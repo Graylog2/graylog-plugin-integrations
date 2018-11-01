@@ -1,0 +1,25 @@
+{
+  "name": "Integrations",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server",
+    "build": "./node_modules/.bin/webpack",
+    "lint": "./node_modules/.bin/eslint -c .eslintrc src/**/*"
+  },
+  "keywords": [
+    "graylog"
+  ],
+  "author": "Graylog, Inc. <hello@graylog.com>",
+  "license": "MIT",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "webpack": "^1.12.2",
+    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
+  }
+}
