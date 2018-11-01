@@ -2,7 +2,17 @@
 
 [![Build Status](https://travis-ci.org/Graylog2/graylog-plugin-estreamer.svg?branch=master)](https://travis-ci.org/Graylog2/graylog-plugin-estreamer)
 
-__Use this paragraph to enter a description of your plugin.__
+**This repository should be kept private for now**
+
+This plugin is the central collection point for integrations-related content. Integrations will be implemented in this
+plugin to allow release of them independent of the Graylog Server project. The initial idea is to implement all 
+integrations content in a single plugin repository, which should keep things simple and allow for easier reworking 
+and maintenance of existing integrations.
+
+This Readme should be updated to describe new plugins as they are implemented.
+
+While this repository is in the early stages, all commits will be made to master. Once real implementation of 
+integrations begins, commits should be made to new branches with a PR.
 
 **Required Graylog version:** 2.0 and later
 
@@ -30,7 +40,7 @@ dramatically by making use of hot reloading. To do this, do the following:
 Usage
 -----
 
-__Use this paragraph to document the usage of your plugin__
+__TODO: Add more details as individual integrations are implemented.__
 
 
 Getting started
