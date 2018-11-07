@@ -72,7 +72,7 @@ public class GELFHTTPOutput implements MessageOutput {
     private static final String CONTENT_ENCODING = "Content-Encoding";
 
     private static final String GZIP_ENCODING = "gzip";
-    private static final String GELF_HTTP_OUTPUT_NAME = "GELF HTTP Output";
+    private static final String GELF_HTTP_OUTPUT_NAME = "GELF Output (HTTP)";
     private static final String GELF_HTTP_OUTPUT_DESCRIPTION = "An output sending GELF over HTTP(S)";
     private static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
     private static final String USER_AGENT_HEADER = "User-Agent";
