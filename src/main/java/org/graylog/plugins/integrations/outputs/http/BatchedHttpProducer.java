@@ -4,14 +4,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okio.BufferedSink;
-import okio.GzipSink;
-import okio.Okio;
 import org.graylog2.gelfclient.GelfMessage;
 import org.graylog2.gelfclient.GelfMessageBuilder;
 import org.graylog2.gelfclient.GelfMessageLevel;
@@ -22,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -33,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Responsible for managing parting and state/threads for HTTPOutput workers.
+ */
 public class BatchedHttpProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchedHttpProducer.class);
@@ -55,9 +49,7 @@ public class BatchedHttpProducer {
     private final int maximumThreads;
     private final HttpUrl url;
 
-    private static final int MILLIS = 5;
-    private static final String CONTENT_ENCODING = "Content-Encoding";
-    private static final String GZIP_ENCODING = "gzip";
+    private static final int BUSY_THREADS_TIMEOUT_MS = 5;
 
     BatchedHttpProducer(int maximumBatchSize, String url, int batchTimeout, int maximumThreads, boolean enableGZip, long writeTimeout, long readTimeout, long connectTimeout) {
 
@@ -144,7 +136,7 @@ public class BatchedHttpProducer {
         while (true) {
             if (this.activeThreads.get() >= this.maximumThreads) {
                 try {
-                    Thread.sleep(MILLIS);
+                    Thread.sleep(BUSY_THREADS_TIMEOUT_MS);
                 } catch (InterruptedException e) { /* noop */ }
             } else {
                 break;
@@ -261,44 +253,6 @@ public class BatchedHttpProducer {
             return true;
         } else {
             return false;
-        }
-    }
-
-    // From okhttp example: https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/RequestBodyCompression.java
-    static class GzipRequestInterceptor implements Interceptor {
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            if (originalRequest.body() == null || originalRequest.header("Content-Encoding") != null) {
-                return chain.proceed(originalRequest);
-            }
-
-            Request compressedRequest = originalRequest.newBuilder()
-                                                       .header(CONTENT_ENCODING, GZIP_ENCODING)
-                                                       .method(originalRequest.method(), gzip(originalRequest.body()))
-                                                       .build();
-            return chain.proceed(compressedRequest);
-        }
-
-        private RequestBody gzip(final RequestBody body) {
-            return new RequestBody() {
-                @Override
-                public MediaType contentType() {
-                    return body.contentType();
-                }
-
-                @Override
-                public long contentLength() {
-                    return -1; // We don't know the compressed length in advance!
-                }
-
-                @Override
-                public void writeTo(BufferedSink sink) throws IOException {
-                    BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
-                    body.writeTo(gzipSink);
-                    gzipSink.close();
-                }
-            };
         }
     }
 
