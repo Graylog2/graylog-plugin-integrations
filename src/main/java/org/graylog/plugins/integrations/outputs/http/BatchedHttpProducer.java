@@ -1,14 +1,11 @@
 package org.graylog.plugins.integrations.outputs.http;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -39,6 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BatchedHttpProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BatchedHttpProducer.class);
+    private static final String SENDER_THREAD_FORMAT = "gelf-http-output-sender-%d";
+    private static final String SCHEDULER_THREAD_FORMAT = "gelf-http-output-batch-scheduler-%d";
 
     private DateTime lastBatchWrite;
     private final int maximumBatchSize;
@@ -46,66 +45,61 @@ public class BatchedHttpProducer {
 
     private final AtomicBoolean isRunning;
 
-    private final OkHttpClient httpClient;
-    private final HttpUrl url;
-    private final ObjectMapper objectMapper;
-
     private ExecutorService executor;
     private final AtomicInteger activeThreads;
+    private final boolean enableGZip;
+    private final long writeTimeout;
+    private final long readTimeout;
+    private final long connectTimeout;
     private final int batchTimeout;
     private final int maximumThreads;
+    private final HttpUrl url;
 
     private static final int MILLIS = 5;
-    private static final int RETRY_TIME_MS = 2000;
-    private static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
     private static final String CONTENT_ENCODING = "Content-Encoding";
-    private static final String GRAYLOG_OUTPUT_USER_AGENT = "graylog-output-gelf-http";
     private static final String GZIP_ENCODING = "gzip";
-    private static final String USER_AGENT_HEADER = "User-Agent";
 
-    public BatchedHttpProducer(int maximumBatchSize, String url, int batchTimeout, int maximumThreads, boolean enableGzip, long writeTimeout, long readTimeout, long connectTimeout) {
+    BatchedHttpProducer(int maximumBatchSize, String url, int batchTimeout, int maximumThreads, boolean enableGZip, long writeTimeout, long readTimeout, long connectTimeout) {
 
+        this.connectTimeout = connectTimeout;
+        this.readTimeout = readTimeout;
+        this.writeTimeout = writeTimeout;
         this.isRunning = new AtomicBoolean();
         this.activeThreads = new AtomicInteger(0);
 
         this.maximumBatchSize = maximumBatchSize;
-        this.objectMapper = new ObjectMapper(); // Not using injected OM because we need specific (default) settings.
         this.batch = new ConcurrentLinkedQueue<>();
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-                .connectTimeout(readTimeout, TimeUnit.MILLISECONDS)
-                .connectTimeout(writeTimeout, TimeUnit.MILLISECONDS);
-
-        if (enableGzip) {
-            builder.addInterceptor(new GzipRequestInterceptor());
-        }
 
         this.url = HttpUrl.parse(url);
 
-        this.httpClient = builder.build();
         this.batchTimeout = batchTimeout;
         this.maximumThreads = maximumThreads;
+        this.enableGZip = enableGZip;
     }
 
     public void start() {
 
+        LOG.info("Starting HTTPProducer");
         this.executor = Executors.newFixedThreadPool(this.maximumThreads,
                                                      new ThreadFactoryBuilder()
                                                              .setDaemon(true)
-                                                             .setNameFormat("gelf-http-output-sender-%d")
+                                                             .setNameFormat(SENDER_THREAD_FORMAT)
                                                              .build());
 
         // Schedule writing of batches.
         Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
                                                            .setDaemon(true)
-                                                           .setNameFormat("gelf-http-output-batch-scheduler-%d")
+                                                           .setNameFormat(SCHEDULER_THREAD_FORMAT)
                                                            .build())
                  .scheduleWithFixedDelay(writeBatchIfReady(), 0, 50, TimeUnit.MILLISECONDS);
+
+        this.isRunning.set(true);
     }
 
     private Runnable writeBatchIfReady() {
         return () -> {
+
+            LOG.trace("Running batch.");
             try {
                 // Wait until we have enough messages or the wait timeout has passed.
                 long size = batch.size();
@@ -125,58 +119,10 @@ public class BatchedHttpProducer {
                         return;
                     }
 
-                    LOG.debug("Sending slice of <{}> messages from batch of <{}>.", slice.size(), size);
-                    executor.submit(() -> {
-                        lastBatchWrite = DateTime.now();
-                        activeThreads.incrementAndGet();
-
-                        BatchedRequest batchedRequest = new BatchedRequest(slice);
-
-                        // We will retry messages that were not accepted. The OutputBuffer timeout has to be adapted properly, based on the use-case.
-                        while (true) {
-                            byte[] body;
-                            try {
-                                body = objectMapper.writeValueAsBytes(batchedRequest);
-                            } catch (JsonProcessingException e) {
-                                LOG.error("Cannot build JSON out of message batch. This is irrecoverable. Skipping batch.", e);
-                                break;
-                            }
-
-                            Request request = new Request.Builder()
-                                    .post(RequestBody.create(MediaType.parse(APPLICATION_JSON_CONTENT_TYPE), body))
-                                    .url(url)
-                                    .addHeader(USER_AGENT_HEADER, GRAYLOG_OUTPUT_USER_AGENT)
-                                    .build();
-
-                            Response response = null;
-                            try {
-                                response = httpClient.newCall(request).execute();
-
-                                if (response.isSuccessful()) {
-                                    LOG.debug("GELF messages written successfully with HTTP response code [{}].", response.code());
-                                    break;
-                                } else {
-                                    LOG.warn("Could not write GELF messages to [{}]. Received HTTP response code [{}]. Will retry.", url.toString(), response.code());
-                                    try {
-                                        Thread.sleep(RETRY_TIME_MS);
-                                    } catch (InterruptedException e1) { /* noop */ }
-                                }
-                            } catch (Exception e) {
-                                LOG.warn("Could not write GELF messages to [{}]. Will retry. Reason was: {}", url.toString(), e.getCause());
-                                LOG.debug("Full exception trace:", e);
-                                try {
-                                    Thread.sleep(RETRY_TIME_MS);
-                                } catch (InterruptedException e1) { /* noop */ }
-                            } finally {
-                                if (response != null) {
-                                    response.close();
-                                }
-                            }
-                        }
-
-                        // The whole slice of the batch has been successfully transmitted.
-                        activeThreads.decrementAndGet();
-                    });
+                    LOG.info("Sending slice of <{}> messages from batch of <{}>.", slice.size(), size);
+                    HttpSenderThread runner = new HttpSenderThread(url, enableGZip, connectTimeout, readTimeout, writeTimeout,
+                                                                   slice, this);
+                    executor.submit(runner);
                 } else {
                     LOG.debug("Not writing batch: Timeout or batch size not reached yet.");
                 }
@@ -186,7 +132,7 @@ public class BatchedHttpProducer {
         };
     }
 
-    public void writeMessage(Message message) {
+    void writeMessage(Message message) {
 
         // Block until a sender thread is available. (this is definitely not handling possible race-conditions,
         // but possibly submitting one task too much is a calculated risk here) - see comment on top of this class.
@@ -204,7 +150,7 @@ public class BatchedHttpProducer {
     }
 
     // TODO: Rework this?
-    protected Map<String, Object> toGELFMessage(final Message message) {
+    private Map<String, Object> toGELFMessage(final Message message) {
         final DateTime timestamp;
         final Object fieldTimeStamp = message.getField(Message.FIELD_TIMESTAMP);
         if (fieldTimeStamp instanceof DateTime) {
@@ -301,7 +247,7 @@ public class BatchedHttpProducer {
 
     private boolean inBatchTimeout() {
         if (lastBatchWrite == null) {
-            LOG.debug("First batch time recording.");
+            LOG.trace("First batch time recording.");
             return true;
         }
 
@@ -349,5 +295,16 @@ public class BatchedHttpProducer {
                 }
             };
         }
+    }
+
+    void decrementThreadCount() {
+
+        activeThreads.decrementAndGet();
+    }
+
+    void incrementThreadCount() {
+
+        lastBatchWrite = DateTime.now();
+        activeThreads.incrementAndGet();
     }
 }

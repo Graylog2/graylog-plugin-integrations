@@ -1,7 +1,6 @@
-package org.graylog.plugins.integrations.outputs;
+package org.graylog.plugins.integrations.outputs.http;
 
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.plugins.integrations.outputs.http.BatchedHttpProducer;
 import org.graylog2.outputs.GelfOutput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
@@ -60,6 +59,9 @@ public class GELFHTTPOutput implements MessageOutput {
                 configuration.getInt(CK_THREAD_POOL_SIZE),
                 configuration.getBoolean(CK_ENABLE_GZIP), configuration.getInt(CK_WRITE_TIMEOUT, WRITE_TIMEOUT_DEFAULT), configuration.getInt(CK_READ_TIMEOUT, READ_TIMEOUT_DEFAULT),
                 configuration.getInt(CK_CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT));
+        producer.start();
+
+        LOG.info("Start done.");
     }
 
     @Override

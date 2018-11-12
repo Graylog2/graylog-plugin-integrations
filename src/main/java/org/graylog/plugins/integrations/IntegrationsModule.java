@@ -1,6 +1,6 @@
 package org.graylog.plugins.integrations;
 
-import org.graylog.plugins.integrations.outputs.GELFHTTPOutput;
+import org.graylog.plugins.integrations.outputs.http.GELFHTTPOutput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 
