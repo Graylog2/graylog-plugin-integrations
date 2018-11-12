@@ -1,4 +1,4 @@
-package org.graylog.plugins.integrations.outputs;
+package org.graylog.plugins.integrations.outputs.http;
 
 import java.util.List;
 import java.util.Map;
