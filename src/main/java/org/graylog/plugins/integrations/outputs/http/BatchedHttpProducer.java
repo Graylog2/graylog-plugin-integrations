@@ -120,7 +120,7 @@ public class BatchedHttpProducer {
                     }
 
                     if (slice.isEmpty()) {
-                        LOG.debug("Slice is empty");
+                        LOG.trace("Slice is empty");
                         return;
                     }
 
@@ -225,7 +225,7 @@ public class BatchedHttpProducer {
             try {
                 numericLevel = Integer.parseInt((String) rawLevel);
             } catch (NumberFormatException e) {
-                LOG.debug("Invalid message level " + rawLevel, e);
+                LOG.trace("Invalid message level " + rawLevel, e);
                 numericLevel = null;
             }
 
@@ -235,7 +235,7 @@ public class BatchedHttpProducer {
                 level = extractLevel(numericLevel);
             }
         } else {
-            LOG.debug("Invalid message level {}", rawLevel);
+            LOG.trace("Invalid message level {}", rawLevel);
             level = null;
         }
 
@@ -257,7 +257,7 @@ public class BatchedHttpProducer {
         }
 
         if (lastBatchWrite.isBefore(DateTime.now().minusMillis(batchTimeout))) {
-            LOG.debug("Batch timeout reached!");
+            LOG.trace("Batch timeout reached!");
             return true;
         } else {
             return false;

@@ -2,6 +2,13 @@ package org.graylog.plugins.integrations.outputs.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.joschi.jadconfig.util.Duration;
+import com.github.rholder.retry.Attempt;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.WaitStrategies;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -11,8 +18,10 @@ import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class HttpSenderWorker implements Runnable {
@@ -28,6 +37,22 @@ public class HttpSenderWorker implements Runnable {
     private static final String APPLICATION_JSON_CONTENT_TYPE = "application/json";
     private static final String GRAYLOG_OUTPUT_USER_AGENT = "graylog-output-gelf-http";
     private static final String USER_AGENT_HEADER = "User-Agent";
+
+    private static final Duration MAX_WAIT_TIME = Duration.seconds(30L);
+    private static final Retryer<Response> HTTP_RETYER = RetryerBuilder.<Response>newBuilder()
+            .retryIfException(t -> t instanceof IOException)
+            .withWaitStrategy(WaitStrategies.exponentialWait(MAX_WAIT_TIME.getQuantity(), MAX_WAIT_TIME.getUnit()))
+            .withRetryListener(new RetryListener() {
+                @Override
+                public <V> void onRetry(Attempt<V> attempt) {
+                    if (attempt.hasException()) {
+                        LOG.error("Caught exception during HTTP request: {}, retrying (attempt #{}).", attempt.getExceptionCause(), attempt.getAttemptNumber());
+                    } else if (attempt.getAttemptNumber() > 1) {
+                        LOG.info("HTTP request finally successful (attempt #{}).", attempt.getAttemptNumber());
+                    }
+                }
+            })
+            .build();
 
     HttpSenderWorker(HttpUrl url, boolean enableGzip, long connectTimeout, long readTimeout, long writeTimeout,
                      final List<Map<String, Object>> slice, BatchedHttpProducer producer) {
@@ -73,9 +98,20 @@ public class HttpSenderWorker implements Runnable {
                     .addHeader(USER_AGENT_HEADER, GRAYLOG_OUTPUT_USER_AGENT)
                     .build();
 
+
             Response response = null;
             try {
-                response = httpClient.newCall(request).execute();
+                try {
+                    response = HTTP_RETYER.call(() -> httpClient.newCall(request).execute());
+                } catch (ExecutionException | RetryException e) {
+                    if (e instanceof RetryException) {
+                        LOG.error("Could not execute HTTP request. Giving up after {} attempts.", ((RetryException) e).getNumberOfFailedAttempts());
+                    } else {
+                        LOG.error("Could not execute HTTP request.");
+                    }
+                    throw new RuntimeException(e);
+                }
+
 
                 if (response.isSuccessful()) {
                     LOG.debug("GELF messages written successfully with HTTP response code [{}].", response.code());
@@ -106,7 +142,8 @@ public class HttpSenderWorker implements Runnable {
 
     public class BatchedRequest {
 
-        public BatchedRequest() { }
+        public BatchedRequest() {
+        }
 
         public BatchedRequest(List<Map<String, Object>> messages) {
             this.messages = messages;
