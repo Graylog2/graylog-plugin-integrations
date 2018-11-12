@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class HttpSenderThread implements Runnable {
+public class HttpSenderWorker implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HttpSenderThread.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpSenderWorker.class);
     private final OkHttpClient httpClient;
     private final HttpUrl url;
     private final ObjectMapper objectMapper;
@@ -29,8 +29,8 @@ public class HttpSenderThread implements Runnable {
     private static final String GRAYLOG_OUTPUT_USER_AGENT = "graylog-output-gelf-http";
     private static final String USER_AGENT_HEADER = "User-Agent";
 
-    HttpSenderThread(HttpUrl url, boolean enableGzip, long connectTimeout, long readTimeout, long writeTimeout,
-                            final List<Map<String, Object>> slice, BatchedHttpProducer producer) {
+    HttpSenderWorker(HttpUrl url, boolean enableGzip, long connectTimeout, long readTimeout, long writeTimeout,
+                     final List<Map<String, Object>> slice, BatchedHttpProducer producer) {
 
         this.producer = producer;
         this.objectMapper = new ObjectMapper(); // Not using injected OM because we need specific (default) settings.
@@ -50,6 +50,8 @@ public class HttpSenderThread implements Runnable {
 
     @Override
     public void run() {
+
+        LOG.trace("[Starting]");
 
         producer.incrementThreadCount();
 
@@ -99,6 +101,7 @@ public class HttpSenderThread implements Runnable {
 
         // The whole slice of the batch has been successfully transmitted.
         producer.decrementThreadCount();
+        LOG.trace("[Finished]");
     }
 
     public class BatchedRequest {

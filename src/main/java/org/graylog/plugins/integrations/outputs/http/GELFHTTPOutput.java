@@ -45,7 +45,7 @@ public class GELFHTTPOutput implements MessageOutput {
     @Inject
     public GELFHTTPOutput(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
 
-        LOG.debug("Output initialized.");
+        LOG.debug("Beginning initialization");
 
         String rawUrl = configuration.getString(CK_URL);
         if (rawUrl == null) {
@@ -61,7 +61,7 @@ public class GELFHTTPOutput implements MessageOutput {
                 configuration.getInt(CK_CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT));
         producer.start();
 
-        LOG.info("Start done.");
+        LOG.debug("Initialization complete");
     }
 
     @Override
@@ -87,7 +87,6 @@ public class GELFHTTPOutput implements MessageOutput {
     public void stop() {
         producer.stop();
     }
-
 
     public interface Factory extends MessageOutput.Factory<GELFHTTPOutput> {
         @Override

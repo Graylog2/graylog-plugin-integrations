@@ -79,7 +79,7 @@ public class BatchedHttpProducer {
 
     public void start() {
 
-        LOG.info("Starting HTTPProducer");
+        LOG.debug("[Starting]");
         this.executor = Executors.newFixedThreadPool(this.maximumThreads,
                                                      new ThreadFactoryBuilder()
                                                              .setDaemon(true)
@@ -94,17 +94,21 @@ public class BatchedHttpProducer {
                  .scheduleWithFixedDelay(writeBatchIfReady(), 0, 50, TimeUnit.MILLISECONDS);
 
         this.isRunning.set(true);
+
+        LOG.debug("[Started successfully]");
     }
 
     private Runnable writeBatchIfReady() {
         return () -> {
 
-            LOG.trace("Running batch.");
             try {
                 // Wait until we have enough messages or the wait timeout has passed.
                 long size = batch.size();
 
-                if (size >= maximumBatchSize || inBatchTimeout()) {
+                boolean inBatchTimeout = inBatchTimeout();
+                LOG.trace("Checking if batch should run. Current batch size [{} out of {}] batch in timeout [{}].", size, maximumBatchSize, inBatchTimeout);
+                if (size >= maximumBatchSize || inBatchTimeout) {
+
                     final List<Map<String, Object>> slice = Lists.newArrayList();
                     for (int i = 0; i < maximumBatchSize; i++) {
                         Map<String, Object> message = batch.poll();
@@ -116,15 +120,16 @@ public class BatchedHttpProducer {
                     }
 
                     if (slice.isEmpty()) {
+                        LOG.debug("Slice is empty");
                         return;
                     }
 
-                    LOG.info("Sending slice of <{}> messages from batch of <{}>.", slice.size(), size);
-                    HttpSenderThread runner = new HttpSenderThread(url, enableGZip, connectTimeout, readTimeout, writeTimeout,
+                    LOG.debug("Sending slice of <{}> messages from batch of <{}>.", slice.size(), size);
+                    HttpSenderWorker runner = new HttpSenderWorker(url, enableGZip, connectTimeout, readTimeout, writeTimeout,
                                                                    slice, this);
                     executor.submit(runner);
                 } else {
-                    LOG.debug("Not writing batch: Timeout or batch size not reached yet.");
+                    LOG.trace("Not writing batch: Timeout or batch size not reached yet.");
                 }
             } catch (Exception e) {
                 LOG.error("Failure when attempting to write batch.", e);
