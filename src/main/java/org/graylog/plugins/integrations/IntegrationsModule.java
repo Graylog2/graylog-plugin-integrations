@@ -1,5 +1,6 @@
 package org.graylog.plugins.integrations;
 
+import org.graylog.plugins.integrations.paloalto.PaloAltoCodec;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 
@@ -40,5 +41,7 @@ public class IntegrationsModule extends PluginModule {
          *
          * addConfigBeans();
          */
+        // Palo Alto Networks parser
+        addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
     }
 }
