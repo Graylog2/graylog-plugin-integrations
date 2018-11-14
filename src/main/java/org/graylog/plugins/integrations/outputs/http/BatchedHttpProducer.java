@@ -143,11 +143,11 @@ public class BatchedHttpProducer {
             }
         }
 
-        this.batch.add(toGELFMessage(message));
+        this.batch.add(toGELFLikeMessage(message));
     }
 
     // TODO: Rework this?
-    private Map<String, Object> toGELFMessage(final Message message) {
+    private Map<String, Object> toGELFLikeMessage(final Message message) {
         final DateTime timestamp;
         final Object fieldTimeStamp = message.getField(Message.FIELD_TIMESTAMP);
         if (fieldTimeStamp instanceof DateTime) {

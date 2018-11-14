@@ -1,7 +1,6 @@
 package org.graylog.plugins.integrations.outputs.http;
 
 import com.google.inject.assistedinject.Assisted;
-import org.graylog2.outputs.GelfOutput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -18,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.List;
 
-public class GELFHTTPOutput implements MessageOutput {
+public class HTTPOutput implements MessageOutput {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GelfOutput.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HTTPOutput.class);
 
     private static final int BATCH_SIZE_DEFAULT = 250;
     private static final int BATCH_TIMEOUT_DEFAULT = 5000;
@@ -37,13 +36,13 @@ public class GELFHTTPOutput implements MessageOutput {
     private static final String CK_THREAD_POOL_SIZE = "thread_pool_size";
     private static final String CK_URL = "url";
     private static final String CK_WRITE_TIMEOUT = "write_timeout";
-    private static final String GELF_HTTP_OUTPUT_DESCRIPTION = "An output sending GELF over HTTP(S)";
-    private static final String GELF_HTTP_OUTPUT_NAME = "GELF Output (HTTP)";
+    private static final String OUTPUT_DESCRIPTION = "An output that batch sends messages HTTP(S). Designed to be used with the Batched HTTP input.";
+    private static final String OUTPUT_NAME = "Batched HTTP";
 
     private BatchedHttpProducer producer;
 
     @Inject
-    public GELFHTTPOutput(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
+    public HTTPOutput(@Assisted Configuration configuration) throws MessageOutputConfigurationException {
 
         LOG.debug("Beginning initialization");
 
@@ -88,9 +87,9 @@ public class GELFHTTPOutput implements MessageOutput {
         producer.stop();
     }
 
-    public interface Factory extends MessageOutput.Factory<GELFHTTPOutput> {
+    public interface Factory extends MessageOutput.Factory<HTTPOutput> {
         @Override
-        GELFHTTPOutput create(Stream stream, Configuration configuration);
+        HTTPOutput create(Stream stream, Configuration configuration);
 
         @Override
         Config getConfig();
@@ -107,8 +106,8 @@ public class GELFHTTPOutput implements MessageOutput {
             configurationRequest.addField(new TextField(
                     CK_URL,
                     "URL",
-                    "https://www.example.org/gelf",
-                    "URL of GELF input (Note that the Graylog GELF HTTP input listens on the /gelf resource)",
+                    "https://www.example.org/batched-http",
+                    "URL of batched http input (Note that the Graylog Batched HTTP input listens on the /batched-http resource)",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));
 
@@ -179,7 +178,7 @@ public class GELFHTTPOutput implements MessageOutput {
 
     public static class Descriptor extends MessageOutput.Descriptor {
         public Descriptor() {
-            super(GELF_HTTP_OUTPUT_NAME, false, "", GELF_HTTP_OUTPUT_DESCRIPTION);
+            super(OUTPUT_NAME, false, "", OUTPUT_DESCRIPTION);
         }
     }
 }

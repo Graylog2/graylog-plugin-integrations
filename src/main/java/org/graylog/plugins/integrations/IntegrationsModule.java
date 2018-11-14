@@ -1,6 +1,6 @@
 package org.graylog.plugins.integrations;
 
-import org.graylog.plugins.integrations.outputs.http.GELFHTTPOutput;
+import org.graylog.plugins.integrations.outputs.http.HTTPOutput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 
@@ -42,6 +42,6 @@ public class IntegrationsModule extends PluginModule {
          * addConfigBeans();
          */
         // Used to send up to the big Graylog cluster from the smaller customer environments.
-        addMessageOutput(GELFHTTPOutput.class, GELFHTTPOutput.Factory.class);
+        addMessageOutput(HTTPOutput.class, HTTPOutput.Factory.class);
     }
 }
