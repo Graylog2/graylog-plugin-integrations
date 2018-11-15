@@ -1,4 +1,4 @@
-package org.graylog.plugins.integrations;
+package org.graylog.integrations;
 
 import org.graylog2.plugin.PluginMetaData;
 import org.graylog2.plugin.ServerStatus;
@@ -16,7 +16,7 @@ public class IntegrationsMetaData implements PluginMetaData {
 
     @Override
     public String getUniqueId() {
-        return "org.graylog.plugins.integrations.IntegrationsPlugin";
+        return "org.graylog.integrations.IntegrationsPlugin";
     }
 
     @Override

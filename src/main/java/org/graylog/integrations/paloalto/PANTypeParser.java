@@ -1,9 +1,9 @@
-package org.graylog.plugins.integrations.paloalto;
+package org.graylog.integrations.paloalto;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import org.graylog.plugins.integrations.paloalto.types.FieldDescription;
-import org.graylog.plugins.integrations.paloalto.types.MessageMapping;
+import org.graylog.integrations.paloalto.types.FieldDescription;
+import org.graylog.integrations.paloalto.types.MessageMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

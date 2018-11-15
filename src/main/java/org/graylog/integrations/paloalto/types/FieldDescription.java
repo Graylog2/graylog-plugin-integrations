@@ -1,4 +1,4 @@
-package org.graylog.plugins.integrations.paloalto.types;
+package org.graylog.integrations.paloalto.types;
 
 import com.google.auto.value.AutoValue;
 

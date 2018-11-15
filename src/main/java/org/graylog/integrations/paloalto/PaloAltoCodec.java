@@ -1,10 +1,10 @@
-package org.graylog.plugins.integrations.paloalto;
+package org.graylog.integrations.paloalto;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import org.graylog.plugins.integrations.paloalto.types.SystemMessageMapping;
-import org.graylog.plugins.integrations.paloalto.types.ThreatMessageMapping;
-import org.graylog.plugins.integrations.paloalto.types.TrafficMessageMapping;
+import org.graylog.integrations.paloalto.types.SystemMessageMapping;
+import org.graylog.integrations.paloalto.types.ThreatMessageMapping;
+import org.graylog.integrations.paloalto.types.TrafficMessageMapping;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
