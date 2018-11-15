@@ -1,6 +1,6 @@
 package org.graylog.integrations;
 
-import org.graylog.integrations.paloalto.PaloAltoCodec;
+import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 

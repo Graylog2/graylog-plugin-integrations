@@ -1,4 +1,4 @@
-package org.graylog.integrations.paloalto;
+package org.graylog.integrations.inputs.paloalto;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;

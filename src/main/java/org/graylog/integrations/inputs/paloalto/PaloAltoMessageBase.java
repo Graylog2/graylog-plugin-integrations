@@ -1,4 +1,4 @@
-package org.graylog.integrations.paloalto;
+package org.graylog.integrations.inputs.paloalto;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
