@@ -1,8 +1,11 @@
 package org.graylog.integrations;
 
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
+import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Set;
@@ -11,6 +14,7 @@ import java.util.Set;
  * Extend the PluginModule abstract class here to add you plugin to the system.
  */
 public class IntegrationsModule extends PluginModule {
+        private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
     /**
      * Returns all configuration beans required by this plugin.
      *
@@ -41,7 +45,9 @@ public class IntegrationsModule extends PluginModule {
          *
          * addConfigBeans();
          */
-        // Palo Alto Networks parser
+        // Palo Alto Networks
+        LOG.info("REGISTERING PALO ALTO");
+        addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
     }
 }

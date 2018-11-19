@@ -6,6 +6,7 @@ import org.graylog.integrations.inputs.paloalto.types.FieldDescription;
 import org.graylog.integrations.inputs.paloalto.types.MessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.PANFieldTemplate;
 import org.graylog.integrations.inputs.paloalto.types.PANMessageTemplate;
+import org.graylog.integrations.inputs.paloalto.types.PANMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +18,11 @@ public class PANTypeParser {
 
     private final ImmutableMap<Integer, FieldDescription> mapping;
     private final PANMessageTemplate messageTemplate;
+    private final PANMessageType messageType;
 
-    public PANTypeParser(MessageMapping mapping, PANMessageTemplate messageTemplate) {
+    public PANTypeParser(MessageMapping mapping, PANMessageTemplate messageTemplate, PANMessageType messageType) {
 
+        this.messageType = messageType;
         this.mapping = mapping.getMapping();
         this.messageTemplate = messageTemplate;
     }
@@ -28,7 +31,15 @@ public class PANTypeParser {
         ImmutableMap.Builder<String, Object> x = new ImmutableMap.Builder<>();
 
         for (PANFieldTemplate field : messageTemplate.getFields()) {
-            String rawValue = fields.get(field.getPosition());
+            String rawValue = null;
+            try {
+                rawValue = fields.get(field.getPosition());
+            } catch (IndexOutOfBoundsException e) {
+                // Skip fields at indexes that do not exist.
+                LOG.trace(String.format("A [%s] field does not exist at index [%d]", messageType.toString(), field.getPosition()));
+                continue;
+            }
+
             Object value;
 
             switch (field.getFieldType()) {

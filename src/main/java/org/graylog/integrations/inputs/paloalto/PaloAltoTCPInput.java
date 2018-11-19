@@ -61,7 +61,5 @@ public class PaloAltoTCPInput extends MessageInput {
         public Config(TcpTransport.Factory transport, PaloAltoCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
         }
-
     }
-
 }

@@ -12,7 +12,7 @@ import java.util.Set;
  * Implement the PluginMetaData interface here.
  */
 public class IntegrationsMetaData implements PluginMetaData {
-    private static final String PLUGIN_PROPERTIES = "org.graylog.plugins.integrations.graylog-plugin-integrations/graylog-plugin.properties";
+    private static final String PLUGIN_PROPERTIES = "org.graylog.integrations.graylog-plugin-integrations/graylog-plugin.properties";
 
     @Override
     public String getUniqueId() {

@@ -92,6 +92,17 @@ public class PANCodecTest {
         // assertEquals("THREAT", message.getField("pa_type"));
     }
 
+    @Test
+    public void invalidPositionTest() {
+
+        // Verify that fields that have invalid positions (do not exist in the logs) are ignored.
+        PaloAltoCodec codec = new PaloAltoCodec(null);
+
+        // TODO: Inject custom configuration.
+        Message message = codec.decode(new RawMessage(SYSTEM_MESSAGE.getBytes()));
+        assertEquals("SYSTEM", message.getField("pa_type"));
+    }
+
     /**
      * Helper for parsing PAN messages from HEX export
      */

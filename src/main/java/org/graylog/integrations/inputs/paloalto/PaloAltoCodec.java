@@ -9,6 +9,8 @@ import org.graylog.integrations.inputs.paloalto.types.TrafficMessageMapping;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.Codec;
@@ -20,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+
+import static org.graylog.integrations.inputs.paloalto.types.PANMessageType.*;
 
 public class PaloAltoCodec implements Codec {
 
@@ -63,15 +67,15 @@ public class PaloAltoCodec implements Codec {
 
         switch (p.panType()) {
             case "THREAT":
-                final PANTypeParser PARSER_THREAT = new PANTypeParser(new ThreatMessageMapping(), builder.getThreatMessageTemplate());
+                final PANTypeParser PARSER_THREAT = new PANTypeParser(new ThreatMessageMapping(), builder.getThreatMessageTemplate(), THREAT);
                 message.addFields(PARSER_THREAT.parseFields(p.fields()));
                 break;
             case "SYSTEM":
-                final PANTypeParser PARSER_SYSTEM = new PANTypeParser(new SystemMessageMapping(), builder.getSystemMessageTemplate());
+                final PANTypeParser PARSER_SYSTEM = new PANTypeParser(new SystemMessageMapping(), builder.getSystemMessageTemplate(), SYSTEM);
                 message.addFields(PARSER_SYSTEM.parseFields(p.fields()));
                 break;
             case "TRAFFIC":
-                final PANTypeParser PARSER_TRAFFIC = new PANTypeParser(new TrafficMessageMapping(), builder.getTrafficMessageTemplate());
+                final PANTypeParser PARSER_TRAFFIC = new PANTypeParser(new TrafficMessageMapping(), builder.getTrafficMessageTemplate(), TRAFFIC);
                 message.addFields(PARSER_TRAFFIC.parseFields(p.fields()));
                 break;
             default:
@@ -105,7 +109,31 @@ public class PaloAltoCodec implements Codec {
     public static class Config implements Codec.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            return new ConfigurationRequest();
+            final ConfigurationRequest request = new ConfigurationRequest();
+
+            request.addField(new TextField(
+                    "SYSTEM_TEMPLATE",
+                    "System Message Template",
+                    "",
+                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
+
+            request.addField(new TextField(
+                    "THREAT_TEMPLATE",
+                    "Threat Message Template",
+                    "",
+                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
+
+            request.addField(new TextField(
+                    "TRAFFIC_TEMPLATE",
+                    "Traffic Message Template",
+                    "",
+                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
+
+
+            return request;
         }
 
         @Override
