@@ -2,6 +2,7 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import org.graylog.integrations.inputs.paloalto.types.PANTemplateBuilder;
 import org.graylog.integrations.inputs.paloalto.types.SystemMessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.ThreatMessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.TrafficMessageMapping;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
 
 public class PaloAltoCodec implements Codec {
 
@@ -28,9 +30,6 @@ public class PaloAltoCodec implements Codec {
     private final Configuration configuration;
     private final PANParser parser;
 
-    private static final PANTypeParser PARSER_THREAT = new PANTypeParser(new ThreatMessageMapping());
-    private static final PANTypeParser PARSER_SYSTEM = new PANTypeParser(new SystemMessageMapping());
-    private static final PANTypeParser PARSER_TRAFFIC = new PANTypeParser(new TrafficMessageMapping());
 
     @AssistedInject
     public PaloAltoCodec(@Assisted Configuration configuration) {
@@ -53,14 +52,26 @@ public class PaloAltoCodec implements Codec {
 
         Message message = new Message(p.payload(), p.source(), p.timestamp());
 
+        final PANTemplateBuilder builder;
+        try {
+            builder = PANTemplateBuilder.newInstance(null, null, null);
+        } catch (IOException e) {
+            // TODO: Handle exception.
+            return null;
+        }
+
+
         switch (p.panType()) {
             case "THREAT":
+                final PANTypeParser PARSER_THREAT = new PANTypeParser(new ThreatMessageMapping(), builder.getThreatMessageTemplate());
                 message.addFields(PARSER_THREAT.parseFields(p.fields()));
                 break;
             case "SYSTEM":
+                final PANTypeParser PARSER_SYSTEM = new PANTypeParser(new SystemMessageMapping(), builder.getSystemMessageTemplate());
                 message.addFields(PARSER_SYSTEM.parseFields(p.fields()));
                 break;
             case "TRAFFIC":
+                final PANTypeParser PARSER_TRAFFIC = new PANTypeParser(new TrafficMessageMapping(), builder.getTrafficMessageTemplate());
                 message.addFields(PARSER_TRAFFIC.parseFields(p.fields()));
                 break;
             default:

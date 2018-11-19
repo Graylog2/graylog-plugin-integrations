@@ -30,6 +30,7 @@ public class PANCodecTest {
     @Test
     public void parseTest() {
 
+        // Test System message results
         PaloAltoCodec codec = new PaloAltoCodec(null);
         Message message = codec.decode(new RawMessage(SYSTEM_MESSAGE.getBytes()));
         assertEquals("SYSTEM", message.getField("pa_type"));
@@ -46,8 +47,8 @@ public class PANCodecTest {
         assertEquals(message.getField("pa_virtualsys_name"), "0");
         assertEquals(0, ((DateTime) message.getField("timestamp")).compareTo(new DateTime("2018-09-19T11:50:35.000-05:00")));
 
+        // Test Traffic message results
         message = codec.decode(new RawMessage(TRAFFIC_MESSAGE.getBytes()));
-
         assertEquals( message.getField("bytes_received"), 140L);
         assertEquals( message.getField("source"), "Panorama--2");
         assertEquals( message.getField("repeat_count"), 1L);
@@ -86,8 +87,9 @@ public class PANCodecTest {
         assertEquals( message.getField("category"), "any");
         assertEquals( message.getField("nat_dest_port"), 443L);
 
-//        message = codec.decode(new RawMessage(THREAT_MESSAGE.getBytes()));
-//        assertEquals("THREAT", message.getField("pa_type"));
+        // TODO: Implement and test THREAT parsing.
+        // message = codec.decode(new RawMessage(THREAT_MESSAGE.getBytes()));
+        // assertEquals("THREAT", message.getField("pa_type"));
     }
 
     /**

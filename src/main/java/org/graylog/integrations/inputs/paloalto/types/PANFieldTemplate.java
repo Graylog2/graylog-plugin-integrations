@@ -9,7 +9,7 @@ public class PANFieldTemplate {
     private static final String TYPE = "type";
 
     @JsonProperty(POSITION)
-    private Integer order;
+    private Integer position;
 
     @JsonProperty(FIELD)
     private String field;
@@ -25,12 +25,12 @@ public class PANFieldTemplate {
         this.field = field;
     }
 
-    public Integer getOrder() {
-        return order;
+    public Integer getPosition() {
+        return position;
     }
 
-    public void setOrder(Integer order) {
-        this.order = order;
+    public void setPosition(Integer position) {
+        this.position = position;
     }
 
     public FieldDescription.FIELD_TYPE getFieldType() {

@@ -15,25 +15,25 @@ public class PANTemplateDefaults {
 
     }
 
-    public static String SYSTEM_TEMPLATE = "{ " +
+    static String SYSTEM_TEMPLATE = "{ " +
                                            "  \"fields\": [ " +
                                            "    { \"position\": 1, \"field\": \"pa_time_received\", \"type\": \"STRING\"}, " +
                                            "    { \"position\": 2, \"field\": \"serial_number\", \"type\": \"STRING\"}, " +
                                            "    { \"position\": 3, \"field\": \"pa_type\", \"type\": \"STRING\"}, " +
                                            "    { \"position\": 4, \"field\": \"content_type\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 5, \"field\": \"pa_time_generated\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 6, \"field\": \"virtual_system\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 7, \"field\": \"event_id\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 8, \"field\": \"object\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 9, \"field\": \"module\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 10, \"field\": \"pa_severity\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 11, \"field\": \"description\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 12, \"field\": \"pa_virtualsys_name\", \"type\": \"STRING\"}, " +
-                                           "    { \"position\": 13, \"field\": \"pa_devicename\", \"type\": \"STRING\"} " +
+                                           "    { \"position\": 6, \"field\": \"pa_time_generated\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 7, \"field\": \"virtual_system\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 8, \"field\": \"event_id\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 9, \"field\": \"object\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 12, \"field\": \"module\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 13, \"field\": \"pa_severity\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 14, \"field\": \"description\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 21, \"field\": \"pa_virtualsys_name\", \"type\": \"STRING\"}, " +
+                                           "    { \"position\": 22, \"field\": \"pa_devicename\", \"type\": \"STRING\"} " +
                                            "  ] " +
                                            "}";
 
-    public static String THREAT_TEMPLATE = "{ " +
+    static String THREAT_TEMPLATE = "{ " +
                                            "  \"fields\": [" +
                                            "    {\"position\": 1,  \"field\": \"pa_time_received\", \"type\": \"STRING\"}, " +
                                            "    {\"position\": 2,  \"field\": \"serial_number\", \"type\": \"STRING\"}, " +
@@ -111,44 +111,44 @@ public class PANTemplateDefaults {
                                            " ]}" +
                                            "}";
 
-    public static String TRAFFIC_TEMPLATE = "{ " +
+    static String TRAFFIC_TEMPLATE = "{ " +
                                            "  \"fields\": [ " +
                                            "    {\"position\": 1,\"field\":\"pa_time_received\", \"type\": \"STRING\"}, " +
                                            "    {\"position\": 2,\"field\":\"serial_number\", \"type\": \"STRING\"}, " +
                                            "    {\"position\": 3,\"field\":\"pa_type\", \"type\": \"STRING\"}, " +
                                            "    {\"position\": 4,\"field\":\"content_type\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 5,\"field\":\"pa_time_generated\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 6,\"field\":\"src_ip\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 7,\"field\":\"dest_ip\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 8,\"field\":\"nat_src_ip\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 9,\"field\":\"nat_dest_ip\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 10,\"field\":\"rule_name\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 11,\"field\":\"src_user\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 12,\"field\":\"dest_user\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 13,\"field\":\"application\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 14,\"field\":\"pa_virtualsys_name\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 15,\"field\":\"src_zone\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 16,\"field\":\"dst_zone\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 17,\"field\":\"interface_inbound\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 18,\"field\":\"interface_outbound\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 19,\"field\":\"log_action\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 20,\"field\":\"session_id\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 21,\"field\":\"repeat_count\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 22,\"field\":\"src_port\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 23,\"field\":\"dest_port\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 24,\"field\":\"nat_src_port\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 25,\"field\":\"nat_dest_port\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 26,\"field\":\"protocol\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 27,\"field\":\"action\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 28,\"field\":\"bytes\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 29,\"field\":\"bytes_sent\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 30,\"field\":\"bytes_received\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 31,\"field\":\"packets\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 32,\"field\":\"category\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 33,\"field\":\"src_location\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 34,\"field\":\"dest_location\", \"type\": \"STRING\"}, " +
-                                           "    {\"position\": 35,\"field\":\"packets_sent\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 36,\"field\":\"packets_received\", \"type\": \"LONG\"}, " +
-                                           "    {\"position\": 37,\"field\":\"pa_devicename\", \"type\": \"STRING\"}" +
+                                           "    {\"position\": 6,\"field\":\"pa_time_generated\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 7,\"field\":\"src_ip\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 8,\"field\":\"dest_ip\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 9,\"field\":\"nat_src_ip\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 10,\"field\":\"nat_dest_ip\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 11,\"field\":\"rule_name\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 12,\"field\":\"src_user\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 13,\"field\":\"dest_user\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 14,\"field\":\"application\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 15,\"field\":\"pa_virtualsys_name\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 16,\"field\":\"src_zone\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 17,\"field\":\"dst_zone\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 18,\"field\":\"interface_inbound\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 19,\"field\":\"interface_outbound\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 20,\"field\":\"log_action\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 22,\"field\":\"session_id\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 23,\"field\":\"repeat_count\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 24,\"field\":\"src_port\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 25,\"field\":\"dest_port\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 26,\"field\":\"nat_src_port\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 27,\"field\":\"nat_dest_port\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 29,\"field\":\"protocol\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 30,\"field\":\"action\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 31,\"field\":\"bytes\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 32,\"field\":\"bytes_sent\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 33,\"field\":\"bytes_received\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 34,\"field\":\"packets\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 37,\"field\":\"category\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 41,\"field\":\"src_location\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 42,\"field\":\"dest_location\", \"type\": \"STRING\"}, " +
+                                           "    {\"position\": 44,\"field\":\"packets_sent\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 45,\"field\":\"packets_received\", \"type\": \"LONG\"}, " +
+                                           "    {\"position\": 51,\"field\":\"pa_devicename\", \"type\": \"STRING\"}" +
                                            " ]}";
 }

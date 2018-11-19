@@ -23,19 +23,19 @@ public class PANTemplateTest {
 
         // Verify that all values are filled.
         builder.getSystemMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getOrder());
+            assertNotNull(v.getPosition());
             assertNotNull(v.getField());
             assertNotNull(v.getFieldType());
         });
 
         builder.getThreatMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getOrder());
+            assertNotNull(v.getPosition());
             assertNotNull(v.getField());
             assertNotNull(v.getFieldType());
         });
 
         builder.getTrafficMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getOrder());
+            assertNotNull(v.getPosition());
             assertNotNull(v.getField());
             assertNotNull(v.getFieldType());
         });
