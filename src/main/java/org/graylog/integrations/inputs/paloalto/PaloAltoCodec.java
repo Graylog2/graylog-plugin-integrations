@@ -3,6 +3,7 @@ package org.graylog.integrations.inputs.paloalto;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import org.graylog.integrations.inputs.paloalto.types.PANTemplateBuilder;
+import org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults;
 import org.graylog.integrations.inputs.paloalto.types.SystemMessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.ThreatMessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.TrafficMessageMapping;
@@ -114,21 +115,21 @@ public class PaloAltoCodec implements Codec {
             request.addField(new TextField(
                     "SYSTEM_TEMPLATE",
                     "System Message Template",
-                    "",
+                    PANTemplateDefaults.SYSTEM_TEMPLATE,
                     "A JSON string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
             request.addField(new TextField(
                     "THREAT_TEMPLATE",
                     "Threat Message Template",
-                    "",
+                    PANTemplateDefaults.THREAT_TEMPLATE,
                     "A JSON string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
             request.addField(new TextField(
                     "TRAFFIC_TEMPLATE",
                     "Traffic Message Template",
-                    "",
+                    PANTemplateDefaults.TRAFFIC_TEMPLATE,
                     "A JSON string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 

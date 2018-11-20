@@ -14,7 +14,7 @@ import javax.inject.Inject;
 
 public class PaloAltoTCPInput extends MessageInput {
 
-    private static final String NAME = "Palo Alto Networks Input (TCP)";
+    public static final String NAME = "Palo Alto Networks Input (TCP)";
 
     @Inject
     public PaloAltoTCPInput(@Assisted Configuration configuration,

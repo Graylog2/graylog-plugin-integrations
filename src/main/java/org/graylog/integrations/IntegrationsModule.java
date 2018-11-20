@@ -46,7 +46,7 @@ public class IntegrationsModule extends PluginModule {
          * addConfigBeans();
          */
         // Palo Alto Networks
-        LOG.info("REGISTERING PALO ALTO");
+        LOG.debug("Registering " + PaloAltoTCPInput.NAME);
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
     }
