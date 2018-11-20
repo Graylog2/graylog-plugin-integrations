@@ -2,6 +2,9 @@ package org.graylog.integrations.inputs.paloalto.types;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -16,10 +19,8 @@ import java.util.Set;
 
 public class PANMessageTemplate {
 
-    public static final String FIELDS = "fields";
-
-    @JsonProperty(FIELDS)
-    Set<PANFieldTemplate> fields;
+    private Set<PANFieldTemplate> fields = new HashSet<>();
+    private List<String> parseErrors = new ArrayList<>();
 
     public Set<PANFieldTemplate> getFields() {
         return fields;
@@ -28,4 +29,19 @@ public class PANMessageTemplate {
     public void setFields(Set<PANFieldTemplate> fields) {
         this.fields = fields;
     }
+
+    public List<String> getParseErrors() {
+        return parseErrors;
+    }
+
+    public void addError(String error) {
+
+        parseErrors.add(error);
+    }
+
+    public boolean hasErrors() {
+
+        return !parseErrors.isEmpty();
+    }
+
 }

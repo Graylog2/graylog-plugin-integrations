@@ -65,7 +65,6 @@ public class PaloAltoCodec implements Codec {
             return null;
         }
 
-
         switch (p.panType()) {
             case "THREAT":
                 final PANTypeParser PARSER_THREAT = new PANTypeParser(new ThreatMessageMapping(), builder.getThreatMessageTemplate(), THREAT);
@@ -108,6 +107,7 @@ public class PaloAltoCodec implements Codec {
 
     @ConfigClass
     public static class Config implements Codec.Config {
+
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest request = new ConfigurationRequest();
@@ -133,13 +133,14 @@ public class PaloAltoCodec implements Codec {
                     "A JSON string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
-
             return request;
         }
 
         @Override
         public void overrideDefaultValues(@Nonnull ConfigurationRequest cr) {
         }
+
+
     }
 
     @Nullable
