@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.graylog.integrations.inputs.paloalto.types.FieldDescription.FIELD_TYPE.*;
@@ -25,6 +26,7 @@ import static org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults
  */
 public class PANTemplates {
 
+    public static final String INVALID_TEMPLATE_ERROR = "[%s] Palo Alto input template is invalid.";
     private PANMessageTemplate systemMessageTemplate;
     private PANMessageTemplate threatMessageTemplate;
     private PANMessageTemplate trafficMessageTemplate;
@@ -57,7 +59,7 @@ public class PANTemplates {
             list = parser.getRecords();
         } catch (IOException e) {
             template.addError(String.format("Failed to parse [%s] CSV. Error [%s/%s] CSV [%s].",
-                                            messageType, ExceptionUtils.getMessage(e), ExceptionUtils.getRootCause(e), csvString ));
+                                            messageType, ExceptionUtils.getMessage(e), ExceptionUtils.getRootCause(e), csvString));
 
             return template;
         }
@@ -114,30 +116,36 @@ public class PANTemplates {
 
         // Skip header row.
         LOG.trace("Parsing CSV rows");
-        list.stream().skip(1).forEach(row -> {
+        int rowIndex = 0;
+        for (CSVRecord row : list) {
+            rowIndex++;
+            if (rowIndex == 1) {
+                continue;
+            }
+
             LOG.trace(row.toString());
 
             // Verify that the row contains as many values as the header row.
             if (headerRow.size() < 2) {
-                template.addError(String.format("Row [%s] must contain [%d] comma-separated values.", row.toString(), row.size()));
+                template.addError(String.format("LINE %d: Row [%s] must contain [%d] comma-separated values", rowIndex, row.toString(), row.size()));
             } else {
 
-                String fieldString = row.get(fieldIndex);
+                String fieldString = row.size() >= 1 ? row.get(fieldIndex) : "";
                 boolean fieldIsValid = StringUtils.isNotBlank(fieldString);
                 if (!fieldIsValid) {
-                    template.addError(String.format("The [%s] value must not be blank.", FIELD));
+                    template.addError(String.format("LINE %d: The [%s] value must not be blank", rowIndex, FIELD));
                 }
 
-                String positionString = row.get(positionIndex);
+                String positionString = row.size() >= 2 ? row.get(positionIndex) : "";
                 boolean positionIsValid = StringUtils.isNumeric(positionString);
                 if (!positionIsValid) {
-                    template.addError(String.format("[%s] is not a valid numeric value for [%s].", positionString, POSITION));
+                    template.addError(String.format("LINE %d: [%s] is not a valid positive integer value for [%s]", rowIndex, positionString, POSITION));
                 }
 
-                String typeString = row.get(typeIndex);
+                String typeString = row.size() >= 3 ? row.get(typeIndex) : "";
                 boolean typeIsValid = EnumUtils.isValidEnum(FieldDescription.FIELD_TYPE.class, typeString);
                 if (!typeIsValid) {
-                    template.addError(String.format("[%s] is not a valid numeric value for [%s]. Valid values are [%s, %s, %s].", positionString, TYPE, BOOLEAN, LONG, STRING));
+                    template.addError(String.format("LINE %d: [%s] is not a valid [%s] value. Valid values are [%s, %s, %s]", rowIndex, typeString, TYPE, BOOLEAN, LONG, STRING));
                 }
 
                 // All row values must be valid.
@@ -147,7 +155,7 @@ public class PANTemplates {
                                                                   FieldDescription.FIELD_TYPE.valueOf(typeString)));
                 }
             }
-        });
+        }
 
         return template;
     }
@@ -183,6 +191,25 @@ public class PANTemplates {
             errors.addAll(trafficMessageTemplate.getParseErrors());
         }
         return errors;
+    }
+
+    public String errorMessageSummary(String delimiter) {
+
+        ArrayList<String> errors = new ArrayList<>();
+        if (systemMessageTemplate != null) {
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.SYSTEM));
+            errors.addAll(systemMessageTemplate.getParseErrors());
+        }
+        if (threatMessageTemplate != null) {
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.THREAT));
+            errors.addAll(threatMessageTemplate.getParseErrors());
+        }
+
+        if (trafficMessageTemplate.getParseErrors() != null) {
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.THREAT));
+            errors.addAll(trafficMessageTemplate.getParseErrors());
+        }
+        return errors.stream().collect(Collectors.joining(delimiter));
     }
 
     public boolean hasErrors() {

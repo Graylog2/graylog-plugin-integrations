@@ -56,8 +56,7 @@ public class PaloAltoTCPInput extends MessageInput {
                                                           configuration.getString(CK_TRAFFIC_TEMPLATE, PANTemplateDefaults.TRAFFIC_TEMPLATE));
 
         if (templates.hasErrors()) {
-            templates.getAllErrors().forEach(LOG::error);
-            throw new MisfireException(templates.getAllErrors().stream().collect(Collectors.joining(", ")));
+            throw new MisfireException(templates.errorMessageSummary("\n"));
         }
 
         super.launch(buffer);
