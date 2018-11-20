@@ -7,9 +7,9 @@ public class PaloAltoFieldTemplate {
 
     private String field;
 
-    private FieldDescription.FIELD_TYPE fieldType;
+    private PaloAltoFieldType fieldType;
 
-    public PaloAltoFieldTemplate(String field, Integer position, FieldDescription.FIELD_TYPE fieldType) {
+    public PaloAltoFieldTemplate(String field, Integer position, PaloAltoFieldType fieldType) {
         this.position = position;
         this.field = field;
         this.fieldType = fieldType;
@@ -31,11 +31,11 @@ public class PaloAltoFieldTemplate {
         this.position = position;
     }
 
-    public FieldDescription.FIELD_TYPE getFieldType() {
+    public PaloAltoFieldType getFieldType() {
         return fieldType;
     }
 
-    public void setFieldType(FieldDescription.FIELD_TYPE fieldType) {
+    public void setFieldType(PaloAltoFieldType fieldType) {
         this.fieldType = fieldType;
     }
 }

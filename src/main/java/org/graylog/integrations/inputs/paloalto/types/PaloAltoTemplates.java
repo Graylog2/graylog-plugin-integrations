@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.graylog.integrations.inputs.paloalto.types.FieldDescription.FIELD_TYPE.*;
+import static org.graylog.integrations.inputs.paloalto.types.PaloAltoFieldType.*;
 import static org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults.*;
 
 /**
@@ -143,7 +143,7 @@ public class PaloAltoTemplates {
                 }
 
                 String typeString = row.size() >= 3 ? row.get(typeIndex) : "";
-                boolean typeIsValid = EnumUtils.isValidEnum(FieldDescription.FIELD_TYPE.class, typeString);
+                boolean typeIsValid = EnumUtils.isValidEnum(PaloAltoFieldType.class, typeString);
                 if (!typeIsValid) {
                     template.addError(String.format("LINE %d: [%s] is not a valid [%s] value. Valid values are [%s, %s, %s]", rowIndex, typeString, TYPE, BOOLEAN, LONG, STRING));
                 }
@@ -152,7 +152,7 @@ public class PaloAltoTemplates {
                 if (fieldIsValid && positionIsValid && typeIsValid) {
                     template.getFields().add(new PaloAltoFieldTemplate(fieldString,
                                                                        Integer.valueOf(positionString),
-                                                                       FieldDescription.FIELD_TYPE.valueOf(typeString)));
+                                                                       PaloAltoFieldType.valueOf(typeString)));
                 }
             }
         }
