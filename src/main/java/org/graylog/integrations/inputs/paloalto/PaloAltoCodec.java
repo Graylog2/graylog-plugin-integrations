@@ -116,21 +116,21 @@ public class PaloAltoCodec implements Codec {
                     "SYSTEM_TEMPLATE",
                     "System Message Template",
                     PANTemplateDefaults.SYSTEM_TEMPLATE,
-                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    "CSV string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
             request.addField(new TextField(
                     "THREAT_TEMPLATE",
                     "Threat Message Template",
                     PANTemplateDefaults.THREAT_TEMPLATE,
-                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    "CSV string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
             request.addField(new TextField(
                     "TRAFFIC_TEMPLATE",
                     "Traffic Message Template",
                     PANTemplateDefaults.TRAFFIC_TEMPLATE,
-                    "A JSON string representing the fields/positions/data types to parse. (See documentation)",
+                    "CSV representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA ));
 
             return request;

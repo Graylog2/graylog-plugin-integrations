@@ -3,6 +3,7 @@ package org.graylog.integrations.inputs.paloalto.types;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.graylog.integrations.inputs.paloalto.types.FieldDescription.FIELD_TYPE.*;
 import static org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults.*;
 
 /**
@@ -82,28 +84,62 @@ public class PANTemplateBuilder {
         LOG.trace("Parsing CSV header.");
 
         // We've already verified that the first element exists.
-        CSVRecord row = list.get(0);
+        CSVRecord headerRow = list.get(0);
 
         // All indexes will be non-null, since we've already verify that they exist.
-        int positionIndex = IntStream.range(0, row.size())
-                                     .filter(i -> POSITION.equals(row.get(i)))
+        int positionIndex = IntStream.range(0, headerRow.size())
+                                     .filter(i -> POSITION.equals(headerRow.get(i)))
                                      .findFirst().getAsInt();
 
-        int fieldIndex = IntStream.range(0, row.size())
-                                  .filter(i -> FIELD.equals(row.get(i)))
+        int fieldIndex = IntStream.range(0, headerRow.size())
+                                  .filter(i -> FIELD.equals(headerRow.get(i)))
                                   .findFirst().getAsInt();
 
-        int typeIndex = IntStream.range(0, row.size())
-                                 .filter(i -> TYPE.equals(row.get(i)))
+        int typeIndex = IntStream.range(0, headerRow.size())
+                                 .filter(i -> TYPE.equals(headerRow.get(i)))
                                  .findFirst().getAsInt();
+
+
+        if (list.size() <= 1) {
+            LOG.error(String.format("No fields were specified for the [%s] message type", messageType));
+            return template;
+        }
 
         // Skip header row.
         LOG.trace("Parsing CSV rows");
-        list.stream().skip(1).forEach(aRow -> {
-            LOG.trace(aRow.toString());
-            template.getFields().add(new PANFieldTemplate(aRow.get(fieldIndex),
-                                                          Integer.valueOf(aRow.get(positionIndex)),
-                                                          FieldDescription.FIELD_TYPE.valueOf(aRow.get(typeIndex))));
+        list.stream().skip(1).forEach(row -> {
+            LOG.trace(row.toString());
+
+            // Verify that the row contains as many values as the header row.
+            if (headerRow.size() < 2) {
+                template.addError(String.format("Row [%s] must contain [%d] comma-separated values", row.toString(), row.size()));
+            } else {
+
+                String fieldString = row.get(fieldIndex);
+                boolean fieldIsValid = StringUtils.isNotBlank(fieldString);
+                if (!fieldIsValid) {
+                    template.addError(String.format("The [%s] value must not be blank", FIELD));
+                }
+
+                String positionString = row.get(positionIndex);
+                boolean positionIsValid = StringUtils.isNumeric(positionString);
+                if (!positionIsValid) {
+                    template.addError(String.format("[%s] is not a valid numeric value for [%s]", positionString, POSITION));
+                }
+
+                String typeString = row.get(typeIndex);
+                boolean typeIsValid = EnumUtils.isValidEnum(FieldDescription.FIELD_TYPE.class, typeString);
+                if (!typeIsValid) {
+                    template.addError(String.format("[%s] is not a valid numeric value for [%s]. Valid values are [%s, %s, %s]", positionString, TYPE, BOOLEAN, LONG, STRING));
+                }
+
+                // All row values must be valid.
+                if (fieldIsValid && positionIsValid && typeIsValid) {
+                    template.getFields().add(new PANFieldTemplate(fieldString,
+                                                                  Integer.valueOf(positionString),
+                                                                  FieldDescription.FIELD_TYPE.valueOf(typeString)));
+                }
+            }
         });
 
         return template;
