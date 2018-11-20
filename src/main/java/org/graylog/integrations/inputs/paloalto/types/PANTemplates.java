@@ -5,6 +5,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -21,23 +23,21 @@ import static org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults
 /**
  * Builds PAN message templates.
  */
-public class PANTemplateBuilder {
+public class PANTemplates {
 
     private PANMessageTemplate systemMessageTemplate;
     private PANMessageTemplate threatMessageTemplate;
     private PANMessageTemplate trafficMessageTemplate;
 
-    private boolean builtSuccessfully = false;
+    private static final Logger LOG = LoggerFactory.getLogger(PANTemplates.class);
 
-    private static final Logger LOG = LoggerFactory.getLogger(PANTemplateBuilder.class);
-
-    public static PANTemplateBuilder newInstance(String systemJson, String threatJson, String trafficJson) throws IOException {
+    public static PANTemplates newInstance(String systemCsv, String threatCsv, String trafficCsv) {
 
         // Use default templates if no template supplied.
-        PANTemplateBuilder builder = new PANTemplateBuilder();
-        String systemTemplate = StringUtils.isNotBlank(systemJson) ? systemJson : SYSTEM_TEMPLATE;
-        String threatTemplate = StringUtils.isNotBlank(systemJson) ? threatJson : THREAT_TEMPLATE;
-        String trafficTemplate = StringUtils.isNotBlank(systemJson) ? trafficJson : TRAFFIC_TEMPLATE;
+        PANTemplates builder = new PANTemplates();
+        String systemTemplate = StringUtils.isNotBlank(systemCsv) ? systemCsv : SYSTEM_TEMPLATE;
+        String threatTemplate = StringUtils.isNotBlank(threatCsv) ? threatCsv : THREAT_TEMPLATE;
+        String trafficTemplate = StringUtils.isNotBlank(trafficCsv) ? trafficCsv : TRAFFIC_TEMPLATE;
 
         builder.systemMessageTemplate = readCSV(systemTemplate, PANMessageType.SYSTEM);
         builder.threatMessageTemplate = readCSV(threatTemplate, PANMessageType.THREAT);
@@ -46,18 +46,25 @@ public class PANTemplateBuilder {
         return builder;
     }
 
-    private static PANMessageTemplate readCSV(String CSV, PANMessageType messageType) throws IOException {
-
-        Reader in = new StringReader(CSV);
-        CSVParser parser = new CSVParser(in, CSVFormat.DEFAULT);
-        List<CSVRecord> list = parser.getRecords();
+    private static PANMessageTemplate readCSV(String csvString, PANMessageType messageType) {
 
         PANMessageTemplate template = new PANMessageTemplate();
+        Reader stringReader = new StringReader(csvString);
+        CSVParser parser = null;
+        List<CSVRecord> list = null;
+        try {
+            parser = new CSVParser(stringReader, CSVFormat.DEFAULT);
+            list = parser.getRecords();
+        } catch (IOException e) {
+            template.addError(String.format("Failed to parse [%s] CSV. Error [%s/%s] CSV [%s].",
+                                            messageType, ExceptionUtils.getMessage(e), ExceptionUtils.getRootCause(e), csvString ));
 
+            return template;
+        }
 
         // Periodically check errors to provide as much feedback to the user as possible about any misconfiguration.
         if (list.isEmpty()) {
-            template.addError(String.format("The header row is missing. It must include the following fields: [%s,%s,%s]", POSITION, FIELD, TYPE));
+            template.addError(String.format("The header row is missing. It must include the following fields: [%s,%s,%s].", POSITION, FIELD, TYPE));
         }
 
         if (template.hasErrors()) {
@@ -65,15 +72,15 @@ public class PANTemplateBuilder {
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(POSITION)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field", POSITION));
+            template.addError(String.format("The header row is invalid. It must include the [%s] field.", POSITION));
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(FIELD)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field", FIELD));
+            template.addError(String.format("The header row is invalid. It must include the [%s] field.", FIELD));
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(TYPE)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field", TYPE));
+            template.addError(String.format("The header row is invalid. It must include the [%s] field.", TYPE));
         }
 
         if (template.hasErrors()) {
@@ -101,7 +108,7 @@ public class PANTemplateBuilder {
 
 
         if (list.size() <= 1) {
-            LOG.error(String.format("No fields were specified for the [%s] message type", messageType));
+            LOG.error(String.format("No fields were specified for the [%s] message type.", messageType));
             return template;
         }
 
@@ -112,25 +119,25 @@ public class PANTemplateBuilder {
 
             // Verify that the row contains as many values as the header row.
             if (headerRow.size() < 2) {
-                template.addError(String.format("Row [%s] must contain [%d] comma-separated values", row.toString(), row.size()));
+                template.addError(String.format("Row [%s] must contain [%d] comma-separated values.", row.toString(), row.size()));
             } else {
 
                 String fieldString = row.get(fieldIndex);
                 boolean fieldIsValid = StringUtils.isNotBlank(fieldString);
                 if (!fieldIsValid) {
-                    template.addError(String.format("The [%s] value must not be blank", FIELD));
+                    template.addError(String.format("The [%s] value must not be blank.", FIELD));
                 }
 
                 String positionString = row.get(positionIndex);
                 boolean positionIsValid = StringUtils.isNumeric(positionString);
                 if (!positionIsValid) {
-                    template.addError(String.format("[%s] is not a valid numeric value for [%s]", positionString, POSITION));
+                    template.addError(String.format("[%s] is not a valid numeric value for [%s].", positionString, POSITION));
                 }
 
                 String typeString = row.get(typeIndex);
                 boolean typeIsValid = EnumUtils.isValidEnum(FieldDescription.FIELD_TYPE.class, typeString);
                 if (!typeIsValid) {
-                    template.addError(String.format("[%s] is not a valid numeric value for [%s]. Valid values are [%s, %s, %s]", positionString, TYPE, BOOLEAN, LONG, STRING));
+                    template.addError(String.format("[%s] is not a valid numeric value for [%s]. Valid values are [%s, %s, %s].", positionString, TYPE, BOOLEAN, LONG, STRING));
                 }
 
                 // All row values must be valid.
@@ -160,5 +167,26 @@ public class PANTemplateBuilder {
 
     public PANMessageTemplate getTrafficMessageTemplate() {
         return trafficMessageTemplate;
+    }
+
+    public List<String> getAllErrors() {
+
+        ArrayList<String> errors = new ArrayList<>();
+        if (systemMessageTemplate != null) {
+            errors.addAll(systemMessageTemplate.getParseErrors());
+        }
+        if (threatMessageTemplate != null) {
+            errors.addAll(threatMessageTemplate.getParseErrors());
+        }
+
+        if (trafficMessageTemplate.getParseErrors() != null) {
+            errors.addAll(trafficMessageTemplate.getParseErrors());
+        }
+        return errors;
+    }
+
+    public boolean hasErrors() {
+
+        return !getAllErrors().isEmpty();
     }
 }

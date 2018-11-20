@@ -1,6 +1,7 @@
 package org.graylog.integrations.inputs;
 
-import org.graylog.integrations.inputs.paloalto.types.PANTemplateBuilder;
+import org.graylog.integrations.inputs.paloalto.types.PANTemplates;
+import org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -14,7 +15,9 @@ public class PANTemplateTest {
     @Test
     public void parseTest() throws Exception {
 
-        PANTemplateBuilder builder = PANTemplateBuilder.newInstance(null, null, null);
+        PANTemplates builder = PANTemplates.newInstance(PANTemplateDefaults.SYSTEM_TEMPLATE,
+                                                        PANTemplateDefaults.THREAT_TEMPLATE,
+                                                        PANTemplateDefaults.TRAFFIC_TEMPLATE);
 
         // Verify that the correct number of fields were parsed.
         assertEquals(13, builder.getSystemMessageTemplate().getFields().size());

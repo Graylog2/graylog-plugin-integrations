@@ -3,7 +3,6 @@ package org.graylog.integrations.inputs.paloalto;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import org.graylog.integrations.inputs.paloalto.types.FieldDescription;
-import org.graylog.integrations.inputs.paloalto.types.MessageMapping;
 import org.graylog.integrations.inputs.paloalto.types.PANFieldTemplate;
 import org.graylog.integrations.inputs.paloalto.types.PANMessageTemplate;
 import org.graylog.integrations.inputs.paloalto.types.PANMessageType;
@@ -16,14 +15,12 @@ public class PANTypeParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(PANTypeParser.class);
 
-    private final ImmutableMap<Integer, FieldDescription> mapping;
     private final PANMessageTemplate messageTemplate;
     private final PANMessageType messageType;
 
-    public PANTypeParser(MessageMapping mapping, PANMessageTemplate messageTemplate, PANMessageType messageType) {
+    public PANTypeParser(PANMessageTemplate messageTemplate, PANMessageType messageType) {
 
         this.messageType = messageType;
-        this.mapping = mapping.getMapping();
         this.messageTemplate = messageTemplate;
     }
 
@@ -71,41 +68,6 @@ public class PANTypeParser {
 
             x.put(field.getField(), value);
         }
-// TODO: Remove after template processing logic is finalized and tested.
-//        for (Map.Entry<Integer, FieldDescription> map : mapping.entrySet()) {
-//            String key = map.getValue().name();
-//            String rawValue = fields.get(map.getKey());
-//            Object value;
-//
-//            switch (map.getValue().type()) {
-//                case STRING:
-//                    // Handle quoted values.
-//                    if (rawValue.startsWith("\"") && rawValue.endsWith("\"")) {
-//                        rawValue = rawValue.substring(1, rawValue.length() - 1);
-//                    }
-//
-//                    value = rawValue;
-//                    break;
-//                case LONG:
-//                    if (!Strings.isNullOrEmpty(rawValue)) {
-//                        value = Long.valueOf(rawValue);
-//                    } else {
-//                        value = 0L;
-//                    }
-//                    break;
-//                case BOOLEAN:
-//                    if (!Strings.isNullOrEmpty(rawValue)) {
-//                        value = Boolean.valueOf(rawValue);
-//                    } else {
-//                        value = false;
-//                    }
-//                    break;
-//                default:
-//                    throw new RuntimeException("Unhandled PAN mapping field type [" + map.getValue().type() + "].");
-//            }
-//
-//            x.put(key, value);
-//        }
 
         return x.build();
     }
