@@ -1,7 +1,7 @@
 package org.graylog.integrations.inputs;
 
-import org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults;
-import org.graylog.integrations.inputs.paloalto.types.PANTemplates;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
@@ -18,9 +18,9 @@ public class PANTemplateTest {
     @Test
     public void parseTest() throws Exception {
 
-        PANTemplates builder = PANTemplates.newInstance(PANTemplateDefaults.SYSTEM_TEMPLATE,
-                                                        PANTemplateDefaults.THREAT_TEMPLATE,
-                                                        PANTemplateDefaults.TRAFFIC_TEMPLATE);
+        PaloAltoTemplates builder = PaloAltoTemplates.newInstance(PaloAltoTemplateDefaults.SYSTEM_TEMPLATE,
+                                                                  PaloAltoTemplateDefaults.THREAT_TEMPLATE,
+                                                                  PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE);
 
         // Verify that the correct number of fields were parsed.
         assertEquals(13, builder.getSystemMessageTemplate().getFields().size());
@@ -51,19 +51,19 @@ public class PANTemplateTest {
     public void verifyCSVValidation() {
 
         // Verify header checking.
-        PANTemplates templates = PANTemplates.newInstance("badheader",
-                                                          DEFAULT_HEADER,
-                                                          DEFAULT_HEADER);
+        PaloAltoTemplates templates = PaloAltoTemplates.newInstance("badheader",
+                                                                    DEFAULT_HEADER,
+                                                                    DEFAULT_HEADER);
         assertEquals(3, templates.getAllErrors().size());
         templates.getAllErrors().forEach(error -> {
             assertTrue(error.contains("The header row is invalid"));
         });
 
         // Verify that invalid value messages returned for invalid values.
-        templates = PANTemplates.newInstance("field,position,type\n" +
-                                             "badvalue",
-                                             DEFAULT_HEADER,
-                                             DEFAULT_HEADER);
+        templates = PaloAltoTemplates.newInstance("field,position,type\n" +
+                                                  "badvalue",
+                                                  DEFAULT_HEADER,
+                                                  DEFAULT_HEADER);
 
         templates.getAllErrors().forEach(error -> {
             assertTrue(error.contains("[] is not a valid"));

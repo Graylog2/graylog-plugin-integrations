@@ -1,6 +1,6 @@
 package org.graylog.integrations.inputs.paloalto.types;
 
-public class PANFieldTemplate {
+public class PaloAltoFieldTemplate {
 
 
     private Integer position;
@@ -9,7 +9,7 @@ public class PANFieldTemplate {
 
     private FieldDescription.FIELD_TYPE fieldType;
 
-    public PANFieldTemplate(String field, Integer position, FieldDescription.FIELD_TYPE fieldType) {
+    public PaloAltoFieldTemplate(String field, Integer position, FieldDescription.FIELD_TYPE fieldType) {
         this.position = position;
         this.field = field;
         this.fieldType = fieldType;

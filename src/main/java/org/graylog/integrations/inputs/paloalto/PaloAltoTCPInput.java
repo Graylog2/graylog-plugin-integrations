@@ -2,8 +2,8 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults;
-import org.graylog.integrations.inputs.paloalto.types.PANTemplates;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
 import org.graylog2.inputs.transports.TcpTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.stream.Collectors;
 
 import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.*;
 
@@ -51,9 +50,9 @@ public class PaloAltoTCPInput extends MessageInput {
     public void launch(InputBuffer buffer) throws MisfireException {
 
         // Parse the templates to log any errors immediately on input startup.
-        PANTemplates templates = PANTemplates.newInstance(configuration.getString(CK_SYSTEM_TEMPLATE, PANTemplateDefaults.SYSTEM_TEMPLATE),
-                                                          configuration.getString(CK_THREAT_TEMPLATE, PANTemplateDefaults.THREAT_TEMPLATE),
-                                                          configuration.getString(CK_TRAFFIC_TEMPLATE, PANTemplateDefaults.TRAFFIC_TEMPLATE));
+        PaloAltoTemplates templates = PaloAltoTemplates.newInstance(configuration.getString(CK_SYSTEM_TEMPLATE, PaloAltoTemplateDefaults.SYSTEM_TEMPLATE),
+                                                                    configuration.getString(CK_THREAT_TEMPLATE, PaloAltoTemplateDefaults.THREAT_TEMPLATE),
+                                                                    configuration.getString(CK_TRAFFIC_TEMPLATE, PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE));
 
         if (templates.hasErrors()) {
             throw new MisfireException(templates.errorMessageSummary("\n"));

@@ -1,6 +1,6 @@
 package org.graylog.integrations.inputs.paloalto.types;
 
-public enum PANMessageType {
+public enum PaloAltoMessageType {
 
     SYSTEM,
     THREAT,

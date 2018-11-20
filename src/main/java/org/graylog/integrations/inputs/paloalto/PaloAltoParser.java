@@ -11,9 +11,9 @@ import javax.validation.constraints.NotNull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PANParser {
+public class PaloAltoParser {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PANParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PaloAltoParser.class);
 
     private static final Pattern SYSLOG_PARSER = Pattern.compile("<\\d+>1 (.+?) (.+?)$");
 

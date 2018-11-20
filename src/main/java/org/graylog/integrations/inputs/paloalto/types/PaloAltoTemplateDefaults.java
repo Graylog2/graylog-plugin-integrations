@@ -9,13 +9,13 @@ package org.graylog.integrations.inputs.paloalto.types;
  *
  * TODO: Consider moving this JSON to static resource fields.
  */
-public class PANTemplateDefaults {
+public class PaloAltoTemplateDefaults {
 
     public static String POSITION = "position";
     public static String FIELD = "field";
     public static  String TYPE = "type";
 
-    private PANTemplateDefaults() {
+    private PaloAltoTemplateDefaults() {
 
     }
 

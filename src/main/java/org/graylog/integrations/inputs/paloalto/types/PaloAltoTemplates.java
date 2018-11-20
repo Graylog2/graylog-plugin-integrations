@@ -19,38 +19,38 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.graylog.integrations.inputs.paloalto.types.FieldDescription.FIELD_TYPE.*;
-import static org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults.*;
+import static org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults.*;
 
 /**
  * Builds PAN message templates.
  */
-public class PANTemplates {
+public class PaloAltoTemplates {
 
     public static final String INVALID_TEMPLATE_ERROR = "[%s] Palo Alto input template is invalid.";
-    private PANMessageTemplate systemMessageTemplate;
-    private PANMessageTemplate threatMessageTemplate;
-    private PANMessageTemplate trafficMessageTemplate;
+    private PaloAltoMessageTemplate systemMessageTemplate;
+    private PaloAltoMessageTemplate threatMessageTemplate;
+    private PaloAltoMessageTemplate trafficMessageTemplate;
 
-    private static final Logger LOG = LoggerFactory.getLogger(PANTemplates.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PaloAltoTemplates.class);
 
-    public static PANTemplates newInstance(String systemCsv, String threatCsv, String trafficCsv) {
+    public static PaloAltoTemplates newInstance(String systemCsv, String threatCsv, String trafficCsv) {
 
         // Use default templates if no template supplied.
-        PANTemplates builder = new PANTemplates();
+        PaloAltoTemplates builder = new PaloAltoTemplates();
         String systemTemplate = StringUtils.isNotBlank(systemCsv) ? systemCsv : SYSTEM_TEMPLATE;
         String threatTemplate = StringUtils.isNotBlank(threatCsv) ? threatCsv : THREAT_TEMPLATE;
         String trafficTemplate = StringUtils.isNotBlank(trafficCsv) ? trafficCsv : TRAFFIC_TEMPLATE;
 
-        builder.systemMessageTemplate = readCSV(systemTemplate, PANMessageType.SYSTEM);
-        builder.threatMessageTemplate = readCSV(threatTemplate, PANMessageType.THREAT);
-        builder.trafficMessageTemplate = readCSV(trafficTemplate, PANMessageType.TRAFFIC);
+        builder.systemMessageTemplate = readCSV(systemTemplate, PaloAltoMessageType.SYSTEM);
+        builder.threatMessageTemplate = readCSV(threatTemplate, PaloAltoMessageType.THREAT);
+        builder.trafficMessageTemplate = readCSV(trafficTemplate, PaloAltoMessageType.TRAFFIC);
 
         return builder;
     }
 
-    private static PANMessageTemplate readCSV(String csvString, PANMessageType messageType) {
+    private static PaloAltoMessageTemplate readCSV(String csvString, PaloAltoMessageType messageType) {
 
-        PANMessageTemplate template = new PANMessageTemplate();
+        PaloAltoMessageTemplate template = new PaloAltoMessageTemplate();
         Reader stringReader = new StringReader(csvString);
         CSVParser parser = null;
         List<CSVRecord> list = null;
@@ -150,9 +150,9 @@ public class PANTemplates {
 
                 // All row values must be valid.
                 if (fieldIsValid && positionIsValid && typeIsValid) {
-                    template.getFields().add(new PANFieldTemplate(fieldString,
-                                                                  Integer.valueOf(positionString),
-                                                                  FieldDescription.FIELD_TYPE.valueOf(typeString)));
+                    template.getFields().add(new PaloAltoFieldTemplate(fieldString,
+                                                                       Integer.valueOf(positionString),
+                                                                       FieldDescription.FIELD_TYPE.valueOf(typeString)));
                 }
             }
         }
@@ -160,20 +160,20 @@ public class PANTemplates {
         return template;
     }
 
-    private static void checkErrors(PANMessageType messageType, List<String> errors) throws MisfireException {
+    private static void checkErrors(PaloAltoMessageType messageType, List<String> errors) throws MisfireException {
         errors.add(0, String.format("Error validating the [%s] CSV message template:", messageType));
         throw new MisfireException(String.join("\n", errors));
     }
 
-    public PANMessageTemplate getSystemMessageTemplate() {
+    public PaloAltoMessageTemplate getSystemMessageTemplate() {
         return systemMessageTemplate;
     }
 
-    public PANMessageTemplate getThreatMessageTemplate() {
+    public PaloAltoMessageTemplate getThreatMessageTemplate() {
         return threatMessageTemplate;
     }
 
-    public PANMessageTemplate getTrafficMessageTemplate() {
+    public PaloAltoMessageTemplate getTrafficMessageTemplate() {
         return trafficMessageTemplate;
     }
 
@@ -197,16 +197,16 @@ public class PANTemplates {
 
         ArrayList<String> errors = new ArrayList<>();
         if (systemMessageTemplate != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.SYSTEM));
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.SYSTEM));
             errors.addAll(systemMessageTemplate.getParseErrors());
         }
         if (threatMessageTemplate != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.THREAT));
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
             errors.addAll(threatMessageTemplate.getParseErrors());
         }
 
         if (trafficMessageTemplate.getParseErrors() != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PANMessageType.THREAT));
+            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
             errors.addAll(trafficMessageTemplate.getParseErrors());
         }
         return errors.stream().collect(Collectors.joining(delimiter));

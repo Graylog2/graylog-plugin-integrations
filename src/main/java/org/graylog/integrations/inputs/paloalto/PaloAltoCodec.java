@@ -2,8 +2,8 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import org.graylog.integrations.inputs.paloalto.types.PANTemplates;
-import org.graylog.integrations.inputs.paloalto.types.PANTemplateDefaults;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
+import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.graylog.integrations.inputs.paloalto.types.PANMessageType.*;
+import static org.graylog.integrations.inputs.paloalto.types.PaloAltoMessageType.*;
 
 public class PaloAltoCodec implements Codec {
 
@@ -33,17 +33,17 @@ public class PaloAltoCodec implements Codec {
     private static final Logger LOG = LoggerFactory.getLogger(PaloAltoCodec.class);
 
     private final Configuration configuration;
-    private final PANParser parser;
-    private final PANTemplates templates;
+    private final PaloAltoParser parser;
+    private final PaloAltoTemplates templates;
 
     @AssistedInject
 
     public PaloAltoCodec(@Assisted Configuration configuration) {
         this.configuration = configuration;
-        this.parser = new PANParser();
-        this.templates = PANTemplates.newInstance(configuration.getString(CK_SYSTEM_TEMPLATE, PANTemplateDefaults.SYSTEM_TEMPLATE),
-                                                  configuration.getString(CK_THREAT_TEMPLATE, PANTemplateDefaults.THREAT_TEMPLATE),
-                                                  configuration.getString(CK_TRAFFIC_TEMPLATE, PANTemplateDefaults.TRAFFIC_TEMPLATE));
+        this.parser = new PaloAltoParser();
+        this.templates = PaloAltoTemplates.newInstance(configuration.getString(CK_SYSTEM_TEMPLATE, PaloAltoTemplateDefaults.SYSTEM_TEMPLATE),
+                                                       configuration.getString(CK_THREAT_TEMPLATE, PaloAltoTemplateDefaults.THREAT_TEMPLATE),
+                                                       configuration.getString(CK_TRAFFIC_TEMPLATE, PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE));
     }
 
     @Nullable
@@ -63,15 +63,15 @@ public class PaloAltoCodec implements Codec {
 
         switch (p.panType()) {
             case "THREAT":
-                final PANTypeParser PARSER_THREAT = new PANTypeParser(templates.getThreatMessageTemplate(), THREAT);
+                final PaloAltoTypeParser PARSER_THREAT = new PaloAltoTypeParser(templates.getThreatMessageTemplate(), THREAT);
                 message.addFields(PARSER_THREAT.parseFields(p.fields()));
                 break;
             case "SYSTEM":
-                final PANTypeParser PARSER_SYSTEM = new PANTypeParser(templates.getSystemMessageTemplate(), SYSTEM);
+                final PaloAltoTypeParser PARSER_SYSTEM = new PaloAltoTypeParser(templates.getSystemMessageTemplate(), SYSTEM);
                 message.addFields(PARSER_SYSTEM.parseFields(p.fields()));
                 break;
             case "TRAFFIC":
-                final PANTypeParser PARSER_TRAFFIC = new PANTypeParser(templates.getTrafficMessageTemplate(), TRAFFIC);
+                final PaloAltoTypeParser PARSER_TRAFFIC = new PaloAltoTypeParser(templates.getTrafficMessageTemplate(), TRAFFIC);
                 message.addFields(PARSER_TRAFFIC.parseFields(p.fields()));
                 break;
             default:
@@ -111,21 +111,21 @@ public class PaloAltoCodec implements Codec {
             request.addField(new TextField(
                     CK_SYSTEM_TEMPLATE,
                     "System Message Template",
-                    PANTemplateDefaults.SYSTEM_TEMPLATE,
+                    PaloAltoTemplateDefaults.SYSTEM_TEMPLATE,
                     "CSV string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_THREAT_TEMPLATE,
                     "Threat Message Template",
-                    PANTemplateDefaults.THREAT_TEMPLATE,
+                    PaloAltoTemplateDefaults.THREAT_TEMPLATE,
                     "CSV string representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_TRAFFIC_TEMPLATE,
                     "Traffic Message Template",
-                    PANTemplateDefaults.TRAFFIC_TEMPLATE,
+                    PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE,
                     "CSV representing the fields/positions/data types to parse. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 

@@ -1,7 +1,5 @@
 package org.graylog.integrations.inputs.paloalto.types;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,16 +15,16 @@ import java.util.Set;
  * @see <a href="http://google.com">https://www.paloaltonetworks.com/documentation/80/pan-os/pan-os/monitoring/use-syslog-for-monitoring/syslog-field-descriptions/threat-log-fields</a>
  */
 
-public class PANMessageTemplate {
+public class PaloAltoMessageTemplate {
 
-    private Set<PANFieldTemplate> fields = new HashSet<>();
+    private Set<PaloAltoFieldTemplate> fields = new HashSet<>();
     private List<String> parseErrors = new ArrayList<>();
 
-    public Set<PANFieldTemplate> getFields() {
+    public Set<PaloAltoFieldTemplate> getFields() {
         return fields;
     }
 
-    public void setFields(Set<PANFieldTemplate> fields) {
+    public void setFields(Set<PaloAltoFieldTemplate> fields) {
         this.fields = fields;
     }
 
