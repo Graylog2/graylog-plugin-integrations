@@ -15,6 +15,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -58,7 +59,7 @@ public class PaloAltoTemplates {
             parser = new CSVParser(stringReader, CSVFormat.DEFAULT);
             list = parser.getRecords();
         } catch (IOException e) {
-            template.addError(String.format("Failed to parse [%s] CSV. Error [%s/%s] CSV [%s].",
+            template.addError(String.format(Locale.ENGLISH, "Failed to parse [%s] CSV. Error [%s/%s] CSV [%s].",
                                             messageType, ExceptionUtils.getMessage(e), ExceptionUtils.getRootCause(e), csvString));
 
             return template;
@@ -66,7 +67,7 @@ public class PaloAltoTemplates {
 
         // Periodically check errors to provide as much feedback to the user as possible about any misconfiguration.
         if (list.isEmpty()) {
-            template.addError(String.format("The header row is missing. It must include the following fields: [%s,%s,%s].", POSITION, FIELD, TYPE));
+            template.addError(String.format(Locale.ENGLISH, "The header row is missing. It must include the following fields: [%s,%s,%s].", POSITION, FIELD, TYPE));
         }
 
         if (template.hasErrors()) {
@@ -74,15 +75,15 @@ public class PaloAltoTemplates {
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(POSITION)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field.", POSITION));
+            template.addError(String.format(Locale.ENGLISH, "The header row is invalid. It must include the [%s] field.", POSITION));
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(FIELD)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field.", FIELD));
+            template.addError(String.format(Locale.ENGLISH, "The header row is invalid. It must include the [%s] field.", FIELD));
         }
 
         if (!list.stream().findFirst().filter(row -> row.toString().contains(TYPE)).isPresent()) {
-            template.addError(String.format("The header row is invalid. It must include the [%s] field.", TYPE));
+            template.addError(String.format(Locale.ENGLISH, "The header row is invalid. It must include the [%s] field.", TYPE));
         }
 
         if (template.hasErrors()) {
@@ -110,7 +111,7 @@ public class PaloAltoTemplates {
 
 
         if (list.size() <= 1) {
-            LOG.error(String.format("No fields were specified for the [%s] message type.", messageType));
+            LOG.error("No fields were specified for the [{}] message type.", messageType);
             return template;
         }
 
@@ -127,25 +128,25 @@ public class PaloAltoTemplates {
 
             // Verify that the row contains as many values as the header row.
             if (headerRow.size() < 2) {
-                template.addError(String.format("LINE %d: Row [%s] must contain [%d] comma-separated values", rowIndex, row.toString(), row.size()));
+                template.addError(String.format(Locale.ENGLISH, "LINE %d: Row [%s] must contain [%d] comma-separated values", rowIndex, row.toString(), row.size()));
             } else {
 
                 String fieldString = row.size() >= 1 ? row.get(fieldIndex) : "";
                 boolean fieldIsValid = StringUtils.isNotBlank(fieldString);
                 if (!fieldIsValid) {
-                    template.addError(String.format("LINE %d: The [%s] value must not be blank", rowIndex, FIELD));
+                    template.addError(String.format(Locale.ENGLISH, "LINE %d: The [%s] value must not be blank", rowIndex, FIELD));
                 }
 
                 String positionString = row.size() >= 2 ? row.get(positionIndex) : "";
                 boolean positionIsValid = StringUtils.isNumeric(positionString);
                 if (!positionIsValid) {
-                    template.addError(String.format("LINE %d: [%s] is not a valid positive integer value for [%s]", rowIndex, positionString, POSITION));
+                    template.addError(String.format(Locale.ENGLISH, "LINE %d: [%s] is not a valid positive integer value for [%s]", rowIndex, positionString, POSITION));
                 }
 
                 String typeString = row.size() >= 3 ? row.get(typeIndex) : "";
                 boolean typeIsValid = EnumUtils.isValidEnum(PaloAltoFieldType.class, typeString);
                 if (!typeIsValid) {
-                    template.addError(String.format("LINE %d: [%s] is not a valid [%s] value. Valid values are [%s, %s, %s]", rowIndex, typeString, TYPE, BOOLEAN, LONG, STRING));
+                    template.addError(String.format(Locale.ENGLISH, "LINE %d: [%s] is not a valid [%s] value. Valid values are [%s, %s, %s]", rowIndex, typeString, TYPE, BOOLEAN, LONG, STRING));
                 }
 
                 // All row values must be valid.
@@ -161,7 +162,7 @@ public class PaloAltoTemplates {
     }
 
     private static void checkErrors(PaloAltoMessageType messageType, List<String> errors) throws MisfireException {
-        errors.add(0, String.format("Error validating the [%s] CSV message template:", messageType));
+        errors.add(0, String.format(Locale.ENGLISH, "Error validating the [%s] CSV message template:", messageType));
         throw new MisfireException(String.join("\n", errors));
     }
 
@@ -197,16 +198,16 @@ public class PaloAltoTemplates {
 
         ArrayList<String> errors = new ArrayList<>();
         if (systemMessageTemplate != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.SYSTEM));
+            errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.SYSTEM));
             errors.addAll(systemMessageTemplate.getParseErrors());
         }
         if (threatMessageTemplate != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
+            errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
             errors.addAll(threatMessageTemplate.getParseErrors());
         }
 
         if (trafficMessageTemplate.getParseErrors() != null) {
-            errors.add(String.format(INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
+            errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
             errors.addAll(trafficMessageTemplate.getParseErrors());
         }
         return errors.stream().collect(Collectors.joining(delimiter));

@@ -32,7 +32,7 @@ public class PaloAltoTypeParser {
                 rawValue = fields.get(field.getPosition());
             } catch (IndexOutOfBoundsException e) {
                 // Skip fields at indexes that do not exist.
-                LOG.trace(String.format("A [%s] field does not exist at index [%d]", messageType.toString(), field.getPosition()));
+                LOG.trace("A [{}] field does not exist at index [{}]", messageType.toString(), field.getPosition());
                 continue;
             }
 
