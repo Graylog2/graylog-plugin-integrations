@@ -19,13 +19,6 @@
     <description>Graylog ${project.artifactId} plugin.</description>
     <url>https://www.graylog.org</url>
 
-    <developers>
-        <developer>
-            <name>Graylog, Inc.</name>
-            <email>hello@graylog.com</email>
-        </developer>
-    </developers>
-
     <scm>
         <connection>scm:git:git@github.com:Graylog2/graylog-plugin-integrations.git</connection>
         <developerConnection>scm:git:git@github.com:Graylog2/graylog-plugin-integrations.git</developerConnection>
@@ -34,55 +27,27 @@
     </scm>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
-        <!-- Plugins will not be deployed by default - set to `false` if you actually want to deploy it -->
+        <maven.source.skip>true</maven.source.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <maven.install.skip>true</maven.install.skip>
         <maven.deploy.skip>true</maven.deploy.skip>
-
+        <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.0.0-alpha.5-SNAPSHOT</graylog.version>
-        <graylog.plugin-dir>/usr/share/graylog-server/plugin</graylog.plugin-dir>
+        <aws-java-sdk.version>1.11.313</aws-java-sdk.version>
+        <aws-kinesis-client.version>1.9.0</aws-kinesis-client.version>
     </properties>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
-    <repositories>
-        <!-- to make our snapshot releases work with Travis et al -->
-        <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sonatype-nexus-releases</id>
-            <name>Sonatype Nexus Releases</name>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -104,6 +69,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -119,28 +91,23 @@
 
     <build>
         <resources>
-            <resource><directory>build</directory></resource>
             <resource>
-              <directory>src/main/resources</directory>
-              <filtering>true</filtering>
+                <directory>build</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
             </resource>
         </resources>
         <plugins>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <skipAssembly>true</skipAssembly>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Graylog-Plugin-Properties-Path>${project.groupId}.${project.artifactId}</Graylog-Plugin-Properties-Path>
+                            <Graylog-Plugin-Properties-Path>${project.groupId}.${project.artifactId}
+                            </Graylog-Plugin-Properties-Path>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -151,15 +118,31 @@
                 <configuration>
                     <annotationProcessors>
                         <annotationProcessor>com.google.auto.value.processor.AutoValueProcessor</annotationProcessor>
+                        <annotationProcessor>com.google.auto.service.processor.AutoServiceProcessor
+                        </annotationProcessor>
                     </annotationProcessors>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.1</version>
                 <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>false</minimizeJar>
+                    <transformers>
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                    </transformers>
+                    <artifactSet>
+                        <excludes>
+                            <exclude>com.google.guava:guava</exclude>
+                            <exclude>com.fasterxml.jackson.core:*</exclude>
+                            <exclude>org.apache.httpcomponents:httpclient</exclude>
+                            <exclude>joda-time:joda-time</exclude>
+                            <exclude>commons-codec:commons-codec</exclude>
+                            <exclude>com.google.protobuf:protobuf-java</exclude>
+                        </excludes>
+                    </artifactSet>
                 </configuration>
                 <executions>
                     <execution>
@@ -167,135 +150,9 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
-                    <preparationGoals>clean test</preparationGoals>
-                    <goals>package</goals>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>jdeb</artifactId>
-                <groupId>org.vafer</groupId>
-                <version>1.4</version>
-                <configuration>
-                    <deb>${project.build.directory}/${project.artifactId}-${project.version}.deb</deb>
-                    <dataSet>
-                        <data>
-                            <src>${project.build.directory}/${project.build.finalName}.jar</src>
-                            <type>file</type>
-                            <mapper>
-                                <type>perm</type>
-                                <prefix>${graylog.plugin-dir}</prefix>
-                                <filemode>644</filemode>
-                                <user>root</user>
-                                <group>root</group>
-                            </mapper>
-                        </data>
-                    </dataSet>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>rpm-maven-plugin</artifactId>
-                <version>2.1.4</version>
-                <configuration>
-                    <group>Application/Internet</group>
-                    <prefixes>
-                        <prefix>/usr</prefix>
-                    </prefixes>
-                    <defineStatements>
-                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
-                        <defineStatement>_binaries_in_noarch_packages_terminate_build 0</defineStatement>
-                    </defineStatements>
-                    <defaultFilemode>644</defaultFilemode>
-                    <defaultDirmode>755</defaultDirmode>
-                    <defaultUsername>root</defaultUsername>
-                    <defaultGroupname>root</defaultGroupname>
-                    <mappings>
-                        <mapping>
-                            <directory>${graylog.plugin-dir}</directory>
-                            <sources>
-                                <source>
-                                    <location>${project.build.directory}/</location>
-                                    <includes>
-                                        <include>${project.build.finalName}.jar</include>
-                                    </includes>
-                                </source>
-                            </sources>
-                        </mapping>
-                    </mappings>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
-    <profiles>
-        <profile>
-            <id>web-interface-build</id>
-            <activation>
-                <property>
-                    <name>!skip.web.build</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.github.eirslett</groupId>
-                        <artifactId>frontend-maven-plugin</artifactId>
-                        <version>1.3</version>
-
-                        <executions>
-                            <execution>
-                                <id>install node and npm</id>
-                                <goals>
-                                    <goal>install-node-and-npm</goal>
-                                </goals>
-                                <configuration>
-                                    <nodeVersion>v6.9.2</nodeVersion>
-                                    <npmVersion>4.0.3</npmVersion>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>npm install</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <!-- Optional configuration which provides for running any npm command -->
-                                <configuration>
-                                    <arguments>install</arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>npm run build</id>
-                                <goals>
-                                    <goal>npm</goal>
-                                </goals>
-                                <configuration>
-                                    <arguments>run build</arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
