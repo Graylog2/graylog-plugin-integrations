@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.graylog.plugins</groupId>
-        <artifactId>graylog-plugin-parent</artifactId>
-        <version>3.0.0-alpha.2-SNAPSHOT</version>
+        <artifactId>graylog-plugin-web-parent</artifactId>
+        <version>3.0.0-alpha.5-SNAPSHOT</version>
         <relativePath>../graylog2-server/graylog-plugin-parent/graylog-plugin-web-parent</relativePath>
     </parent>
 
