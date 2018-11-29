@@ -18,9 +18,10 @@ public class PaloAltoParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(PaloAltoParser.class);
 
+    private static final DateTimeFormatter SYSLOG_TIMESTAMP_FORMATTER = DateTimeFormat.forPattern("MMM d HH:mm:ss YYYY").withLocale(Locale.US);
     private static final Pattern PANORAMA_SYSLOG_PARSER = Pattern.compile("<\\d+>1 (.+?) (.+?)$");
     private static final Pattern STANDARD_SYSLOG_PARSER = Pattern.compile("<\\d+>(.+?) (.+?) (.+?) (.+?)(\\s.*)");
-    public static final String PANORAMA_DELIMITER = "- - - -";
+    private static final String PANORAMA_DELIMITER = "- - - -";
 
     // TODO TESTS
 
@@ -66,8 +67,7 @@ public class PaloAltoParser {
             if (matcher.matches()) {
                 // Attempt to parse date in format: Aug 22 11:21:04
                 // TODO This needs work.
-                DateTimeFormatter formatter = DateTimeFormat.forPattern("MMM d HH:mm:ss YYYY").withLocale(Locale.US);
-                DateTime timestamp  = formatter.parseDateTime(matcher.group(1) + " " + matcher.group(2) + " " +  matcher.group(3) + " " + DateTime.now().getYear());
+                DateTime timestamp  = SYSLOG_TIMESTAMP_FORMATTER.parseDateTime(matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3) + " " + DateTime.now().getYear());
                 String source = matcher.group(4);
                 String panData = matcher.group(5);
 
