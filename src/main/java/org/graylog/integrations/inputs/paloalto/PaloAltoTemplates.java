@@ -19,8 +19,15 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.*;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.BOOLEAN;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.LONG;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.STRING;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.FIELD;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.POSITION;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.SYSTEM_TEMPLATE;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.THREAT_TEMPLATE;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.TYPE;
 
 /**
  * Builds PAN message templates.

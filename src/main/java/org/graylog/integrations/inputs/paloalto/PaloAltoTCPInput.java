@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
-import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_SYSTEM_TEMPLATE;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_THREAT_TEMPLATE;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_TRAFFIC_TEMPLATE;
 
 public class PaloAltoTCPInput extends MessageInput {
 

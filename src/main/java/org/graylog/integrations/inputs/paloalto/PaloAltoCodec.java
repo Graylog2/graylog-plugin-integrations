@@ -18,7 +18,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.SYSTEM;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.THREAT;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.TRAFFIC;
 
 public class PaloAltoCodec implements Codec {
 
