@@ -1,4 +1,4 @@
-package org.graylog.integrations.inputs.paloalto.types;
+package org.graylog.integrations.inputs.paloalto;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -19,8 +19,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.graylog.integrations.inputs.paloalto.types.PaloAltoFieldType.*;
-import static org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults.*;
 
 /**
  * Builds PAN message templates.

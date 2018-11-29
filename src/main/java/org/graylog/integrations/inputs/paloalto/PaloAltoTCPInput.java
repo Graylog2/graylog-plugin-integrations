@@ -2,8 +2,6 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
 import org.graylog2.inputs.transports.TcpTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;

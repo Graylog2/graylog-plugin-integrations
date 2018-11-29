@@ -1,4 +1,4 @@
-package org.graylog.integrations.inputs.paloalto.types;
+package org.graylog.integrations.inputs.paloalto;
 
 /**
  * Default PAN message templates. Used for tests and initial configurations on input creation.

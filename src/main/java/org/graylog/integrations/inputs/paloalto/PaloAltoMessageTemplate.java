@@ -1,4 +1,4 @@
-package org.graylog.integrations.inputs.paloalto.types;
+package org.graylog.integrations.inputs.paloalto;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -2,9 +2,6 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoFieldTemplate;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoMessageTemplate;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoMessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

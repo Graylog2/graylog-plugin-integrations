@@ -1,7 +1,7 @@
 package org.graylog.integrations.inputs;
 
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
+import org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults;
+import org.graylog.integrations.inputs.paloalto.PaloAltoTemplates;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

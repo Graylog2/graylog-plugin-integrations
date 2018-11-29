@@ -2,8 +2,6 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplates;
-import org.graylog.integrations.inputs.paloalto.types.PaloAltoTemplateDefaults;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -20,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static org.graylog.integrations.inputs.paloalto.types.PaloAltoMessageType.*;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.*;
 
 public class PaloAltoCodec implements Codec {
 
