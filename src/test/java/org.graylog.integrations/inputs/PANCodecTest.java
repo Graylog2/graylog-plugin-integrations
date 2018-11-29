@@ -46,18 +46,18 @@ public class PANCodecTest {
         // Test System message results
         PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
         Message message = codec.decode(new RawMessage(PANORAMA_SYSTEM_MESSAGE.getBytes()));
-        assertEquals("SYSTEM", message.getField("pa_type"));
+        assertEquals("SYSTEM", message.getField("type"));
         assertEquals(message.getField("module"), "general");
         assertEquals(message.getField("description"), "\"Deviating device: Prod--2");
         assertEquals(message.getField("serial_number"), "000710000506");
         assertEquals(message.getField("source"), "Panorama-1");
         assertEquals(message.getField("message"), "1,2018/09/19 11:50:35,000710000506,SYSTEM,general,0,2018/09/19 11:50:35,,general,,0,0,general,informational,\"Deviating device: Prod--2, Serial: 007255000045717, Object: N/A, Metric: mp-cpu, Value: 34\",1163103,0x0,0,0,0,0,,Panorama-1");
-        assertEquals(message.getField("pa_severity"), "informational");
-        assertEquals(message.getField("pa_time_generated"), "2018/09/19 11:50:35");
+        assertEquals(message.getField("severity"), "informational");
+        assertEquals(message.getField("generated_time"), "2018/09/19 11:50:35");
         assertEquals(message.getField("event_id"), "general");
-        assertEquals(message.getField("pa_devicename"), "0");
-        assertEquals(message.getField("content_type"), "general");
-        assertEquals(message.getField("pa_virtualsys_name"), "0");
+        assertEquals(message.getField("device_name"), "0");
+        assertEquals(message.getField("content_threat_type"), "general");
+        assertEquals(message.getField("virtual_system_name"), "0");
         assertEquals(0, ((DateTime) message.getField("timestamp")).compareTo(new DateTime("2018-09-19T11:50:35.000-05:00")));
 
         // Test Traffic message results
