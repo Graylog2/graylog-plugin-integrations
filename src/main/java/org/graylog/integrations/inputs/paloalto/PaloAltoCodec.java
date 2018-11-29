@@ -35,7 +35,6 @@ public class PaloAltoCodec implements Codec {
     private final PaloAltoTemplates templates;
 
     @AssistedInject
-
     public PaloAltoCodec(@Assisted Configuration configuration) {
         this.configuration = configuration;
         this.parser = new PaloAltoParser();
@@ -61,16 +60,16 @@ public class PaloAltoCodec implements Codec {
 
         switch (p.panType()) {
             case "THREAT":
-                final PaloAltoTypeParser PARSER_THREAT = new PaloAltoTypeParser(templates.getThreatMessageTemplate(), THREAT);
-                message.addFields(PARSER_THREAT.parseFields(p.fields()));
+                final PaloAltoTypeParser parserThreat = new PaloAltoTypeParser(templates.getThreatMessageTemplate(), THREAT);
+                message.addFields(parserThreat.parseFields(p.fields()));
                 break;
             case "SYSTEM":
-                final PaloAltoTypeParser PARSER_SYSTEM = new PaloAltoTypeParser(templates.getSystemMessageTemplate(), SYSTEM);
-                message.addFields(PARSER_SYSTEM.parseFields(p.fields()));
+                final PaloAltoTypeParser parserSystem = new PaloAltoTypeParser(templates.getSystemMessageTemplate(), SYSTEM);
+                message.addFields(parserSystem.parseFields(p.fields()));
                 break;
             case "TRAFFIC":
-                final PaloAltoTypeParser PARSER_TRAFFIC = new PaloAltoTypeParser(templates.getTrafficMessageTemplate(), TRAFFIC);
-                message.addFields(PARSER_TRAFFIC.parseFields(p.fields()));
+                final PaloAltoTypeParser parserTraffic = new PaloAltoTypeParser(templates.getTrafficMessageTemplate(), TRAFFIC);
+                message.addFields(parserTraffic.parseFields(p.fields()));
                 break;
             default:
                 LOG.debug("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());
