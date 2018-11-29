@@ -128,7 +128,7 @@ public class PaloAltoTemplateDefaults {
                                             "2,serial_number,STRING\n" +
                                             "3,type,STRING\n" +
                                             "4,threat_content_type,STRING\n" +
-                                            "5,future_use1,\n" +
+                                            "5,future_use1,STRING\n" +
                                             "6,generated_time,STRING\n" +
                                             "7,src_ip,STRING\n" +
                                             "8,dest_ip,STRING\n" +
