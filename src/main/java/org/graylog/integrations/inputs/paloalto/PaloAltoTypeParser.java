@@ -26,16 +26,16 @@ public class PaloAltoTypeParser {
         for (PaloAltoFieldTemplate field : messageTemplate.getFields()) {
             String rawValue = null;
             try {
-                rawValue = fields.get(field.getPosition());
+                rawValue = fields.get(field.position());
             } catch (IndexOutOfBoundsException e) {
                 // Skip fields at indexes that do not exist.
-                LOG.trace("A [{}] field does not exist at index [{}]", messageType.toString(), field.getPosition());
+                LOG.trace("A [{}] field does not exist at index [{}]", messageType.toString(), field.position());
                 continue;
             }
 
             Object value;
 
-            switch (field.getFieldType()) {
+            switch (field.fieldType()) {
                 case STRING:
                     // Handle quoted values.
                     if (rawValue.startsWith("\"") && rawValue.endsWith("\"")) {
@@ -59,10 +59,10 @@ public class PaloAltoTypeParser {
                     }
                     break;
                 default:
-                    throw new RuntimeException("Unhandled PAN mapping field type [" + field.getFieldType() + "].");
+                    throw new RuntimeException("Unhandled PAN mapping field type [" + field.fieldType() + "].");
             }
 
-            x.put(field.getField(), value);
+            x.put(field.field(), value);
         }
 
         return x.build();

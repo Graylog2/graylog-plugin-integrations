@@ -1,5 +1,6 @@
 package org.graylog.integrations.inputs.paloalto;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -158,9 +159,9 @@ public class PaloAltoTemplates {
 
                 // All row values must be valid.
                 if (fieldIsValid && positionIsValid && typeIsValid) {
-                    template.getFields().add(new PaloAltoFieldTemplate(fieldString,
-                                                                       Integer.valueOf(positionString),
-                                                                       PaloAltoFieldType.valueOf(typeString)));
+                    template.getFields().add(PaloAltoFieldTemplate.create(fieldString,
+                                                                          Integer.valueOf(positionString),
+                                                                          PaloAltoFieldType.valueOf(typeString)));
                 }
             }
         }
@@ -204,17 +205,18 @@ public class PaloAltoTemplates {
     public String errorMessageSummary(String delimiter) {
 
         ArrayList<String> errors = new ArrayList<>();
-        if (systemMessageTemplate != null) {
+        if (CollectionUtils.isNotEmpty(systemMessageTemplate.getParseErrors())) {
             errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.SYSTEM));
             errors.addAll(systemMessageTemplate.getParseErrors());
         }
-        if (threatMessageTemplate != null) {
+
+        if (CollectionUtils.isNotEmpty(threatMessageTemplate.getParseErrors())) {
             errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
             errors.addAll(threatMessageTemplate.getParseErrors());
         }
 
-        if (trafficMessageTemplate.getParseErrors() != null) {
-            errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.THREAT));
+        if (CollectionUtils.isNotEmpty(trafficMessageTemplate.getParseErrors())) {
+            errors.add(String.format(Locale.ENGLISH, INVALID_TEMPLATE_ERROR, PaloAltoMessageType.TRAFFIC));
             errors.addAll(trafficMessageTemplate.getParseErrors());
         }
         return errors.stream().collect(Collectors.joining(delimiter));

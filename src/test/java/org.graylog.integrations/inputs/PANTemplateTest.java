@@ -23,28 +23,9 @@ public class PANTemplateTest {
                                                                   PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE);
 
         // Verify that the correct number of fields were parsed.
-        assertEquals(13, builder.getSystemMessageTemplate().getFields().size());
-        assertEquals(73, builder.getThreatMessageTemplate().getFields().size());
-        assertEquals(37, builder.getTrafficMessageTemplate().getFields().size());
-
-        // Verify that all values are filled.
-        builder.getSystemMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getPosition());
-            assertNotNull(v.getField());
-            assertNotNull(v.getFieldType());
-        });
-
-        builder.getThreatMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getPosition());
-            assertNotNull(v.getField());
-            assertNotNull(v.getFieldType());
-        });
-
-        builder.getTrafficMessageTemplate().getFields().forEach(v -> {
-            assertNotNull(v.getPosition());
-            assertNotNull(v.getField());
-            assertNotNull(v.getFieldType());
-        });
+        assertEquals(22, builder.getSystemMessageTemplate().getFields().size());
+        assertEquals(74, builder.getThreatMessageTemplate().getFields().size());
+        assertEquals(63, builder.getTrafficMessageTemplate().getFields().size());
     }
 
     @Test
