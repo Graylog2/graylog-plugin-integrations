@@ -103,9 +103,9 @@ public class PaloAltoCodec implements Codec {
     @ConfigClass
     public static class Config implements Codec.Config {
 
-        private static final String SYSTEM_MESSAGE_TEMPLATE_LABEL = "System Message Mappings";
-        private static final String THREAT_MESSAGE_TEMPLATE_LABEL = "Threat Message Mappings";
-        private static final String TRAFFIC_MESSAGE_TEMPLATE_LABEL = "Traffic Message Mappings";
+        private static final String SYSTEM_MESSAGE_LABEL = "System Message Mappings";
+        private static final String THREAT_MESSAGE_LABEL = "Threat Message Mappings";
+        private static final String TRAFFIC_MESSAGE_LABEL = "Traffic Message Mappings";
         private static final String SYSTEM_MESSAGE_DESCRIPTION = "CSV string representing the fields/positions/data types to parse. (See documentation)";
         private static final String THREAT_MESSAGE_DESCRIPTION = "CSV string representing the fields/positions/data types to parse. (See documentation)";
         private static final String TRAFFIC_MESSAGE_DESCRIPTION = "CSV representing the fields/positions/data types to parse. (See documentation)";
@@ -116,21 +116,21 @@ public class PaloAltoCodec implements Codec {
 
             request.addField(new TextField(
                     CK_SYSTEM_TEMPLATE,
-                    SYSTEM_MESSAGE_TEMPLATE_LABEL,
+                    SYSTEM_MESSAGE_LABEL,
                     PaloAltoTemplateDefaults.SYSTEM_TEMPLATE,
                     SYSTEM_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_THREAT_TEMPLATE,
-                    THREAT_MESSAGE_TEMPLATE_LABEL,
+                    THREAT_MESSAGE_LABEL,
                     PaloAltoTemplateDefaults.THREAT_TEMPLATE,
                     THREAT_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_TRAFFIC_TEMPLATE,
-                    TRAFFIC_MESSAGE_TEMPLATE_LABEL,
+                    TRAFFIC_MESSAGE_LABEL,
                     PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE,
                     TRAFFIC_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));

@@ -66,3 +66,29 @@ $ mvn release:perform
 ```
 
 This sets the version numbers, creates a tag and pushes to GitHub. Travis CI will build the release artifacts and upload to GitHub automatically.
+
+
+## Palo Alto Networks Input (TCP)
+
+This input supports the ability for Graylog to receive `SYSTEM`, `THREAT` and `TRAFFIC` logs from both a Palo Alto device
+and the Palo Alto Panorama system.  
+
+
+Both Palo Alto systems will send logs with a typical Syslog header followed by a comma-separated list of fields. The 
+fields order might change between version of [PAN OS](https://www.paloaltonetworks.com/documentation/81/pan-os).
+
+This input ships with a field configuration that is compatible with [PAN OS 8.1](https://www.paloaltonetworks.com/documentation/81/pan-os).
+Other versions can easily be supported by customizing the `SYSTEM`, `THREAT` and `TRAFFIC` 
+
+
+
+
+
+
+
+
+
+
+
+
+
