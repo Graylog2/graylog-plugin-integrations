@@ -103,29 +103,36 @@ public class PaloAltoCodec implements Codec {
     @ConfigClass
     public static class Config implements Codec.Config {
 
+        private static final String SYSTEM_MESSAGE_TEMPLATE_LABEL = "System Message Mappings";
+        private static final String THREAT_MESSAGE_TEMPLATE_LABEL = "Threat Message Mappings";
+        private static final String TRAFFIC_MESSAGE_TEMPLATE_LABEL = "Traffic Message Mappings";
+        private static final String SYSTEM_MESSAGE_DESCRIPTION = "CSV string representing the fields/positions/data types to parse. (See documentation)";
+        private static final String THREAT_MESSAGE_DESCRIPTION = "CSV string representing the fields/positions/data types to parse. (See documentation)";
+        private static final String TRAFFIC_MESSAGE_DESCRIPTION = "CSV representing the fields/positions/data types to parse. (See documentation)";
+
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest request = new ConfigurationRequest();
 
             request.addField(new TextField(
                     CK_SYSTEM_TEMPLATE,
-                    "System Message Template",
+                    SYSTEM_MESSAGE_TEMPLATE_LABEL,
                     PaloAltoTemplateDefaults.SYSTEM_TEMPLATE,
-                    "CSV string representing the fields/positions/data types to parse. (See documentation)",
+                    SYSTEM_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_THREAT_TEMPLATE,
-                    "Threat Message Template",
+                    THREAT_MESSAGE_TEMPLATE_LABEL,
                     PaloAltoTemplateDefaults.THREAT_TEMPLATE,
-                    "CSV string representing the fields/positions/data types to parse. (See documentation)",
+                    THREAT_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             request.addField(new TextField(
                     CK_TRAFFIC_TEMPLATE,
-                    "Traffic Message Template",
+                    TRAFFIC_MESSAGE_TEMPLATE_LABEL,
                     PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE,
-                    "CSV representing the fields/positions/data types to parse. (See documentation)",
+                    TRAFFIC_MESSAGE_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL, TextField.Attribute.TEXTAREA));
 
             return request;
