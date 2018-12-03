@@ -29,10 +29,11 @@ public class PANCodecTest {
     private final static String PANORAMA_THREAT_MESSAGE = "<14>1 2018-09-19T11:50:33-05:00 Panorama--1 - - - - 1,2018/09/19 11:50:33,007255000045716,THREAT,spyware,2049,2018/09/19 11:50:33,10.20.30.40,10.20.30.40,10.20.30.40,10.20.30.40,HTTPS-strict,,,ssl,vsys1,Public,Public,ethernet1/1,ethernet1/1,ALK Logging,2018/09/19 11:50:33,201360,1,21131,443,56756,443,0x80403000,tcp,alert,\"test.com/\",Suspicious TLS Evasion Found(14978),online_test.com,informational,client-to-server,1007133,0xa000000000000000,10.20.30.40-10.20.30.40,10.20.30.40-10.20.30.40,0,,1204440535977427988,,,0,,,,,,,,0,13,16,0,0,,Prod--1,,,,,0,,0,,N/A,spyware,AppThreat-8065-5006,0x0,0,4294967295";
 
     // These messages are directly from a Palo Alto device (non-panorama).
-    private final static String SYSLOG_THREAT_MESSAGE = "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0";
+    private final static String SYSLOG_THREAT_MESSAGE =   "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0";
+    private final static String SYSLOG_THREAT_MESSAGE_2 = "<14>Apr  8 01:47:32 1,2012/04/08 01:47:32,001606001116,THREAT,file,1,2012/04/08 01:47:27,217.31.49.10,192.168.0.2,0.0.0.0,0.0.0.0,rule1,,tng\\crusher,web-browsing,vsys1,untrust,trust,ethernet1/2,ethernet1/1,forwardAll,2012/04/08 01:47:32,1628,1,80,51060,0,0,0x200000,tcp,block-continue,\"imer.up\",Windows Executable (EXE)(52020),any,low,server-to-client,0,0x0,Czech Republic,192.168.0.0-192.168.255.255,0,";
 
     private final static String[] SYSLOG_THREAT_MESSAGES =
-            {"<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+            {"<14>Aug  8 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
             "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
             "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
             "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
@@ -52,6 +53,10 @@ public class PANCodecTest {
             Message message = codec.decode(new RawMessage(threatString.getBytes()));
             assertEquals("THREAT", message.getField("type"));
         }
+
+        PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
+        Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_2.getBytes()));
+        assertEquals("THREAT", message.getField("type"));
     }
 
     @Test
@@ -59,7 +64,7 @@ public class PANCodecTest {
         // Test System message results
         PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
         Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE.getBytes()));
-        assertEquals("THREAT", message.getField("pa_type"));
+        assertEquals("THREAT", message.getField("type"));
     }
 
     @Test
@@ -87,19 +92,19 @@ public class PANCodecTest {
         assertEquals(message.getField("bytes_received"), 140L);
         assertEquals(message.getField("source"), "Panorama--2");
         assertEquals(message.getField("repeat_count"), 1L);
-        assertEquals(message.getField("pa_time_received"), "2018/09/19 11:50:32");
-        assertEquals(message.getField("interface_outbound"), "ethernet1/1");
+        assertEquals(message.getField("receive_time"), "2018/09/19 11:50:32");
+        assertEquals(message.getField("outbound_interface"), "ethernet1/1");
         assertEquals(message.getField("packets"), 6L);
-        assertEquals(message.getField("dest_location"), "10.20.30.40-10.20.30.40");
+        assertEquals(message.getField("destination_location"), "10.20.30.40-10.20.30.40");
         assertEquals(message.getField("src_ip"), "10.20.30.40");
-        assertEquals(message.getField("pa_time_generated"), "2018/09/19 11:50:32");
+        assertEquals(message.getField("generated_time"), "2018/09/19 11:50:32");
         assertEquals(message.getField("protocol"), "tcp");
-        assertEquals(message.getField("content_type"), "end");
+        assertEquals(message.getField("threat_content_type"), "end");
         assertEquals(message.getField("packets_sent"), 4L);
         assertEquals(message.getField("packets_received"), 2L);
         assertEquals(message.getField("action"), "allow");
-        assertEquals(message.getField("pa_virtualsys_name"), "vsys1");
-        assertEquals(message.getField("dest_port"), 443L);
+        assertEquals(message.getField("virtual_system"), "vsys1");
+        assertEquals(message.getField("destination_port"), 443L);
         assertEquals(((DateTime) message.getField("timestamp")).compareTo(new DateTime("2018-09-19T11:50:32.000-05:00")), 0);
         assertEquals(message.getField("rule_name"), "HTTPS-strict");
         assertEquals(message.getField("nat_src_ip"), "10.20.30.40");
@@ -107,20 +112,20 @@ public class PANCodecTest {
         assertEquals(message.getField("serial_number"), "007255000045717");
         assertEquals(message.getField("message"), "1,2018/09/19 11:50:32,007255000045717,TRAFFIC,end,2049,2018/09/19 11:50:32,10.20.30.40,10.20.30.40,10.20.30.40,10.20.30.40,HTTPS-strict,,,incomplete,vsys1,Public,Public,ethernet1/1,ethernet1/1,ALK Logging,2018/09/19 11:50:32,205742,1,64575,443,41304,443,0x400070,tcp,allow,412,272,140,6,2018/09/19 11:50:15,0,any,0,54196730,0x8000000000000000,10.20.30.40-10.20.30.40,10.20.30.40-10.20.30.40,0,4,2,tcp-fin,13,16,0,0,,Prod--2,from-policy,,,0,,0,,N/A,0,0,0,0");
         assertEquals(message.getField("bytes_sent"), 272L);
-        assertEquals(message.getField("dst_zone"), "Public");
-        assertEquals(message.getField("nat_src_port"), 41304L);
-        assertEquals(message.getField("src_port"), 64575L);
-        assertEquals(message.getField("src_location"), "10.20.30.40-10.20.30.40");
+        assertEquals(message.getField("destination_zone"), "Public");
+        assertEquals(message.getField("nat_source_port"), 41304L);
+        assertEquals(message.getField("source_port"), 64575L);
+        assertEquals(message.getField("source_location"), "10.20.30.40-10.20.30.40");
         assertEquals(message.getField("log_action"), "ALK Logging");
-        assertEquals(message.getField("interface_inbound"), "ethernet1/1");
+        assertEquals(message.getField("inbound_interface"), "ethernet1/1");
         assertEquals(message.getField("application"), "incomplete");
-        assertEquals(message.getField("src_zone"), "Public");
+        assertEquals(message.getField("source_zone"), "Public");
         assertEquals(message.getField("bytes"), 412L);
         assertEquals(message.getField("dest_ip"), "10.20.30.40");
-        assertEquals(message.getField("pa_type"), "TRAFFIC");
+        assertEquals(message.getField("type"), "TRAFFIC");
         assertEquals(message.getField("nat_dest_ip"), "10.20.30.40");
         assertEquals(message.getField("category"), "any");
-        assertEquals(message.getField("nat_dest_port"), 443L);
+        assertEquals(message.getField("nat_destination_port"), 443L);
 
         // TODO: Implement and test THREAT parsing.
         // message = codec.decode(new RawMessage(THREAT_MESSAGE.getBytes()));
