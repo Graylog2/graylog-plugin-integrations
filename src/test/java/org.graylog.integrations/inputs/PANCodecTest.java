@@ -7,6 +7,7 @@ import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.journal.RawMessage;
 import org.joda.time.DateTime;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.FileWriter;
@@ -28,42 +29,59 @@ public class PANCodecTest {
     private final static String PANORAMA_SYSTEM_MESSAGE = "<14>1 2018-09-19T11:50:35-05:00 Panorama-1 - - - - 1,2018/09/19 11:50:35,000710000506,SYSTEM,general,0,2018/09/19 11:50:35,,general,,0,0,general,informational,\"Deviating device: Prod--2, Serial: 007255000045717, Object: N/A, Metric: mp-cpu, Value: 34\",1163103,0x0,0,0,0,0,,Panorama-1";
     private final static String PANORAMA_THREAT_MESSAGE = "<14>1 2018-09-19T11:50:33-05:00 Panorama--1 - - - - 1,2018/09/19 11:50:33,007255000045716,THREAT,spyware,2049,2018/09/19 11:50:33,10.20.30.40,10.20.30.40,10.20.30.40,10.20.30.40,HTTPS-strict,,,ssl,vsys1,Public,Public,ethernet1/1,ethernet1/1,ALK Logging,2018/09/19 11:50:33,201360,1,21131,443,56756,443,0x80403000,tcp,alert,\"test.com/\",Suspicious TLS Evasion Found(14978),online_test.com,informational,client-to-server,1007133,0xa000000000000000,10.20.30.40-10.20.30.40,10.20.30.40-10.20.30.40,0,,1204440535977427988,,,0,,,,,,,,0,13,16,0,0,,Prod--1,,,,,0,,0,,N/A,spyware,AppThreat-8065-5006,0x0,0,4294967295";
 
-    // These messages are directly from a Palo Alto device (non-panorama).
-    private final static String SYSLOG_THREAT_MESSAGE =   "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0";
-    private final static String SYSLOG_THREAT_MESSAGE_2 = "<14>Apr  8 01:47:32 1,2012/04/08 01:47:32,001606001116,THREAT,file,1,2012/04/08 01:47:27,217.31.49.10,192.168.0.2,0.0.0.0,0.0.0.0,rule1,,tng\\crusher,web-browsing,vsys1,untrust,trust,ethernet1/2,ethernet1/1,forwardAll,2012/04/08 01:47:32,1628,1,80,51060,0,0,0x200000,tcp,block-continue,\"imer.up\",Windows Executable (EXE)(52020),any,low,server-to-client,0,0x0,Czech Republic,192.168.0.0-192.168.255.255,0,";
+    // Raw PAN device messages.
+    // These help to test the various combinations that we might see.
+    private final static String SYSLOG_THREAT_MESSAGE = "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0";
+    private final static String SYSLOG_THREAT_MESSAGE_DOUBLE_SPACE_DATE = "<14>Aug  2 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0";
+    private final static String SYSLOG_THREAT_MESSAGE_NO_HOST = "<14>Apr  8 01:47:32 1,2012/04/08 01:47:32,001606001116,THREAT,file,1,2012/04/08 01:47:27,217.31.49.10,192.168.0.2,0.0.0.0,0.0.0.0,rule1,,tng\\crusher,web-browsing,vsys1,untrust,trust,ethernet1/2,ethernet1/1,forwardAll,2012/04/08 01:47:32,1628,1,80,51060,0,0,0x200000,tcp,block-continue,\"imer.up\",Windows Executable (EXE)(52020),any,low,server-to-client,0,0x0,Czech Republic,192.168.0.0-192.168.255.255,0,";
+    private final static String SYSLOG_THREAT_MESSAGE_NO_HOST_DOUBLE_SPACE_DATE = "<14>Apr  8 01:47:32 1,2012/04/08 01:47:32,001606001116,THREAT,file,1,2012/04/08 01:47:27,217.31.49.10,192.168.0.2,0.0.0.0,0.0.0.0,rule1,,tng\\crusher,web-browsing,vsys1,untrust,trust,ethernet1/2,ethernet1/1,forwardAll,2012/04/08 01:47:32,1628,1,80,51060,0,0,0x200000,tcp,block-continue,\"imer.up\",Windows Executable (EXE)(52020),any,low,server-to-client,0,0x0,Czech Republic,192.168.0.0-192.168.255.255,0,";
 
-    private final static String[] SYSLOG_THREAT_MESSAGES =
+    private final static String[] MORE_SYSLOG_THREAT_MESSAGES =
             {"<14>Aug  8 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:59,10.0.2.251,10.0.190.117,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,,dart\\dmartin2,ms-ds-smbv2,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:59,667895,2,445,20738,0,0,0x2000,tcp,alert,\"27758 Oliver 801702018 Bus Drawing.doc\",Microsoft Office File with Macros Detected(39154),any,informational,server-to-client,6585310726021616815,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,code-execution,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:59,10.0.2.251,10.0.190.117,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,,dart\\dmartin2,ms-ds-smbv2,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:59,667895,2,445,20738,0,0,0x2000,tcp,alert,\"27758 Oliver 801702018 Bus Drawing.doc\",Microsoft Office File with Macros Detected(39154),any,informational,server-to-client,6585310726021616815,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,code-execution,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:55,10.0.50.176,10.0.190.103,0.0.0.0,0.0.0.0,LAN-to-DMZ-103_L4,dart\\opendns_connector,,msrpc,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:55,259887,2,55836,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC ISystemActivator bind(30846),any,informational,client-to-server,6585310726021616810,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:55,10.0.50.176,10.0.190.103,0.0.0.0,0.0.0.0,LAN-to-DMZ-103_L4,dart\\opendns_connector,,msrpc,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:55,259887,2,55836,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC ISystemActivator bind(30846),any,informational,client-to-server,6585310726021616810,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,wildfire,0,2018/08/22 11:20:55,23.43.62.88,10.4.25.93,23.43.62.88,198.51.223.40,LAN-to-WAN-Known-User,,dart\\dhoftender,web-browsing,vsys1,WAN_L3,LAN_L3,ethernet1/1,ethernet1/6,Panorama,2018/08/22 11:20:55,895841,1,80,50844,80,35947,0x402000,tcp,allow,\"stream.x86.x-none.dat\",Windows Dynamic Link Library (DLL)(52019),benign,informational,server-to-client,6585310726021616809,0x8000000000000000,United States,10.0.0.0-10.255.255.255,0,,0,9e5c336d886db943e0e464efb1e375d2a29d4ba117255bc6aa9a7053b86577c0,wildfire.paloaltonetworks.com,50,,pe,,,,,,11069273395,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,unknown,WildFire-0-0,0x0",
-            "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,wildfire,0,2018/08/22 11:20:55,23.43.62.88,10.4.25.93,23.43.62.88,198.51.223.40,LAN-to-WAN-Known-User,,dart\\dhoftender,web-browsing,vsys1,WAN_L3,LAN_L3,ethernet1/1,ethernet1/6,Panorama,2018/08/22 11:20:55,895841,1,80,50844,80,35947,0x402000,tcp,allow,\"stream.x86.x-none.dat\",Windows Dynamic Link Library (DLL)(52019),benign,informational,server-to-client,6585310726021616809,0x8000000000000000,United States,10.0.0.0-10.255.255.255,0,,0,9e5c336d886db943e0e464efb1e375d2a29d4ba117255bc6aa9a7053b86577c0,wildfire.paloaltonetworks.com,50,,pe,,,,,,11069273395,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,unknown,WildFire-0-0,0x0"};
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.190.116,10.0.2.225,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,dart\\abluitt,dart\\kmendoza_admin,msrpc,vsys1,DMZ-2_L3,LAN_L3,ethernet1/3,ethernet1/6,Panorama,2018/08/22 11:21:02,398906,1,26475,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC Endpoint Mapper Detection(30845),any,informational,client-to-server,6585310726021616818,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+                    "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+                    "<13>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:21:02,10.0.58.109,13.66.22.101,198.51.223.40,13.66.22.101,LAN-to-WAN-90,dart\\rulak,,ftp,vsys1,LAN_L3,WAN_L3,ethernet1/6,ethernet1/1,Panorama,2018/08/22 11:21:02,3829077,1,52670,21,35329,21,0x402000,tcp,alert,\"Web.config\",FTP REST(36419),any,low,client-to-server,6585310726021616817,0x8000000000000000,10.0.0.0-10.255.255.255,United States,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:59,10.0.2.251,10.0.190.117,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,,dart\\dmartin2,ms-ds-smbv2,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:59,667895,2,445,20738,0,0,0x2000,tcp,alert,\"27758 Oliver 801702018 Bus Drawing.doc\",Microsoft Office File with Macros Detected(39154),any,informational,server-to-client,6585310726021616815,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,code-execution,AppThreat-8054-4933,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:59,10.0.2.251,10.0.190.117,0.0.0.0,0.0.0.0,DMZ-to-LAN_hq-direct-access,,dart\\dmartin2,ms-ds-smbv2,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:59,667895,2,445,20738,0,0,0x2000,tcp,alert,\"27758 Oliver 801702018 Bus Drawing.doc\",Microsoft Office File with Macros Detected(39154),any,informational,server-to-client,6585310726021616815,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,code-execution,AppThreat-8054-4933,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:55,10.0.50.176,10.0.190.103,0.0.0.0,0.0.0.0,LAN-to-DMZ-103_L4,dart\\opendns_connector,,msrpc,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:55,259887,2,55836,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC ISystemActivator bind(30846),any,informational,client-to-server,6585310726021616810,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,vulnerability,0,2018/08/22 11:20:55,10.0.50.176,10.0.190.103,0.0.0.0,0.0.0.0,LAN-to-DMZ-103_L4,dart\\opendns_connector,,msrpc,vsys1,LAN_L3,DMZ-2_L3,ethernet1/6,ethernet1/3,Panorama,2018/08/22 11:20:55,259887,2,55836,135,0,0,0x2000,tcp,alert,\"\",Microsoft RPC ISystemActivator bind(30846),any,informational,client-to-server,6585310726021616810,0x8000000000000000,10.0.0.0-10.255.255.255,10.0.0.0-10.255.255.255,0,,0,,,0,,,,,,,,0,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,info-leak,AppThreat-8054-4933,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,wildfire,0,2018/08/22 11:20:55,23.43.62.88,10.4.25.93,23.43.62.88,198.51.223.40,LAN-to-WAN-Known-User,,dart\\dhoftender,web-browsing,vsys1,WAN_L3,LAN_L3,ethernet1/1,ethernet1/6,Panorama,2018/08/22 11:20:55,895841,1,80,50844,80,35947,0x402000,tcp,allow,\"stream.x86.x-none.dat\",Windows Dynamic Link Library (DLL)(52019),benign,informational,server-to-client,6585310726021616809,0x8000000000000000,United States,10.0.0.0-10.255.255.255,0,,0,9e5c336d886db943e0e464efb1e375d2a29d4ba117255bc6aa9a7053b86577c0,wildfire.paloaltonetworks.com,50,,pe,,,,,,11069273395,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,unknown,WildFire-0-0,0x0",
+                    "<14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22 11:21:04,013201001141,THREAT,wildfire,0,2018/08/22 11:20:55,23.43.62.88,10.4.25.93,23.43.62.88,198.51.223.40,LAN-to-WAN-Known-User,,dart\\dhoftender,web-browsing,vsys1,WAN_L3,LAN_L3,ethernet1/1,ethernet1/6,Panorama,2018/08/22 11:20:55,895841,1,80,50844,80,35947,0x402000,tcp,allow,\"stream.x86.x-none.dat\",Windows Dynamic Link Library (DLL)(52019),benign,informational,server-to-client,6585310726021616809,0x8000000000000000,United States,10.0.0.0-10.255.255.255,0,,0,9e5c336d886db943e0e464efb1e375d2a29d4ba117255bc6aa9a7053b86577c0,wildfire.paloaltonetworks.com,50,,pe,,,,,,11069273395,346,12,0,0,,pa5220-hq-mdf-1,,,,,0,,0,,N/A,unknown,WildFire-0-0,0x0"};
 
     @Test
-    public void threatTest() {
+    public void testAllSyslogFormats() {
 
-        // Test a list of threat messages.
-        for (String threatString : SYSLOG_THREAT_MESSAGES) {
+        PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
+
+        Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE.getBytes()));
+        assertEquals("THREAT", message.getField("type"));
+
+        message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_DOUBLE_SPACE_DATE.getBytes()));
+        assertEquals("THREAT", message.getField("type"));
+
+        message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_NO_HOST.getBytes()));
+        assertEquals("THREAT", message.getField("type"));
+
+        message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_NO_HOST_DOUBLE_SPACE_DATE.getBytes()));
+        assertEquals("THREAT", message.getField("type"));
+    }
+
+    @Test
+    public void testMoreSyslogFormats() {
+
+        // Test an extra list of messages.
+        for (String threatString : MORE_SYSLOG_THREAT_MESSAGES) {
             PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
             Message message = codec.decode(new RawMessage(threatString.getBytes()));
             assertEquals("THREAT", message.getField("type"));
         }
-
-        PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
-        Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_2.getBytes()));
-        assertEquals("THREAT", message.getField("type"));
     }
 
     @Test
     public void syslogValuesTest() {
         // Test System message results
         PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
-        Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE.getBytes()));
+        Message message = codec.decode(new RawMessage(SYSLOG_THREAT_MESSAGE_NO_HOST_DOUBLE_SPACE_DATE.getBytes()));
         assertEquals("THREAT", message.getField("type"));
     }
 
@@ -132,15 +150,16 @@ public class PANCodecTest {
         // assertEquals("THREAT", message.getField("pa_type"));
     }
 
+    // TODO: Implement this test.
+    @Ignore
     @Test
     public void invalidPositionTest() {
 
         // Verify that fields that have invalid positions (do not exist in the logs) are ignored.
-        PaloAltoCodec codec = new PaloAltoCodec(null);
+        PaloAltoCodec codec = new PaloAltoCodec(Configuration.EMPTY_CONFIGURATION);
 
-        // TODO: Inject custom configuration.
         Message message = codec.decode(new RawMessage(PANORAMA_SYSTEM_MESSAGE.getBytes()));
-        assertEquals("SYSTEM", message.getField("pa_type"));
+        assertEquals("SYSTEM", message.getField("type"));
     }
 
     /**
