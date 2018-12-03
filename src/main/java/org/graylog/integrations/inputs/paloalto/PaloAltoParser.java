@@ -10,9 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,15 +24,17 @@ public class PaloAltoParser {
     private static final Pattern PANORAMA_SYSLOG_PARSER = Pattern.compile("<\\d+>[0-9] (.+?) (.+?)\\s[-]\\s[-]\\s[-]\\s[-]\\s(\\d,.*)");
 
     // Syslog with host name.
+    // <14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22...
     private static final Pattern STANDARD_SYSLOG_PARSER = Pattern.compile("<\\d+>([A-Z][a-z][a-z]\\s{1,2}\\d{1,2}\\s\\d{1,2}[:]\\d{1,2}[:]\\d{2})\\s(.+?)\\s(\\d,.*)");
 
     // Sometimes, the host name is missing (no idea why), so same pattern except with no host.
-    private static final Pattern STANDARD_SYSLOG_PARSER_NO_HOST = Pattern.compile("<\\d+>([A-Z][a-z][a-z]\\s{1,2}\\d{1,2}\\s\\d{1,2}[:]\\d{1,2}[:]\\d{2})\\s(\\d,.*)");
+    // <14>Apr  8 01:47:32 1,2012/04/08...
+    private static final Pattern STANDARD_SYSLOG_NO_HOST_PARSER = Pattern.compile("<\\d+>([A-Z][a-z][a-z]\\s{1,2}\\d{1,2}\\s\\d{1,2}[:]\\d{1,2}[:]\\d{2})\\s(\\d,.*)");
 
     private static final String SINGLE_SPACE = " ";
-    private static final String DOUBLE_SPACE = "\\s{2}";
 
-    // TODO TESTS
+    // Used to remove extra space between month and day, so date parsing works. eg. Apr  8 01:47:32 -> Apr 8 01:47:32
+    private static final String DOUBLE_SPACE = "\\s{2}";
 
     @Nullable
     public PaloAltoMessageBase parse(@NotNull String raw) {
@@ -85,10 +84,10 @@ public class PaloAltoParser {
                     LOG.error("Cannot parse malformed Syslog message: {}", raw);
                     return null;
                 }
-            } else if (STANDARD_SYSLOG_PARSER_NO_HOST.matcher(raw).matches()) {
+            } else if (STANDARD_SYSLOG_NO_HOST_PARSER.matcher(raw).matches()) {
                 LOG.trace("Message is in structured syslog (with no hostname) format [{}]", raw);
 
-                final Matcher matcher = STANDARD_SYSLOG_PARSER_NO_HOST.matcher(raw);
+                final Matcher matcher = STANDARD_SYSLOG_NO_HOST_PARSER.matcher(raw);
                 if (matcher.matches()) {
                     // Attempt to parse date in format: Aug 22 11:21:04
                     // TODO This needs work.
