@@ -11,7 +11,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * Test parsing of raw PAN message templates.
  */
-public class PANTemplateTest {
+public class PaloAltoTemplateTest {
 
     public static final String DEFAULT_HEADER = "field,position,type";
 

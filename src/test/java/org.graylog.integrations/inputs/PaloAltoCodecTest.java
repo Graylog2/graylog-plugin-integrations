@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
-public class PANCodecTest {
+public class PaloAltoCodecTest {
 
     // These messages are in Panorama format. Panorama is Palo Alto's log management system.
     // Messages forwarded from Panorama will have the  - - - -  delimiter.
