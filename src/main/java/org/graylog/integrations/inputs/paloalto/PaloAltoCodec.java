@@ -49,12 +49,12 @@ public class PaloAltoCodec implements Codec {
     @Override
     public Message decode(@Nonnull RawMessage rawMessage) {
         String s = new String(rawMessage.getPayload());
-        LOG.debug("Received raw message: {}", s);
+        LOG.trace("Received raw message: {}", s);
 
         PaloAltoMessageBase p = parser.parse(s);
 
+        // Return when error occurs parsing syslog header.
         if (p == null) {
-            LOG.warn("Could not parse PAN message.");
             return null;
         }
 
@@ -74,7 +74,7 @@ public class PaloAltoCodec implements Codec {
                 message.addFields(parserTraffic.parseFields(p.fields()));
                 break;
             default:
-                LOG.debug("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());
+                LOG.error("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());
         }
 
         LOG.trace("Successfully processed [{}] message with [{}] fields.", p.panType(), message.getFieldCount());
@@ -143,8 +143,6 @@ public class PaloAltoCodec implements Codec {
         @Override
         public void overrideDefaultValues(@Nonnull ConfigurationRequest cr) {
         }
-
-
     }
 
     @Nullable
@@ -152,5 +150,4 @@ public class PaloAltoCodec implements Codec {
     public CodecAggregator getAggregator() {
         return null;
     }
-
 }
