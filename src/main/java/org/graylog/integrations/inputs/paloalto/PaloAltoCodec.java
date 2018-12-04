@@ -77,6 +77,8 @@ public class PaloAltoCodec implements Codec {
                 LOG.debug("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());
         }
 
+        LOG.trace("Successfully processed [{}] message with [{}] fields.", p.panType(), message.getFieldCount());
+
         return message;
     }
 
