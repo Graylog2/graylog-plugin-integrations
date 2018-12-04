@@ -89,7 +89,7 @@ public class PaloAltoTemplateDefaults {
                                            "39,destination_location,STRING\n" +
                                            "40,future_use3,STRING\n" +
                                            "41,content_type,STRING\n" +
-                                           "42,pcap_id,LONG\n" +
+                                           "42,pcap_id,STRING\n" +
                                            "43,file_digest,STRING\n" +
                                            "44,cloud,STRING\n" +
                                            "45,url_index,LONG\n" +
