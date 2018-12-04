@@ -83,7 +83,7 @@ public class PaloAltoTemplateDefaults {
                                            "33,category,STRING\n" +
                                            "34,severity,STRING\n" +
                                            "35,direction,STRING\n" +
-                                           "36,sequence_number,LONG\n" +
+                                           "36,sequence_number,STRING\n" +
                                            "37,action_flags,STRING\n" +
                                            "38,source_location,STRING\n" +
                                            "39,destination_location,STRING\n" +

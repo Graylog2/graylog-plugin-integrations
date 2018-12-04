@@ -98,9 +98,10 @@ public class PaloAltoTemplates {
             return template;
         }
 
-        // Read header indexes.
+//        LOG.trace("Parsing CSV [{}]", csvString );
         LOG.trace("Parsing CSV header.");
 
+        // Read header indexes.
         // We've already verified that the first element exists.
         CSVRecord headerRow = list.get(0);
 
@@ -131,8 +132,6 @@ public class PaloAltoTemplates {
             if (rowIndex == 1) {
                 continue;
             }
-
-            LOG.trace(row.toString());
 
             // Verify that the row contains as many values as the header row.
             if (headerRow.size() < 2) {

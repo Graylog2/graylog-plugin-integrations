@@ -33,7 +33,7 @@ public class PaloAltoTypeParser {
                 continue;
             }
 
-            Object value;
+            Object value = null;
 
             switch (field.fieldType()) {
                 case STRING:
@@ -46,7 +46,12 @@ public class PaloAltoTypeParser {
                     break;
                 case LONG:
                     if (!Strings.isNullOrEmpty(rawValue)) {
-                        value = Long.valueOf(rawValue);
+                        try {
+                            value = Long.valueOf(rawValue);
+                        } catch (NumberFormatException e) {
+                            LOG.error("[{}] is an invalid LONG value for the [{}] [{}] field", rawValue, messageType, field.field() );
+                            continue;
+                        }
                     } else {
                         value = 0L;
                     }
