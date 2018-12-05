@@ -1,10 +1,10 @@
 {
-  "name": "Integrations",
+  "name": "graylog-plugin-enterprise-integrations",
   "version": "1.0.0-SNAPSHOT",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
+    "url": "git@github.com:Graylog2/graylog-plugin-enterprise-integrations.git"
   },
   "scripts": {
     "build": "webpack --bail"
@@ -13,9 +13,9 @@
     "graylog"
   ],
   "author": "Graylog, Inc. <hello@graylog.com>",
-  "license": "MIT",
   "dependencies": {
   },
+  "private": true,
   "devDependencies": {
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   }
