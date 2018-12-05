@@ -1,68 +1,56 @@
-# Integrations Plugin for Graylog
+# Enterprise Integrations Plugin for Graylog
 
-[![Build Status](https://travis-ci.org/Graylog2/graylog-plugin-estreamer.svg?branch=master)](https://travis-ci.org/Graylog2/graylog-plugin-estreamer)
+**This repository is private** 
 
-**This repository should be kept private for now**
+Integrations in this repository should only be distributed to Enterprise customers. 
 
-This plugin is the central collection point for integrations-related content. Integrations will be implemented in this
-plugin to allow release of them independent of the Graylog Server project. The initial idea is to implement all 
-integrations content in a single plugin repository, which should keep things simple and allow for easier reworking 
-and maintenance of existing integrations.
+WARNING: There is currently no `enterprise` license check built into the 
+plugin, so anyone who obtains it can run it. Please make sure to not publicly distribute the plugin package.  
 
-This Readme should be updated to describe new plugins as they are implemented.
-
-While this repository is in the early stages, all commits will be made to master. Once real implementation of 
-integrations begins, commits should be made to new branches with a PR.
-
-**Required Graylog version:** 2.0 and later
+**Required Graylog version:** 2.5 and later
 
 Installation
 ------------
 
-[Download the plugin](https://github.com/Graylog2/graylog-plugin-estreamer/releases)
-and place the `.jar` file in your Graylog plugin directory. The plugin directory
-is the `plugins/` folder relative from your `graylog-server` directory by default
-and can be configured in your `graylog.conf` file.
+See the [Releases](https://github.com/Graylog2/graylog-plugin-enterprise-integrations/releases) page to access the latest versions 
+of the plugin. A typical plugin JAR and Debian/RPM packages are available for download. Public URLs are also included 
+for each for remote installs. Please make sure to not publicly distribute the download links. 
 
-Restart `graylog-server` and you are done.
+The installation process is the same as any other plugin: Place the `.jar` file in your Graylog plugin directory, or use
+the operating system packages with the public URLs indicated on the [Releases](https://github.com/Graylog2/graylog-plugin-enterprise-integrations/releases) page.
+
+Releases
+--------
+
+This plugin will be released at least quarterly (and also timed with `graylog-server` when possible). Each build of the 
+plugin will target a specific (and usually current) `graylog-server` version. 
+
+Versioning
+----------
+
+The Enterprise Integrations plugin version includes both the `graylog-server` version and the `enterprise-integrations`
+release number in the following format:
+
+`<graylog-server-version>+<integrations-release-number>`
+
+eg. `2.5.0+0.jar` for the 2.5.0 server release and the initial Enterprise Integrations release. The 
+Enterprise Integrations release number is an `integer` that starts at `0` and increments until the `graylog-server` 
+major version is incremented. 
+
+The plugin `.jar` file follows the same format: 
+
+`graylog-plugin-enterprise-integrations-<graylog-server-version>+<integrations-release-number>.jar`  
+
+eg. `graylog-plugin-enterprise-integrations-2.5.0+0.jar` for the 2.5.0 `graylog-server` version and the initial plugin release.
+  
+**Why a + symbol between the server and integrations versions?** Due to the versioning 
+library that we're using in Java, the version number needs to follow a designated format: `major`.`minor`.`patch`+`build-metadata`. 
+The `build-metadata` field is the only place where we could stuff another version.
+ 
+The format of this version scheme is perhaps not ideal, but it should allow us to easily identify which version of the 
+plugin works with which `graylog-server` version. 
 
 Development
 -----------
 
-You can improve your development experience for the web interface part of your plugin
-dramatically by making use of hot reloading. To do this, do the following:
-
-* `git clone https://github.com/Graylog2/graylog2-server.git`
-* `cd graylog2-server/graylog2-web-interface`
-* `ln -s $YOURPLUGIN plugin/`
-* `npm install && npm start`
-
-Usage
------
-
-__TODO: Add more details as individual integrations are implemented.__
-
-
-Getting started
----------------
-
-This project is using Maven 3 and requires Java 8 or higher.
-
-* Clone this repository.
-* Run `mvn package` to build a JAR file.
-* Optional: Run `mvn jdeb:jdeb` and `mvn rpm:rpm` to create a DEB and RPM package respectively.
-* Copy generated JAR file in target directory to your Graylog plugin directory.
-* Restart the Graylog.
-
-Plugin Release
---------------
-
-We are using the maven release plugin:
-
-```
-$ mvn release:prepare
-[...]
-$ mvn release:perform
-```
-
-This sets the version numbers, creates a tag and pushes to GitHub. Travis CI will build the release artifacts and upload to GitHub automatically.
+This is an enterprise-only closed source project. Do not distribute the source code.
