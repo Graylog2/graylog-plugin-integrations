@@ -12,7 +12,7 @@
 
     <groupId>org.graylog.integrations</groupId>
     <artifactId>graylog-plugin-enterprise-integrations</artifactId>
-    <version>3.0.0.0-alpha.5-SNAPSHOT</version>
+    <version>3.0.0-alpha.5-SNAPSHOT+0</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
