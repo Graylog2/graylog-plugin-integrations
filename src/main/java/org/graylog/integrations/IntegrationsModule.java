@@ -1,9 +1,15 @@
 package org.graylog.integrations;
 
+import com.google.inject.TypeLiteral;
+import com.google.inject.multibindings.Multibinder;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
+import org.graylog.integrations.notifications.ScriptAlarmCallback;
+import org.graylog2.alarmcallbacks.EmailAlarmCallback;
+import org.graylog2.alarmcallbacks.HTTPAlarmCallback;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
+import org.graylog2.plugin.alarms.callbacks.AlarmCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,5 +55,13 @@ public class IntegrationsModule extends PluginModule {
         LOG.debug("Registering message input: {}", PaloAltoTCPInput.NAME);
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
+
+        // Script Alert Notification Callback
+        Multibinder<AlarmCallback> alarmCallbackBinder = Multibinder.newSetBinder(binder(), AlarmCallback.class);
+        alarmCallbackBinder.addBinding().to(ScriptAlarmCallback.class);
+
+        TypeLiteral<Class<? extends AlarmCallback>> type = new TypeLiteral<Class<? extends AlarmCallback>>(){};
+        Multibinder<Class<? extends AlarmCallback>> alarmCallbackClassBinder = Multibinder.newSetBinder(binder(), type);
+        alarmCallbackClassBinder.addBinding().toInstance(ScriptAlarmCallback.class);
     }
 }
