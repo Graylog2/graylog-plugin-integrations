@@ -1,4 +1,4 @@
-package org.graylog.integrations.inputs.paloalto;
+package org.graylog.integrations.notifications.scriptalert;
 
 import org.graylog.integrations.notifications.ShellExecutor;
 import org.junit.Assert;
