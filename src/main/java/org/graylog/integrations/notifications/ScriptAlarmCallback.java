@@ -55,6 +55,7 @@ public class ScriptAlarmCallback implements AlarmCallback {
 
     public static final String CK_USER_RECEIVERS = "user_receivers";
     public static final String CK_EMAIL_RECEIVERS = "email_receivers";
+    public static final String SCRIPT_PATH = "script_path";
 
     private final AlertSender alertSender;
     private final NotificationService notificationService;
@@ -138,11 +139,11 @@ public class ScriptAlarmCallback implements AlarmCallback {
 
         // TODO: Add some fields.
         ConfigurationRequest configurationRequest = new ConfigurationRequest();
-        configurationRequest.addField(new TextField("sender",
-                                                    "Sender",
-                                                    "graylog@example.org",
-                                                    "The sender of sent out mail alerts",
-                                                    ConfigurationField.Optional.OPTIONAL));
+        configurationRequest.addField(new TextField(SCRIPT_PATH,
+                                                    "Script Path",
+                                                    "/usr/local/bin",
+                                                    "The full path to the script.",
+                                                    ConfigurationField.Optional.NOT_OPTIONAL));
 
         return configurationRequest;
     }
