@@ -1,10 +1,10 @@
 {
-  "name": "graylog-plugin-enterprise-integrations",
+  "name": "graylog-plugin-integrations",
   "version": "1.0.0-SNAPSHOT",
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:Graylog2/graylog-plugin-enterprise-integrations.git"
+    "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
   },
   "scripts": {
     "build": "webpack --bail"
