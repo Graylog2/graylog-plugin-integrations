@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>org.graylog.integrations</groupId>
-    <artifactId>graylog-plugin-enterprise-integrations</artifactId>
+    <artifactId>graylog-plugin-integrations</artifactId>
     <version>3.0.0-alpha.6-SNAPSHOT+0</version>
     <packaging>jar</packaging>
 
@@ -20,9 +20,9 @@
     <url>https://www.graylog.org</url>
 
     <scm>
-        <connection>scm:git:git@github.com:Graylog2/graylog-plugin-enterprise-integrations.git</connection>
-        <developerConnection>scm:git:git@github.com:Graylog2/graylog-plugin-enterprise-integrations.git</developerConnection>
-        <url>https://github.com/Graylog2/graylog-plugin-enterprise-integrations</url>
+        <connection>scm:git:git@github.com:Graylog2/graylog-plugin-integrations.git</connection>
+        <developerConnection>scm:git:git@github.com:Graylog2/graylog-plugin-integrations.git</developerConnection>
+        <url>https://github.com/Graylog2/graylog-plugin-integrations</url>
         <tag>HEAD</tag>
     </scm>
 
