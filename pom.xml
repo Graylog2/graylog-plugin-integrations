@@ -10,7 +10,6 @@
         <relativePath>../graylog2-server/graylog-plugin-parent/graylog-plugin-web-parent</relativePath>
     </parent>
 
-    <groupId>org.graylog.integrations</groupId>
     <artifactId>graylog-plugin-integrations</artifactId>
     <version>3.0.0-beta.4</version>
     <packaging>jar</packaging>
