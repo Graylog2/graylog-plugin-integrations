@@ -23,28 +23,3 @@ Releases
 
 This plugin will be released approximately once per quarter (and timed with `graylog-server` when possible). Each build of the 
 plugin will target a specific (and usually current) `graylog-server` version. 
-
-Versioning
-----------
-
-The Integrations plugin version includes both the `graylog-server` version and the `integrations`
-release number in the following format:
-
-`<graylog-server-version>+<integrations-release-number>`
-
-eg. `2.5.0+0.jar` for the 2.5.0 server release and the initial Integrations release. The 
-Integrations release number is an `integer` that starts at `0` and increments until the `graylog-server` 
-major version is incremented. 
-
-The plugin `.jar` file follows the same format: 
-
-`graylog-plugin-integrations-<graylog-server-version>+<integrations-release-number>.jar`  
-
-eg. `graylog-plugin-integrations-2.5.0+0.jar` for the 2.5.0 `graylog-server` version and the initial plugin release.
-  
-**Why a + symbol between the server and integrations versions?** Due to the versioning 
-library that we're using in Java, the version number needs to follow a designated format: `major`.`minor`.`patch`+`build-metadata`. 
-The `build-metadata` field is the only place where we could stuff another version.
- 
-The format of this version scheme is perhaps not ideal, but it should allow us to easily identify which version of the 
-plugin works with which `graylog-server` version. 
