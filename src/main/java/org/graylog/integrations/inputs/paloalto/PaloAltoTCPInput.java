@@ -18,6 +18,7 @@ package org.graylog.integrations.inputs.paloalto;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
+import org.graylog2.inputs.transports.SyslogTcpTransport;
 import org.graylog2.inputs.transports.TcpTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
@@ -99,7 +100,7 @@ public class PaloAltoTCPInput extends MessageInput {
     public static class Config extends MessageInput.Config {
 
         @Inject
-        public Config(TcpTransport.Factory transport, PaloAltoCodec.Factory codec) {
+        public Config(SyslogTcpTransport.Factory transport, PaloAltoCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
         }
     }
