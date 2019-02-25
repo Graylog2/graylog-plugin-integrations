@@ -122,7 +122,7 @@ public class PaloAltoParser {
             }
         }
         
-        LOG.error("Cannot parse malformed PAN message [unrecognized format]: {}", raw);
+        LOG.error("Cannot parse malformed PAN message [unrecognized message format]: {}", raw);
         return null;
     }
 }
