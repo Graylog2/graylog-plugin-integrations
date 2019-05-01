@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations;
 
+import org.graylog.integrations.aws.resources.AWSCloudWatchResource;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog2.plugin.PluginConfigBean;
@@ -65,5 +66,7 @@ public class IntegrationsModule extends PluginModule {
         LOG.debug("Registering message input: {}", PaloAltoTCPInput.NAME);
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
+
+        addRestResource(AWSCloudWatchResource.class);
     }
 }

@@ -4,23 +4,25 @@ import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponses;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.AWSCloudWatchService;
 import org.graylog.integrations.aws.AWSException;
-import org.graylog2.audit.AuditEventTypes;
-import org.graylog2.audit.jersey.AuditEvent;
-import org.graylog2.shared.rest.resources.RestResource;
+import org.graylog.integrations.aws.AWSService;
+import org.graylog.integrations.aws.resources.responses.AWSCloudWatchResponse;
+import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
+import org.graylog2.plugin.rest.PluginRestResource;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Web endpoints for the AWS CloudWatch.
@@ -41,13 +43,25 @@ import javax.ws.rs.core.Response;
 @Path("/system/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AWSCloudWatchResource extends RestResource {
+public class AWSCloudWatchResource implements PluginRestResource {
 
     private AWSCloudWatchService awsCloudWatchService;
+    private AWSService awsService;
 
     @Inject
-    public AWSCloudWatchResource(AWSCloudWatchService awsCloudWatchService) {
+    public AWSCloudWatchResource(AWSCloudWatchService awsCloudWatchService,
+                                 AWSService awsService) {
         this.awsCloudWatchService = awsCloudWatchService;
+        this.awsService = awsService;
+    }
+
+    @GET
+    @Timed
+    @Path("/regions")
+    @ApiOperation(value = "Get all available AWS regions")
+    public List<AWSRegionResponse> list() {
+
+        return awsService.getAvailableRegions();
     }
 
     @PUT
@@ -57,11 +71,6 @@ public class AWSCloudWatchResource extends RestResource {
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = AWSCloudWatchResponse.class
     )
-    @ApiResponses(value = {
-            // TODO: TBD
-            // @ApiResponse(code = 400, message = "Some AWS error?")
-    })
-    @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_UPDATE)
     public Response update(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                    AWSHeathCheckRequest heathCheckRequest) throws AWSException {
 
