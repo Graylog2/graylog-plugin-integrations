@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws.resources.responses;
 
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
