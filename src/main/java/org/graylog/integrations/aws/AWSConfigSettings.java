@@ -5,12 +5,25 @@ import software.amazon.awssdk.regions.Region;
 
 public class AWSConfigSettings {
 
-    // CONFIGURATION
-    // Set credentials
-    AwsBasicCredentials basicCredentials = AwsBasicCredentials.create(UserCredentials.accessKey, UserCredentials.secretKey);
+    public static AwsBasicCredentials createUser(){
 
-    // Set Region
-    Region region = Region.US_EAST_1;
+        AwsBasicCredentials basicCredentials =
+                AwsBasicCredentials.create(UserCredentials.getAccessKey(), UserCredentials.getSecretKey());
+
+        return basicCredentials;
+    }
+
+
+    public static void setRegion(){
+
+        int regionsAvailable = Region.regions().size();
+        for (int i=0; i<regionsAvailable; i++){
+            // List available regions
+            String region = Region.regions().get(i).toString();
+        }
+        // Hardcode region to us-east-1
+        Region.regions().get(15);
+    }
 
 
 }
