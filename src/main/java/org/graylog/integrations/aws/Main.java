@@ -3,77 +3,55 @@ package org.graylog.integrations.aws;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogStreamsRequest;
+import software.amazon.awssdk.services.cloudwatchlogs.model.FilterLogEventsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
 
-import static org.graylog.integrations.aws.CloudWatchService.createCloudWatchLogClient;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
 
-        String logGroupName;
-        String logStreamName;
         int logLimit;
-        int logGroupListSize;
-        int logStreamListSize;
+        boolean fromStart = true;
 
         // CONFIGURATION
-        // Set credentials
-        AwsBasicCredentials basicCredentials =
-                AwsBasicCredentials.create(UserCredentials.accessKey, UserCredentials.secretKey);
-        // Set Region
-        Region region = Region.US_EAST_1;
-
+        AwsBasicCredentials awsUserCredentials = AWSConfigSettings.createUser();
+        AWSConfigSettings.setRegion();
 
         // CLOUDWATCH
-        CloudWatchLogsClient cloudWatchLogsClient = createCloudWatchLogClient(basicCredentials, region);
-
-        // Number of logGroupNames that exist
-        logGroupListSize = cloudWatchLogsClient.describeLogGroups().logGroups().size();
+        CloudWatchLogsClient cloudWatchLogsClient = CloudWatchService.createCloudWatchLogClient(awsUserCredentials, Region.US_EAST_1);
 
         //List all the logGroupName(s) available
-        for (int i = 0; i < logGroupListSize; i++) {
-            logGroupName = cloudWatchLogsClient.describeLogGroups().logGroups().get(i).logGroupName();
-            DescribeLogStreamsRequest logStreamsRequest = DescribeLogStreamsRequest.builder()
-                    .logGroupName(logGroupName)
-                    .build();
-            CloudWatchService.printGroupNames(cloudWatchLogsClient);
+        ArrayList<String> logGroupNameList = CloudWatchService.getGroupNameList(cloudWatchLogsClient);
+        System.out.println("Log Group Names Available:" + logGroupNameList);
+        String logGroupName = "/var/log/messages";
 
-            // Number of logStreamNames that exist
-            logStreamListSize = cloudWatchLogsClient.describeLogStreams(((logStreamsRequest))).logStreams().size();
-            System.out.print("Log Group Name: " + logGroupName + "\n");
+        //List all the logStreamName(s) available
+        ArrayList<String> logStreamNameList = CloudWatchService.getStreamNameList(cloudWatchLogsClient, logGroupName);
+        System.out.println("Stream Names from " + logGroupName + ": " + logStreamNameList);
 
-            // List all logStream(s) available
-            for (int j = 0; j < logStreamListSize; j++) {
-                logStreamName = cloudWatchLogsClient.describeLogStreams(((logStreamsRequest))).logStreams().get(j).logStreamName();
-                System.out.print("     Log Stream Name: " + logStreamName + "\n");
-            }
-        }
+        // Pick a random logStreamName
+        Random rand = new Random();
+        int rng = rand.ints(0, (logStreamNameList.size() -1)).findFirst().getAsInt();
 
-        // Hardcoded variables for test purposes
-        logGroupName = "graylogs";
-        logStreamName = "graylog";
-
+        // PULL LOGS
         // Create GetLogEventRequest object
-        GetLogEventsRequest getLogEventsRequest = GetLogEventsRequest.builder()
-                .logGroupName(logGroupName)
-                .logStreamName(logStreamName) // logStreamName is required
-                //.startTime()
-                //.endTime()
-                //.nextToken()
-                //.limit(logLimit)
-                .startFromHead(true)
-                .build();
+        GetLogEventsRequest getLogEventsRequest = CloudWatchService.createGetLogEventRequest("/var/log/messages", "i-09c80ef1838f091e1",fromStart);
 
         logLimit = cloudWatchLogsClient.getLogEvents(getLogEventsRequest).events().size();
 
         // Designate getLogEventsRequest from the START
-        cloudWatchLogsClient.getLogEvents(getLogEventsRequest);
-        System.out.print("\n Pull log from the START, and print to console.\n\n");
+        //cloudWatchLogsClient.getLogEvents(getLogEventsRequest);
+        FilterLogEventsRequest filterLogEventsRequest = FilterLogEventsRequest.builder().logGroupName(logGroupName).build();
+        cloudWatchLogsClient.filterLogEvents(FilterLogEventsRequest.builder().build());
+
 
         //Iterate through all the events
         for (int i = 0; i < logLimit; i++) {
-            System.out.print(" [" + i + "] " + cloudWatchLogsClient.getLogEvents(getLogEventsRequest).events().get(i) + "\n");
+            if (i== logLimit-1) {
+                System.out.println("[" + i + "] " + cloudWatchLogsClient.getLogEvents(getLogEventsRequest).events().get(i));
+            }
         }
 
         // Set next token
