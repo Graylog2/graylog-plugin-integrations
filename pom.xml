@@ -53,6 +53,12 @@
             <artifactId>aws-sdk-java</artifactId>
             <version>${aws-java-sdk-2.version}</version>
         </dependency>
+        <!-- Include the latest version of the Apache Http Client -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.6</version>
+        </dependency>
         <!-- Explicitly include commons-codec in this POM, since the AWS SDK v2 internally remaps
              commons-codec to another internal package. This makes the commons-codec from
              graylog-project-parent unavailable.
