@@ -6,9 +6,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.AWSCloudWatchService;
+import org.graylog.integrations.aws.AWSKinesisService;
 import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.resources.requests.AWSHeathCheckRequest;
 import org.graylog.integrations.aws.resources.responses.AWSCloudWatchResponse;
+import org.graylog.integrations.aws.resources.responses.AWSKinesisStreamsResponse;
 import org.graylog.integrations.aws.resources.responses.AWSLogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
 import org.graylog2.plugin.rest.PluginRestResource;
@@ -45,16 +47,18 @@ import java.util.List;
 @Path("/system/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AWSCloudWatchResource implements PluginRestResource {
+public class AWSResource implements PluginRestResource {
 
-    private AWSCloudWatchService awsCloudWatchService;
+    private AWSCloudWatchService cloudWatchService;
+    private AWSKinesisService kinesisService;
     private AWSService awsService;
 
     @Inject
-    public AWSCloudWatchResource(AWSService awsService,
-                                 AWSCloudWatchService awsCloudWatchService) {
+    public AWSResource(AWSService awsService,
+                       AWSCloudWatchService cloudWatchService, AWSKinesisService kinesisService) {
         this.awsService = awsService;
-        this.awsCloudWatchService = awsCloudWatchService;
+        this.cloudWatchService = cloudWatchService;
+        this.kinesisService = kinesisService;
     }
 
     @GET
@@ -66,15 +70,26 @@ public class AWSCloudWatchResource implements PluginRestResource {
         return awsService.getAvailableRegions();
     }
 
-    // TODO: Pass in credentials some how.
+    // TODO: Pass in credentials somehow.
     @GET
     @Timed
     @Path("/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS log groups for the specified region")
     public AWSLogGroupsResponse logGroups(@ApiParam(name = "regionName", required = true)
-                                              @PathParam("regionName") String regionName) {
+                                          @PathParam("regionName") String regionName) {
 
-        return awsCloudWatchService.getLogGroups(regionName);
+        return cloudWatchService.getLogGroups(regionName);
+    }
+
+    // TODO: Pass in credentials somehow.
+    @GET
+    @Timed
+    @Path("/kinesisStreams/{regionName}")
+    @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
+    public AWSKinesisStreamsResponse kinesisStreams(@ApiParam(name = "regionName", required = true)
+                                                    @PathParam("regionName") String regionName) {
+
+        return kinesisService.getStreams(regionName);
     }
 
     @PUT
@@ -89,7 +104,7 @@ public class AWSCloudWatchResource implements PluginRestResource {
         // TODO: Check permissions?
 
         // Call into service layer to handle business logic.
-        AWSCloudWatchResponse response = awsCloudWatchService.healthCheck(heathCheckRequest);
+        AWSCloudWatchResponse response = cloudWatchService.healthCheck(heathCheckRequest);
 
         return Response.accepted().entity(response).build();
     }

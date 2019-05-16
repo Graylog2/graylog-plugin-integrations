@@ -27,7 +27,7 @@ public class AWSCloudWatchService {
     }
 
     /**
-     * @return A list of all available regions if the user is authorized.
+     * @return A list of all available log groups if the user is authorized.
      * @param regionName
      */
     public AWSLogGroupsResponse getLogGroups(String regionName) {
