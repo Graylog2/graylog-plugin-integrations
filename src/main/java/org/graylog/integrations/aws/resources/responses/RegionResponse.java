@@ -8,7 +8,7 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSRegionResponse {
+public abstract class RegionResponse {
 
     // eu-west-2
     @JsonProperty
@@ -23,9 +23,9 @@ public abstract class AWSRegionResponse {
     @JsonProperty
     public abstract String displayValue();
 
-    public static AWSRegionResponse create(@JsonProperty("regionId") String regionId,
-                                           @JsonProperty("regionDescription") String regionDescription,
-                                           @JsonProperty("displayValue") String displayValue ) {
-        return new AutoValue_AWSRegionResponse(regionId, regionDescription, displayValue);
+    public static RegionResponse create(@JsonProperty("regionId") String regionId,
+                                        @JsonProperty("regionDescription") String regionDescription,
+                                        @JsonProperty("displayValue") String displayValue ) {
+        return new AutoValue_RegionResponse(regionId, regionDescription, displayValue);
     }
 }

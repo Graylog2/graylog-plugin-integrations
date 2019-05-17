@@ -1,6 +1,6 @@
 package org.graylog.integrations.aws;
 
-import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
@@ -19,7 +19,7 @@ public class AWSService {
     /**
      * @return A list of all available regions.
      */
-    public List<AWSRegionResponse> getAvailableRegions() {
+    public List<RegionResponse> getAvailableRegions() {
 
         return Region.regions().stream()
                      .filter(r -> !r.isGlobalRegion()) // Ignore the global region. We don't need it.
@@ -27,7 +27,7 @@ public class AWSService {
                          // Build a single AWSRegionResponse with id, description, and displayValue.
                          RegionMetadata regionMetadata = r.metadata();
                          String displayValue = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
-                         return AWSRegionResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
+                         return RegionResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
                      }).collect(Collectors.toList());
     }
 }

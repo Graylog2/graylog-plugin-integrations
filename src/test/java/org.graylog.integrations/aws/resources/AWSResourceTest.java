@@ -1,11 +1,11 @@
 package org.graylog.integrations.aws.resources;
 
-import org.graylog.integrations.aws.AWSCloudWatchService;
-import org.graylog.integrations.aws.AWSKinesisService;
+import org.graylog.integrations.aws.CloudWatchService;
+import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.AWSService;
-import org.graylog.integrations.aws.resources.responses.AWSKinesisStreamsResponse;
-import org.graylog.integrations.aws.resources.responses.AWSLogGroupsResponse;
-import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
+import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,28 +21,28 @@ public class AWSResourceTest {
 
     @Before
     public void setUp() {
-        cloudWatchResource = new AWSResource(new AWSService(), new AWSCloudWatchService(), new AWSKinesisService());
+        cloudWatchResource = new AWSResource(new AWSService(), new CloudWatchService(), new KinesisService());
     }
 
     @Test
     public void testGetRegions() {
 
-        List<AWSRegionResponse> regions = cloudWatchResource.regions();
+        List<RegionResponse> regions = cloudWatchResource.regions();
         assertFalse(regions.isEmpty());
     }
 
     @Test
     public void testGetLogGroups() {
 
-        AWSLogGroupsResponse awsLogGroupsResponse = cloudWatchResource.logGroups("test-region");
-        assertEquals(2, awsLogGroupsResponse.logGroupNames().size());
-        assertTrue(awsLogGroupsResponse.success());
+        LogGroupsResponse logGroupsResponse = cloudWatchResource.logGroups("test-region");
+        assertEquals(2, logGroupsResponse.logGroupNames().size());
+        assertTrue(logGroupsResponse.success());
     }
 
     @Test
     public void testGetStreams() {
 
-        AWSKinesisStreamsResponse awsLogGroupsResponse = cloudWatchResource.kinesisStreams("test-region");
+        KinesisStreamsResponse awsLogGroupsResponse = cloudWatchResource.kinesisStreams("test-region");
         assertEquals(2, awsLogGroupsResponse.streamNames().size());
         assertTrue(awsLogGroupsResponse.success());
     }

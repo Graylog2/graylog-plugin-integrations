@@ -5,14 +5,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.integrations.aws.AWSCloudWatchService;
-import org.graylog.integrations.aws.AWSKinesisService;
+import org.graylog.integrations.aws.CloudWatchService;
+import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.AWSService;
-import org.graylog.integrations.aws.resources.requests.AWSHeathCheckRequest;
-import org.graylog.integrations.aws.resources.responses.AWSCloudWatchResponse;
-import org.graylog.integrations.aws.resources.responses.AWSKinesisStreamsResponse;
-import org.graylog.integrations.aws.resources.responses.AWSLogGroupsResponse;
-import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
+import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
+import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog2.plugin.rest.PluginRestResource;
 
 import javax.inject.Inject;
@@ -49,13 +49,13 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AWSResource implements PluginRestResource {
 
-    private AWSCloudWatchService cloudWatchService;
-    private AWSKinesisService kinesisService;
+    private CloudWatchService cloudWatchService;
+    private KinesisService kinesisService;
     private AWSService awsService;
 
     @Inject
     public AWSResource(AWSService awsService,
-                       AWSCloudWatchService cloudWatchService, AWSKinesisService kinesisService) {
+                       CloudWatchService cloudWatchService, KinesisService kinesisService) {
         this.awsService = awsService;
         this.cloudWatchService = cloudWatchService;
         this.kinesisService = kinesisService;
@@ -65,7 +65,7 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/regions")
     @ApiOperation(value = "Get all available AWS regions")
-    public List<AWSRegionResponse> regions() {
+    public List<RegionResponse> regions() {
 
         return awsService.getAvailableRegions();
     }
@@ -75,7 +75,7 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS log groups for the specified region")
-    public AWSLogGroupsResponse logGroups(@ApiParam(name = "regionName", required = true)
+    public LogGroupsResponse logGroups(@ApiParam(name = "regionName", required = true)
                                           @PathParam("regionName") String regionName) {
 
         return cloudWatchService.getLogGroups(regionName);
@@ -86,7 +86,7 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
-    public AWSKinesisStreamsResponse kinesisStreams(@ApiParam(name = "regionName", required = true)
+    public KinesisStreamsResponse kinesisStreams(@ApiParam(name = "regionName", required = true)
                                                     @PathParam("regionName") String regionName) {
 
         return kinesisService.getStreams(regionName);
@@ -94,17 +94,17 @@ public class AWSResource implements PluginRestResource {
 
     @PUT
     @Timed
-    @Path("/healthCheck")
+    @Path("/kinesisHealthCheck")
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
-            response = AWSCloudWatchResponse.class
+            response = KinesisHealthCheckResponse.class
     )
-    public Response update(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSHeathCheckRequest heathCheckRequest) {
+    public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) {
 
         // TODO: Check permissions?
 
         // Call into service layer to handle business logic.
-        AWSCloudWatchResponse response = cloudWatchService.healthCheck(heathCheckRequest);
+        KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
 
         return Response.accepted().entity(response).build();
     }

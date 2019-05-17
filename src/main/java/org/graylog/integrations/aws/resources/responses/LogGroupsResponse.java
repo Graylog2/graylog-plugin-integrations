@@ -10,11 +10,11 @@ import java.util.List;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSKinesisStreamsResponse {
+public abstract class LogGroupsResponse {
 
     // A String list of log group names.
     @JsonProperty
-    public abstract List<String> streamNames();
+    public abstract List<String> logGroupNames();
 
     // Indicates if the request for log groups was successful or not.
     @JsonProperty
@@ -24,9 +24,9 @@ public abstract class AWSKinesisStreamsResponse {
     @JsonProperty
     public abstract String message();
 
-    public static AWSKinesisStreamsResponse create(@JsonProperty("streamNames") List<String> streamNames,
-                                                   @JsonProperty("success") boolean success,
-                                                   @JsonProperty("message") String message) {
-        return new AutoValue_AWSKinesisStreamsResponse(streamNames, success, message);
+    public static LogGroupsResponse create(@JsonProperty("logGroupName") List<String> logGroupNames,
+                                           @JsonProperty("success") boolean success,
+                                           @JsonProperty("message") String message) {
+        return new AutoValue_LogGroupsResponse(logGroupNames, success, message);
     }
 }

@@ -10,11 +10,11 @@ import java.util.List;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSLogGroupsResponse {
+public abstract class KinesisStreamsResponse {
 
     // A String list of log group names.
     @JsonProperty
-    public abstract List<String> logGroupNames();
+    public abstract List<String> streamNames();
 
     // Indicates if the request for log groups was successful or not.
     @JsonProperty
@@ -24,9 +24,9 @@ public abstract class AWSLogGroupsResponse {
     @JsonProperty
     public abstract String message();
 
-    public static AWSLogGroupsResponse create(@JsonProperty("logGroupName") List<String> logGroupNames,
-                                             @JsonProperty("success") boolean success,
-                                             @JsonProperty("message") String message) {
-        return new AutoValue_AWSLogGroupsResponse(logGroupNames, success, message);
+    public static KinesisStreamsResponse create(@JsonProperty("streamNames") List<String> streamNames,
+                                                @JsonProperty("success") boolean success,
+                                                @JsonProperty("message") String message) {
+        return new AutoValue_KinesisStreamsResponse(streamNames, success, message);
     }
 }

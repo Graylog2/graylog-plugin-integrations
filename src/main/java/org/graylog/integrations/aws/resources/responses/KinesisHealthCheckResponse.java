@@ -9,7 +9,7 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSCloudWatchResponse {
+public abstract class KinesisHealthCheckResponse {
 
     @JsonProperty
     public abstract boolean success();
@@ -22,9 +22,9 @@ public abstract class AWSCloudWatchResponse {
     @JsonProperty
     public abstract String message();
 
-    public static AWSCloudWatchResponse create(@JsonProperty("success") boolean success,
-                                               @JsonProperty("logType") String logType,
-                                               @JsonProperty("message") String message) {
-        return new AutoValue_AWSCloudWatchResponse(success, logType, message);
+    public static KinesisHealthCheckResponse create(@JsonProperty("success") boolean success,
+                                                    @JsonProperty("logType") String logType,
+                                                    @JsonProperty("message") String message) {
+        return new AutoValue_KinesisHealthCheckResponse(success, logType, message);
     }
 }

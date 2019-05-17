@@ -1,6 +1,6 @@
 package org.graylog.integrations.aws;
 
-import org.graylog.integrations.aws.resources.responses.AWSRegionResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.junit.Test;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public class AWSServiceTest {
     public void regionTest() {
 
         AWSService awsService = new AWSService();
-        List<AWSRegionResponse> availableRegions = awsService.getAvailableRegions();
+        List<RegionResponse> availableRegions = awsService.getAvailableRegions();
 
         // Check format of random region.
         assertTrue(availableRegions.stream().anyMatch(r -> r.regionId().equals("eu-west-2")));
