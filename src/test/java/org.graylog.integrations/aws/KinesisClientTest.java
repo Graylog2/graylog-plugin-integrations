@@ -8,19 +8,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class KinesisServiceTest {
+public class KinesisClientTest {
 
-    private KinesisService kinesisService;
+    private KinesisClient kinesisClient;
 
     @Before
     public void setUp() {
-        kinesisService = new KinesisService();
+        kinesisClient = new KinesisClient();
     }
 
     @Test
     public void testGetStreams() {
 
-        KinesisStreamsResponse streamsResponse = kinesisService.getKinesisStreams("test-region", null, null);
+        KinesisStreamsResponse streamsResponse = kinesisClient.getKinesisStreams("test-region", null, null);
 
         assertTrue(streamsResponse.success());
         assertEquals(2, streamsResponse.streamNames().size());

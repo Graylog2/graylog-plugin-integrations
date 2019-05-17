@@ -1,8 +1,7 @@
 package org.graylog.integrations.aws.resources;
 
-import org.glassfish.jersey.internal.RuntimeDelegateImpl;
 import org.graylog.integrations.aws.CloudWatchService;
-import org.graylog.integrations.aws.KinesisService;
+import org.graylog.integrations.aws.KinesisClient;
 import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -23,7 +22,7 @@ public class AWSResourceTest {
 
     @Before
     public void setUp() {
-        cloudWatchResource = new AWSResource(new AWSService(), new CloudWatchService(), new KinesisService());
+        cloudWatchResource = new AWSResource(new AWSService(), new CloudWatchService(), new KinesisClient());
     }
 
     @Test

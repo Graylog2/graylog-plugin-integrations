@@ -11,7 +11,6 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.acm.model.LimitExceededException;
-import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.KinesisException;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
@@ -22,9 +21,9 @@ import java.util.Locale;
 /**
  * Service for all AWS CloudWatch business logic.
  */
-public class KinesisService {
+public class KinesisClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KinesisService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KinesisClient.class);
 
     /**
      * @param regionName The AWS region.
@@ -33,14 +32,14 @@ public class KinesisService {
     public KinesisStreamsResponse getKinesisStreams(String regionName, String accessKeyId, String secretAccessKey) {
 
         // Only explicitly provide credentials if key/secret are provided.
-        final KinesisClientBuilder clientBuilder = KinesisClient.builder();
+        final KinesisClientBuilder clientBuilder = software.amazon.awssdk.services.kinesis.KinesisClient.builder();
         if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
             StaticCredentialsProvider credentialsProvider =
                     StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
             clientBuilder.credentialsProvider(credentialsProvider);
         }
 
-        final KinesisClient kinesisClient = clientBuilder.build();
+        final software.amazon.awssdk.services.kinesis.KinesisClient kinesisClient = clientBuilder.build();
         final ListStreamsResponse response;
         try {
             response = kinesisClient.listStreams(ListStreamsRequest.builder().build());

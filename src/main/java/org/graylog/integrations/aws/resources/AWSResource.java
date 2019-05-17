@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.CloudWatchService;
-import org.graylog.integrations.aws.KinesisService;
+import org.graylog.integrations.aws.KinesisClient;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
@@ -50,15 +50,15 @@ import java.util.List;
 public class AWSResource implements PluginRestResource {
 
     private CloudWatchService cloudWatchService;
-    private KinesisService kinesisService;
+    private KinesisClient kinesisClient;
     private AWSService awsService;
 
     @Inject
     public AWSResource(AWSService awsService,
-                       CloudWatchService cloudWatchService, KinesisService kinesisService) {
+                       CloudWatchService cloudWatchService, KinesisClient kinesisClient) {
         this.awsService = awsService;
         this.cloudWatchService = cloudWatchService;
-        this.kinesisService = kinesisService;
+        this.kinesisClient = kinesisClient;
     }
 
     @GET
@@ -89,7 +89,7 @@ public class AWSResource implements PluginRestResource {
                                    @PathParam("regionName") String regionName) {
 
         // TODO: Pass in credentials somehow.
-        final KinesisStreamsResponse response = kinesisService.getKinesisStreams(regionName, null, null);
+        final KinesisStreamsResponse response = kinesisClient.getKinesisStreams(regionName, null, null);
 
         // Return appropriate error HTTP status
         if (!response.success()) {
@@ -112,7 +112,7 @@ public class AWSResource implements PluginRestResource {
         // TODO: Check permissions?
 
         // Call into service layer to handle business logic.
-        KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
+        KinesisHealthCheckResponse response = kinesisClient.healthCheck(heathCheckRequest);
 
         return Response.accepted().entity(response).build();
     }
