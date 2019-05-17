@@ -5,9 +5,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisService;
-import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
@@ -76,20 +76,28 @@ public class AWSResource implements PluginRestResource {
     @Path("/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS log groups for the specified region")
     public LogGroupsResponse logGroups(@ApiParam(name = "regionName", required = true)
-                                          @PathParam("regionName") String regionName) {
+                                       @PathParam("regionName") String regionName) {
 
         return cloudWatchService.getLogGroups(regionName);
     }
 
-    // TODO: Pass in credentials somehow.
     @GET
     @Timed
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
-    public KinesisStreamsResponse kinesisStreams(@ApiParam(name = "regionName", required = true)
-                                                    @PathParam("regionName") String regionName) {
+    public Response kinesisStreams(@ApiParam(name = "regionName", required = true)
+                                   @PathParam("regionName") String regionName) {
 
-        return kinesisService.getStreams(regionName);
+        // TODO: Pass in credentials somehow.
+        final KinesisStreamsResponse response = kinesisService.getKinesisStreams(regionName, null, null);
+
+        // Return appropriate error HTTP status
+        if (!response.success()) {
+            return Response.serverError().entity(response).build();
+        }
+
+        // Else return success.
+        return Response.ok().entity(response).build();
     }
 
     @PUT

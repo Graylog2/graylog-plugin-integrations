@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @JsonAutoDetect
@@ -14,6 +15,7 @@ public abstract class KinesisStreamsResponse {
 
     // A String list of log group names.
     @JsonProperty
+    @Nullable
     public abstract List<String> streamNames();
 
     // Indicates if the request for log groups was successful or not.
