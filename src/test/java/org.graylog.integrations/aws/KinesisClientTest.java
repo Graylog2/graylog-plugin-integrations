@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,7 +20,7 @@ public class KinesisClientTest {
     }
 
     @Test
-    public void testGetStreams() {
+    public void testGetStreams() throws ExecutionException {
 
         List<String> kinesisStreams = kinesisClient.getKinesisStreams("test-region", null, null);
         assertEquals(2, kinesisStreams.size());

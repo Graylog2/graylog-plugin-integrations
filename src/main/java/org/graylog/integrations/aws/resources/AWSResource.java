@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Web endpoints for the AWS CloudWatch.
@@ -85,7 +86,7 @@ public class AWSResource implements PluginRestResource {
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> kinesisStreams(@ApiParam(name = "regionName", required = true)
-                                   @PathParam("regionName") String regionName) {
+                                   @PathParam("regionName") String regionName) throws ExecutionException {
 
         return kinesisClient.getKinesisStreams(regionName, null, null);
     }
