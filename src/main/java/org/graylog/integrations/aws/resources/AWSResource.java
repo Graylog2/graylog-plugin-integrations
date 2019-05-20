@@ -10,7 +10,6 @@ import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisClient;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.resources.responses.KinesisStreamsResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog2.plugin.rest.PluginRestResource;
@@ -43,7 +42,7 @@ import java.util.List;
  */
 
 @RequiresAuthentication
-@Api(value = "System/AWS Cloud Watch", description = "AWS CloudWatch integrations")
+@Api(value = "System/AWS", description = "AWS integrations")
 @Path("/system/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -85,19 +84,10 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
-    public Response kinesisStreams(@ApiParam(name = "regionName", required = true)
+    public List<String> kinesisStreams(@ApiParam(name = "regionName", required = true)
                                    @PathParam("regionName") String regionName) {
 
-        // TODO: Pass in credentials somehow.
-        final KinesisStreamsResponse response = kinesisClient.getKinesisStreams(regionName, null, null);
-
-        // Return appropriate error HTTP status
-        if (!response.success()) {
-            return Response.serverError().entity(response).build();
-        }
-
-        // Else return success.
-        return Response.ok().entity(response).build();
+        return kinesisClient.getKinesisStreams(regionName, null, null);
     }
 
     @PUT
