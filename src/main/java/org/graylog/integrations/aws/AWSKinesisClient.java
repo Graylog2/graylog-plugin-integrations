@@ -51,6 +51,8 @@ public class AWSKinesisClient {
         LOG.debug("List Kinesis streams for region [{}]", regionName);
 
         // Only explicitly provide credentials if key/secret are provided.
+        // TODO: Remove this IF check and always provided the string credentials. This will prevent the AWS SDK
+        //  from reading credentials from environment variables, which we definitely do not want to do.
         if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
             StaticCredentialsProvider credentialsProvider =
                     StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
@@ -93,8 +95,7 @@ public class AWSKinesisClient {
             }
         }
 
-        // TODO: Change to debug.
-        LOG.info("Kinesis streams queried [{}]", streamNames);
+        LOG.debug("Kinesis streams queried: [{}]", streamNames);
 
         return streamNames;
     }

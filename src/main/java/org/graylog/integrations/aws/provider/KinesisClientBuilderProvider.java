@@ -28,7 +28,6 @@ import javax.inject.Singleton;
 // TODO: Do we really need a provider for a simple builder?
 @Singleton
 public class KinesisClientBuilderProvider implements Provider<KinesisClientBuilder> {
-    private static final Logger LOG = LoggerFactory.getLogger(KinesisClientBuilderProvider.class);
 
     @Inject
     public KinesisClientBuilderProvider() {
