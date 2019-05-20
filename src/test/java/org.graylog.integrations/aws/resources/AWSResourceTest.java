@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -39,9 +40,9 @@ public class AWSResourceTest {
     }
 
     @Test
-    public void testGetStreams() {
+    public void testGetStreams() throws ExecutionException {
 
-        List<String> kinesisStreams = cloudWatchResource.kinesisStreams("test-region");
+        List<String> kinesisStreams = cloudWatchResource.kinesisStreams("eu-west-1");
         assertEquals(2, kinesisStreams.size());
     }
 }
