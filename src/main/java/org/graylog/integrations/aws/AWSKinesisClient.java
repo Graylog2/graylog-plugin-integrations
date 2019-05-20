@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
@@ -24,9 +25,9 @@ import java.util.concurrent.ExecutionException;
 /**
  * Service for all AWS CloudWatch business logic.
  */
-public class KinesisClient {
+public class AWSKinesisClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KinesisClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AWSKinesisClient.class);
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 100;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
 
@@ -37,6 +38,8 @@ public class KinesisClient {
      */
     public List<String> getKinesisStreams(String regionName, String accessKeyId, String secretAccessKey) throws ExecutionException {
 
+        LOG.debug("List Kinesis streams for region [{}]", regionName);
+
         // Only explicitly provide credentials if key/secret are provided.
         final KinesisClientBuilder clientBuilder = software.amazon.awssdk.services.kinesis.KinesisClient.builder();
         if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
@@ -45,10 +48,10 @@ public class KinesisClient {
             clientBuilder.credentialsProvider(credentialsProvider);
         }
 
-        final software.amazon.awssdk.services.kinesis.KinesisClient kinesisClient =
+        final KinesisClient kinesisClient =
                 clientBuilder.region(Region.of(regionName)).build();
 
-        // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names.
+        // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
         // if AWS API always returns true for hasMoreStreamNames.
         final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
@@ -69,7 +72,7 @@ public class KinesisClient {
                 final ListStreamsResponse moreSteamsResponse = kinesisClient.listStreams(moreStreamsRequest);
                 streamNames.addAll(moreSteamsResponse.streamNames());
 
-                // If more streams, then this will execute once more.
+                // If more streams, then this will execute again.
                 return moreSteamsResponse.hasMoreStreams();
             });
             // Only catch the RetryException, which occurs after too many attempts. When this happens, we still want
@@ -78,6 +81,9 @@ public class KinesisClient {
         } catch (RetryException e) {
             LOG.error("Failed to get all stream names after {} attempts. Proceeding to return currently obtained streams.", KINESIS_LIST_STREAMS_MAX_ATTEMPTS);
         }
+
+        // TODO: Change to debug.
+        LOG.info("Kinesis streams queried [{}]", streamNames);
 
         return streamNames;
     }

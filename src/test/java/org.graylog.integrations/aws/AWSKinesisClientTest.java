@@ -10,13 +10,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class KinesisClientTest {
+public class AWSKinesisClientTest {
 
-    private KinesisClient kinesisClient;
+    private AWSKinesisClient kinesisClient;
 
     @Before
     public void setUp() {
-        kinesisClient = new KinesisClient();
+        kinesisClient = new AWSKinesisClient();
     }
 
     @Test

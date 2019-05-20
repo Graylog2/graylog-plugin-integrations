@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.CloudWatchService;
-import org.graylog.integrations.aws.KinesisClient;
+import org.graylog.integrations.aws.AWSKinesisClient;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -50,12 +50,12 @@ import java.util.concurrent.ExecutionException;
 public class AWSResource implements PluginRestResource {
 
     private CloudWatchService cloudWatchService;
-    private KinesisClient kinesisClient;
+    private AWSKinesisClient kinesisClient;
     private AWSService awsService;
 
     @Inject
     public AWSResource(AWSService awsService,
-                       CloudWatchService cloudWatchService, KinesisClient kinesisClient) {
+                       CloudWatchService cloudWatchService, AWSKinesisClient kinesisClient) {
         this.awsService = awsService;
         this.cloudWatchService = cloudWatchService;
         this.kinesisClient = kinesisClient;
