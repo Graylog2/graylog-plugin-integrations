@@ -7,6 +7,8 @@ import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.junit.Before;
 import org.junit.Test;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -21,7 +23,7 @@ public class AWSResourceTest {
 
     @Before
     public void setUp() {
-        cloudWatchResource = new AWSResource(new AWSService(), new CloudWatchService(), new AWSKinesisClient());
+        cloudWatchResource = new AWSResource(new AWSService(), new CloudWatchService(), new AWSKinesisClient(KinesisClient.builder()));
     }
 
     @Test
