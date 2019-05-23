@@ -103,7 +103,7 @@ public class AWSResource implements PluginRestResource {
         // TODO: Check permissions?
 
         // Call into service layer to handle business logic.
-        KinesisHealthCheckResponse response = kinesisClient.healthCheck(heathCheckRequest);
+        KinesisHealthCheckResponse response = awsService.healthCheck(heathCheckRequest);
 
         return Response.accepted().entity(response).build();
     }

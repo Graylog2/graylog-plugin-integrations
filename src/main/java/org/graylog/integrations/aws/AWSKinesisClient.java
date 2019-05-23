@@ -99,17 +99,4 @@ public class AWSKinesisClient {
 
         return streamNames;
     }
-
-    public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) {
-
-        LOG.info("Attempting to perform AWS Kinesis health check [{}]", request);
-
-        // TODO: Attempt to pull a few logs from Kinesis.
-
-        // TODO: Run regex to identify log type.
-
-        // TODO: How do we pass the detected log type into the setup save method later?
-
-        return KinesisHealthCheckResponse.create(true, "CloudWatch", "Success");
-    }
 }
