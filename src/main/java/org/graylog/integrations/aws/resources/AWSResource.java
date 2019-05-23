@@ -5,9 +5,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.graylog.integrations.aws.AWSKinesisClient;
 import org.graylog.integrations.aws.AWSService;
 import org.graylog.integrations.aws.CloudWatchService;
-import org.graylog.integrations.aws.AWSKinesisClient;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -86,7 +86,7 @@ public class AWSResource implements PluginRestResource {
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> kinesisStreams(@ApiParam(name = "regionName", required = true)
-                                   @PathParam("regionName") String regionName) throws ExecutionException {
+                                       @PathParam("regionName") String regionName) throws ExecutionException {
 
         return kinesisClient.getKinesisStreams(regionName, null, null);
     }

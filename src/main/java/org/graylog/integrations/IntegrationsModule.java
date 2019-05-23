@@ -16,16 +16,14 @@
  */
 package org.graylog.integrations;
 
-import okhttp3.OkHttpClient;
-import org.graylog.integrations.aws.provider.KinesisClientBuilderProvider;
 import org.graylog.integrations.aws.resources.AWSResource;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
 import java.util.Collections;
@@ -35,7 +33,8 @@ import java.util.Set;
  * Extend the PluginModule abstract class here to add you plugin to the system.
  */
 public class IntegrationsModule extends PluginModule {
-        private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
     /**
      * Returns all configuration beans required by this plugin.
      *
@@ -72,6 +71,6 @@ public class IntegrationsModule extends PluginModule {
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         addRestResource(AWSResource.class);
-        bind(KinesisClientBuilder.class).toProvider(KinesisClientBuilderProvider.class).asEagerSingleton();
+        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
     }
 }
