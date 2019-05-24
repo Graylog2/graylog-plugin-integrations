@@ -5,8 +5,6 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import org.apache.commons.lang3.StringUtils;
-import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -24,18 +22,20 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Service for all AWS CloudWatch business logic.
+ * This layer directly interacts with the AWS SDK/API.
+ *
+ * All AWS SDK code should be kept within this class.
  */
-public class AWSKinesisClient {
+public class AWSClient {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AWSKinesisClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AWSClient.class);
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 100;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
 
     final KinesisClientBuilder kinesisClientBuilder;
 
     @Inject
-    public AWSKinesisClient(KinesisClientBuilder kinesisClientBuilder) {
+    public AWSClient(KinesisClientBuilder kinesisClientBuilder) {
 
         this.kinesisClientBuilder = kinesisClientBuilder;
     }

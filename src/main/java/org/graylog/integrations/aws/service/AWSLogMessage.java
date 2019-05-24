@@ -1,4 +1,4 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.service;
 
 public class AWSLogMessage {
 

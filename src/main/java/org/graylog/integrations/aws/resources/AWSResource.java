@@ -5,12 +5,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.integrations.aws.AWSKinesisClient;
-import org.graylog.integrations.aws.AWSService;
-import org.graylog.integrations.aws.CloudWatchService;
+import org.graylog.integrations.aws.AWSClient;
+import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog2.plugin.rest.PluginRestResource;
 
@@ -29,17 +27,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Web endpoints for the AWS CloudWatch.
- *
- * Methods needed:
- *
- * 1) Authentication checker. Attempts to obtain a few CloudWatch logs. Returns any configuration
- * or authentication errors.
- *
- * 2) Log format detection response. May be able to combine this with the authentication checker. Should indicate what
- * type of log messages were detected.
- *
- * 3) Save configuration: Saves an AWS configuration.
+ * Web endpoints for the AWS integration.
  */
 
 @RequiresAuthentication
@@ -49,16 +37,11 @@ import java.util.concurrent.ExecutionException;
 @Consumes(MediaType.APPLICATION_JSON)
 public class AWSResource implements PluginRestResource {
 
-    private CloudWatchService cloudWatchService;
-    private AWSKinesisClient kinesisClient;
     private AWSService awsService;
 
     @Inject
-    public AWSResource(AWSService awsService,
-                       CloudWatchService cloudWatchService, AWSKinesisClient kinesisClient) {
+    public AWSResource(AWSService awsService, AWSClient kinesisClient) {
         this.awsService = awsService;
-        this.cloudWatchService = cloudWatchService;
-        this.kinesisClient = kinesisClient;
     }
 
     @GET
@@ -75,10 +58,11 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS log groups for the specified region")
-    public LogGroupsResponse logGroups(@ApiParam(name = "regionName", required = true)
+    public List<String> logGroups(@ApiParam(name = "regionName", required = true)
                                        @PathParam("regionName") String regionName) {
 
-        return cloudWatchService.getLogGroups(regionName);
+        // TODO: Implement the contents of the cloudWatchService.getLogGroups method.
+        return awsService.getLogGroups(regionName, null, null);
     }
 
     @GET
@@ -88,7 +72,7 @@ public class AWSResource implements PluginRestResource {
     public List<String> kinesisStreams(@ApiParam(name = "regionName", required = true)
                                        @PathParam("regionName") String regionName) throws ExecutionException {
 
-        return kinesisClient.getKinesisStreams(regionName, null, null);
+        return awsService.getKinesisStreams(regionName, null, null);
     }
 
     @PUT

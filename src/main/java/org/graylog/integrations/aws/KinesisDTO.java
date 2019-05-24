@@ -17,6 +17,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * TODO: This class has not been used yet. We will delete it if we decide to store data directly in the input.
+ * I am currently feeling like we will likely store data in the input.
+ */
 @AutoValue
 @JsonDeserialize(builder = KinesisDTO.Builder.class)
 @WithBeanGetter

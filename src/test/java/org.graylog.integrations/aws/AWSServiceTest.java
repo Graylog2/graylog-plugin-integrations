@@ -3,9 +3,16 @@ package org.graylog.integrations.aws;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.service.AWSLogMessage;
+import org.graylog.integrations.aws.service.AWSService;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import software.amazon.awssdk.regions.Region;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
 import java.util.List;
 
@@ -14,11 +21,19 @@ import static org.junit.Assert.assertTrue;
 
 public class AWSServiceTest {
 
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+    @Mock
+    private KinesisClientBuilder kinesisClientBuilder;
+
     AWSService awsService;
+
+    private AWSClient awsClient;
 
     @Before
     public void setUp() throws Exception {
-        awsService = new AWSService();
+        awsService = new AWSService(new AWSClient(kinesisClientBuilder));
     }
 
     @Test
