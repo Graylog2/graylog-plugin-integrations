@@ -2,6 +2,9 @@ package org.graylog.integrations.aws.service;
 
 public class AWSLogMessage {
 
+    private static final String ACTION_ACCEPT = "ACCEPT";
+    private static final String ACTION_REJECT = "REJECT";
+
     private String logMessage;
 
     public AWSLogMessage(String logMessage) {
@@ -20,7 +23,7 @@ public class AWSLogMessage {
 
         // Not using a regex here, because it would be quite complicated and hard to maintain.
         // Performance should not be an issue here, because this will only be executed once when detecting a log message.
-        if ((logMessage.contains("ACCEPT") || logMessage.contains("REJECT")) &&
+        if ((logMessage.contains(ACTION_ACCEPT) || logMessage.contains(ACTION_REJECT)) &&
             logMessage.chars().filter(Character::isSpaceChar).count() == 13) {
             return Type.FLOW_LOGS;
         }
@@ -30,9 +33,10 @@ public class AWSLogMessage {
         return Type.UNKNOWN;
     }
 
+    // One enum value should be added for each type of log message that auto-detect is supported for.
     public enum Type {
 
-        FLOW_LOGS,
+        FLOW_LOGS, // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
         UNKNOWN
     }
 }
