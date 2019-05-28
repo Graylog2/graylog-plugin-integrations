@@ -42,6 +42,12 @@ public class AWSClientTest {
     }
 
     @Test
+    public void name() {
+
+        Main.main(null);
+    }
+
+    @Test
     public void testGetStreams() throws ExecutionException {
 
         // Test with two streams and one page. This is the most common case for most AWS accounts.

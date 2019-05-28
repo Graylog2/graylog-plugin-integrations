@@ -13,21 +13,18 @@ public class CloudWatchService {
 
     public CloudWatchLogsClient logsClient;
 
-    // Create a CloudwatchLog client
-    public static CloudWatchLogsClient createCloudWatchLogClient(AwsCredentials basicCredentials, Region region) {
+    public static CloudWatchLogsClient createCloudWatchLogClient(Region region) {
 
         CloudWatchLogsClient logsClient = CloudWatchLogsClient.builder()
-                .credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
+                //.credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
                 .region(region)
                 .build();
-
         return logsClient;
     }
 
     public CloudWatchLogsClient createGetLogRequest(String logGroupName, String logStreamName, boolean fromStart) {
         logsClient.getLogEvents(createGetLogEventRequest(logGroupName, logStreamName, fromStart));
         return logsClient;
-
     }
 
     public static GetLogEventsRequest createGetLogEventRequest(String logGroupName, String logStreamName, boolean fromStart) {
@@ -40,7 +37,6 @@ public class CloudWatchService {
                 //.limit(logLimit)
                 .startFromHead(fromStart)
                 .build();
-
         return getLogEventsRequest;
     }
 

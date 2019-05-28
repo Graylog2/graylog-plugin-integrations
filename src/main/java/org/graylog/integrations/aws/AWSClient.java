@@ -40,6 +40,8 @@ public class AWSClient {
         this.kinesisClientBuilder = kinesisClientBuilder;
     }
 
+
+
     /**
      * Get a list of Kinesis stream names. All available streams will be returned.
      *
