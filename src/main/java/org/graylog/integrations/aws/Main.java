@@ -1,62 +1,71 @@
 package org.graylog.integrations.aws;
 
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.model.FilterLogEventsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
+import software.amazon.awssdk.services.kinesis.model.SubscribeToShardRequest;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
 
-        int logLimit;
         boolean fromStart = true;
 
         // CONFIGURATION
-        AwsBasicCredentials awsUserCredentials = AWSConfigSettings.createUser();
-        AWSConfigSettings.setRegion();
+
+        String region = "us-east-1";
+
 
         // CLOUDWATCH
-        CloudWatchLogsClient cloudWatchLogsClient = CloudWatchService.createCloudWatchLogClient(awsUserCredentials, Region.US_EAST_1);
+        CloudWatchLogsClient cloudWatchLogsClient = CloudWatchService.createCloudWatchLogClient(region);
 
-        //List all the logGroupName(s) available
-        ArrayList<String> logGroupNameList = CloudWatchService.getGroupNameList(cloudWatchLogsClient);
-        System.out.println("Log Group Names Available:" + logGroupNameList);
+        //Get all the logGroupName(s) available
+        // TODO optimize this
+        ArrayList<String> logGroupNameList = new CloudWatchService().getGroupNameList(region);
         String logGroupName = "/var/log/messages";
 
-        //List all the logStreamName(s) available
+        //Get all the logStreamName(s) available
         ArrayList<String> logStreamNameList = CloudWatchService.getStreamNameList(cloudWatchLogsClient, logGroupName);
-        System.out.println("Stream Names from " + logGroupName + ": " + logStreamNameList);
-
-        // Pick a random logStreamName
-        Random rand = new Random();
-        int rng = rand.ints(0, (logStreamNameList.size() -1)).findFirst().getAsInt();
 
         // PULL LOGS
-        // Create GetLogEventRequest object
-        GetLogEventsRequest getLogEventsRequest = CloudWatchService.createGetLogEventRequest("/var/log/messages", "i-09c80ef1838f091e1",fromStart);
+        GetLogEventsRequest getLogEventsRequest = CloudWatchService.createGetLogEventRequest("/var/log/messages", "i-09c80ef1838f091e1", fromStart);
 
-        logLimit = cloudWatchLogsClient.getLogEvents(getLogEventsRequest).events().size();
+        FilterLogEventsRequest filterLogEventsRequest = FilterLogEventsRequest.builder()
+                .logGroupName(logGroupName)
+                .logStreamNames(logStreamNameList)
+                //logStreamNames(String... var1);
+                //startTime(Long var1);
+                //endTime(Long var1);
+                //filterPattern(String var1);
+                //nextToken(String var1);
+                //limit(Integer var1);
+                .interleaved(false) //false produces more logs
+                .build();
 
-        // Designate getLogEventsRequest from the START
-        //cloudWatchLogsClient.getLogEvents(getLogEventsRequest);
-        FilterLogEventsRequest filterLogEventsRequest = FilterLogEventsRequest.builder().logGroupName(logGroupName).build();
-        cloudWatchLogsClient.filterLogEvents(FilterLogEventsRequest.builder().build());
+//        cloudWatchLogsClient.filterLogEvents(filterLogEventsRequest);
+//        cloudWatchLogsClient.getLogEventsPaginator(getLogEventsRequest).iterator();
 
-
-        //Iterate through all the events
-        for (int i = 0; i < logLimit; i++) {
-            if (i== logLimit-1) {
-                System.out.println("[" + i + "] " + cloudWatchLogsClient.getLogEvents(getLogEventsRequest).events().get(i));
-            }
-        }
+        logGroupNameList.iterator();
 
         // Set next token
         String nextToken = cloudWatchLogsClient.getLogEvents(getLogEventsRequest).nextForwardToken();
 
+        KinesisClient kinesisClient = KinesisService.getKinesisClient();
+        kinesisClient.describeLimits();
+        SubscribeToShardRequest subscribeToShardRequest = SubscribeToShardRequest.builder().shardId("shardID").build();
+        GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator("somethingGoesHere?").build();
+
+        String shardIterator;
+//        GetShardIteratorRequest getShardIteratorRequest = new GetShardIteratorRequest(); //GetShardIteratorRequest();
+//        getShardIteratorRequest.setStreamName(myStreamName);
+//        getShardIteratorRequest.setShardId(shard.getShardId());
+//        getShardIteratorRequest.setShardIteratorType("TRIM_HORIZON");
+
+        //GetShardIteratorResult getShardIteratorResult = client.getShardIterator(getShardIteratorRequest);
+//        shardIterator = getShardIteratorResult.getShardIterator();
 
         // TODO resolve nextToken issue
         // Designate getLogEventsRequest from LAST REQUEST

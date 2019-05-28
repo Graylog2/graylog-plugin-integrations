@@ -1,23 +1,30 @@
 package org.graylog.integrations.aws;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogStreamsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class CloudWatchService {
 
-    public CloudWatchLogsClient logsClient;
+    private CloudWatchLogsClient logsClient;
 
-    public static CloudWatchLogsClient createCloudWatchLogClient(Region region) {
+    @Inject
+    public CloudWatchService() {
+
+    }
+
+    static CloudWatchLogsClient createCloudWatchLogClient(String region) {
 
         CloudWatchLogsClient logsClient = CloudWatchLogsClient.builder()
                 //.credentialsProvider(StaticCredentialsProvider.create(basicCredentials))
-                .region(region)
+                .region(Region.of(region))
                 .build();
         return logsClient;
     }
@@ -27,7 +34,7 @@ public class CloudWatchService {
         return logsClient;
     }
 
-    public static GetLogEventsRequest createGetLogEventRequest(String logGroupName, String logStreamName, boolean fromStart) {
+    static GetLogEventsRequest createGetLogEventRequest(String logGroupName, String logStreamName, boolean fromStart) {
         GetLogEventsRequest getLogEventsRequest = GetLogEventsRequest.builder()
                 .logGroupName(logGroupName)
                 .logStreamName(logStreamName)
@@ -40,29 +47,37 @@ public class CloudWatchService {
         return getLogEventsRequest;
     }
 
-    public static ArrayList<String> getGroupNameList(CloudWatchLogsClient cloudWatchLogsClient) {
-        int logGroupListSize = cloudWatchLogsClient.describeLogGroups().logGroups().size();
+    public ArrayList<String> getGroupNameList(String region) {
+
         ArrayList<String> groupNameList = new ArrayList<>();
-        for (int i = 0; i < logGroupListSize; i++) {
-            String logGroupName = cloudWatchLogsClient.describeLogGroups().logGroups().get(i).logGroupName();
-            groupNameList.add(logGroupName);
+        // TODO optimize this
+        Iterator<DescribeLogGroupsResponse> logGroupsIterator = CloudWatchService.createCloudWatchLogClient(region).describeLogGroupsPaginator().iterator();
+        DescribeLogGroupsResponse response = logGroupsIterator.next();
+        for (int c = 0; c < response.logGroups().size(); c++) {
+            response.logGroups().get(c).logGroupName();
+            groupNameList.add(response.logGroups().get(c).logGroupName());
         }
         return groupNameList;
     }
 
-    public static ArrayList<String> getStreamNameList(CloudWatchLogsClient cloudWatchLogsClient, String logGroupName) {
+    static ArrayList<String> getStreamNameList(CloudWatchLogsClient cloudWatchLogsClient, String logGroupName) {
         DescribeLogStreamsRequest logStreamsRequest = DescribeLogStreamsRequest.builder()
                 .logGroupName(logGroupName)
                 .build();
-
-        // Number of logStreamNames that exist
         int logStreamListSize = cloudWatchLogsClient.describeLogStreams(((logStreamsRequest))).logStreams().size();
         ArrayList<String> streamNameList = new ArrayList<>();
-        for (int j = 0; j < logStreamListSize; j++) {
-            String logStreamName = cloudWatchLogsClient.describeLogStreams(((logStreamsRequest))).logStreams().get(j).logStreamName();
+        for (int c = 0; c < logStreamListSize; c++) {
+            String logStreamName = cloudWatchLogsClient.describeLogStreams(((logStreamsRequest))).logStreams().get(c).logStreamName();
             streamNameList.add(logStreamName);
         }
         return streamNameList;
     }
 
+    List<String> fakeLogGroups() {
+
+        ArrayList<String> logGroups = new ArrayList<>();
+        logGroups.add("test-group1");
+        logGroups.add("test-group2");
+        return logGroups;
+    }
 }

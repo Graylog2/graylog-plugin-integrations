@@ -1,26 +1,17 @@
 package org.graylog.integrations.aws.resources;
 
-import org.graylog.integrations.aws.AWSClient;
-import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.CloudWatchService;
+import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.service.AWSService;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
-import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
-import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
 public class AWSResourceTest {
@@ -44,6 +35,6 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(new AWSClient(kinesisClientBuilder)));
+        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder), new CloudWatchService());
     }
 }

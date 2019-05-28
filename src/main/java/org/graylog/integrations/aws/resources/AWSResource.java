@@ -5,6 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.graylog.integrations.aws.CloudWatchService;
+import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSService;
@@ -36,10 +38,24 @@ import java.util.concurrent.ExecutionException;
 public class AWSResource implements PluginRestResource {
 
     private AWSService awsService;
+    private KinesisService kinesisService;
+    private CloudWatchService cloudWatchService;
 
     @Inject
-    public AWSResource(AWSService awsService) {
+    public AWSResource(AWSService awsService, KinesisService kinesisService, CloudWatchService cloudWatchService) {
         this.awsService = awsService;
+        this.kinesisService = kinesisService;
+        this.cloudWatchService = cloudWatchService;
+    }
+
+    @GET
+    @Timed
+    @Path("/Cloudwatch/{regionName}")
+    @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
+    public List<String> getLogGroupNames(@ApiParam(name = "regionName", required = true)
+                                         @PathParam("regionName") String regionName) {
+
+        return cloudWatchService.getGroupNameList(regionName);
     }
 
     // TODO: Rework to accept a form post body with credentials
@@ -48,9 +64,9 @@ public class AWSResource implements PluginRestResource {
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> getKinesisStreams(@ApiParam(name = "regionName", required = true)
-                                       @PathParam("regionName") String regionName) throws ExecutionException {
+                                          @PathParam("regionName") String regionName) throws ExecutionException {
 
-        return awsService.getKinesisStreams(regionName, null, null);
+        return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
     @PUT
@@ -65,7 +81,7 @@ public class AWSResource implements PluginRestResource {
         // TODO: Check permissions?
 
         // Call into service layer to handle business logic.
-        KinesisHealthCheckResponse response = awsService.healthCheck(heathCheckRequest);
+        KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
 
         return Response.accepted().entity(response).build();
     }

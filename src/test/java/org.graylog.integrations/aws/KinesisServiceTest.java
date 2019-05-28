@@ -1,5 +1,8 @@
 package org.graylog.integrations.aws;
 
+import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
-public class AWSClientTest {
+public class KinesisServiceTest {
 
     private static final String[] TWO_TEST_STREAMS = {"test-stream-1", "test-stream-2"};
     private static final String TEST_REGION = Region.EU_WEST_1.id();
@@ -32,19 +35,45 @@ public class AWSClientTest {
     @Mock
     private KinesisClient kinesisClient;
 
-    private AWSClient awsClient;
+    private KinesisService kinesisService;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         // Create an AWS client with a mock KinesisClientBuilder
-        awsClient = new AWSClient(kinesisClientBuilder);
+        kinesisService = new KinesisService(kinesisClientBuilder);
     }
 
     @Test
     public void name() {
 
         Main.main(null);
+    }
+
+    @Test
+    public void testLogIdentification() {
+
+        // Verify that an ACCEPT flow log us detected as a flow log.
+        AWSLogMessage logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK");
+        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.messageType());
+
+        // Verify that an ACCEPT flow log us detected as a flow log.
+        logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT OK");
+        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.messageType());
+
+        // Verify that it's detected as unknown
+        logMessage = new AWSLogMessage("haha this is not a real log message");
+        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.messageType());
+    }
+
+    @Test
+    public void healthCheck() {
+
+        KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create("us-east-1", "some-group", "", "");
+        KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
+
+        // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
+        assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
     }
 
     @Test
@@ -56,9 +85,11 @@ public class AWSClientTest {
 
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(false).build());
-        List<String> kinesisStreams = awsClient.getKinesisStreams(TEST_REGION, null, null);
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(false).build());
+
+
+        List<String> kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, null, null);
         assertEquals(2, kinesisStreams.size());
 
         // Test with stream paging functionality. This will be the case when a large number of Kinesis streams
@@ -69,14 +100,14 @@ public class AWSClientTest {
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 // First return a response with two streams indicating that there are more.
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(true).build())
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(true).build())
                 // Then return a response with two streams and indicate that all have been retrieved.
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(false).build()); // Indicate no more streams.
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(false).build()); // Indicate no more streams.
 
-        kinesisStreams = awsClient.getKinesisStreams(TEST_REGION, null, null);
+        kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, null, null);
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, kinesisStreams.size());
