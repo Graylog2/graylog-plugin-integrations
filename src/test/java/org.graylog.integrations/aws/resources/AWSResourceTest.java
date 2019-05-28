@@ -44,14 +44,6 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(new AWSClient(kinesisClientBuilder)),
-                                      new AWSClient(kinesisClientBuilder));
-    }
-
-    @Test
-    public void testGetRegions() {
-
-        List<RegionResponse> regions = awsResource.regions();
-        assertFalse(regions.isEmpty());
+        awsResource = new AWSResource(new AWSService(new AWSClient(kinesisClientBuilder)));
     }
 }

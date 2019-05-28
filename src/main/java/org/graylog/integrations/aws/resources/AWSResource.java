@@ -5,7 +5,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.integrations.aws.AWSClient;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSService;
@@ -39,16 +38,16 @@ public class AWSResource implements PluginRestResource {
     private AWSService awsService;
 
     @Inject
-    public AWSResource(AWSService awsService, AWSClient kinesisClient) {
+    public AWSResource(AWSService awsService) {
         this.awsService = awsService;
     }
 
-    // TODO: Rework to accept a form post body with credentials.
+    // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
     @Path("/kinesisStreams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
-    public List<String> kinesisStreams(@ApiParam(name = "regionName", required = true)
+    public List<String> getKinesisStreams(@ApiParam(name = "regionName", required = true)
                                        @PathParam("regionName") String regionName) throws ExecutionException {
 
         return awsService.getKinesisStreams(regionName, null, null);

@@ -1,5 +1,8 @@
 package org.graylog.integrations.aws.service;
 
+/**
+ * Supports the ability to automatically parse
+ */
 public class AWSLogMessage {
 
     private static final String ACTION_ACCEPT = "ACCEPT";

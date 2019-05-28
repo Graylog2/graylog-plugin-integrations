@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class AWSService {
 
     AWSClient awsClient;
 
+    @Inject
     public AWSService(AWSClient awsClient) {
         this.awsClient = awsClient;
     }
