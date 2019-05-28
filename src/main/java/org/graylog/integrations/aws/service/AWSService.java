@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -61,24 +60,8 @@ public class AWSService {
     }
 
     /**
-     * @return A list of all available log groups if the user is authorized.
-     * @param regionName
-     */
-    public List<String> getLogGroups(String regionName, String accessKeyId, String secretAccessKey) {
-
-        // TODO: Call AWS to get a list of log groups.
-        // TODO: Move this to AWSClient
-
-        // Return some sample data
-        ArrayList<String> logGroupNames = new ArrayList<>();
-        logGroupNames.add("flow-logs");
-        logGroupNames.add("application-logs");
-
-        return logGroupNames;
-    }
-
-    /**
      * No business logic is required here. Pass through request to AWSService.
+     *
      * @return
      */
     public List<String> getKinesisStreams(String regionName, String accessKeyId, String secretAccessKey) throws ExecutionException {

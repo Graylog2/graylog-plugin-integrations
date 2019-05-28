@@ -6,10 +6,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.AWSClient;
-import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.rest.PluginRestResource;
 
 import javax.inject.Inject;
@@ -44,27 +43,7 @@ public class AWSResource implements PluginRestResource {
         this.awsService = awsService;
     }
 
-    @GET
-    @Timed
-    @Path("/regions")
-    @ApiOperation(value = "Get all available AWS regions")
-    public List<RegionResponse> regions() {
-
-        return awsService.getAvailableRegions();
-    }
-
-    // TODO: Pass in credentials somehow.
-    @GET
-    @Timed
-    @Path("/logGroups/{regionName}")
-    @ApiOperation(value = "Get all available AWS log groups for the specified region")
-    public List<String> logGroups(@ApiParam(name = "regionName", required = true)
-                                       @PathParam("regionName") String regionName) {
-
-        // TODO: Implement the contents of the cloudWatchService.getLogGroups method.
-        return awsService.getLogGroups(regionName, null, null);
-    }
-
+    // TODO: Rework to accept a form post body with credentials.
     @GET
     @Timed
     @Path("/kinesisStreams/{regionName}")
