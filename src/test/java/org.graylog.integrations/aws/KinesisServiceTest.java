@@ -55,15 +55,23 @@ public class KinesisServiceTest {
 
         // Verify that an ACCEPT flow log us detected as a flow log.
         AWSLogMessage logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK");
-        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.messageType());
+        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.detectLogMessageType());
 
         // Verify that an ACCEPT flow log us detected as a flow log.
         logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT OK");
-        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.messageType());
+        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.detectLogMessageType());
+
+        // Verify that a message with 14 spaces (instead of 13) is not identified as a flow log.
+        logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT OK ONE-MORE-WORD");
+        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
+
+        // Verify that a message with 12 spaces (instead of 13) is not identified as a flow log.
+        logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT");
+        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
 
         // Verify that it's detected as unknown
         logMessage = new AWSLogMessage("haha this is not a real log message");
-        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.messageType());
+        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
     }
 
     @Test
