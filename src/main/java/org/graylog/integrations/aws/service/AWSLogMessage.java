@@ -17,23 +17,33 @@ public class AWSLogMessage {
     /**
      * Detects the type of log message.
      *
-     * @return
+     * @return A {@code Type} indicating the which kind of log message has been detected.
      */
-    public Type messageType() {
+    public Type detectLogMessageType() {
 
-        // AWS Flow Logs
-        // 2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK
-
-        // Not using a regex here, because it would be quite complicated and hard to maintain.
-        // Performance should not be an issue here, because this will only be executed once when detecting a log message.
-        if ((logMessage.contains(ACTION_ACCEPT) || logMessage.contains(ACTION_REJECT)) &&
-            logMessage.chars().filter(Character::isSpaceChar).count() == 13) {
+        if (isFlowLog()) {
             return Type.FLOW_LOGS;
         }
 
-        // Add more log message types here as needed
-
         return Type.UNKNOWN;
+    }
+
+    /**
+     * Flow logs are space-delimited messages. See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+     *
+     * Sample: 2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK
+     *
+     * Match a message with exactly 13 spaces and either the word ACCEPT or REJECT.
+     * Use simple if checks instead of regex to keep this simple. Performance should not be a concern, since
+     * this is only called once during the healthcheck.
+     *
+     * @return true if message is a flowlog.
+     */
+    private boolean isFlowLog() {
+        boolean hasAction = logMessage.contains("ACCEPT") || logMessage.contains("REJECT");
+        long spaceCount = logMessage.chars().filter(Character::isSpaceChar).count();
+
+        return hasAction && spaceCount == 13;
     }
 
     // One enum value should be added for each type of log message that auto-detect is supported for.
