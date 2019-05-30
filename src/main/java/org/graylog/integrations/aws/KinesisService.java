@@ -46,16 +46,27 @@ public class KinesisService {
 
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest heathCheckRequest) {
 
-        // TODO: Read a log message from Kinesis.
+        // TODO: Check if the Kinesis stream exists.
+        // TODO: Replace with result for actual stream check.
+        boolean streamExists = false;
+        if (!streamExists) {
+            return KinesisHealthCheckResponse.create(false,
+                                                     AWSLogMessage.Type.UNKNOWN.toString(),
+                                                     "The stream does not exist."); // TODO: Include specific error message here.
+        }
+
+        // TODO: Try to read log message from Kinesis.
 
         // Detect the log message format
-
         // TODO: Replace with actual log message received from Kinesis stream.
         String message = "2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK";
         AWSLogMessage awsLogMessage = new AWSLogMessage(message);
 
+        // TODO: Add parsing logic
+        // Add a codec that knows how to parse each message type.
+
         return KinesisHealthCheckResponse.create(true,
-                                                 awsLogMessage.messageType().toString(),
+                                                 awsLogMessage.detectLogMessageType().toString(),
                                                  "Success! The message is an AWS FlowLog!");
     }
 
