@@ -24,7 +24,7 @@ public class Main {
 
         //Get all the logGroupName(s) available
         // TODO optimize this
-        ArrayList<String> logGroupNameList = new CloudWatchService().getGroupNameList(region);
+        ArrayList<String> logGroupNameList = new CloudWatchService().getLogGroupNames(region);
         String logGroupName = "/var/log/messages";
 
         //Get all the logStreamName(s) available

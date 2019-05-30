@@ -34,5 +34,7 @@ public class AWSService {
                 }).collect(Collectors.toList());
     }
 
+    // TODO GET getUserCredentials
+
 
 }

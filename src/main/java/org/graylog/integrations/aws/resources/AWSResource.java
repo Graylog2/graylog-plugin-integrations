@@ -9,6 +9,7 @@ import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.rest.PluginRestResource;
 
@@ -48,16 +49,27 @@ public class AWSResource implements PluginRestResource {
         this.cloudWatchService = cloudWatchService;
     }
 
+    // GET AWS regions
     @GET
     @Timed
-    @Path("/Cloudwatch/{regionName}")
+    @Path("/")
+    @ApiOperation(value = "Get all available AWS regions")
+    public List<RegionResponse>  getAwsRegions() {
+        return awsService.getAvailableRegions();
+    }
+
+    // GET CloudWatch log group names
+    @GET
+    @Timed
+    @Path("/cloudwatch/{regionName}")
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
     public List<String> getLogGroupNames(@ApiParam(name = "regionName", required = true)
                                          @PathParam("regionName") String regionName) {
 
-        return cloudWatchService.getGroupNameList(regionName);
+        return cloudWatchService.getLogGroupNames(regionName);
     }
 
+    // GET Kinesis Streams
     // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
@@ -69,6 +81,7 @@ public class AWSResource implements PluginRestResource {
         return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
+    // PUT Kinesis Health Check
     @PUT
     @Timed
     @Path("/kinesisHealthCheck")
@@ -85,4 +98,7 @@ public class AWSResource implements PluginRestResource {
 
         return Response.accepted().entity(response).build();
     }
+
+    // TODO  GET kinesisAutomatedSetup
+    // getRegion, getlogGroupNames, subscribeToStream
 }
