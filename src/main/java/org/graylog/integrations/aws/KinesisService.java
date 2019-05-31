@@ -48,7 +48,7 @@ public class KinesisService {
 
         // TODO: Check if the Kinesis stream exists.
         // TODO: Replace with result for actual stream check.
-        boolean streamExists = false;
+        boolean streamExists = true;
         if (!streamExists) {
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
