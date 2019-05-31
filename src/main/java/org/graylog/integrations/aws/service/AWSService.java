@@ -34,7 +34,9 @@ public class AWSService {
                 }).collect(Collectors.toList());
     }
 
-    // TODO GET getUserCredentials
+    //TODO Add getAWSServices List
+    //List that contains all the supported AWS services (i.e. Cloudwatch, Kinesis)
 
+    // TODO GET getUserCredentials
 
 }

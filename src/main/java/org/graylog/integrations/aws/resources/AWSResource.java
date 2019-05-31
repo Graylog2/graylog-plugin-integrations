@@ -32,8 +32,8 @@ import java.util.concurrent.ExecutionException;
  */
 
 @RequiresAuthentication
-@Api(value = "System/AWS", description = "AWS integrations")
-@Path("/system/aws")
+@Api(value = "AWS", description = "AWS integrations")
+@Path("/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AWSResource implements PluginRestResource {
@@ -52,16 +52,16 @@ public class AWSResource implements PluginRestResource {
     // GET AWS regions
     @GET
     @Timed
-    @Path("/")
+    @Path("/regions")
     @ApiOperation(value = "Get all available AWS regions")
-    public List<RegionResponse>  getAwsRegions() {
+    public List<RegionResponse> getAwsRegions() {
         return awsService.getAvailableRegions();
     }
 
     // GET CloudWatch log group names
     @GET
     @Timed
-    @Path("/cloudwatch/{regionName}")
+    @Path("/cloudWatch/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
     public List<String> getLogGroupNames(@ApiParam(name = "regionName", required = true)
                                          @PathParam("regionName") String regionName) {
@@ -73,7 +73,7 @@ public class AWSResource implements PluginRestResource {
     // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
-    @Path("/kinesisStreams/{regionName}")
+    @Path("/kinesis/streams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> getKinesisStreams(@ApiParam(name = "regionName", required = true)
                                           @PathParam("regionName") String regionName) throws ExecutionException {
@@ -84,7 +84,7 @@ public class AWSResource implements PluginRestResource {
     // PUT Kinesis Health Check
     @PUT
     @Timed
-    @Path("/kinesisHealthCheck")
+    @Path("/kinesis/healthCheck")
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = KinesisHealthCheckResponse.class
