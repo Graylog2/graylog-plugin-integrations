@@ -9,6 +9,7 @@ import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.rest.PluginRestResource;
 
@@ -31,8 +32,8 @@ import java.util.concurrent.ExecutionException;
  */
 
 @RequiresAuthentication
-@Api(value = "System/AWS", description = "AWS integrations")
-@Path("/system/aws")
+@Api(value = "AWS", description = "AWS integrations")
+@Path("/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AWSResource implements PluginRestResource {
@@ -48,20 +49,31 @@ public class AWSResource implements PluginRestResource {
         this.cloudWatchService = cloudWatchService;
     }
 
+    // GET AWS regions
     @GET
     @Timed
-    @Path("/Cloudwatch/{regionName}")
+    @Path("/regions")
+    @ApiOperation(value = "Get all available AWS regions")
+    public List<RegionResponse> getAwsRegions() {
+        return awsService.getAvailableRegions();
+    }
+
+    // GET CloudWatch log group names
+    @GET
+    @Timed
+    @Path("/cloudWatch/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
     public List<String> getLogGroupNames(@ApiParam(name = "regionName", required = true)
                                          @PathParam("regionName") String regionName) {
 
-        return cloudWatchService.getGroupNameList(regionName);
+        return cloudWatchService.getLogGroupNames(regionName);
     }
 
+    // GET Kinesis Streams
     // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
-    @Path("/kinesisStreams/{regionName}")
+    @Path("/kinesis/streams/{regionName}")
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> getKinesisStreams(@ApiParam(name = "regionName", required = true)
                                           @PathParam("regionName") String regionName) throws ExecutionException {
@@ -69,9 +81,10 @@ public class AWSResource implements PluginRestResource {
         return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
+    // PUT Kinesis Health Check
     @PUT
     @Timed
-    @Path("/kinesisHealthCheck")
+    @Path("/kinesis/healthCheck")
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = KinesisHealthCheckResponse.class
@@ -85,4 +98,7 @@ public class AWSResource implements PluginRestResource {
 
         return Response.accepted().entity(response).build();
     }
+
+    // TODO  GET kinesisAutomatedSetup
+    // getRegion, getlogGroupNames, subscribeToStream
 }

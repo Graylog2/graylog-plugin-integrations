@@ -47,17 +47,17 @@ public class CloudWatchService {
         return getLogEventsRequest;
     }
 
-    public ArrayList<String> getGroupNameList(String region) {
+    public ArrayList<String> getLogGroupNames(String region) {
 
-        ArrayList<String> groupNameList = new ArrayList<>();
+        ArrayList<String> logGroupNames = new ArrayList<>();
         // TODO optimize this
         Iterator<DescribeLogGroupsResponse> logGroupsIterator = CloudWatchService.createCloudWatchLogClient(region).describeLogGroupsPaginator().iterator();
         DescribeLogGroupsResponse response = logGroupsIterator.next();
         for (int c = 0; c < response.logGroups().size(); c++) {
             response.logGroups().get(c).logGroupName();
-            groupNameList.add(response.logGroups().get(c).logGroupName());
+            logGroupNames.add(response.logGroups().get(c).logGroupName());
         }
-        return groupNameList;
+        return logGroupNames;
     }
 
     static ArrayList<String> getStreamNameList(CloudWatchLogsClient cloudWatchLogsClient, String logGroupName) {

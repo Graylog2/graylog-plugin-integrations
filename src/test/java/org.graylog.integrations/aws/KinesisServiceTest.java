@@ -45,12 +45,6 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void name() {
-
-        Main.main(null);
-    }
-
-    @Test
     public void testLogIdentification() {
 
         // Verify that an ACCEPT flow log us detected as a flow log.

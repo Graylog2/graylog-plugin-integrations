@@ -119,4 +119,10 @@ public class KinesisService {
         return streamNames;
     }
 
+    // TODO Create Kinesis Stream
+
+    // TODO Subscribe to Kinesis Stream
+
+    // TODO getRecord
+
 }
