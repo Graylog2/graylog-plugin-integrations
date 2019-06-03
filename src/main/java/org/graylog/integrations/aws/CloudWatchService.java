@@ -2,13 +2,14 @@ package org.graylog.integrations.aws;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogStreamsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.GetLogEventsRequest;
+import software.amazon.awssdk.services.cloudwatchlogs.paginators.DescribeLogGroupsIterable;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class CloudWatchService {
@@ -47,17 +48,25 @@ public class CloudWatchService {
         return getLogEventsRequest;
     }
 
+    /**
+     * Returns a list of log groups that exist in CloudWatch.
+     *
+     * @param region The AWS region
+     * @return A list of log groups in alphabetical order.
+     */
     public ArrayList<String> getLogGroupNames(String region) {
 
-        ArrayList<String> logGroupNames = new ArrayList<>();
-        // TODO optimize this
-        Iterator<DescribeLogGroupsResponse> logGroupsIterator = CloudWatchService.createCloudWatchLogClient(region).describeLogGroupsPaginator().iterator();
-        DescribeLogGroupsResponse response = logGroupsIterator.next();
-        for (int c = 0; c < response.logGroups().size(); c++) {
-            response.logGroups().get(c).logGroupName();
-            logGroupNames.add(response.logGroups().get(c).logGroupName());
+        final CloudWatchLogsClient cloudWatchLogsClient = CloudWatchService.createCloudWatchLogClient(region);
+        final DescribeLogGroupsRequest describeLogGroupsRequest = DescribeLogGroupsRequest.builder().build();
+        final DescribeLogGroupsIterable responses = cloudWatchLogsClient.describeLogGroupsPaginator(describeLogGroupsRequest);
+
+        final ArrayList<String> groupNameList = new ArrayList<>();
+        for (DescribeLogGroupsResponse response : responses) {
+            for (int c = 0; c < response.logGroups().size(); c++) {
+                groupNameList.add(response.logGroups().get(c).logGroupName());
+            }
         }
-        return logGroupNames;
+        return groupNameList;
     }
 
     static ArrayList<String> getStreamNameList(CloudWatchLogsClient cloudWatchLogsClient, String logGroupName) {
