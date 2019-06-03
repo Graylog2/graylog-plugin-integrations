@@ -1,11 +1,10 @@
 package org.graylog.integrations.aws.resources;
 
-import com.google.common.io.ByteStreams;
-import org.apache.commons.lang3.ObjectUtils;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
@@ -29,11 +28,9 @@ import software.amazon.kinesis.retrieval.RetrievalConfig;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -42,62 +39,69 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * This class attempts to connect to the indicated Kinesis stream and read one log message.
+ * This class attempts to connect to the indicated Kinesis stream and read one log message. If the stream exists
+ * and a message can be read, then the message will be returned.
  *
- * The connection is completed with a full Kinesis subscription which uses DynamoDB for state tracking
- * and all of the other parts that.
+ * This class does not do parsing of any kind. The binary payload from the first Kinesis record will be returned.
+ * That payload might be GZIPed (if from a CloudWatch subscription), or just a plain binary string if sent from
+ * somewhere else. The responsibility of parsing and unpacking the GZIPPED payload falls on the caller of this class.
+ *
+ * A full Kinesis subscription is executed, which uses DynamoDB for state tracking. This effectively tests most of the
+ * permissions needed in order to read log messages from the Kinesis stream later at runtime.
+ *
+ * TODO: Figure out the correct way to allow callers to wait for a response for a specified timeout.
+ * If the timeout is exceeded, then then the client instance will need to be shut down gracefully.
  */
 public class KinesisHealthCheck {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisHealthCheck.class);
-    public static final boolean DO_PUBLISH = false;
-
-    public static void main(String... args) {
-        if (args.length < 1) {
-            LOG.error("At a minimum, the stream name is required as the first argument. The Region may be specified as the second argument.");
-            System.exit(1);
-        }
-
-        String streamName = args[0];
-        String region = null;
-        if (args.length > 1) {
-            region = args[1];
-        }
-
-        new KinesisHealthCheck(streamName, region).run();
-    }
 
     private final String streamName;
     private final Region region;
     private final KinesisAsyncClient kinesisClient;
+    private final String applicationName;
 
     private KinesisHealthCheck(String streamName, String region) {
+
+        // Validate input.
+        Preconditions.checkArgument(StringUtils.isNotBlank(streamName), "Stream Name must not be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(region), "Region must not be blank");
+
         this.streamName = streamName;
-        this.region = Region.of(ObjectUtils.firstNonNull(region, "us-east-2"));
+        this.region = Region.of(region);
         this.kinesisClient = KinesisClientUtil.createKinesisAsyncClient(KinesisAsyncClient.builder().region(this.region));
+        this.applicationName = createRandomApplicationName();
+    }
+
+    public void start() {
+
+        run();
     }
 
     private void run() {
 
         ScheduledExecutorService producerExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder().region(region).build();
-        CloudWatchAsyncClient cloudWatchClient = CloudWatchAsyncClient.builder().region(region).build();
+        // The application name is a unique identifier that is used when creating the Kinesis Subscriber.
+        final String applicationName = createRandomApplicationName();
 
-        ConfigsBuilder configsBuilder = new ConfigsBuilder(streamName, "Test", kinesisClient, dynamoClient, cloudWatchClient, UUID.randomUUID().toString(), new SampleRecordProcessorFactory());
+        final DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder().region(region).build();
+        final CloudWatchAsyncClient cloudWatchClient = CloudWatchAsyncClient.builder().region(region).build();
+        final ConfigsBuilder configsBuilder = new ConfigsBuilder(streamName, applicationName, kinesisClient, dynamoClient, cloudWatchClient, UUID.randomUUID().toString(), new SampleRecordProcessorFactory());
 
-        RetrievalConfig retrievalConfig = configsBuilder.retrievalConfig();
+        final RetrievalConfig retrievalConfig = configsBuilder.retrievalConfig();
+
+        // TODO: TRIM_HORIZON reads from the beginning of the stream. Ideally this would read from the end of the stream. Check if this is possible.
         retrievalConfig.initialPositionInStreamExtended(InitialPositionInStreamExtended.newInitialPosition(InitialPositionInStream.TRIM_HORIZON));
 
         // Only pull 1 record.
-        PollingConfig pollingConfig = new PollingConfig(streamName, kinesisClient);
+        final PollingConfig pollingConfig = new PollingConfig(streamName, kinesisClient);
         pollingConfig.maxRecords(1);
 
-        Scheduler scheduler = new Scheduler(
+        final Scheduler scheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),
                 configsBuilder.coordinatorConfig(),
                 configsBuilder.leaseManagementConfig(),
@@ -107,12 +111,12 @@ public class KinesisHealthCheck {
                 retrievalConfig.retrievalSpecificConfig(pollingConfig)
         );
 
-        Thread schedulerThread = new Thread(scheduler);
+        final Thread schedulerThread = new Thread(scheduler);
         schedulerThread.setDaemon(true);
         schedulerThread.start();
 
         System.out.println("Press enter to shutdown");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
             reader.readLine();
         } catch (IOException ioex) {
@@ -121,7 +125,7 @@ public class KinesisHealthCheck {
 
         producerExecutor.shutdownNow();
 
-        Future<Boolean> gracefulShutdownFuture = scheduler.startGracefulShutdown();
+        final Future<Boolean> gracefulShutdownFuture = scheduler.startGracefulShutdown();
         LOG.info("Waiting up to 20 seconds for shutdown to complete.");
         try {
             gracefulShutdownFuture.get(20, TimeUnit.SECONDS);
@@ -135,119 +139,100 @@ public class KinesisHealthCheck {
         LOG.info("Completed, shutting down now.");
     }
 
-    private static class SampleRecordProcessorFactory implements ShardRecordProcessorFactory {
+    // TODO: Is static keyword needed here?
+    private class SampleRecordProcessorFactory implements ShardRecordProcessorFactory {
         public ShardRecordProcessor shardRecordProcessor() {
             return new KinesisProcessor();
         }
     }
 
-    private static class KinesisProcessor implements ShardRecordProcessor {
+    /**
+     * The application name is a unique identifier that is used when creating the Kinesis Subscriber. State tracking
+     * tables/rows in DynamoDB will automatically be created using this application name.
+     *
+     * @return a random string application name starting with the string {@code "KinesisHealthCheck"}, so it can be
+     * easily identified.
+     */
+    private String createRandomApplicationName() {
 
-        private static final String SHARD_ID_MDC_KEY = "ShardId";
+        // Prefix the application
+        String applicationName = String.format("KinesisHealthCheck-%s-%s", streamName, UUID.randomUUID().toString());
+        LOG.debug("Using application name [{}]", this.applicationName);
+        return applicationName;
+    }
 
-        private static final Logger log = LoggerFactory.getLogger(KinesisProcessor.class);
+    // TODO: Is static keyword needed here?
+    private class KinesisProcessor implements ShardRecordProcessor {
 
-        private String shardId;
-
-        public final AtomicInteger receivedMessageCount = new AtomicInteger(0);
+        private final Logger log = LoggerFactory.getLogger(KinesisProcessor.class);
 
         // Called at startup time.
         public void initialize(InitializationInput initializationInput) {
-
-            // TODO: Start up a scheduled thread that periodically writes logs into a CloudWatch group.
-            shardId = initializationInput.shardId();
-            MDC.put(SHARD_ID_MDC_KEY, shardId);
-            try {
-                log.info("Initializing @ Sequence: {}", initializationInput.extendedSequenceNumber());
-            } finally {
-                MDC.remove(SHARD_ID_MDC_KEY);
-            }
+            log.debug("Initializing healthCheck for application name [{}]", KinesisHealthCheck.this.applicationName);
         }
 
-        // Called back each time records are available for processing.
+        /**
+         * Called automatically by the AWS Kinesis Client library each time records are available for reading in
+         * Kinesis.
+         *
+         * @param processRecordsInput provided by the AWS SDK and contains the retrieved records.
+         */
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
-            // TODO: Print received logs to the console.
-            MDC.put(SHARD_ID_MDC_KEY, shardId);
             try {
-                log.info("Processing {} record(s)", processRecordsInput.records().size());
-
+                log.debug("Processing {} record(s)", processRecordsInput.records().size());
                 Consumer<KinesisClientRecord> method = r -> {
-                    log.info("Processing record pk: {} -- Seq: {}", r.partitionKey(), r.sequenceNumber());
 
+                    log.trace("Processing record pk: {} -- Seq: {}", r.partitionKey(), r.sequenceNumber());
 
                     final ByteBuffer dataBuffer = processRecordsInput.records().get(0).data().asReadOnlyBuffer();
                     final byte[] dataBytes = new byte[dataBuffer.remaining()];
                     dataBuffer.get(dataBytes);
 
-                    // TODO: Identify if payload is GZipped. If so, unpack.
-                    // After unpacking, check if message is a CloudWatch logs container JSON. This will need to be
-                    // parsed and the log messages extracted.
-
-                    final ByteArrayInputStream dataStream = new ByteArrayInputStream(dataBytes);
-                    try {
-
-                        log.info("Received message # {}: {}", receivedMessageCount.incrementAndGet(),
-                                 new String(ByteStreams.toByteArray(dataStream), StandardCharsets.UTF_8));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    // TODO: Supply the receive data bytes to a callback method that the caller can subscribe to.
                 };
 
                 log.info("[{}] records received", processRecordsInput.records().size());
                 processRecordsInput.records().forEach(method);
-
-                // TODO: Bail after pulling one record.
             } catch (Throwable t) {
                 log.error("Caught throwable while processing records. Aborting.");
                 Runtime.getRuntime().halt(1);
-            } finally {
-                MDC.remove(SHARD_ID_MDC_KEY);
             }
         }
 
         // Handle case when Kinesis subscription lease is lost.
         public void leaseLost(LeaseLostInput leaseLostInput) {
-            MDC.put(SHARD_ID_MDC_KEY, shardId);
-            try {
-                log.info("Lost lease, so terminating.");
-            } finally {
-                MDC.remove(SHARD_ID_MDC_KEY);
-            }
+            log.info("Lost lease, so terminating.");
         }
 
         // Not sure when this is called?
         public void shardEnded(ShardEndedInput shardEndedInput) {
-            MDC.put(SHARD_ID_MDC_KEY, shardId);
+
             try {
                 log.info("Reached shard end checkpointing.");
                 shardEndedInput.checkpointer().checkpoint();
             } catch (Exception e) {
                 log.error("Exception while checkpointing at shard end. Giving up.", e);
-            } finally {
-                MDC.remove(SHARD_ID_MDC_KEY);
             }
         }
 
-        // Since the Kinesis consumer maintains its own threads, we need to gracefully shut those down.
-        // This is called when a shutdown is requested.
+        /**
+         * Since the Kinesis consumer maintains its own threads, we need to gracefully shut those down.
+         * This is called when a shutdown is requested.
+         */
         public void shutdownRequested(ShutdownRequestedInput shutdownRequestedInput) {
-            MDC.put(SHARD_ID_MDC_KEY, shardId);
             try {
                 log.info("Scheduler is shutting down, checkpointing.");
                 shutdownRequestedInput.checkpointer().checkpoint();
             } catch (Exception e) {
                 log.error("Exception while checkpointing at requested shutdown. Giving up.", e);
-            } finally {
-                MDC.remove(SHARD_ID_MDC_KEY);
             }
         }
     }
 
     /**
-     * A tester that can be used to write messages into a Kinesis stream.
-     *
-     * This will be needed when testing.
+     * A tester that can be used to write messages into a Kinesis stream for testing purposes.
+     * Keeping this inline for convenience. TODO: Consider removing in the future.
      */
     public class ProducerTester {
 
@@ -273,21 +258,38 @@ public class KinesisHealthCheck {
         // We won't need to publish data, because CloudWatch is going to do that for us.
         // This is only here for testing purposes.
         private void publishRecord() {
-            if (DO_PUBLISH) {
-                LOG.info("Publishing a record");
-                PutRecordRequest request = PutRecordRequest.builder()
-                                                           .partitionKey(RandomStringUtils.randomAlphabetic(5, 20))
-                                                           .streamName(streamName)
-                                                           .data(SdkBytes.fromUtf8String("hahaha"))
-                                                           .build();
-                try {
-                    kinesisClient.putRecord(request).get();
-                } catch (InterruptedException e) {
-                    LOG.info("Interrupted, assuming shutdown.");
-                } catch (ExecutionException e) {
-                    LOG.error("Exception while sending data to Kinesis. Will try again next cycle.", e);
-                }
+            LOG.info("Publishing a record");
+            PutRecordRequest request = PutRecordRequest.builder()
+                                                       .partitionKey(RandomStringUtils.randomAlphabetic(5, 20))
+                                                       .streamName(streamName)
+                                                       .data(SdkBytes.fromUtf8String("Test record"))
+                                                       .build();
+            try {
+                kinesisClient.putRecord(request).get();
+            } catch (InterruptedException e) {
+                LOG.info("Interrupted, assuming shutdown.");
+            } catch (ExecutionException e) {
+                LOG.error("Exception while sending data to Kinesis. Will try again next cycle.", e);
             }
         }
+    }
+
+    /**
+     * Use for testing only.
+     * TODO: Remove this before release.
+     *
+     * @param args supply the stream and region in a space-separated format eg. test-stream us-east-1
+     */
+    public static void main(String... args) {
+
+        if (args.length < 2) {
+            LOG.error("The stream name and region are required as arguments.");
+            System.exit(1);
+        }
+
+        String streamName = args[0];
+        String region = args[1];
+
+        new KinesisHealthCheck(streamName, region).run();
     }
 }
