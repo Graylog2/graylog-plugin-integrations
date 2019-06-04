@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -71,7 +70,7 @@ public class CloudWatchServiceTest {
 
         // Inspect the log groups returned and verify the contents and size.
         Assert.assertEquals("The number of groups should be because the two responses " +
-                            "with 3 groups each were provided.", 6, logGroupNames.size());
+                                    "with 3 groups each were provided.", 6, logGroupNames.size());
 
         // Loop example to verify presence of a specific log group.
         boolean foundGroup = false;
@@ -82,7 +81,7 @@ public class CloudWatchServiceTest {
         }
         assertTrue(foundGroup);
 
-        // One line presence verification with Java 8 stream.
+        // One line with stream.
         assertTrue(logGroupNames.stream().anyMatch(logGroupName -> logGroupName.equals("group-2")));
     }
 }
