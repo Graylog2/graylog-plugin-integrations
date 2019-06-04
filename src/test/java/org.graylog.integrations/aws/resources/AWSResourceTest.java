@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
@@ -25,6 +26,9 @@ public class AWSResourceTest {
     private KinesisClientBuilder kinesisClientBuilder;
 
     @Mock
+    private CloudWatchLogsClientBuilder logsClientBuilder;
+
+    @Mock
     KinesisClient kinesisClient;
 
     @Before
@@ -35,6 +39,6 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder), new CloudWatchService());
+        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder), new CloudWatchService(logsClientBuilder));
     }
 }

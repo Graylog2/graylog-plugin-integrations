@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutionException;
 public class KinesisService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
-    private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 100;
+    private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
 
     private final KinesisClientBuilder kinesisClientBuilder;

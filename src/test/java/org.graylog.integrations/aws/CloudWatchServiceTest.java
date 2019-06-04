@@ -1,35 +1,81 @@
 package org.graylog.integrations.aws;
 
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
+import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRequest;
+import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
+import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
+import software.amazon.awssdk.services.cloudwatchlogs.paginators.DescribeLogGroupsIterable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
 
 public class CloudWatchServiceTest {
+
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+
+    @Mock
+    private CloudWatchLogsClientBuilder logsClientBuilder;
+
+    @Mock
+    private CloudWatchLogsClient cloudWatchLogsClient;
+
+    @Mock
+    DescribeLogGroupsIterable logGroupsIterable;
 
     private CloudWatchService cloudWatchService;
 
     @Before
     public void setUp() {
 
-        cloudWatchService = new CloudWatchService();
+        cloudWatchService = new CloudWatchService(logsClientBuilder);
     }
 
     @Test
     public void testLogGroupNames() {
 
-        List<String> logGroups = cloudWatchService.fakeLogGroups();
+        when(logsClientBuilder.region(isA(Region.class))).thenReturn(logsClientBuilder);
+        when(logsClientBuilder.build()).thenReturn(cloudWatchLogsClient);
 
-        boolean foundLogGroupName = false;
-        for (String logGroup : logGroups) {
-            if (logGroup.equals("test-group1")) {
-                foundLogGroupName = true;
+        DescribeLogGroupsResponse fakeLogGroupResponse = DescribeLogGroupsResponse
+                .builder()
+                .logGroups(LogGroup.builder().logGroupName("group-1").build(),
+                           LogGroup.builder().logGroupName("group-2").build(),
+                           LogGroup.builder().logGroupName("group-3").build())
+                .build();
+        List<DescribeLogGroupsResponse> responses = Arrays.asList(fakeLogGroupResponse, fakeLogGroupResponse);
+        when(logGroupsIterable.iterator()).thenReturn(responses.iterator());
+        when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
+
+        ArrayList<String> logGroupNames = cloudWatchService.getLogGroupNames("us-east-1");
+        Assert.assertEquals("The number of groups should be because the two responses " +
+                            "with 3 groups each were provided.", 3, logGroupNames.size());
+
+        // Loop example.
+        boolean foundGroup = false;
+        for (String logGroupName : logGroupNames) {
+            if (logGroupName.equals("group-1")) {
+                foundGroup = true;
             }
         }
-        assertTrue(foundLogGroupName);
-        assertEquals(2, logGroups.size());
+        assertTrue(foundGroup);
+
+        // One line with stream.
+        assertTrue(logGroupNames.stream().anyMatch(logGroupName -> logGroupName.equals("group-2")));
     }
 }

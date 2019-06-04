@@ -2,6 +2,7 @@ package org.graylog.integrations.aws;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogStreamsRequest;
@@ -14,11 +15,12 @@ import java.util.List;
 
 public class CloudWatchService {
 
-    private CloudWatchLogsClient logsClient;
+    private CloudWatchLogsClientBuilder logsClientBuilder;
 
     @Inject
-    public CloudWatchService() {
+    public CloudWatchService(CloudWatchLogsClientBuilder logsClientBuilder) {
 
+        this.logsClientBuilder = logsClientBuilder;
     }
 
     static CloudWatchLogsClient createCloudWatchLogClient(String region) {
@@ -30,10 +32,10 @@ public class CloudWatchService {
         return logsClient;
     }
 
-    public CloudWatchLogsClient createGetLogRequest(String logGroupName, String logStreamName, boolean fromStart) {
-        logsClient.getLogEvents(createGetLogEventRequest(logGroupName, logStreamName, fromStart));
-        return logsClient;
-    }
+//    public CloudWatchLogsClient createGetLogRequest(String logGroupName, String logStreamName, boolean fromStart) {
+//        logsClient.getLogEvents(createGetLogEventRequest(logGroupName, logStreamName, fromStart));
+//        return logsClient;
+//    }
 
     static GetLogEventsRequest createGetLogEventRequest(String logGroupName, String logStreamName, boolean fromStart) {
         GetLogEventsRequest getLogEventsRequest = GetLogEventsRequest.builder()
@@ -56,7 +58,7 @@ public class CloudWatchService {
      */
     public ArrayList<String> getLogGroupNames(String region) {
 
-        final CloudWatchLogsClient cloudWatchLogsClient = CloudWatchService.createCloudWatchLogClient(region);
+        final CloudWatchLogsClient cloudWatchLogsClient = logsClientBuilder.region(Region.of(region)).build();
         final DescribeLogGroupsRequest describeLogGroupsRequest = DescribeLogGroupsRequest.builder().build();
         final DescribeLogGroupsIterable responses = cloudWatchLogsClient.describeLogGroupsPaginator(describeLogGroupsRequest);
 
@@ -80,13 +82,5 @@ public class CloudWatchService {
             streamNameList.add(logStreamName);
         }
         return streamNameList;
-    }
-
-    List<String> fakeLogGroups() {
-
-        ArrayList<String> logGroups = new ArrayList<>();
-        logGroups.add("test-group1");
-        logGroups.add("test-group2");
-        return logGroups;
     }
 }

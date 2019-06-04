@@ -23,6 +23,9 @@ import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
@@ -71,6 +74,8 @@ public class IntegrationsModule extends PluginModule {
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         addRestResource(AWSResource.class);
+
+        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
     }
 }
