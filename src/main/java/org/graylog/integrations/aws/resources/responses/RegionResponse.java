@@ -23,9 +23,9 @@ public abstract class RegionResponse {
     @JsonProperty
     public abstract String displayValue();
 
-    public static RegionResponse create(@JsonProperty("regionId") String regionId,
-                                        @JsonProperty("regionDescription") String regionDescription,
-                                        @JsonProperty("displayValue") String displayValue ) {
+    public static RegionResponse create(@JsonProperty("region_id") String regionId,
+                                        @JsonProperty("region_description") String regionDescription,
+                                        @JsonProperty("display_value") String displayValue ) {
         return new AutoValue_RegionResponse(regionId, regionDescription, displayValue);
     }
 }

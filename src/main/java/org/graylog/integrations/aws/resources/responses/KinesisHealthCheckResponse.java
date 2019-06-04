@@ -23,7 +23,7 @@ public abstract class KinesisHealthCheckResponse {
     public abstract String message();
 
     public static KinesisHealthCheckResponse create(@JsonProperty("success") boolean success,
-                                                    @JsonProperty("logType") String logType,
+                                                    @JsonProperty("log_type") String logType,
                                                     @JsonProperty("message") String message) {
         return new AutoValue_KinesisHealthCheckResponse(success, logType, message);
     }
