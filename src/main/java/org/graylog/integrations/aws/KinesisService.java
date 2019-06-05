@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
@@ -9,6 +10,7 @@ import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.graylog.integrations.aws.service.AWSService;
+import org.graylog2.plugin.Tools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -18,51 +20,135 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
+import software.amazon.awssdk.services.kinesis.model.Record;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.zip.GZIPInputStream;
 
 public class KinesisService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
+    public static final int EIGHT_BITS = 8;
 
     private final KinesisClientBuilder kinesisClientBuilder;
+    private ObjectMapper objectMapper;
 
     @Inject
-    public KinesisService(KinesisClientBuilder kinesisClientBuilder) {
+    public KinesisService(KinesisClientBuilder kinesisClientBuilder,
+                          ObjectMapper objectMapper) {
 
         this.kinesisClientBuilder = kinesisClientBuilder;
+        this.objectMapper = objectMapper;
     }
 
-    public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest heathCheckRequest) {
+    public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
-        // TODO: Check if the Kinesis stream exists.
-        // TODO: Replace with result for actual stream check.
-        boolean streamExists = true;
+        LOG.info("Conducting healthCheck");
+
+        // List all streams and make sure the indicated stream is in the list.
+        List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
+
+        boolean streamExists = kinesisStreams.stream()
+                                             .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
                                                      "The stream does not exist."); // TODO: Include specific error message here.
         }
 
-        // TODO: Try to read log message from Kinesis.
+        List<Record> records = readKinesisRecords(request);
+        if (records.size() == 0) {
+            return KinesisHealthCheckResponse.create(false,
+                                                     AWSLogMessage.Type.UNKNOWN.toString(),
+                                                     ":( The Kinesis stream does not contain any messages yet");
+        }
 
-        // Detect the log message format
-        // TODO: Replace with actual log message received from Kinesis stream.
-        String message = "2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK";
-        AWSLogMessage awsLogMessage = new AWSLogMessage(message);
+        // Convert the message to a string
+        // TODO: Inspect message payload here. If GZipped, then extract and inspect contents.
+        // GZipped payloads are likely from Cloud Watch.
+        byte[] payloadBytes = records.get(0).data().asByteArray();
 
-        // TODO: Add parsing logic
-        // Add a codec that knows how to parse each message type.
+        if (isCompressed(payloadBytes)) {
+            // Parse as CloudWatch
+            final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
+
+            // Extract messages, so that they can be committed to journal one by one.
+            final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
+
+            // Pick out the first log entry.
+            Optional<CloudWatchLogEntry> logEntry =
+                    data.logEvents.stream()
+                                  .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
+
+            // TODO: Add error checking here for optional. If no messages were returned, then return a respond accordingly.
+            return detectMessage(logEntry.get().message);
+        }
+
+        // The log message is in plain text. Go ahead and parse it straight up.
+        return detectMessage(new String(payloadBytes));
+    }
+
+    /**
+     * Detect the message type
+     * @param logMessage A string containing the actual log message.
+     * @return a fully built {@code KinesisHealthCheckResponse}.
+     */
+    private KinesisHealthCheckResponse detectMessage(String logMessage) {
+
+        AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
+
+        AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
+
+        // Build the specific response type for the message.
+        String responseMessage = String.format("Success! The message is an %s!", type.getDescription());
+        if (type.isUnknown()) {
+            responseMessage = "The message is of an unknown type";
+        }
 
         return KinesisHealthCheckResponse.create(true,
                                                  awsLogMessage.detectLogMessageType().toString(),
-                                                 "Success! The message is an AWS FlowLog!");
+                                                 responseMessage);
+    }
+
+    /**
+     * Read the first or last records from the stream.
+     *
+     * @param request The request details including the region and stream name.
+     * @return
+     */
+    private List<Record> readKinesisRecords(KinesisHealthCheckRequest request) {
+
+        // Records can be obtained directly from a Kinesis stream using GetRecords.
+        // https://docs.aws.amazon.com/kinesis/latest/APIReference/API_GetRecords.html
+        // https://docs.aws.amazon.com/streams/latest/dev/developing-consumers-with-sdk.html#kinesis-using-sdk-java-get-data-getrecords
+
+        return new ArrayList<>();
+    }
+
+    /**
+     * Checks if the supplied stream is GZip compressed.
+     *
+     * @param bytes a byte array.
+     * @return true if the byte array is GZip compressed and false if not.
+     */
+    public boolean isCompressed(byte[] bytes) {
+        if ((bytes == null) || (bytes.length < 2)) {
+            return false;
+        } else {
+
+            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
+            boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
+            boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS); // The >> operator shifts the GZIP magic number to the second byte.
+            return firstByteIsMagicNumber && secondByteIsMagicNumber;
+        }
     }
 
     /**
@@ -85,7 +171,7 @@ public class KinesisService {
         }
 
         final KinesisClient kinesisClient =
-                kinesisClientBuilder.region(Region.of(regionName)).build();
+                KinesisClient.builder().region(Region.of(regionName)).build();
 
         // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
@@ -104,8 +190,8 @@ public class KinesisService {
                 retryer.call(() -> {
                     final String lastStreamName = streamNames.get(streamNames.size() - 1);
                     final ListStreamsRequest moreStreamsRequest = ListStreamsRequest.builder()
-                            .exclusiveStartStreamName(lastStreamName)
-                            .limit(KINESIS_LIST_STREAMS_LIMIT).build();
+                                                                                    .exclusiveStartStreamName(lastStreamName)
+                                                                                    .limit(KINESIS_LIST_STREAMS_LIMIT).build();
                     final ListStreamsResponse moreSteamsResponse = kinesisClient.listStreams(moreStreamsRequest);
                     streamNames.addAll(moreSteamsResponse.streamNames());
 

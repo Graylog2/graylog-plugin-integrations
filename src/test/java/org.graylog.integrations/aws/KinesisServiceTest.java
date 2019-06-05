@@ -1,5 +1,8 @@
 package org.graylog.integrations.aws;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
@@ -15,6 +18,7 @@ import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -42,7 +46,7 @@ public class KinesisServiceTest {
     public void setUp() {
 
         // Create an AWS client with a mock KinesisClientBuilder
-        kinesisService = new KinesisService(kinesisClientBuilder);
+        kinesisService = new KinesisService(kinesisClientBuilder, new ObjectMapper());
     }
 
     @Test
@@ -70,9 +74,9 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void healthCheck() {
+    public void healthCheck() throws ExecutionException, IOException {
 
-        KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create("us-east-1", "some-group", "", "");
+        KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create("eu-west-1", "dtorrey-test-flowlogs", "", "");
         KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point

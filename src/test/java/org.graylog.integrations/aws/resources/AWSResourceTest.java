@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws.resources;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.service.AWSService;
@@ -39,6 +40,6 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder), new CloudWatchService(logsClientBuilder));
+        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder, new ObjectMapper()), new CloudWatchService(logsClientBuilder));
     }
 }

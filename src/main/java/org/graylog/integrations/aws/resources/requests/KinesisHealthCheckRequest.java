@@ -14,7 +14,7 @@ public abstract class KinesisHealthCheckRequest {
     public abstract String region();
 
     @JsonProperty
-    public abstract String logGroupName();
+    public abstract String streamName();
 
     @JsonProperty
     public abstract String awsAccessKeyId();
@@ -23,9 +23,9 @@ public abstract class KinesisHealthCheckRequest {
     public abstract String awsSecretAccessKey();
 
     public static KinesisHealthCheckRequest create(@JsonProperty("region") String region,
-                                                   @JsonProperty("log_group_name") String logGroupName,
+                                                   @JsonProperty("stream_name") String streamName,
                                                    @JsonProperty("aws_access_key_id") String awsAccessKeyId,
                                                    @JsonProperty("aws_secret_access_key") String awsSecretAccessKey) {
-        return new AutoValue_KinesisHealthCheckRequest(region, logGroupName, awsAccessKeyId, awsSecretAccessKey);
+        return new AutoValue_KinesisHealthCheckRequest(region, streamName, awsAccessKeyId, awsSecretAccessKey);
     }
 }

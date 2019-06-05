@@ -39,7 +39,7 @@ public class AWSLogMessage {
      *
      * @return true if message is a flowlog.
      */
-    private boolean isFlowLog() {
+    public boolean isFlowLog() {
         boolean hasAction = logMessage.contains("ACCEPT") || logMessage.contains("REJECT");
         long spaceCount = logMessage.chars().filter(Character::isSpaceChar).count();
 
@@ -49,7 +49,21 @@ public class AWSLogMessage {
     // One enum value should be added for each type of log message that auto-detect is supported for.
     public enum Type {
 
-        FLOW_LOGS, // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
-        UNKNOWN
+        FLOW_LOGS("AWS Flow Log"), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+        UNKNOWN("Unknown log message");
+
+        private String description;
+
+        Type(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public boolean isUnknown() {
+            return this == UNKNOWN;
+        }
     }
 }
