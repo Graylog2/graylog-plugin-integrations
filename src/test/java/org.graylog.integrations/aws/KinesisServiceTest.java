@@ -29,6 +29,7 @@ public class KinesisServiceTest {
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
+
     @Mock
     private KinesisClientBuilder kinesisClientBuilder;
 
