@@ -27,11 +27,9 @@ import software.amazon.kinesis.retrieval.KinesisClientRecord;
 import software.amazon.kinesis.retrieval.RetrievalConfig;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -58,13 +56,22 @@ import java.util.function.Consumer;
 public class KinesisHealthCheck {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisHealthCheck.class);
+    public static final int BLOCK_TIMEOUT = 60;
+    public static final TimeUnit BLOCK_TIMEOUT_UNITS = TimeUnit.SECONDS;
 
     private final String streamName;
     private final Region region;
     private final KinesisAsyncClient kinesisClient;
     private final String applicationName;
 
-    private KinesisHealthCheck(String streamName, String region) {
+    // Latch will block until a message is received or a timeout is elapsed.
+    private CountDownLatch messageReceivedLatch = new CountDownLatch(1);
+
+    private byte[] messageContent = null;
+    private ScheduledExecutorService producerExecutor;
+    private Scheduler scheduler;
+
+    public KinesisHealthCheck(String streamName, String region) {
 
         // Validate input.
         Preconditions.checkArgument(StringUtils.isNotBlank(streamName), "Stream Name must not be blank");
@@ -76,14 +83,29 @@ public class KinesisHealthCheck {
         this.applicationName = createRandomApplicationName();
     }
 
-    public void start() {
+    /**
+     * Block the caller and wait for a message to be received.
+     */
+    public byte[] getMessageBlocking() {
 
         run();
+
+        Boolean await = null;
+        try {
+            await = messageReceivedLatch.await(BLOCK_TIMEOUT, BLOCK_TIMEOUT_UNITS);
+        } catch (InterruptedException e) {
+            // TODO: Do we need to shut down the Kinesis stream reader now?
+            LOG.error("The healthCheck operation was interrupted while waiting for a message to be received from the stream.");
+        }
+
+        shutdown();
+
+        return messageContent;
     }
 
     private void run() {
 
-        ScheduledExecutorService producerExecutor = Executors.newSingleThreadScheduledExecutor();
+        producerExecutor = Executors.newSingleThreadScheduledExecutor();
 
         // The application name is a unique identifier that is used when creating the Kinesis Subscriber.
         final String applicationName = createRandomApplicationName();
@@ -101,7 +123,7 @@ public class KinesisHealthCheck {
         final PollingConfig pollingConfig = new PollingConfig(streamName, kinesisClient);
         pollingConfig.maxRecords(1);
 
-        final Scheduler scheduler = new Scheduler(
+        scheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),
                 configsBuilder.coordinatorConfig(),
                 configsBuilder.leaseManagementConfig(),
@@ -114,14 +136,9 @@ public class KinesisHealthCheck {
         final Thread schedulerThread = new Thread(scheduler);
         schedulerThread.setDaemon(true);
         schedulerThread.start();
+    }
 
-        System.out.println("Press enter to shutdown");
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        try {
-            reader.readLine();
-        } catch (IOException ioex) {
-            LOG.error("Caught exception while waiting for confirm. Shutting down.", ioex);
-        }
+    private void shutdown() {
 
         producerExecutor.shutdownNow();
 
@@ -157,7 +174,7 @@ public class KinesisHealthCheck {
 
         // Prefix the application
         String applicationName = String.format("KinesisHealthCheck-%s-%s", streamName, UUID.randomUUID().toString());
-        LOG.debug("Using application name [{}]", this.applicationName);
+        LOG.info("Using application name [{}]", this.applicationName);
         return applicationName;
     }
 
@@ -168,7 +185,7 @@ public class KinesisHealthCheck {
 
         // Called at startup time.
         public void initialize(InitializationInput initializationInput) {
-            log.debug("Initializing healthCheck for application name [{}]", KinesisHealthCheck.this.applicationName);
+            LOG.info("Initializing healthCheck for application name [{}]", KinesisHealthCheck.this.applicationName);
         }
 
         /**
@@ -180,16 +197,16 @@ public class KinesisHealthCheck {
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
             try {
-                log.debug("Processing {} record(s)", processRecordsInput.records().size());
+                LOG.info("Processing {} record(s)", processRecordsInput.records().size());
                 Consumer<KinesisClientRecord> method = r -> {
 
                     log.trace("Processing record pk: {} -- Seq: {}", r.partitionKey(), r.sequenceNumber());
 
                     final ByteBuffer dataBuffer = processRecordsInput.records().get(0).data().asReadOnlyBuffer();
-                    final byte[] dataBytes = new byte[dataBuffer.remaining()];
-                    dataBuffer.get(dataBytes);
+                    KinesisHealthCheck.this.messageContent = new byte[dataBuffer.remaining()];
 
-                    // TODO: Supply the receive data bytes to a callback method that the caller can subscribe to.
+                    // Release the blocking latch to indicate that the message data has been received.
+                    messageReceivedLatch.countDown();
                 };
 
                 log.info("[{}] records received", processRecordsInput.records().size());
