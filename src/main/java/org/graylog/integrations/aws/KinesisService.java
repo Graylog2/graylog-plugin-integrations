@@ -5,6 +5,7 @@ import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
@@ -23,6 +25,7 @@ import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 
 import javax.inject.Inject;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class KinesisService {
 
@@ -98,6 +102,7 @@ public class KinesisService {
 
     /**
      * Detect the message type
+     *
      * @param logMessage A string containing the actual log message.
      * @return a fully built {@code KinesisHealthCheckResponse}.
      */
@@ -126,9 +131,44 @@ public class KinesisService {
      */
     private List<Record> readKinesisRecords(KinesisHealthCheckRequest request) {
 
-        // Records can be obtained directly from a Kinesis stream using GetRecords.
-        // https://docs.aws.amazon.com/kinesis/latest/APIReference/API_GetRecords.html
-        // https://docs.aws.amazon.com/streams/latest/dev/developing-consumers-with-sdk.html#kinesis-using-sdk-java-get-data-getrecords
+        // Mock up Kinesis CloudWatch subscription record.
+        // TODO: This will be substituted with actual Kinesis record retrieval later.
+        String messageData = "{\n" +
+                             "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                             "  \"owner\": \"459220251735\",\n" +
+                             "  \"logGroup\": \"test-flowlogs\",\n" +
+                             "  \"logStream\": \"eni-3423-all\",\n" +
+                             "  \"subscriptionFilters\": [\n" +
+                             "    \"filter\"\n" +
+                             "  ],\n" +
+                             "  \"logEvents\": [\n" +
+                             "    {\n" +
+                             "      \"id\": \"3423\",\n" +
+                             "      \"timestamp\": 1559738144000,\n" +
+                             "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                             "    },\n" +
+                             "    {\n" +
+                             "      \"id\": \"3423\",\n" +
+                             "      \"timestamp\": 1559738144000,\n" +
+                             "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                             "    }\n" +
+                             "  ]\n" +
+                             "}";
+
+        try {
+            // Compress the test record, as CloudWatch subscriptions are compressed.
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
+            GZIPOutputStream gzip = new GZIPOutputStream(bos);
+            gzip.write(messageData.getBytes());
+            gzip.close();
+            byte[] compressed = bos.toByteArray();
+            bos.close();
+
+            Record record = Record.builder().data(SdkBytes.fromByteArray(compressed)).build();
+            return Lists.newArrayList(record);
+        } catch (Exception e) {
+            LOG.error("Failed to mock up Kinesis record", e);
+        }
 
         return new ArrayList<>();
     }

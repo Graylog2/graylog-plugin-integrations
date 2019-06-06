@@ -16,6 +16,10 @@ import com.google.common.base.MoreObjects;
  * </pre>
  */
 public class CloudWatchLogEvent {
+
+    @JsonProperty("id")
+    public long id;
+
     @JsonProperty("timestamp")
     public long timestamp;
 
