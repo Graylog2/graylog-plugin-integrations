@@ -7,6 +7,7 @@ import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -73,6 +74,7 @@ public class KinesisServiceTest {
         assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
     }
 
+    @Ignore
     @Test
     public void healthCheck() throws ExecutionException, IOException {
 

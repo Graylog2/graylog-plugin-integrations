@@ -1,6 +1,6 @@
 package org.graylog.integrations.aws;
 
-import org.junit.Assert;
+import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

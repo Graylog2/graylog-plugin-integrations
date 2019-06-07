@@ -1,4 +1,4 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.cloudwatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
