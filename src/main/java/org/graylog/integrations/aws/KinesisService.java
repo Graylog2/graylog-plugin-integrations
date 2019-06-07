@@ -1,11 +1,13 @@
 package org.graylog.integrations.aws;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.common.collect.Lists;
+import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
@@ -14,7 +16,11 @@ import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.graylog.integrations.aws.service.AWSService;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
+import org.graylog2.plugin.configuration.Configuration;
+import org.graylog2.plugin.inputs.codecs.Codec;
+import org.graylog2.plugin.journal.RawMessage;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -46,15 +53,21 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     public static final int EIGHT_BITS = 8;
 
+    private Configuration configuration;
     private final KinesisClientBuilder kinesisClientBuilder;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+    private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
     @Inject
-    public KinesisService(KinesisClientBuilder kinesisClientBuilder,
-                          ObjectMapper objectMapper) {
+    public KinesisService(@Assisted Configuration configuration,
+                          KinesisClientBuilder kinesisClientBuilder,
+                          ObjectMapper objectMapper,
+                          Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
 
+        this.configuration = configuration;
         this.kinesisClientBuilder = kinesisClientBuilder;
         this.objectMapper = objectMapper;
+        this.availableCodecs = availableCodecs;
     }
 
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
@@ -110,8 +123,8 @@ public class KinesisService {
      * Detect the message type
      *
      * @param logMessage A string containing the actual log message.
-     * @param streamName
-     * @param logGroupName
+     * @param streamName The stream name.
+     * @param logGroupName The log group name.
      * @return a fully built {@code KinesisHealthCheckResponse}.
      */
     private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
@@ -127,10 +140,26 @@ public class KinesisService {
 
             // Parse the Flow Log message
             final CloudWatchLogEntry logEvent = new CloudWatchLogEntry(streamName, logGroupName, DateTime.now().getMillis() / 1000, logMessage);
-            final FlowLogMessage flowLogMessage = FlowLogMessage.fromLogEvent(logEvent);
 
-            // TODO: Convert message to JSON format.
+            // Look up the codec by name
+            final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(type.getCodecName());
+            if (codecFactory == null) {
+                LOG.error("A codec with name [{}] could not be found.", type.getCodecName());
+                return null;
+            }
+
+            // Parse the message with the selected codec.
+            // TODO: Is this codec the correct one to supply?
+            final Codec codec = codecFactory.create(configuration);
+
             // Load up Flow Log codec, parse the message and convert it to GELF JSON
+            try {
+                final Message fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
+                // TODO convert fullyParsedMessage to JSON format and add to response.
+            } catch (JsonProcessingException e) {
+                LOG.error("An error occurred decoding Flow Log message.", e);
+                // TODO: Return appropriate error message here.
+            }
         }
         else if (type.isUnknown()) {
             responseMessage = "The message is of an unknown type";

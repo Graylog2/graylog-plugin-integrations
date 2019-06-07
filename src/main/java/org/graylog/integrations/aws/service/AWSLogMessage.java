@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws.service;
 
+import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+
 /**
  * Supports the ability to automatically parse
  */
@@ -49,17 +51,27 @@ public class AWSLogMessage {
     // One enum value should be added for each type of log message that auto-detect is supported for.
     public enum Type {
 
-        FLOW_LOGS("AWS Flow Log"), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
-        UNKNOWN("Unknown log message");
+        FLOW_LOGS("AWS Flow Log", CloudWatchRawLogCodec.NAME), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+        // TODO: Consider renaming this codec to not include the name CloudWatch, since the logs did not necessarily come from CloudWatch.
+        UNKNOWN("Unknown log message", CloudWatchRawLogCodec.NAME);
 
         private String description;
 
-        Type(String description) {
+        // The codec name, which is usually defined as a constant at the top of the codec class.
+        private String codecName;
+
+        Type(String description, String codecName) {
+
             this.description = description;
+            this.codecName = codecName;
         }
 
         public String getDescription() {
             return description;
+        }
+
+        public String getCodecName() {
+            return codecName;
         }
 
         public boolean isUnknown() {
