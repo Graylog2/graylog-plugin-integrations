@@ -9,11 +9,13 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
+import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.Tools;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -60,27 +62,27 @@ public class KinesisService {
         LOG.info("Conducting healthCheck");
 
         // List all streams and make sure the indicated stream is in the list.
-        List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
+        final List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
 
-        boolean streamExists = kinesisStreams.stream()
+        final boolean streamExists = kinesisStreams.stream()
                                              .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     "The stream does not exist."); // TODO: Include specific error message here.
+                                                     "The stream does not exist.", ""); // TODO: Include specific error message here.
         }
 
-        List<Record> records = readKinesisRecords(request);
+        final List<Record> records = readKinesisRecords(request);
         if (records.size() == 0) {
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     ":( The Kinesis stream does not contain any messages yet");
+                                                     ":( The Kinesis stream does not contain any messages yet", "");
         }
 
         // Convert the message to a string
         // TODO: Inspect message payload here. If GZipped, then extract and inspect contents.
         // GZipped payloads are likely from Cloud Watch.
-        byte[] payloadBytes = records.get(0).data().asByteArray();
+        final byte[] payloadBytes = records.get(0).data().asByteArray();
 
         if (isCompressed(payloadBytes)) {
             // Parse as CloudWatch
@@ -95,34 +97,48 @@ public class KinesisService {
                                   .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
 
             // TODO: Add error checking here for optional. If no messages were returned, then return a respond accordingly.
-            return detectMessage(logEntry.get().message);
+            // TODO: Identify log group name and pass in here if possible?
+            return detectMessage(logEntry.get().message, request.streamName(), "");
         }
 
         // The log message is in plain text. Go ahead and parse it straight up.
-        return detectMessage(new String(payloadBytes));
+        // TODO: Identify log group name and pass in here if possible?
+        return detectMessage(new String(payloadBytes), request.streamName(), "");
     }
 
     /**
      * Detect the message type
      *
      * @param logMessage A string containing the actual log message.
+     * @param streamName
+     * @param logGroupName
      * @return a fully built {@code KinesisHealthCheckResponse}.
      */
-    private KinesisHealthCheckResponse detectMessage(String logMessage) {
+    private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
 
-        AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
+        final AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
 
-        AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
+        final AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
 
         // Build the specific response type for the message.
         String responseMessage = String.format("Success! The message is an %s!", type.getDescription());
-        if (type.isUnknown()) {
+
+        if (type == AWSLogMessage.Type.FLOW_LOGS) {
+
+            // Parse the Flow Log message
+            final CloudWatchLogEntry logEvent = new CloudWatchLogEntry(streamName, logGroupName, DateTime.now().getMillis() / 1000, logMessage);
+            final FlowLogMessage flowLogMessage = FlowLogMessage.fromLogEvent(logEvent);
+
+            // TODO: Convert message to JSON format.
+            // Load up Flow Log codec, parse the message and convert it to GELF JSON
+        }
+        else if (type.isUnknown()) {
             responseMessage = "The message is of an unknown type";
         }
 
         return KinesisHealthCheckResponse.create(true,
                                                  awsLogMessage.detectLogMessageType().toString(),
-                                                 responseMessage);
+                                                 responseMessage, "");
     }
 
     /**
@@ -135,7 +151,7 @@ public class KinesisService {
 
         // Mock up Kinesis CloudWatch subscription record.
         // TODO: This will be substituted with actual Kinesis record retrieval later.
-        String messageData = "{\n" +
+        final String messageData = "{\n" +
                              "  \"messageType\": \"DATA_MESSAGE\",\n" +
                              "  \"owner\": \"459220251735\",\n" +
                              "  \"logGroup\": \"test-flowlogs\",\n" +
@@ -159,14 +175,14 @@ public class KinesisService {
 
         try {
             // Compress the test record, as CloudWatch subscriptions are compressed.
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
-            GZIPOutputStream gzip = new GZIPOutputStream(bos);
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
+            final GZIPOutputStream gzip = new GZIPOutputStream(bos);
             gzip.write(messageData.getBytes());
             gzip.close();
-            byte[] compressed = bos.toByteArray();
+            final byte[] compressed = bos.toByteArray();
             bos.close();
 
-            Record record = Record.builder().data(SdkBytes.fromByteArray(compressed)).build();
+            final Record record = Record.builder().data(SdkBytes.fromByteArray(compressed)).build();
             return Lists.newArrayList(record);
         } catch (Exception e) {
             LOG.error("Failed to mock up Kinesis record", e);
@@ -187,8 +203,8 @@ public class KinesisService {
         } else {
 
             // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
-            boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
-            boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS); // The >> operator shifts the GZIP magic number to the second byte.
+            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
+            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS); // The >> operator shifts the GZIP magic number to the second byte.
             return firstByteIsMagicNumber && secondByteIsMagicNumber;
         }
     }
@@ -207,7 +223,7 @@ public class KinesisService {
         // TODO: Remove this IF check and always provided the string credentials. This will prevent the AWS SDK
         //  from reading credentials from environment variables, which we definitely do not want to do.
         if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
-            StaticCredentialsProvider credentialsProvider =
+            final StaticCredentialsProvider credentialsProvider =
                     StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
             kinesisClientBuilder.credentialsProvider(credentialsProvider);
         }
@@ -223,7 +239,7 @@ public class KinesisService {
                 .withStopStrategy(StopStrategies.stopAfterAttempt(KINESIS_LIST_STREAMS_MAX_ATTEMPTS))
                 .build();
 
-        ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
+        final ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
         final List<String> streamNames = new ArrayList<>(listStreamsResponse.streamNames());
 

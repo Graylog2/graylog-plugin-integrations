@@ -20,11 +20,18 @@ public abstract class KinesisHealthCheckResponse {
 
     // Some specific success or error message from AWS SDK.
     @JsonProperty
-    public abstract String message();
+    public abstract String explanation();
+
+    // A JSON representation of the message. This will be displayed in the UI to show the user
+    // that we have identified the message type. The user can then verify that the parsed
+    // message looks correct.
+    @JsonProperty
+    public abstract String jsonMessage();
 
     public static KinesisHealthCheckResponse create(@JsonProperty("success") boolean success,
                                                     @JsonProperty("log_type") String logType,
-                                                    @JsonProperty("message") String message) {
-        return new AutoValue_KinesisHealthCheckResponse(success, logType, message);
+                                                    @JsonProperty("explanation") String explanation,
+                                                    @JsonProperty("json_message") String jsonMessage) {
+        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation);
     }
 }
