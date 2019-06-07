@@ -1,8 +1,11 @@
 package org.graylog.integrations.aws.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
@@ -37,6 +40,15 @@ public class AWSService {
     //TODO Add getAWSServices List
     //List that contains all the supported AWS services (i.e. Cloudwatch, Kinesis)
 
-    // TODO GET getUserCredentials
+    public static boolean validCredentials(String accessKeyId, String secretAccessKey) {
+        // Checking credentials are valid
+        boolean validCredentials = false;
+        if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
+            StaticCredentialsProvider credentialsProvider =
+                    StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
+            validCredentials = true;
+        }
+        return validCredentials;
+    }
 
 }
