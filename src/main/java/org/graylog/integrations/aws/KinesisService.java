@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
-import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 
@@ -111,4 +110,9 @@ public class KinesisService {
     // TODO Subscribe to Kinesis Stream
 
     // TODO getRecord
+
+    public void retrieveLogs(String kinesisStream) {
+
+    }
+
 }

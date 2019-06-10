@@ -48,6 +48,8 @@ public class AWSService {
                     StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
             validCredentials = true;
         }
+        // TODO throw an exception (not auth excp?), return a credentials provider
+        // Content Pack Exception
         return validCredentials;
     }
 
