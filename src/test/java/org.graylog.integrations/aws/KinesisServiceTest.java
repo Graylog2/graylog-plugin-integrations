@@ -132,7 +132,7 @@ public class KinesisServiceTest {
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             TEST_STREAM_1, "", "");
+                                                                             TEST_STREAM_1, "", "", "");
         KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point

@@ -69,9 +69,25 @@ public class KinesisService {
         this.availableCodecs = availableCodecs;
     }
 
+    /**
+     * The Health Check performs the following actions:
+     *
+     * 1) Check if the supplied stream exists.
+     * 2) Retrieve a log message from the indicated Kinesis stream.
+     * 3) Detect the type of log message.
+     * 4) Parse the message if it's a known type of message.
+     *
+     * @param request The request, which indicates which stream region to health check
+     * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
+     * message.
+     * @throws ExecutionException
+     * @throws IOException
+     */
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
-        LOG.info("Conducting healthCheck");
+        LOG.debug("Executing healthCheck");
+
+        LOG.debug("Getting a list of streams to find out if the indicated stream exists");
 
         // List all streams and make sure the indicated stream is in the list.
         final List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
@@ -79,20 +95,23 @@ public class KinesisService {
         final boolean streamExists = kinesisStreams.stream()
                                                    .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
+            String explanation = "The requested stream was not found.";
+            LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     "The stream does not exist.", ""); // TODO: Include specific error message here.
+                                                     explanation, request.logGroupName()); // TODO: Include specific error message here.
         }
 
         final List<Record> records = readKinesisRecords(request);
         if (records.size() == 0) {
+            LOG.error("No streams were found.");
+            String explanation = "The Kinesis stream does not contain any messages.";
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     ":( The Kinesis stream does not contain any messages yet", "");
+                                                     explanation, request.logGroupName());
         }
 
-        // Convert the message to a string
-        // GZipped payloads are likely from Cloud Watch.
+        // Handle compressed/GZipped payloads. These are likely from Cloud Watch.
         final byte[] payloadBytes = records.get(0).data().asByteArray();
         if (isCompressed(payloadBytes)) {
             // Parse as CloudWatch
@@ -101,19 +120,26 @@ public class KinesisService {
             // Extract messages, so that they can be committed to journal one by one.
             final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
 
-            // Pick out the first log entry.
-            Optional<CloudWatchLogEntry> logEntry =
+            // Pick just one log entry.
+            Optional<CloudWatchLogEntry> logEntryOptional =
                     data.logEvents.stream()
                                   .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
 
-            // TODO: Add error checking here for optional. If no messages were returned, then return a respond accordingly.
+            if (!logEntryOptional.isPresent()) {
+                return KinesisHealthCheckResponse.create(false,
+                                                         AWSLogMessage.Type.UNKNOWN.toString(),
+                                                         "The Kinesis stream does not contain any messages.", request.logGroupName());
+            }
+
             // TODO: Identify log group name and pass in here if possible? This would come from the request.
-            return detectMessage(logEntry.get().message, request.streamName(), "");
+            return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
         }
+
+        // Fall through handles all non-compressed payloads.
 
         // The log message is in plain text. Go ahead and parse it straight up.
         // TODO: Identify log group name and pass in here if possible? This would come from the request.
-        return detectMessage(new String(payloadBytes), request.streamName(), "");
+        return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
     }
 
     /**
@@ -168,7 +194,7 @@ public class KinesisService {
 
         return KinesisHealthCheckResponse.create(true,
                                                  awsLogMessage.detectLogMessageType().toString(),
-                                                 responseMessage, "");
+                                                 responseMessage, logGroupName);
     }
 
     /**
