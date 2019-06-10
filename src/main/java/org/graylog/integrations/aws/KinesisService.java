@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -87,7 +88,7 @@ public class KinesisService {
 
         LOG.debug("Executing healthCheck");
 
-        LOG.debug("Getting a list of streams to find out if the indicated stream exists");
+        LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
 
         // List all streams and make sure the indicated stream is in the list.
         final List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
@@ -102,10 +103,12 @@ public class KinesisService {
                                                      explanation, request.logGroupName()); // TODO: Include specific error message here.
         }
 
+        LOG.debug("The stream [{}] exists", request.streamName());
+
         final List<Record> records = readKinesisRecords(request);
         if (records.size() == 0) {
-            LOG.error("No streams were found.");
             String explanation = "The Kinesis stream does not contain any messages.";
+            LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
                                                      explanation, request.logGroupName());
@@ -114,11 +117,20 @@ public class KinesisService {
         // Handle compressed/GZipped payloads. These are likely from Cloud Watch.
         final byte[] payloadBytes = records.get(0).data().asByteArray();
         if (isCompressed(payloadBytes)) {
-            // Parse as CloudWatch
-            final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
 
+            LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
+
+            final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
+            LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
+
+            // Assume that the payload is from CloudWatch.
             // Extract messages, so that they can be committed to journal one by one.
             final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
+
+            if (LOG.isTraceEnabled()) {
+                // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
+                LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents.size());
+            }
 
             // Pick just one log entry.
             Optional<CloudWatchLogEntry> logEntryOptional =
@@ -126,75 +138,82 @@ public class KinesisService {
                                   .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
 
             if (!logEntryOptional.isPresent()) {
+                LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
                 return KinesisHealthCheckResponse.create(false,
                                                          AWSLogMessage.Type.UNKNOWN.toString(),
                                                          "The Kinesis stream does not contain any messages.", request.logGroupName());
             }
 
-            // TODO: Identify log group name and pass in here if possible? This would come from the request.
-            return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
+            return detectMessage(logEntryOptional.get().message, request.streamName(), request.logGroupName());
         }
 
         // Fall through handles all non-compressed payloads.
-
         // The log message is in plain text. Go ahead and parse it straight up.
-        // TODO: Identify log group name and pass in here if possible? This would come from the request.
         return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
     }
 
     /**
-     * Detect the message type
+     * Detect the message type.
      *
      * @param logMessage   A string containing the actual log message.
      * @param streamName   The stream name.
      * @param logGroupName The log group name.
-     * @return a fully built {@code KinesisHealthCheckResponse}.
+     * @return a {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
     private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
 
-        final AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
+        LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}]",
+                  logMessage, streamName, logGroupName);
 
+        final AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
         final AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
 
-        // Build the specific response type for the message.
+        LOG.debug("The message is type [{}]", type);
+
+        // Build the specific default response type for the message. This might be overridden below.
         String responseMessage = String.format("Success! The message is an %s!", type.getDescription());
 
-        if (type == AWSLogMessage.Type.FLOW_LOGS) {
+        // Parse the Flow Log message
+        final CloudWatchLogEntry logEvent = new CloudWatchLogEntry(streamName, logGroupName, DateTime.now().getMillis() / 1000, logMessage);
 
-            // Parse the Flow Log message
-            final CloudWatchLogEntry logEvent = new CloudWatchLogEntry(streamName, logGroupName, DateTime.now().getMillis() / 1000, logMessage);
-
-            // Look up the codec by name
-            final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(type.getCodecName());
-            if (codecFactory == null) {
-                LOG.error("A codec with name [{}] could not be found.", type.getCodecName());
-                return null;
-            }
-
-            // Parse the message with the selected codec.
-            // TODO: Is this codec the correct one to supply?
-            final Codec codec = codecFactory.create(configuration);
-
-            // Load up Flow Log codec, parse the message and convert it to GELF JSON
-            try {
-                final Message fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
-
-                // TODO: Using ObjectMapper here creates a very verbose message. Consider shortening up the message.
-                //  The goal is only to provide the user with a idea of what the parsed message fields look like.
-                return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
-                                                         responseMessage,
-                                                         fullyParsedMessage.toString());
-            } catch (JsonProcessingException e) {
-                LOG.error("An error occurred decoding Flow Log message.", e);
-                // TODO: Return appropriate error message here.
-            }
-        } else if (type.isUnknown()) {
-            responseMessage = "The message is of an unknown type";
+        // Look up the codec for the type of log by name.
+        // All messages will resolve to a particular codec. Event Unknown messages will resolve to the raw logs codec.
+        final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(type.getCodecName());
+        if (codecFactory == null) {
+            String explanation = String.format(Locale.ENGLISH, "A codec with name [%s] could not be found.", type.getCodecName());
+            LOG.error(explanation);
+            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
-        return KinesisHealthCheckResponse.create(true,
-                                                 awsLogMessage.detectLogMessageType().toString(),
-                                                 responseMessage, logGroupName);
+        // Parse the message with the selected codec.
+        final Codec codec = codecFactory.create(configuration);
+
+        // Load up Flow Log codec, parse the message and convert it to GELF JSON
+        final Message fullyParsedMessage;
+        try {
+            fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
+        } catch (JsonProcessingException e) {
+            LOG.error("An error occurred decoding Flow Log message.", e);
+            String explanation = String.format(Locale.ENGLISH, "Message decoding failed. More information might be " +
+                                                               "available by enabling Debug logging. message [%s]", logMessage);
+            LOG.error(explanation);
+            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
+        }
+
+        // Message decoding can return null, so check for this.
+        if (fullyParsedMessage == null) {
+            String explanation = String.format(Locale.ENGLISH, "Message decoding failed. More information might be " +
+                                                               "available by enabling Debug logging. message [%s]", logMessage);
+            LOG.error(explanation);
+            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
+        }
+
+        // TODO: fullyParsedMessage.toString() below needs to be replaced with a shorter more nicely formatted
+        //  representation of the message. The goal is only to provide the user with a idea of what the parsed
+        //  message fields look like.
+        return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
+                                                 responseMessage,
+                                                 fullyParsedMessage.toString());
     }
 
     /**

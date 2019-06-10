@@ -35,6 +35,6 @@ public abstract class KinesisHealthCheckRequest {
                                                    @JsonProperty("aws_access_key_id") String awsAccessKeyId,
                                                    @JsonProperty("aws_secret_access_key") String awsSecretAccessKey) {
 
-        return new AutoValue_KinesisHealthCheckRequest(region, streamName, awsAccessKeyId, awsSecretAccessKey);
+        return new AutoValue_KinesisHealthCheckRequest(region, streamName, logGroupName, awsAccessKeyId, awsSecretAccessKey);
     }
 }

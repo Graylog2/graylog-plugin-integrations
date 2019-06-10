@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
@@ -26,6 +28,7 @@ public abstract class KinesisHealthCheckResponse {
     // that we have identified the message type. The user can then verify that the parsed
     // message looks correct.
     @JsonProperty
+    @Nullable
     public abstract String jsonMessage();
 
     public static KinesisHealthCheckResponse create(@JsonProperty("success") boolean success,
