@@ -1,14 +1,12 @@
 package org.graylog.integrations.aws.service;
 
+import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
 
 /**
  * Supports the ability to automatically parse
  */
 public class AWSLogMessage {
-
-    private static final String ACTION_ACCEPT = "ACCEPT";
-    private static final String ACTION_REJECT = "REJECT";
 
     private String logMessage;
 
@@ -51,7 +49,7 @@ public class AWSLogMessage {
     // One enum value should be added for each type of log message that auto-detect is supported for.
     public enum Type {
 
-        FLOW_LOGS("AWS Flow Log", CloudWatchRawLogCodec.NAME), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+        FLOW_LOGS("AWS Flow Log", CloudWatchFlowLogCodec.NAME), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
         // TODO: Consider renaming this codec to not include the name CloudWatch, since the logs did not necessarily come from CloudWatch.
         UNKNOWN("Unknown log message", CloudWatchRawLogCodec.NAME);
 

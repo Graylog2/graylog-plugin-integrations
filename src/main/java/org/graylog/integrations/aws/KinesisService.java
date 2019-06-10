@@ -11,7 +11,6 @@ import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
-import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
@@ -51,7 +50,7 @@ public class KinesisService {
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
-    public static final int EIGHT_BITS = 8;
+    private static final int EIGHT_BITS = 8;
 
     private Configuration configuration;
     private final KinesisClientBuilder kinesisClientBuilder;
@@ -78,7 +77,7 @@ public class KinesisService {
         final List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
 
         final boolean streamExists = kinesisStreams.stream()
-                                             .anyMatch(streamName -> streamName.equals(request.streamName()));
+                                                   .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
@@ -93,10 +92,8 @@ public class KinesisService {
         }
 
         // Convert the message to a string
-        // TODO: Inspect message payload here. If GZipped, then extract and inspect contents.
         // GZipped payloads are likely from Cloud Watch.
         final byte[] payloadBytes = records.get(0).data().asByteArray();
-
         if (isCompressed(payloadBytes)) {
             // Parse as CloudWatch
             final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
@@ -110,20 +107,20 @@ public class KinesisService {
                                   .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
 
             // TODO: Add error checking here for optional. If no messages were returned, then return a respond accordingly.
-            // TODO: Identify log group name and pass in here if possible?
+            // TODO: Identify log group name and pass in here if possible? This would come from the request.
             return detectMessage(logEntry.get().message, request.streamName(), "");
         }
 
         // The log message is in plain text. Go ahead and parse it straight up.
-        // TODO: Identify log group name and pass in here if possible?
+        // TODO: Identify log group name and pass in here if possible? This would come from the request.
         return detectMessage(new String(payloadBytes), request.streamName(), "");
     }
 
     /**
      * Detect the message type
      *
-     * @param logMessage A string containing the actual log message.
-     * @param streamName The stream name.
+     * @param logMessage   A string containing the actual log message.
+     * @param streamName   The stream name.
      * @param logGroupName The log group name.
      * @return a fully built {@code KinesisHealthCheckResponse}.
      */
@@ -155,13 +152,17 @@ public class KinesisService {
             // Load up Flow Log codec, parse the message and convert it to GELF JSON
             try {
                 final Message fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
-                // TODO convert fullyParsedMessage to JSON format and add to response.
+
+                // TODO: Using ObjectMapper here creates a very verbose message. Consider shortening up the message.
+                //  The goal is only to provide the user with a idea of what the parsed message fields look like.
+                return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
+                                                         responseMessage,
+                                                         fullyParsedMessage.toString());
             } catch (JsonProcessingException e) {
                 LOG.error("An error occurred decoding Flow Log message.", e);
                 // TODO: Return appropriate error message here.
             }
-        }
-        else if (type.isUnknown()) {
+        } else if (type.isUnknown()) {
             responseMessage = "The message is of an unknown type";
         }
 
@@ -181,26 +182,26 @@ public class KinesisService {
         // Mock up Kinesis CloudWatch subscription record.
         // TODO: This will be substituted with actual Kinesis record retrieval later.
         final String messageData = "{\n" +
-                             "  \"messageType\": \"DATA_MESSAGE\",\n" +
-                             "  \"owner\": \"459220251735\",\n" +
-                             "  \"logGroup\": \"test-flowlogs\",\n" +
-                             "  \"logStream\": \"eni-3423-all\",\n" +
-                             "  \"subscriptionFilters\": [\n" +
-                             "    \"filter\"\n" +
-                             "  ],\n" +
-                             "  \"logEvents\": [\n" +
-                             "    {\n" +
-                             "      \"id\": \"3423\",\n" +
-                             "      \"timestamp\": 1559738144000,\n" +
-                             "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
-                             "    },\n" +
-                             "    {\n" +
-                             "      \"id\": \"3423\",\n" +
-                             "      \"timestamp\": 1559738144000,\n" +
-                             "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
-                             "    }\n" +
-                             "  ]\n" +
-                             "}";
+                                   "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                                   "  \"owner\": \"459220251735\",\n" +
+                                   "  \"logGroup\": \"test-flowlogs\",\n" +
+                                   "  \"logStream\": \"eni-3423-all\",\n" +
+                                   "  \"subscriptionFilters\": [\n" +
+                                   "    \"filter\"\n" +
+                                   "  ],\n" +
+                                   "  \"logEvents\": [\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    },\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    }\n" +
+                                   "  ]\n" +
+                                   "}";
 
         try {
             // Compress the test record, as CloudWatch subscriptions are compressed.
@@ -258,7 +259,7 @@ public class KinesisService {
         }
 
         final KinesisClient kinesisClient =
-                KinesisClient.builder().region(Region.of(regionName)).build();
+                kinesisClientBuilder.region(Region.of(regionName)).build();
 
         // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
