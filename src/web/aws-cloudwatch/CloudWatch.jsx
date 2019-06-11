@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
-// import UserNotification from 'util/UserNotification';
 import Wizard from 'components/common/Wizard';
 
 import StepAuthorize from './StepAuthorize';
