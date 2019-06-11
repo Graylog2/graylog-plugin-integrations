@@ -82,7 +82,26 @@ public class AWSResource implements PluginRestResource {
         return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
-    // PUT Kinesis Health Check
+    /**
+     * Performs an AWS HealthCheck
+     *
+     * Sample CURL command for executing this method. Use this to model the UI request.
+     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
+     *
+     * curl 'http://someuser:somepass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/healthCheck' \
+     * -X PUT \
+     * -H 'X-Requested-By: XMLHttpRequest' \
+     * -H 'Content-Type: application/json'   \
+     * -H 'Accept: application/json' \
+     * --data-binary '{
+     *   "region": "us-east-1",
+     *   "aws_access_key_id": "some-key",
+     *   "aws_secret_access_key": "some-secret",
+     *   "stream_name": "a-stream",
+     *   "log_group_name": "a-log-group"
+     * }'
+     *
+     */
     @PUT
     @Timed
     @Path("/kinesis/healthCheck")
