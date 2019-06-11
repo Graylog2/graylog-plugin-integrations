@@ -35,6 +35,6 @@ public abstract class KinesisHealthCheckResponse {
                                                     @JsonProperty("log_type") String logType,
                                                     @JsonProperty("explanation") String explanation,
                                                     @JsonProperty("json_message") String jsonMessage) {
-        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation);
+        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation, jsonMessage);
     }
 }
