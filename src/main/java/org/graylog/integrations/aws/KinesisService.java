@@ -13,8 +13,14 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
+import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
+import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
+import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -109,10 +115,31 @@ public class KinesisService {
 
     // TODO Subscribe to Kinesis Stream
 
-    // TODO getRecord
+    public static void retrieveKinesisLogs(String kinesisStream) {
 
-    public void retrieveLogs(String kinesisStream) {
+        KinesisClient kinesisClient = KinesisClient.builder().region(Region.US_EAST_1).build();
+        ListShardsRequest listShardsRequest = ListShardsRequest.builder().streamName(kinesisStream).build();
+        ListShardsResponse listShardsResponse = kinesisClient.listShards(listShardsRequest);
 
+        String shardID = "";
+        int shardNum = listShardsResponse.shards().size();
+
+        // Iterate through the shards that exist
+        for (int i = 0; i < shardNum; i++) {
+            shardID = listShardsResponse.shards().get(0).shardId();
+            GetShardIteratorRequest getShardIteratorRequest = GetShardIteratorRequest.builder()
+                    .shardId(shardID)
+                    .streamName(kinesisStream)
+                    .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
+                    .build();
+            String shardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
+            // TODO Iterate through the shardIterators
+            GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(shardIterator).build();
+            GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
+            int recordSize = getRecordsResponse.records().size();
+            for (int j = 0; j < recordSize; j++) {
+                System.out.println("[" + j + "]" + new String(getRecordsResponse.records().get(0).data().asByteArray()));
+            }
+        }
     }
-
 }
