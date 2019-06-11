@@ -2,6 +2,9 @@ package org.graylog.integrations.aws.cloudwatch;
 
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * Resolves IANA protocol numbers to their names.
+ */
 public class IANAProtocolNumbers {
 
     private final ImmutableMap<Integer, String> table;
@@ -149,11 +152,6 @@ public class IANAProtocolNumbers {
     }
 
     public String lookup(int number) {
-        if(table.containsKey(number)) {
-            return table.get(number);
-        } else {
-            return "UNKNOWN";
-        }
+        return table.getOrDefault(number, "UNKNOWN");
     }
-
 }

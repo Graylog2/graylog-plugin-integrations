@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
-    public static final String NAME = "AWSCloudWatchRawLog";
+    public static final String NAME = "CloudWatchRawLog";
 
     @Inject
     public CloudWatchRawLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {

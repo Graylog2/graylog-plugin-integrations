@@ -53,18 +53,15 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int EIGHT_BITS = 8;
 
-    private Configuration configuration;
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
     @Inject
-    public KinesisService(@Assisted Configuration configuration,
-                          KinesisClientBuilder kinesisClientBuilder,
+    public KinesisService(KinesisClientBuilder kinesisClientBuilder,
                           ObjectMapper objectMapper,
                           Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
 
-        this.configuration = configuration;
         this.kinesisClientBuilder = kinesisClientBuilder;
         this.objectMapper = objectMapper;
         this.availableCodecs = availableCodecs;
@@ -81,8 +78,6 @@ public class KinesisService {
      * @param request The request, which indicates which stream region to health check
      * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
      * message.
-     * @throws ExecutionException
-     * @throws IOException
      */
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
@@ -188,7 +183,8 @@ public class KinesisService {
         }
 
         // Parse the message with the selected codec.
-        final Codec codec = codecFactory.create(configuration);
+        // TODO: Do we need to provide a valid configuration here? Probably. Need to correctly inject into this class.
+        final Codec codec = codecFactory.create(Configuration.EMPTY_CONFIGURATION);
 
         // Load up appropriate codec and parse the message.
         final Message fullyParsedMessage;

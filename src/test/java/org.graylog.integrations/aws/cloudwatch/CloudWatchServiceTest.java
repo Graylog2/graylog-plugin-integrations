@@ -35,7 +35,7 @@ public class CloudWatchServiceTest {
     private CloudWatchLogsClient cloudWatchLogsClient;
 
     @Mock
-    DescribeLogGroupsIterable logGroupsIterable;
+    private DescribeLogGroupsIterable logGroupsIterable;
 
     private CloudWatchService cloudWatchService;
 

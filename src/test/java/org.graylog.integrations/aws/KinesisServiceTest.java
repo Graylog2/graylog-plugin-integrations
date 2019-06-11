@@ -91,7 +91,7 @@ public class KinesisServiceTest {
             }
         });
 
-        kinesisService = new KinesisService(Configuration.EMPTY_CONFIGURATION, kinesisClientBuilder, new ObjectMapper(), availableCodecs);
+        kinesisService = new KinesisService(kinesisClientBuilder, new ObjectMapper(), availableCodecs);
     }
 
     @Test

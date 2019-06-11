@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
-    public static final String NAME = "AWSFlowLog";
+    public static final String NAME = "FlowLog";
 
     private final IANAProtocolNumbers protocolNumbers;
 
