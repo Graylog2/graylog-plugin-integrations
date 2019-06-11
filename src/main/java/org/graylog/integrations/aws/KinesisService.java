@@ -91,7 +91,9 @@ public class KinesisService {
         LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
 
         // List all streams and make sure the indicated stream is in the list.
-        final List<String> kinesisStreams = getKinesisStreams(request.region(), null, null);
+        final List<String> kinesisStreams = getKinesisStreams(request.region(),
+                                                              request.awsAccessKeyId(),
+                                                              request.awsAccessKeyId());
 
         final boolean streamExists = kinesisStreams.stream()
                                                    .anyMatch(streamName -> streamName.equals(request.streamName()));
@@ -135,7 +137,7 @@ public class KinesisService {
             // Pick just one log entry.
             Optional<CloudWatchLogEntry> logEntryOptional =
                     data.logEvents().stream()
-                                  .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
+                        .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
 
             if (!logEntryOptional.isPresent()) {
                 LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
