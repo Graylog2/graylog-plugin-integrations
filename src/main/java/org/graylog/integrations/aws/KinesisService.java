@@ -135,7 +135,7 @@ public class KinesisService {
             // Pick just one log entry.
             Optional<CloudWatchLogEntry> logEntryOptional =
                     data.logEvents.stream()
-                                  .map(le -> new CloudWatchLogEntry(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
+                                  .map(le -> CloudWatchLogEntry.create(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
 
             if (!logEntryOptional.isPresent()) {
                 LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
@@ -144,7 +144,7 @@ public class KinesisService {
                                                          "The Kinesis stream does not contain any messages.", request.logGroupName());
             }
 
-            return detectMessage(logEntryOptional.get().message, request.streamName(), request.logGroupName());
+            return detectMessage(logEntryOptional.get().message(), request.streamName(), request.logGroupName());
         }
 
         // Fall through handles all non-compressed payloads.
@@ -174,7 +174,7 @@ public class KinesisService {
         String responseMessage = String.format("Success! The message is an %s!", type.getDescription());
 
         // Parse the Flow Log message
-        final CloudWatchLogEntry logEvent = new CloudWatchLogEntry(streamName, logGroupName, DateTime.now().getMillis() / 1000, logMessage);
+        final CloudWatchLogEntry logEvent = CloudWatchLogEntry.create(logGroupName, streamName, DateTime.now().getMillis() / 1000, logMessage);
 
         // Look up the codec for the type of log by name.
         // All messages will resolve to a particular codec. Event Unknown messages will resolve to the raw logs codec.
@@ -188,7 +188,7 @@ public class KinesisService {
         // Parse the message with the selected codec.
         final Codec codec = codecFactory.create(configuration);
 
-        // Load up Flow Log codec, parse the message and convert it to GELF JSON
+        // Load up appropriate codec and parse the message.
         final Message fullyParsedMessage;
         try {
             fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));

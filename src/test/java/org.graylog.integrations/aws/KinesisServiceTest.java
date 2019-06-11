@@ -121,6 +121,10 @@ public class KinesisServiceTest {
     @Test
     public void healthCheck() throws ExecutionException, IOException {
 
+        // TODO: This test verifies the path that CloudWatch flow logs are being sent.
+        //  Add a test for the case when an unknown CloudWatch format is sent, and also
+        //  when a non-CloudWatch payload is provided.
+
         when(kinesisClientBuilder.region(Region.EU_WEST_1)).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
@@ -130,7 +134,6 @@ public class KinesisServiceTest {
                                                .hasMoreStreams(false).build());
 
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
-
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
                                                                              TEST_STREAM_1, "", "", "");
         KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);

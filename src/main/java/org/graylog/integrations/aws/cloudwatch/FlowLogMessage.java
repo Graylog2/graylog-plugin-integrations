@@ -25,7 +25,7 @@ public class FlowLogMessage {
     private final String action;
     private final String logStatus;
 
-    public FlowLogMessage(DateTime timestamp,
+    private FlowLogMessage(DateTime timestamp,
                           int version,
                           String accountId,
                           String interfaceId,
@@ -59,15 +59,15 @@ public class FlowLogMessage {
 
     @Nullable
     public static FlowLogMessage fromLogEvent(final CloudWatchLogEntry logEvent) {
-        final String[] parts = logEvent.message.split(" ");
+        final String[] parts = logEvent.message().split(" ");
 
         if (parts.length != 14) {
-            LOG.warn("Received FlowLog message with not exactly 14 fields. Skipping. Message was: [{}]", logEvent.message);
+            LOG.warn("Received FlowLog message with not exactly 14 fields. Skipping. Message was: [{}]", logEvent.message());
             return null;
         }
 
         return new FlowLogMessage(
-                new DateTime(Long.valueOf(logEvent.timestamp)),
+                new DateTime(Long.valueOf(logEvent.timestamp())),
                 safeInteger(parts[0]),
                 parts[1],
                 parts[2],

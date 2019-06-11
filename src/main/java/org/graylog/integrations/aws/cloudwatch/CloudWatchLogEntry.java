@@ -1,9 +1,14 @@
 package org.graylog.integrations.aws.cloudwatch;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
+import com.google.auto.value.AutoValue;
+import org.graylog.autovalue.WithBeanGetter;
 
-public class CloudWatchLogEntry {
+@JsonAutoDetect
+@AutoValue
+@WithBeanGetter
+public abstract class CloudWatchLogEntry {
 
     private static final String LOG_GROUP = "log_group";
     private static final String LOG_STREAM = "log_stream";
@@ -11,34 +16,21 @@ public class CloudWatchLogEntry {
     private static final String MESSAGE = "message";
 
     @JsonProperty(LOG_GROUP)
-    public String logGroup;
+    public abstract String logGroup();
 
     @JsonProperty(LOG_STREAM)
-    public String logStream;
+    public abstract String logStream();
 
     @JsonProperty(TIMESTAMP)
-    public long timestamp;
+    public abstract long timestamp();
 
     @JsonProperty(MESSAGE)
-    public String message;
+    public abstract String message();
 
-    public CloudWatchLogEntry() {
-    }
-
-    public CloudWatchLogEntry(String logGroup, String logStream, long timestamp, String message) {
-        this.logGroup = logGroup;
-        this.logStream = logStream;
-        this.timestamp = timestamp;
-        this.message = message;
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add(LOG_GROUP, logGroup)
-                          .add(LOG_STREAM, logStream)
-                          .add(TIMESTAMP, timestamp)
-                          .add(MESSAGE, message)
-                          .toString();
+    public static CloudWatchLogEntry create(@JsonProperty(LOG_GROUP) String logGroup,
+                                            @JsonProperty(LOG_STREAM) String logStream,
+                                            @JsonProperty(TIMESTAMP) long timestamp,
+                                            @JsonProperty(MESSAGE) String message) {
+        return new AutoValue_CloudWatchLogEntry(logGroup, logStream, timestamp, message);
     }
 }

@@ -30,9 +30,9 @@ public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
         try {
             final String source = configuration.getString(CloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-raw-logs");
             Message result = new Message(
-                    logEvent.message,
+                    logEvent.message(),
                     source,
-                    new DateTime(logEvent.timestamp)
+                    new DateTime(logEvent.timestamp())
             );
             result.addField(AWSUtils.FIELD_LOG_GROUP, logGroup);
             result.addField(AWSUtils.FIELD_LOG_STREAM, logStream);
