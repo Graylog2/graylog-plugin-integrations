@@ -10,22 +10,26 @@ import org.graylog.autovalue.WithBeanGetter;
 @WithBeanGetter
 public abstract class RegionResponse {
 
+    private static final String REGION_ID = "region_id";
+    private static final String REGION_DESCRIPTION = "region_description";
+    private static final String DISPLAY_VALUE = "display_value";
+
     // eu-west-2
-    @JsonProperty
+    @JsonProperty(REGION_ID)
     public abstract String regionId();
 
     // EU (London)
-    @JsonProperty
+    @JsonProperty(REGION_DESCRIPTION)
     public abstract String regionDescription();
 
     // The combination of both the name and description for display in the UI:
     // EU (London): eu-west-2
-    @JsonProperty
+    @JsonProperty(DISPLAY_VALUE)
     public abstract String displayValue();
 
-    public static RegionResponse create(@JsonProperty("region_id") String regionId,
-                                        @JsonProperty("region_description") String regionDescription,
-                                        @JsonProperty("display_value") String displayValue ) {
+    public static RegionResponse create(@JsonProperty(REGION_ID) String regionId,
+                                        @JsonProperty(REGION_DESCRIPTION) String regionDescription,
+                                        @JsonProperty(DISPLAY_VALUE) String displayValue) {
         return new AutoValue_RegionResponse(regionId, regionDescription, displayValue);
     }
 }

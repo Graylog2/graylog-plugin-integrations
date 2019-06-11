@@ -13,28 +13,33 @@ import javax.annotation.Nullable;
 @WithBeanGetter
 public abstract class KinesisHealthCheckResponse {
 
-    @JsonProperty
+    private static final String SUCCESS = "success";
+    private static final String LOG_TYPE = "log_type";
+    private static final String EXPLANATION = "explanation";
+    private static final String JSON_MESSAGE = "json_message";
+
+    @JsonProperty(SUCCESS)
     public abstract boolean success();
 
     // Eg. CloudWatch, other.
-    @JsonProperty
+    @JsonProperty(LOG_TYPE)
     public abstract String logType();
 
     // Some specific success or error message from AWS SDK.
-    @JsonProperty
+    @JsonProperty(EXPLANATION)
     public abstract String explanation();
 
     // A JSON representation of the message. This will be displayed in the UI to show the user
     // that we have identified the message type. The user can then verify that the parsed
     // message looks correct.
-    @JsonProperty
     @Nullable
+    @JsonProperty(JSON_MESSAGE)
     public abstract String jsonMessage();
 
-    public static KinesisHealthCheckResponse create(@JsonProperty("success") boolean success,
-                                                    @JsonProperty("log_type") String logType,
-                                                    @JsonProperty("explanation") String explanation,
-                                                    @JsonProperty("json_message") String jsonMessage) {
+    public static KinesisHealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
+                                                    @JsonProperty(LOG_TYPE) String logType,
+                                                    @JsonProperty(EXPLANATION) String explanation,
+                                                    @JsonProperty(JSON_MESSAGE) String jsonMessage) {
         return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation, jsonMessage);
     }
 }

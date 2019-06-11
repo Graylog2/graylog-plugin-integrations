@@ -12,28 +12,34 @@ import javax.annotation.Nullable;
 @WithBeanGetter
 public abstract class KinesisHealthCheckRequest {
 
-    @JsonProperty
+    private static final String REGION = "region";
+    private static final String STREAM_NAME = "stream_name";
+    private static final String LOG_GROUP_NAME = "log_group_name";
+    private static final String AWS_ACCESS_KEY_ID = "aws_access_key_id";
+    private static final String AWS_SECRET_ACCESS_KEY = "aws_secret_access_key";
+
+    @JsonProperty(REGION)
     public abstract String region();
 
-    @JsonProperty
+    @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
     // Optional. This will only be supplied for CloudWatch integrations, and will not be supplied for direct Kinesis.
-    @JsonProperty
     @Nullable
+    @JsonProperty(LOG_GROUP_NAME)
     public abstract String logGroupName();
 
-    @JsonProperty
+    @JsonProperty(AWS_ACCESS_KEY_ID)
     public abstract String awsAccessKeyId();
 
-    @JsonProperty
+    @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
-    public static KinesisHealthCheckRequest create(@JsonProperty("region") String region,
-                                                   @JsonProperty("stream_name") String streamName,
-                                                   @JsonProperty("log_group_name") String logGroupName,
-                                                   @JsonProperty("aws_access_key_id") String awsAccessKeyId,
-                                                   @JsonProperty("aws_secret_access_key") String awsSecretAccessKey) {
+    public static KinesisHealthCheckRequest create(@JsonProperty(REGION) String region,
+                                                   @JsonProperty(STREAM_NAME) String streamName,
+                                                   @JsonProperty(LOG_GROUP_NAME) String logGroupName,
+                                                   @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
+                                                   @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey) {
 
         return new AutoValue_KinesisHealthCheckRequest(region, streamName, logGroupName, awsAccessKeyId, awsSecretAccessKey);
     }
