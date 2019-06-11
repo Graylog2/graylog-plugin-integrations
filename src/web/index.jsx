@@ -3,6 +3,7 @@ import 'webpack-entry';
 import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin';
 
 import Routes from 'common/Routes.js';
+
 import AWSServices from './aws/Services';
 import AWSCloudWatch from './aws-cloudwatch/CloudWatch';
 
