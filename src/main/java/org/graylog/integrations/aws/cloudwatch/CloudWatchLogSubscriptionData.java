@@ -1,6 +1,11 @@
 package org.graylog.integrations.aws.cloudwatch;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.auto.value.AutoValue;
+import org.graylog.autovalue.WithBeanGetter;
 
 import java.util.List;
 
@@ -32,23 +37,46 @@ import java.util.List;
  * }
  * </pre>
  */
-public class CloudWatchLogSubscriptionData {
 
-    @JsonProperty("messageType")
-    public String messageType;
+@JsonAutoDetect
+@AutoValue
+@WithBeanGetter
+public abstract class CloudWatchLogSubscriptionData {
 
-    @JsonProperty("owner")
-    public String owner;
+    private static final String MESSAGE_TYPE = "messageType";
+    private static final String OWNER = "owner";
+    private static final String LOG_GROUP = "logGroup";
+    private static final String LOG_STREAM = "logStream";
+    private static final String SUBSCRIPTION_FILTERS = "subscriptionFilters";
+    private static final String LOG_EVENTS = "logEvents";
 
-    @JsonProperty("logGroup")
-    public String logGroup;
+    @JsonProperty(MESSAGE_TYPE)
+    public abstract String messageType();
 
-    @JsonProperty("logStream")
-    public String logStream;
+    @JsonProperty(OWNER)
+    public abstract String owner();
 
-    @JsonProperty("subscriptionFilters")
-    public List<String> subscriptionFilters;
+    @JsonProperty(LOG_GROUP)
+    public abstract String logGroup();
 
-    @JsonProperty("logEvents")
-    public List<CloudWatchLogEvent> logEvents;
+    @JsonProperty(LOG_STREAM)
+    public abstract String logStream();
+
+    @JsonProperty(SUBSCRIPTION_FILTERS)
+    public abstract List<String> subscriptionFilters();
+
+    @JsonProperty(LOG_EVENTS)
+    public abstract List<CloudWatchLogEvent> logEvents();
+
+    @JsonCreator
+    public static CloudWatchLogSubscriptionData create(@JsonProperty(MESSAGE_TYPE) String messageType,
+                                                       @JsonProperty(OWNER) String owner,
+                                                       @JsonProperty(LOG_GROUP) String logGroup,
+                                                       @JsonProperty(LOG_STREAM) String logStream,
+                                                       @JsonProperty(SUBSCRIPTION_FILTERS) List<String> subscriptionFilters,
+                                                       @JsonProperty(LOG_EVENTS) List<CloudWatchLogEvent> logEvents) {
+        return new AutoValue_CloudWatchLogSubscriptionData(messageType, owner, logGroup, logStream, subscriptionFilters, logEvents);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.cloudwatch;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
@@ -27,6 +28,7 @@ public abstract class CloudWatchLogEntry {
     @JsonProperty(MESSAGE)
     public abstract String message();
 
+    @JsonCreator
     public static CloudWatchLogEntry create(@JsonProperty(LOG_GROUP) String logGroup,
                                             @JsonProperty(LOG_STREAM) String logStream,
                                             @JsonProperty(TIMESTAMP) long timestamp,

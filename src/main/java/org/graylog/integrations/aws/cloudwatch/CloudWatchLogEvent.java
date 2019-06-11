@@ -1,7 +1,10 @@
 package org.graylog.integrations.aws.cloudwatch;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
+import com.google.auto.value.AutoValue;
+import org.graylog.autovalue.WithBeanGetter;
 
 /**
  * A single CloudWatch log event.
@@ -15,22 +18,28 @@ import com.google.common.base.MoreObjects;
  * }
  * </pre>
  */
-public class CloudWatchLogEvent {
+@JsonAutoDetect
+@AutoValue
+@WithBeanGetter
+public abstract class CloudWatchLogEvent {
 
-    @JsonProperty("id")
-    public long id;
+    private static final String ID = "id";
+    private static final String TIMESTAMP = "timestamp";
+    private static final String MESSAGE = "message";
 
-    @JsonProperty("timestamp")
-    public long timestamp;
+    @JsonProperty(ID)
+    public abstract long id();
 
-    @JsonProperty("message")
-    public String message;
+    @JsonProperty(TIMESTAMP)
+    public abstract long timestamp();
 
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("timestamp", timestamp)
-                .add("message", message)
-                .toString();
+    @JsonProperty(MESSAGE)
+    public abstract String message();
+
+    @JsonCreator
+    public static CloudWatchLogEvent create(@JsonProperty(ID) long id,
+                                            @JsonProperty(TIMESTAMP) long timestamp,
+                                            @JsonProperty(MESSAGE) String message) {
+        return new AutoValue_CloudWatchLogEvent(id, timestamp, message);
     }
 }

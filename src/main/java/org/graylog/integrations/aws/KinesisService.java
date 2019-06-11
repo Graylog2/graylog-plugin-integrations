@@ -129,13 +129,13 @@ public class KinesisService {
 
             if (LOG.isTraceEnabled()) {
                 // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
-                LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents.size());
+                LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents().size());
             }
 
             // Pick just one log entry.
             Optional<CloudWatchLogEntry> logEntryOptional =
-                    data.logEvents.stream()
-                                  .map(le -> CloudWatchLogEntry.create(data.logGroup, data.logStream, le.timestamp, le.message)).findAny();
+                    data.logEvents().stream()
+                                  .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
 
             if (!logEntryOptional.isPresent()) {
                 LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
