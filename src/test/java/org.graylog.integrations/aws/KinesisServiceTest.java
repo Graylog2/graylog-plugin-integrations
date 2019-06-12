@@ -6,6 +6,7 @@ import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -177,5 +179,20 @@ public class KinesisServiceTest {
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, kinesisStreams.size());
+    }
+
+    @Test
+    public void testMessageFormat() {
+
+        HashMap<String, Object> fields = new HashMap<>();
+        fields.put("_id", "123");
+        fields.put("src_addr", "Dan");
+        fields.put("port", 80);
+
+        String summary = kinesisService.buildMessageSummary(new Message(fields), "The full message");
+        assertEquals("The summary should have 4 lines", 4, summary.split("\n").length);
+        assertTrue(summary.contains("id"));
+        assertTrue(summary.contains("src_addr"));
+        assertTrue(summary.contains("port"));
     }
 }

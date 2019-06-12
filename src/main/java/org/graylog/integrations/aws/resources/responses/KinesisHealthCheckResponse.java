@@ -16,7 +16,7 @@ public abstract class KinesisHealthCheckResponse {
     private static final String SUCCESS = "success";
     private static final String LOG_TYPE = "log_type";
     private static final String EXPLANATION = "explanation";
-    private static final String JSON_MESSAGE = "json_message";
+    private static final String MESSAGE_SUMMARY = "message_summary";
 
     @JsonProperty(SUCCESS)
     public abstract boolean success();
@@ -33,13 +33,13 @@ public abstract class KinesisHealthCheckResponse {
     // that we have identified the message type. The user can then verify that the parsed
     // message looks correct.
     @Nullable
-    @JsonProperty(JSON_MESSAGE)
-    public abstract String jsonMessage();
+    @JsonProperty(MESSAGE_SUMMARY)
+    public abstract String messageSummary();
 
     public static KinesisHealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
                                                     @JsonProperty(LOG_TYPE) String logType,
                                                     @JsonProperty(EXPLANATION) String explanation,
-                                                    @JsonProperty(JSON_MESSAGE) String jsonMessage) {
-        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation, jsonMessage);
+                                                    @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
+        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation, messageSummary);
     }
 }

@@ -6,8 +6,9 @@ import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.inject.assistedinject.Assisted;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
@@ -206,12 +207,9 @@ public class KinesisService {
             return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
-        // TODO: fullyParsedMessage.toString() below needs to be replaced with a shorter more nicely formatted
-        //  representation of the message. The goal is only to provide the user with a idea of what the parsed
-        //  message fields look like.
         return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
                                                  responseMessage,
-                                                 fullyParsedMessage.toString());
+                                                 buildMessageSummary(fullyParsedMessage, logEvent.message()));
     }
 
     /**
@@ -280,6 +278,43 @@ public class KinesisService {
             final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS); // The >> operator shifts the GZIP magic number to the second byte.
             return firstByteIsMagicNumber && secondByteIsMagicNumber;
         }
+    }
+
+    /**
+     * Prepare a string summary of all fields. This will be displayed on the Health Check results page.
+     * The purpose is to provide the user with a summary of the parsed fields.
+     *
+     * Note that the {@code org.graylog2.plugin.Message.toString()} method is not suitable for this, since it is a
+     * one-line summary. Multi-line is important for clarity.
+     *
+     * @param message The fully parsed {@code org.graylog2.plugin.Message} object.
+     * @param fullMessage The full, unparsed message string.
+     * @return a summary of fields in the following format:
+     *
+     * full_message: 2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK
+     * protocol_number: 6
+     * src_addr: 172.1.1.2
+     * source: aws-flowlogs
+     * message: eni-3244234 ACCEPT TCP 172.1.1.2:80 -> 172.1.1.2:2264
+     * packets: 1
+     * ...
+     */
+    public String buildMessageSummary(Message message, String fullMessage) {
+
+        // Build up a representation of the message.
+        final StringBuilder builder = new StringBuilder();
+        final String cleanMessage = fullMessage.replaceAll("\\n", "").replaceAll("\\t", "");
+
+        // Append the entire message.
+        builder.append("full_message: ");
+        builder.append(StringUtils.abbreviate(cleanMessage, 225)); // Shorten if too long.
+
+        // Append the field values.
+        builder.append("\n");
+        final Map<String, Object> filteredFields = Maps.newHashMap(message.getFields());
+        Joiner.on("\n" ).withKeyValueSeparator(": ").appendTo(builder, filteredFields);
+
+        return builder.toString();
     }
 
     /**
