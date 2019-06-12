@@ -50,6 +50,7 @@ import java.util.zip.GZIPOutputStream;
 public class KinesisService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
+
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int EIGHT_BITS = 8;
@@ -98,7 +99,7 @@ public class KinesisService {
             LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     explanation, request.logGroupName()); // TODO: Include specific error message here.
+                                                     explanation, request.logGroupName());
         }
 
         LOG.debug("The stream [{}] exists", request.streamName());
@@ -156,7 +157,7 @@ public class KinesisService {
      * @param logMessage   A string containing the actual log message.
      * @param streamName   The stream name.
      * @param logGroupName The log group name.
-     * @return a {@code KinesisHealthCheckResponse} with the fully parsed message and type.
+     * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
     private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
 
@@ -184,7 +185,7 @@ public class KinesisService {
         }
 
         // Parse the message with the selected codec.
-        // TODO: Do we need to provide a valid configuration here? Probably. Need to correctly inject into this class.
+        // TODO: Do we need to provide a valid configuration here?
         final Codec codec = codecFactory.create(Configuration.EMPTY_CONFIGURATION);
 
         // Load up appropriate codec and parse the message.
@@ -287,7 +288,7 @@ public class KinesisService {
      * Note that the {@code org.graylog2.plugin.Message.toString()} method is not suitable for this, since it is a
      * one-line summary. Multi-line is important for clarity.
      *
-     * @param message The fully parsed {@code org.graylog2.plugin.Message} object.
+     * @param message     The fully parsed {@code org.graylog2.plugin.Message} object.
      * @param fullMessage The full, unparsed message string.
      * @return a summary of fields in the following format:
      *
@@ -312,7 +313,7 @@ public class KinesisService {
         // Append the field values.
         builder.append("\n");
         final Map<String, Object> filteredFields = Maps.newHashMap(message.getFields());
-        Joiner.on("\n" ).withKeyValueSeparator(": ").appendTo(builder, filteredFields);
+        Joiner.on("\n").withKeyValueSeparator(": ").appendTo(builder, filteredFields);
 
         return builder.toString();
     }
@@ -377,9 +378,5 @@ public class KinesisService {
         return streamNames;
     }
 
-    // TODO Create Kinesis Stream
-
-    // TODO Subscribe to Kinesis Stream
-
-    // TODO getRecord
+    // TODO Add method for auto-setup with stream creation and subscription.
 }
