@@ -42,6 +42,13 @@ public class KinesisService {
         this.kinesisClientBuilder = kinesisClientBuilder;
     }
 
+    public KinesisClient createKinesisClient(String regionName, String accessKeyId, String secretAccessKey) {
+
+        return kinesisClientBuilder.region(Region.of(regionName))
+                .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
+                .build();
+    }
+
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest heathCheckRequest) {
 
         // TODO: Read a log message from Kinesis.
@@ -57,7 +64,6 @@ public class KinesisService {
                                                  "Success! The message is an AWS FlowLog!");
     }
 
-
     /**
      * Get a list of Kinesis stream names. All available streams will be returned.
      *
@@ -72,41 +78,39 @@ public class KinesisService {
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
         // if AWS API always returns true for hasMoreStreamNames.
 
-        final KinesisClient kinesisClient = kinesisClientBuilder.region(Region.of(regionName)).build();
+        final KinesisClient kinesisClient = createKinesisClient(regionName, accessKeyId, secretAccessKey);
+
         ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
         final List<String> streamNames = new ArrayList<>(listStreamsResponse.streamNames());
 
-        if (AWSService.validCredentials(accessKeyId, secretAccessKey)) {
+        // Create retryer to keep checking if more streams exist
+        final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
+                .retryIfResult(b -> Objects.equals(b, Boolean.TRUE))
+                .withStopStrategy(StopStrategies.stopAfterAttempt(KINESIS_LIST_STREAMS_MAX_ATTEMPTS))
+                .build();
 
-            // Create retryer to keep checking if more streams exist
-            final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
-                    .retryIfResult(b -> Objects.equals(b, Boolean.TRUE))
-                    .withStopStrategy(StopStrategies.stopAfterAttempt(KINESIS_LIST_STREAMS_MAX_ATTEMPTS))
-                    .build();
+        if (listStreamsResponse.hasMoreStreams()) {
+            try {
+                retryer.call(() -> {
+                    final String lastStreamName = streamNames.get(streamNames.size() - 1);
+                    final ListStreamsRequest moreStreamsRequest = ListStreamsRequest.builder()
+                            .exclusiveStartStreamName(lastStreamName)
+                            .limit(KINESIS_LIST_STREAMS_LIMIT).build();
+                    final ListStreamsResponse moreSteamsResponse = kinesisClient.listStreams(moreStreamsRequest);
+                    streamNames.addAll(moreSteamsResponse.streamNames());
 
-            if (listStreamsResponse.hasMoreStreams()) {
-                try {
-                    retryer.call(() -> {
-                        final String lastStreamName = streamNames.get(streamNames.size() - 1);
-                        final ListStreamsRequest moreStreamsRequest = ListStreamsRequest.builder()
-                                .exclusiveStartStreamName(lastStreamName)
-                                .limit(KINESIS_LIST_STREAMS_LIMIT).build();
-                        final ListStreamsResponse moreSteamsResponse = kinesisClient.listStreams(moreStreamsRequest);
-                        streamNames.addAll(moreSteamsResponse.streamNames());
-
-                        // If more streams, then this will execute again.
-                        return moreSteamsResponse.hasMoreStreams();
-                    });
-                    // Only catch the RetryException, which occurs after too many attempts. When this happens, we still want
-                    // to the return the response with any streams obtained.
-                    // All other exceptions will be bubbled up to the client caller.
-                } catch (RetryException e) {
-                    LOG.error("Failed to get all stream names after {} attempts. Proceeding to return currently obtained streams.", KINESIS_LIST_STREAMS_MAX_ATTEMPTS);
-                }
+                    // If more streams, then this will execute again.
+                    return moreSteamsResponse.hasMoreStreams();
+                });
+                // Only catch the RetryException, which occurs after too many attempts. When this happens, we still want
+                // to the return the response with any streams obtained.
+                // All other exceptions will be bubbled up to the client caller.
+            } catch (RetryException e) {
+                LOG.error("Failed to get all stream names after {} attempts. Proceeding to return currently obtained streams.", KINESIS_LIST_STREAMS_MAX_ATTEMPTS);
             }
-            LOG.debug("Kinesis streams queried: [{}]", streamNames);
         }
+        LOG.debug("Kinesis streams queried: [{}]", streamNames);
         return streamNames;
 
     }
