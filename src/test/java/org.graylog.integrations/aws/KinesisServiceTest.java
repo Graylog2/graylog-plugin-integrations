@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws;
 
+import org.assertj.core.api.AssertionsForClassTypes;
+import org.assertj.core.api.ThrowableAssert;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.service.AWSLogMessage;
@@ -9,6 +11,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
@@ -32,6 +35,61 @@ public class KinesisServiceTest {
 
     @Mock
     private KinesisClientBuilder kinesisClientBuilder;
+
+    @Test
+    public void testGetStreamsCredentials() {
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "", ""))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("An AWS access key is required");
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "dsfadsdf", ""))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("An AWS secret key is required");
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "", "dsfadsdf"))
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("An AWS access key is required");
+    }
+
+    @Test
+    public void testGetStreams() throws ExecutionException {
+
+        // Test with two streams and one page. This is the most common case for most AWS accounts.
+        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+
+        when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
+                .thenReturn(ListStreamsResponse.builder()
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(false).build());
+
+
+        List<String> kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, "accessKey", "secretKey");
+        assertEquals(2, kinesisStreams.size());
+
+        // Test with stream paging functionality. This will be the case when a large number of Kinesis streams
+        // are present on a particular AWS account.
+        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+
+        when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
+                // First return a response with two streams indicating that there are more.
+                .thenReturn(ListStreamsResponse.builder()
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(true).build())
+                // Then return a response with two streams and indicate that all have been retrieved.
+                .thenReturn(ListStreamsResponse.builder()
+                                    .streamNames(TWO_TEST_STREAMS)
+                                    .hasMoreStreams(false).build()); // Indicate no more streams.
+
+        kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, "accessKey", "secretKey");
+
+        // There should be 4 total streams (two from each page).
+        assertEquals(4, kinesisStreams.size());
+
+    }
+
+    // TODO Add retrieveKinesisLogs test
 
     @Mock
     private KinesisClient kinesisClient;
@@ -69,42 +127,5 @@ public class KinesisServiceTest {
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
         assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
-    }
-
-    @Test
-    public void testGetStreams() throws ExecutionException {
-
-        // Test with two streams and one page. This is the most common case for most AWS accounts.
-        when(kinesisClientBuilder.region(Region.EU_WEST_1)).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
-
-        when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
-                .thenReturn(ListStreamsResponse.builder()
-                                    .streamNames(TWO_TEST_STREAMS)
-                                    .hasMoreStreams(false).build());
-
-
-        List<String> kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, null, null);
-        assertEquals(2, kinesisStreams.size());
-
-        // Test with stream paging functionality. This will be the case when a large number of Kinesis streams
-        // are present on a particular AWS account.
-        when(kinesisClientBuilder.region(Region.EU_WEST_1)).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
-
-        when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
-                // First return a response with two streams indicating that there are more.
-                .thenReturn(ListStreamsResponse.builder()
-                                    .streamNames(TWO_TEST_STREAMS)
-                                    .hasMoreStreams(true).build())
-                // Then return a response with two streams and indicate that all have been retrieved.
-                .thenReturn(ListStreamsResponse.builder()
-                                    .streamNames(TWO_TEST_STREAMS)
-                                    .hasMoreStreams(false).build()); // Indicate no more streams.
-
-        kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, null, null);
-
-        // There should be 4 total streams (two from each page).
-        assertEquals(4, kinesisStreams.size());
     }
 }
