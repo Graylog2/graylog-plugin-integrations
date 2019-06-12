@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.service;
 
-import org.apache.commons.lang3.StringUtils;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +41,11 @@ public class AWSService {
     //TODO Add getAWSServices List
     //List that contains all the supported AWS services (i.e. Cloudwatch, Kinesis)
 
-    public static boolean validCredentials(String accessKeyId, String secretAccessKey) {
+    public static StaticCredentialsProvider validateCredentials(String accessKeyId, String secretAccessKey) {
         // Checking credentials are valid
-        boolean validCredentials = false;
-        if (StringUtils.isNotBlank(accessKeyId) && StringUtils.isNotBlank(secretAccessKey)) {
-            StaticCredentialsProvider credentialsProvider =
-                    StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
-            validCredentials = true;
-        }
-        // TODO throw an exception (not auth excp?), return a credentials provider
-        // Content Pack Exception
-        return validCredentials;
-    }
+        Preconditions.checkArgument(StringUtils.isNotBlank(accessKeyId), "An AWS access key is required.");
+        Preconditions.checkArgument(StringUtils.isNotBlank(secretAccessKey), "An AWS secret key is required.");
 
+        return StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
+    }
 }
