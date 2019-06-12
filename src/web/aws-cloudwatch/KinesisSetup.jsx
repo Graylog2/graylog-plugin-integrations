@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
+import FormAdvancedOptions from './FormAdvancedOptions';
 
 const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
   return (
@@ -32,6 +33,8 @@ const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
             <option value="group-name-3">Group Name 3</option>
             <option value="group-name-4">Group Name 4</option>
           </Input>
+
+          <FormAdvancedOptions onChange={onChange} getValue={getValue} />
 
           <Button type="submit">Verify &amp; Format</Button>
         </form>

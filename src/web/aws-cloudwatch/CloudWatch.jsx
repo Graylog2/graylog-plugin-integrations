@@ -50,7 +50,15 @@ export default class AWSCloudWatch extends Component {
     this.state = {
       currentStep: 'authorize',
       enabledSteps: ['authorize'],
-      formData: {},
+      formData: {
+        // Default Advanced Values
+        awsCloudWatchGlobalInput: '',
+        awsCloudWatchAssumeARN: '',
+        awsCloudWatchBatchSize: '10000',
+        awsCloudWatchThrottleEnabled: '',
+        awsCloudWatchThrottleWait: '1000',
+        // End Default Values
+      },
       wizardSteps: this.wizardWithDisabledSteps(),
     };
 
@@ -92,7 +100,7 @@ export default class AWSCloudWatch extends Component {
     this.setState({
       formData: {
         ...formData,
-        [target.id]: target.value,
+        [target.name || target.id]: target.value,
       },
     });
   }

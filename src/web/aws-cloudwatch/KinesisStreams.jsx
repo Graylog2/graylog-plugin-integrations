@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
+import FormAdvancedOptions from './FormAdvancedOptions';
 
 const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
   return (
@@ -24,6 +25,8 @@ const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
             <option value="stream-name-3">Stream Name 3</option>
             <option value="stream-name-4">Stream Name 4</option>
           </Input>
+
+          <FormAdvancedOptions onChange={onChange} getValue={getValue} />
 
           <Button type="submit">Verify Stream &amp; Format</Button>
         </form>
