@@ -24,8 +24,6 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
@@ -37,8 +35,8 @@ import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
-import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -78,8 +76,8 @@ public class KinesisService {
     public KinesisClient createKinesisClient(String regionName, String accessKeyId, String secretAccessKey) {
 
         return kinesisClientBuilder.region(Region.of(regionName))
-                .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
-                .build();
+                                   .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
+                                   .build();
     }
 
     /**
@@ -405,10 +403,10 @@ public class KinesisService {
         for (int i = 0; i < shardNum; i++) {
             shardID = listShardsResponse.shards().get(i).shardId();
             GetShardIteratorRequest getShardIteratorRequest = GetShardIteratorRequest.builder()
-                    .shardId(shardID)
-                    .streamName(kinesisStream)
-                    .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
-                    .build();
+                                                                                     .shardId(shardID)
+                                                                                     .streamName(kinesisStream)
+                                                                                     .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
+                                                                                     .build();
             String currentShardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
             GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(currentShardIterator).build();
             GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
