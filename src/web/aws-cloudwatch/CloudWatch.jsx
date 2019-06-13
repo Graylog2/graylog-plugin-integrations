@@ -8,6 +8,7 @@ import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
+import { DEFAULT_SETTINGS } from './util';
 
 export default class AWSCloudWatch extends Component {
   static propTypes = {
@@ -16,27 +17,41 @@ export default class AWSCloudWatch extends Component {
     }).isRequired,
   }
 
+  logOutput = { // Demo Data until API is wired
+    full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',
+    version: 2,
+    'account-id': 123456789010,
+    'interface-id': 'eni-abc123de',
+    src_addr: '172.31.16.139',
+    dst_addr: '172.31.16.21',
+    src_port: 20641,
+    dst_port: 22,
+    protocol: 6,
+    packets: 20,
+    bytes: 4249,
+    start: 1418530010,
+    end: 1418530070,
+    action: 'ACCEPT',
+    'log-status': 'OK',
+  }
+
   constructor(props) {
     super(props);
 
     this.state = {
       visibleAdvancedOptions: false,
-      currentStep: 'authorize',
-      enabledSteps: ['authorize'],
+      currentStep: 'review',
+      enabledSteps: ['authorize', 'kinesis-setup', 'health-check', 'review'],
       formData: {
-        /* Default Advanced Values */
-        awsCloudWatchGlobalInput: '',
-        awsCloudWatchAssumeARN: '',
-        awsCloudWatchBatchSize: '10000',
-        awsCloudWatchThrottleEnabled: '',
-        awsCloudWatchThrottleWait: '1000',
-        /* End Default Values */
-        awsCloudWatchName: 'Test',
-        awsCloudWatchDescription: 'Desc',
-        awsCloudWatchAwsKey: 'ABC',
-        awsCloudWatchAwsSecret: '123',
-        awsCloudWatchAwsRegion: 'us-east-2',
+        ...DEFAULT_SETTINGS,
+        awsCloudWatchName: 'Some Name',
+        awsCloudWatchDescription: 'A Description',
+        awsCloudWatchAwsKey: 'key123',
+        awsCloudWatchAwsSecret: 'secretabc',
+        awsCloudWatchAwsRegion: 'us-west-1',
+        awsCloudWatchKinesisStream: 'stream-name-2',
       },
+      logOutput: JSON.stringify(this.logOutput, null, 2),
     };
   }
 
@@ -95,7 +110,7 @@ export default class AWSCloudWatch extends Component {
   }
 
   render() {
-    const { currentStep, formData, visibleAdvancedOptions } = this.state;
+    const { currentStep, formData, logOutput, visibleAdvancedOptions } = this.state;
     const wizardSteps = [
       {
         key: 'authorize',
@@ -119,13 +134,13 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'health-check',
         title: 'AWS CloudWatch Health Check',
-        component: (<StepHealthCheck onSubmit={this.handleSubmit} />),
+        component: (<StepHealthCheck onSubmit={this.handleSubmit} logOutput={logOutput} />),
         disabled: this.isDisabledStep('health-check'),
       },
       {
         key: 'review',
         title: 'AWS CloudWatch Review',
-        component: (<StepReview onSubmit={this.handleSubmit} values={formData} />),
+        component: (<StepReview onSubmit={this.handleSubmit} values={formData} logOutput={logOutput} />),
         disabled: this.isDisabledStep('review'),
       },
     ];

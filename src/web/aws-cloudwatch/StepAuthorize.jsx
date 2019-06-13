@@ -37,12 +37,12 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  required />
 
           <Input id="awsCloudWatchAwsSecret"
-                 type="password"
+                 type="text"
                  label="AWS Secret"
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
                  defaultValue={values.awsCloudWatchAwsSecret}
-                 autoComplete="new-password"
+                 autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchAwsRegion"
