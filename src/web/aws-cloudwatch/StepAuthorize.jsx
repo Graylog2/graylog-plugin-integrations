@@ -33,6 +33,7 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
                  value={getValue('awsCloudWatchAwsKey')}
+                 autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchAwsSecret"
@@ -41,6 +42,7 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
                  value={getValue('awsCloudWatchAwsSecret')}
+                 autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchAwsRegion"

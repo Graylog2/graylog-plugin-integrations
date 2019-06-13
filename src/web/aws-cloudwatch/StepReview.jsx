@@ -10,7 +10,9 @@ const StepReview = ({ getAllValues, onSubmit }) => {
           <h2>AWS CloudWatch Input Review</h2>
           <p>Review All The Things</p>
 
-          <code><pre>{JSON.stringify(getAllValues(), null, 2)}</pre></code>
+          <code>
+            <pre>{JSON.stringify(getAllValues(), null, 2)}</pre>
+          </code>
 
           <Button type="submit">Complete CloudWatch Setup</Button>
         </form>
