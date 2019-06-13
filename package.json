@@ -7,7 +7,8 @@
     "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
   },
   "scripts": {
-    "build": "webpack --bail"
+    "build": "webpack --bail",
+    "lint": "eslint --ext js,jsx src"
   },
   "keywords": [
     "graylog"
@@ -15,6 +16,8 @@
   "author": "Graylog, Inc. <hello@graylog.com>",
   "private": true,
   "devDependencies": {
+    "eslint-config-graylog": "file:../graylog2-server/graylog2-web-interface/packages/eslint-config-graylog",
+    "eslint-loader": "^1.6.3",
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   }
 }

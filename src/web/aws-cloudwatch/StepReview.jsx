@@ -1,29 +1,27 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
+import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
-export default class Review extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-    getAllValues: PropTypes.func.isRequired,
-  }
+const StepReview = ({ getAllValues, onSubmit }) => {
+  return (
+    <Row>
+      <Col md={8}>
+        <form onSubmit={onSubmit}>
+          <h2>AWS CloudWatch Input Review</h2>
+          <p>Review All The Things</p>
 
-  render() {
-    const { getAllValues, onSubmit } = this.props;
+          <code><pre>{JSON.stringify(getAllValues(), null, 2)}</pre></code>
 
-    return (
-      <Row>
-        <Col md={8}>
-          <form onSubmit={onSubmit}>
-            <h2>AWS CloudWatch Input Review</h2>
-            <p>Review All The Things</p>
+          <Button type="submit">Complete CloudWatch Setup</Button>
+        </form>
+      </Col>
+    </Row>
+  );
+};
 
-            <code><pre>{JSON.stringify(getAllValues(), null, 2)}</pre></code>
+StepReview.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  getAllValues: PropTypes.func.isRequired,
+};
 
-            <Button type="submit">Complete CloudWatch Setup</Button>
-          </form>
-        </Col>
-      </Row>
-    )
-  }
-}
+export default StepReview;

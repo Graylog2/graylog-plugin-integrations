@@ -1,14 +1,13 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react';
 
-export default class AWSServices extends Component {
-  render() {
-    return (
-      <div>
+const Services = () => {
+  return (
+    <div>
         List of Services.
 
-        <ul><li><a href="/aws/cloudwatch">CloudWatch</a></li></ul>
-      </div>
-    )
-  }
-}
+      <ul><li><a href="/aws/cloudwatch">CloudWatch</a></li></ul>
+    </div>
+  );
+};
+
+export default Services;

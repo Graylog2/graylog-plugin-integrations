@@ -1,16 +1,22 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 // import UserNotification from 'util/UserNotification';
 import Wizard from 'components/common/Wizard';
 
-import StepAuthorize from './StepAuthorize'
-import StepKinesis from './StepKinesis'
-import StepHealthCheck from './StepHealthCheck'
-import StepReview from './StepReview'
+import StepAuthorize from './StepAuthorize';
+import StepKinesis from './StepKinesis';
+import StepHealthCheck from './StepHealthCheck';
+import StepReview from './StepReview';
 
 export default class AWSCloudWatch extends Component {
+  static propTypes = {
+    params: PropTypes.shape({
+      step: PropTypes.string,
+    }).isRequired,
+  }
+
   constructor(props) {
     super(props);
 
@@ -19,16 +25,16 @@ export default class AWSCloudWatch extends Component {
         key: 'authorize',
         title: 'AWS CloudWatch Authorize',
         component: (<StepAuthorize onSubmit={this.handleSubmit}
-                                         onChange={this.handleFieldUpdate}
-                                         getValue={this.getFormData} />),
+                                   onChange={this.handleFieldUpdate}
+                                   getValue={this.getFormData} />),
       },
       {
         key: 'kinesis-setup',
         title: 'AWS CloudWatch Kinesis Setup',
         component: (<StepKinesis onSubmit={this.handleSubmit}
-                                       onChange={this.handleFieldUpdate}
-                                       getValue={this.getFormData}
-                                       hasStreams />),
+                                 onChange={this.handleFieldUpdate}
+                                 getValue={this.getFormData}
+                                 hasStreams />),
       },
       {
         key: 'health-check',
@@ -52,25 +58,19 @@ export default class AWSCloudWatch extends Component {
     this.availableSteps = this.wizardSteps.map(step => step.key);
   }
 
-  static propTypes = {
-    params: PropTypes.shape({
-      step: PropTypes.string,
-    }),
-  }
-
   wizardWithDisabledSteps = () => {
-    return this.wizardSteps.map((step) => (
-       {
+    return this.wizardSteps.map(step => (
+      {
         ...step,
         disabled: this.isDisabledStep(step.key),
       }
     ));
   }
 
-  getFormData = (value) => {
-    return this.state.formData[value];
-  }
+  /* eslint-disable-next-line react/destructuring-assignment */
+  getFormData = value => this.state.formData[value];
 
+  /* eslint-disable-next-line react/destructuring-assignment */
   getAllFormData = () => this.state.formData;
 
   isDisabledStep = (step) => {
@@ -82,9 +82,9 @@ export default class AWSCloudWatch extends Component {
 
     if (!enabledSteps || enabledSteps.length === 0) {
       return true;
-    };
+    }
 
-    return !enabledSteps.includes(step)
+    return !enabledSteps.includes(step);
   };
 
   handleFieldUpdate = ({ target }) => {
@@ -93,9 +93,9 @@ export default class AWSCloudWatch extends Component {
     this.setState({
       formData: {
         ...formData,
-        [target.id]: target.value
-      }
-    })
+        [target.id]: target.value,
+      },
+    });
   }
 
   handleSubmit = (formData) => {
@@ -105,7 +105,7 @@ export default class AWSCloudWatch extends Component {
     const nextStep = this.availableSteps.indexOf(currentStep) + 1;
 
     if (this.wizardSteps[nextStep]) {
-      const key = this.wizardSteps[nextStep].key;
+      const { key } = this.wizardSteps[nextStep];
 
       this.setState({
         enabledSteps: [...enabledSteps, key],
@@ -123,7 +123,7 @@ export default class AWSCloudWatch extends Component {
   handleStepChange = (currentStep) => {
     this.setState({
       currentStep,
-    })
+    });
   }
 
   render() {
@@ -132,16 +132,14 @@ export default class AWSCloudWatch extends Component {
     return (
       <Row>
         <Col md={12}>
-          <Wizard
-            steps={wizardSteps}
-            activeStep={currentStep}
-            onStepChange={this.handleStepChange}
-            horizontal
-            justified
-            hidePreviousNextButtons
-          />
+          <Wizard steps={wizardSteps}
+                  activeStep={currentStep}
+                  onStepChange={this.handleStepChange}
+                  horizontal
+                  justified
+                  hidePreviousNextButtons />
         </Col>
       </Row>
-    )
+    );
   }
 }
