@@ -1,11 +1,14 @@
 package org.graylog.integrations.aws.service;
 
+import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
+import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,53 @@ public class AWSService {
                     String displayValue = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
                     return RegionResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
                 }).collect(Collectors.toList());
+    }
+
+    /**
+     * @return A list of available AWS services supported by the AWS Graylog AWS integration.
+     */
+    public AvailableAWSServiceSummmary getAvailableServices() {
+
+        ArrayList<AvailableAWSService> services = new ArrayList<>();
+        AvailableAWSService cloudWatchService =
+                AvailableAWSService.create("CloudWatch",
+                                           "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs" +
+                                           "in real time. Amazon CloudWatch is a monitoring and management service built" +
+                                           "for developers, system operators, site reliability engineers (SRE), " +
+                                           "and IT managers.",
+                                           "{\n" +
+                                           "  \"Version\": \"2012-10-17\",\n" +
+                                           "  \"Statement\": [\n" +
+                                           "    {\n" +
+                                           "      \"Sid\": \"VisualEditor0\",\n" +
+                                           "      \"Effect\": \"Allow\",\n" +
+                                           "      \"Action\": [\n" +
+                                           "        \"cloudwatch:PutMetricData\",\n" +
+                                           "        \"dynamodb:CreateTable\",\n" +
+                                           "        \"dynamodb:DescribeTable\",\n" +
+                                           "        \"dynamodb:GetItem\",\n" +
+                                           "        \"dynamodb:PutItem\",\n" +
+                                           "        \"dynamodb:Scan\",\n" +
+                                           "        \"dynamodb:UpdateItem\",\n" +
+                                           "        \"ec2:DescribeInstances\",\n" +
+                                           "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
+                                           "        \"ec2:DescribeNetworkInterfaces\",\n" +
+                                           "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
+                                           "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
+                                           "        \"kinesis:GetRecords\",\n" +
+                                           "        \"kinesis:GetShardIterator\",\n" +
+                                           "        \"kinesis:ListShards\"\n" +
+                                           "      ],\n" +
+                                           "      \"Resource\": \"*\"\n" +
+                                           "    }\n" +
+                                           "  ]\n" +
+                                           "}",
+                                           "Requires Kinesis",
+                                           "https://aws.amazon.com/cloudwatch/"
+                );
+        services.add(cloudWatchService);
+
+        return AvailableAWSServiceSummmary.create(services, services.size());
     }
 
     //TODO Add getAWSServices List
