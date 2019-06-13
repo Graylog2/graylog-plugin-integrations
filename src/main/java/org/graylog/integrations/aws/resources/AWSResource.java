@@ -5,8 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.integrations.aws.CloudWatchService;
 import org.graylog.integrations.aws.KinesisService;
+import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
@@ -24,6 +24,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -81,7 +82,26 @@ public class AWSResource implements PluginRestResource {
         return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
-    // PUT Kinesis Health Check
+    /**
+     * Performs an AWS HealthCheck
+     *
+     * Sample CURL command for executing this method. Use this to model the UI request.
+     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
+     *
+     * curl 'http://someuser:somepass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/healthCheck' \
+     * -X PUT \
+     * -H 'X-Requested-By: XMLHttpRequest' \
+     * -H 'Content-Type: application/json'   \
+     * -H 'Accept: application/json' \
+     * --data-binary '{
+     *   "region": "us-east-1",
+     *   "aws_access_key_id": "some-key",
+     *   "aws_secret_access_key": "some-secret",
+     *   "stream_name": "a-stream",
+     *   "log_group_name": "a-log-group"
+     * }'
+     *
+     */
     @PUT
     @Timed
     @Path("/kinesis/healthCheck")
@@ -89,7 +109,7 @@ public class AWSResource implements PluginRestResource {
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = KinesisHealthCheckResponse.class
     )
-    public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) {
+    public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
 
         // TODO: Check permissions?
 

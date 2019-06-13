@@ -1,6 +1,5 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.cloudwatch;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -35,7 +35,7 @@ public class CloudWatchServiceTest {
     private CloudWatchLogsClient cloudWatchLogsClient;
 
     @Mock
-    DescribeLogGroupsIterable logGroupsIterable;
+    private DescribeLogGroupsIterable logGroupsIterable;
 
     private CloudWatchService cloudWatchService;
 
@@ -69,8 +69,8 @@ public class CloudWatchServiceTest {
         ArrayList<String> logGroupNames = cloudWatchService.getLogGroupNames("us-east-1");
 
         // Inspect the log groups returned and verify the contents and size.
-        Assert.assertEquals("The number of groups should be because the two responses " +
-                                    "with 3 groups each were provided.", 6, logGroupNames.size());
+        assertEquals("The number of groups should be because the two responses " +
+                     "with 3 groups each were provided.", 6, logGroupNames.size());
 
         // Loop example to verify presence of a specific log group.
         boolean foundGroup = false;
