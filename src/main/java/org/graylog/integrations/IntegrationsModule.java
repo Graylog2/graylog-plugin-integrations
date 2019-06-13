@@ -16,12 +16,20 @@
  */
 package org.graylog.integrations;
 
+import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.resources.AWSResource;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
+import software.amazon.awssdk.services.kinesis.KinesisClient;
+import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
 import java.util.Collections;
 import java.util.Set;
@@ -30,7 +38,8 @@ import java.util.Set;
  * Extend the PluginModule abstract class here to add you plugin to the system.
  */
 public class IntegrationsModule extends PluginModule {
-        private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
     /**
      * Returns all configuration beans required by this plugin.
      *
@@ -65,5 +74,12 @@ public class IntegrationsModule extends PluginModule {
         LOG.debug("Registering message input: {}", PaloAltoTCPInput.NAME);
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
+
+        addRestResource(AWSResource.class);
+
+        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
+        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+        addCodec(CloudWatchFlowLogCodec.NAME, CloudWatchFlowLogCodec.class);
+        addCodec(CloudWatchRawLogCodec.NAME, CloudWatchRawLogCodec.class);
     }
 }
