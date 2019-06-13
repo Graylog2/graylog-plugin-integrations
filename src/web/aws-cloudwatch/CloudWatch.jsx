@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 import Wizard from 'components/common/Wizard';
+import PageHeader from 'components/common/PageHeader';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
@@ -148,6 +149,11 @@ export default class AWSCloudWatch extends Component {
 
     return (
       <Row>
+        <Col md={12}>
+          <PageHeader title="AWS Integration">
+            <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
+          </PageHeader>
+        </Col>
         <Col md={12}>
           <Wizard steps={wizardSteps}
                   activeStep={currentStep}

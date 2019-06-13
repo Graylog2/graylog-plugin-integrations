@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
@@ -18,9 +18,10 @@ const StepHealthCheck = ({ onSubmit, logOutput }) => {
                  type="textarea"
                  label="Formatted CloudWatch Log"
                  value={logOutput}
+                 rows={10}
                  disabled />
 
-          <Button type="submit">Review &amp; Finalize</Button>
+          <Button type="submit" bsStyle="primary">Review &amp; Finalize</Button>
         </form>
       </Col>
     </Row>
