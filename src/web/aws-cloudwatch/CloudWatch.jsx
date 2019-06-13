@@ -1,14 +1,14 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 // import UserNotification from 'util/UserNotification';
 import Wizard from 'components/common/Wizard';
 
-import CloudWatchAuthorize from './StepAuthorize'
-import CloudWatchKinesis from './StepKinesis'
-import CloudWatchHealthCheck from './StepHealthCheck'
-import CloudWatchReview from './StepReview'
+import StepAuthorize from './StepAuthorize'
+import StepKinesis from './StepKinesis'
+import StepHealthCheck from './StepHealthCheck'
+import StepReview from './StepReview'
 
 export default class AWSCloudWatch extends Component {
   constructor(props) {
@@ -18,14 +18,14 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'authorize',
         title: 'AWS CloudWatch Authorize',
-        component: (<CloudWatchAuthorize onSubmit={this.handleSubmit}
+        component: (<StepAuthorize onSubmit={this.handleSubmit}
                                          onChange={this.handleFieldUpdate}
                                          getValue={this.getFormData} />),
       },
       {
         key: 'kinesis-setup',
         title: 'AWS CloudWatch Kinesis Setup',
-        component: (<CloudWatchKinesis onSubmit={this.handleSubmit}
+        component: (<StepKinesis onSubmit={this.handleSubmit}
                                        onChange={this.handleFieldUpdate}
                                        getValue={this.getFormData}
                                        hasStreams />),
@@ -33,12 +33,12 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'health-check',
         title: 'AWS CloudWatch Health Check',
-        component: (<CloudWatchHealthCheck onSubmit={this.handleSubmit} />),
+        component: (<StepHealthCheck onSubmit={this.handleSubmit} />),
       },
       {
         key: 'review',
         title: 'AWS CloudWatch Review',
-        component: (<CloudWatchReview onSubmit={this.handleSubmit} getAllValues={this.getAllFormData} />),
+        component: (<StepReview onSubmit={this.handleSubmit} getAllValues={this.getAllFormData} />),
       },
     ];
 
@@ -112,7 +112,7 @@ export default class AWSCloudWatch extends Component {
         currentStep: key,
       }, () => {
         this.setState({
-          wizardSteps: this.wizardWithDisabledSteps(this.wizardSteps),
+          wizardSteps: this.wizardWithDisabledSteps(),
         });
       });
     }
@@ -131,14 +131,16 @@ export default class AWSCloudWatch extends Component {
 
     return (
       <Row>
-        <Wizard
-          steps={wizardSteps}
-          activeStep={currentStep}
-          onStepChange={this.handleStepChange}
-          horizontal
-          justified
-          hidePreviousNextButtons
-        />
+        <Col md={12}>
+          <Wizard
+            steps={wizardSteps}
+            activeStep={currentStep}
+            onStepChange={this.handleStepChange}
+            horizontal
+            justified
+            hidePreviousNextButtons
+          />
+        </Col>
       </Row>
     )
   }

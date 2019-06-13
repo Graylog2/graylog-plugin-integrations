@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import CloudWatchStreams from './KinesisStreams'
-import CloudWatchKinesisSetup from './KinesisSetup'
+import KinesisStreams from './KinesisStreams'
+import KinesisSetup from './KinesisSetup'
 
 export default class StepKinesis extends Component {
   static propTypes = {
@@ -22,8 +22,8 @@ export default class StepKinesis extends Component {
     return (
       <React.Fragment>
         { hasStreams
-            ? <CloudWatchStreams {...restProps} />
-            : <CloudWatchKinesisSetup {...restProps} />
+            ? <KinesisStreams {...restProps} />
+            : <KinesisSetup {...restProps} />
         }
       </React.Fragment>
     )
