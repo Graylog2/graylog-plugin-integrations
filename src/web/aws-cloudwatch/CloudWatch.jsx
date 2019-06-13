@@ -22,9 +22,7 @@ export default class AWSCloudWatch extends Component {
     this.state = {
       advOptionsOpened: false,
       currentStep: 'authorize',
-      // currentStep: 'kinesis-setup',
       enabledSteps: ['authorize'],
-      // enabledSteps: ['authorize', 'kinesis-setup'],
       formData: {
         /* Default Advanced Values */
         awsCloudWatchGlobalInput: '',
@@ -33,12 +31,6 @@ export default class AWSCloudWatch extends Component {
         awsCloudWatchThrottleEnabled: '',
         awsCloudWatchThrottleWait: '1000',
         /* End Default Values */
-        // awsCloudWatchName: 'test',
-        // awsCloudWatchDescription: 'test',
-        // awsCloudWatchAwsKey: '123',
-        // awsCloudWatchAwsSecret: '123',
-        // awsCloudWatchAwsRegion: 'us-east-2',
-        // awsCloudWatchKinesisStream: 'stream-name-2',
       },
     };
   }
