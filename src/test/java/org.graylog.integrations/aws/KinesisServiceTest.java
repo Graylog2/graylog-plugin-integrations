@@ -129,7 +129,8 @@ public class KinesisServiceTest {
         //  Add a test for the case when an unknown CloudWatch format is sent, and also
         //  when a non-CloudWatch payload is provided.
 
-        when(kinesisClientBuilder.region(Region.EU_WEST_1)).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
@@ -139,7 +140,7 @@ public class KinesisServiceTest {
 
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             "", "", TEST_STREAM_1, "");
+                                                                             "key", "secret", TEST_STREAM_1, "");
         KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
