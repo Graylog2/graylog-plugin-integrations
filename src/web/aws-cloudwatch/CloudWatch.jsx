@@ -20,7 +20,7 @@ export default class AWSCloudWatch extends Component {
     super(props);
 
     this.state = {
-      advOptionsOpened: false,
+      visibleAdvancedOptions: false,
       currentStep: 'authorize',
       enabledSteps: ['authorize'],
       formData: {
@@ -34,21 +34,6 @@ export default class AWSCloudWatch extends Component {
       },
     };
   }
-
-  _advancedOptions = () => {
-    const { advOptionsOpened } = this.state;
-
-    return {
-      toggle: this.toggleAdvancedOptions,
-      opened: advOptionsOpened,
-    };
-  }
-
-  /* eslint-disable-next-line react/destructuring-assignment */
-  getFormData = value => this.state.formData[value];
-
-  /* eslint-disable-next-line react/destructuring-assignment */
-  getAllFormData = () => this.state.formData;
 
   isDisabledStep = (step) => {
     const { enabledSteps } = this.state;
@@ -102,15 +87,15 @@ export default class AWSCloudWatch extends Component {
   }
 
   toggleAdvancedOptions = () => {
-    const { advOptionsOpened } = this.state;
+    const { visibleAdvancedOptions } = this.state;
 
     this.setState({
-      advOptionsOpened: !advOptionsOpened,
+      visibleAdvancedOptions: !visibleAdvancedOptions,
     });
   }
 
   render() {
-    const { currentStep, formData } = this.state;
+    const { currentStep, formData, visibleAdvancedOptions } = this.state;
     const wizardSteps = [
       {
         key: 'authorize',
@@ -126,7 +111,8 @@ export default class AWSCloudWatch extends Component {
         component: (<StepKinesis onSubmit={this.handleSubmit}
                                  onChange={this.handleFieldUpdate}
                                  values={formData}
-                                 advOptions={this._advancedOptions}
+                                 toggleAdvancedOptions={this.toggleAdvancedOptions}
+                                 visibleAdvancedOptions={visibleAdvancedOptions}
                                  hasStreams />),
         disabled: this.isDisabledStep('kinesis-setup'),
       },
@@ -139,7 +125,7 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'review',
         title: 'AWS CloudWatch Review',
-        component: (<StepReview onSubmit={this.handleSubmit} getAllValues={this.getAllFormData} />),
+        component: (<StepReview onSubmit={this.handleSubmit} values={formData} />),
         disabled: this.isDisabledStep('review'),
       },
     ];

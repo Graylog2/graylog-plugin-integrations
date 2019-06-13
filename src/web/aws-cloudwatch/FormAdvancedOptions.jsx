@@ -3,14 +3,14 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
-const FormAdvancedOptions = ({ onChange, values, toggle, opened }) => {
+const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
   return (
     <div>
       <ToggleAdvancedOptions onClick={toggle} type="button">
           Advanced Options <i className="fa fa-angle-right fa-sm" />
       </ToggleAdvancedOptions>
 
-      <AdvancedOptionsContent opened={opened}>
+      <AdvancedOptionsContent visible={visible}>
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="1"
@@ -51,11 +51,11 @@ FormAdvancedOptions.propTypes = {
   onChange: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
-  opened: PropTypes.bool.isRequired,
+  visible: PropTypes.bool.isRequired,
 };
 
 const AdvancedOptionsContent = styled.div`
-  display: ${props => (props.opened ? 'block' : 'none')};
+  display: ${props => (props.visible ? 'block' : 'none')};
 
 `;
 

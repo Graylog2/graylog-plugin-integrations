@@ -5,9 +5,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisStreams = ({ onChange, onSubmit, values, advOptions }) => {
-  const { toggle, opened } = advOptions();
-
+const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
   return (
     <Row>
       <Col md={8}>
@@ -30,8 +28,8 @@ const KinesisStreams = ({ onChange, onSubmit, values, advOptions }) => {
 
           <FormAdvancedOptions onChange={onChange}
                                values={values}
-                               toggle={toggle}
-                               opened={opened} />
+                               toggle={toggleAdvancedOptions}
+                               visible={visibleAdvancedOptions} />
 
           <Button type="submit">Verify Stream &amp; Format</Button>
         </form>
@@ -44,7 +42,8 @@ KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
-  advOptions: PropTypes.func.isRequired,
+  toggleAdvancedOptions: PropTypes.func.isRequired,
+  visibleAdvancedOptions: PropTypes.bool.isRequired,
 };
 
 export default KinesisStreams;

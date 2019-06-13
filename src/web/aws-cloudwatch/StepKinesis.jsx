@@ -20,11 +20,14 @@ StepKinesis.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   values: PropTypes.object.isRequired,
-  advOptions: PropTypes.func.isRequired,
+  toggleAdvancedOptions: PropTypes.func,
+  visibleAdvancedOptions: PropTypes.bool,
 };
 
 StepKinesis.defaultProps = {
   hasStreams: false,
+  visibleAdvancedOptions: false,
+  toggleAdvancedOptions: () => {},
 };
 
 export default StepKinesis;
