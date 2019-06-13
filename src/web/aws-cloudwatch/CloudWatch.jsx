@@ -33,6 +33,7 @@ export default class AWSCloudWatch extends Component {
         component: (<StepKinesis onSubmit={this.handleSubmit}
                                  onChange={this.handleFieldUpdate}
                                  getValue={this.getFormData}
+                                 advOptions={this._advancedOptions}
                                  hasStreams />),
       },
       {
@@ -48,8 +49,9 @@ export default class AWSCloudWatch extends Component {
     ];
 
     this.state = {
-      currentStep: 'authorize',
-      enabledSteps: ['authorize'],
+      advOptionsOpened: false,
+      currentStep: 'kinesis-setup',
+      enabledSteps: ['authorize', 'kinesis-setup'],
       formData: {
         // Default Advanced Values
         awsCloudWatchGlobalInput: '',
@@ -58,20 +60,37 @@ export default class AWSCloudWatch extends Component {
         awsCloudWatchThrottleEnabled: '',
         awsCloudWatchThrottleWait: '1000',
         // End Default Values
+        awsCloudWatchName: 'test',
+        awsCloudWatchDescription: 'test',
+        awsCloudWatchAwsKey: '123',
+        awsCloudWatchAwsSecret: '123',
+        awsCloudWatchAwsRegion: 'us-east-2',
+        awsCloudWatchKinesisStream: 'stream-name-2',
       },
-      wizardSteps: this.wizardWithDisabledSteps(),
+      wizardSteps: this._wizardWithDisabledSteps(),
     };
 
     this.availableSteps = this.wizardSteps.map(step => step.key);
   }
 
-  wizardWithDisabledSteps = () => {
+  _wizardWithDisabledSteps = () => {
     return this.wizardSteps.map(step => (
       {
         ...step,
         disabled: this.isDisabledStep(step.key),
       }
     ));
+  }
+
+  _advancedOptions = () => {
+    const { advOptionsOpened } = this.state;
+
+    console.log('_advancedOptions', advOptionsOpened);
+
+    return {
+      toggle: this.toggleAdvancedOptions,
+      opened: advOptionsOpened,
+    };
   }
 
   /* eslint-disable-next-line react/destructuring-assignment */
@@ -96,11 +115,17 @@ export default class AWSCloudWatch extends Component {
 
   handleFieldUpdate = ({ target }) => {
     const { formData } = this.state;
+    const isChecked = Object.keys(target).includes('checked');
+    let { value } = target;
+
+    if (isChecked) {
+      value = target.checked ? value : '';
+    }
 
     this.setState({
       formData: {
         ...formData,
-        [target.name || target.id]: target.value,
+        [target.name || target.id]: value,
       },
     });
   }
@@ -119,7 +144,7 @@ export default class AWSCloudWatch extends Component {
         currentStep: key,
       }, () => {
         this.setState({
-          wizardSteps: this.wizardWithDisabledSteps(),
+          wizardSteps: this._wizardWithDisabledSteps(),
         });
       });
     }
@@ -133,8 +158,20 @@ export default class AWSCloudWatch extends Component {
     });
   }
 
+  toggleAdvancedOptions = () => {
+    const { advOptionsOpened } = this.state;
+
+    console.log('toggleAdvancedOptions', !advOptionsOpened);
+
+    this.setState({
+      advOptionsOpened: !advOptionsOpened,
+    });
+  }
+
   render() {
     const { currentStep, wizardSteps } = this.state;
+
+    console.log('render CloudWatch');
 
     return (
       <Row>

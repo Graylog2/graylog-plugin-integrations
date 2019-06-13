@@ -11,6 +11,8 @@ import KinesisStreams from './KinesisStreams';
 import KinesisSetup from './KinesisSetup';
 
 const StepKinesis = ({ hasStreams, ...restProps }) => {
+  console.log('render StepKinesis');
+
   return (
     <React.Fragment>
       { hasStreams
@@ -26,6 +28,7 @@ StepKinesis.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   getValue: PropTypes.func.isRequired,
+  advOptions: PropTypes.func.isRequired,
 };
 
 StepKinesis.defaultProps = {

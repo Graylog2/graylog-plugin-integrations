@@ -5,7 +5,9 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
+const KinesisSetup = ({ getValue, onChange, onSubmit, advOptions }) => {
+  const { toggle, opened } = advOptions();
+
   return (
     <Row>
       <Col md={8}>
@@ -34,7 +36,10 @@ const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
             <option value="group-name-4">Group Name 4</option>
           </Input>
 
-          <FormAdvancedOptions onChange={onChange} getValue={getValue} />
+          <FormAdvancedOptions onChange={onChange}
+                               getValue={getValue}
+                               toggle={toggle}
+                               opened={opened} />
 
           <Button type="submit">Verify &amp; Format</Button>
         </form>
@@ -47,6 +52,7 @@ KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   getValue: PropTypes.func.isRequired,
+  advOptions: PropTypes.func.isRequired,
 };
 
 export default KinesisSetup;
