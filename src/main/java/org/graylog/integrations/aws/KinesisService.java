@@ -101,7 +101,7 @@ public class KinesisService {
         // List all streams and make sure the indicated stream is in the list.
         final List<String> kinesisStreams = getKinesisStreams(request.region(),
                                                               request.awsAccessKeyId(),
-                                                              request.awsAccessKeyId());
+                                                              request.awsSecretAccessKey());
 
         final boolean streamExists = kinesisStreams.stream()
                                                    .anyMatch(streamName -> streamName.equals(request.streamName()));
@@ -115,7 +115,8 @@ public class KinesisService {
 
         LOG.debug("The stream [{}] exists", request.streamName());
 
-        final List<Record> records = readKinesisRecords(request);
+        // TODO: Replace readFakeKinesisRecords with actual Kinesis record message retrieval
+        final List<Record> records = readFakeKinesisRecords(request);
         if (records.size() == 0) {
             String explanation = "The Kinesis stream does not contain any messages.";
             LOG.error(explanation);
@@ -225,12 +226,15 @@ public class KinesisService {
     }
 
     /**
-     * Read the first or last records from the stream.
+     * TODO: Delete this method after connecting with actual log retrieval.
      *
-     * @param request The request details including the region and stream name.
-     * @return
+     * @param request The request details including the region and stream name. This contains the AWS key and secret.
+
+     * @return a fake Kinesis record with a compressed CloudWatch log subscription payload.
+     *  See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html for more info on
+     *  CloudWatch Kinesis subscription payloads.
      */
-    private List<Record> readKinesisRecords(KinesisHealthCheckRequest request) {
+    private List<Record> readFakeKinesisRecords(KinesisHealthCheckRequest request) {
 
         // Mock up Kinesis CloudWatch subscription record.
         // TODO: This will be substituted with actual Kinesis record retrieval later.
