@@ -57,7 +57,6 @@ export default class FormAdvancedOptions extends Component {
             type="text"
             value={getValue('awsCloudWatchAssumeARN')}
             onChange={onChange}
-            bsSize="large"
             label="AWS assume role ARN"
           />
 
@@ -66,7 +65,6 @@ export default class FormAdvancedOptions extends Component {
             type="number"
             value={getValue('awsCloudWatchBatchSize')}
             onChange={onChange}
-            bsSize="large"
             label="Kinesis Record batch size"
           />
 
@@ -84,7 +82,6 @@ export default class FormAdvancedOptions extends Component {
             type="number"
             value={getValue('awsCloudWatchThrottleWait')}
             onChange={onChange}
-            bsSize="large"
             label="Throttled wait milliseconds"
           />
         </AdvancedOptionsContent>

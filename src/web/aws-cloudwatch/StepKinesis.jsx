@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 import React from 'react';
 import PropTypes from 'prop-types';
+=======
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { Row, Col } from 'react-bootstrap';
+>>>>>>> Cleanup
 
 import KinesisStreams from './KinesisStreams';
 import KinesisSetup from './KinesisSetup';
@@ -26,4 +32,19 @@ StepKinesis.defaultProps = {
   hasStreams: false,
 };
 
+<<<<<<< HEAD
 export default StepKinesis;
+=======
+    return (
+      <Row>
+        <Col md="8">
+          { hasStreams
+              ? <CloudWatchStreams {...restProps} />
+              : <CloudWatchKinesisSetup {...restProps} />
+          }
+        </Col>
+      </Row>
+    )
+  }
+}
+>>>>>>> Cleanup
