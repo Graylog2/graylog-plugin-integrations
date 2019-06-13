@@ -1,12 +1,12 @@
 package org.graylog.integrations.aws.service;
 
+import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+
 /**
- * Supports the ability to automatically parse
+ * A helper class that supports the ability to detect the type of AWS log message.
  */
 public class AWSLogMessage {
-
-    private static final String ACTION_ACCEPT = "ACCEPT";
-    private static final String ACTION_REJECT = "REJECT";
 
     private String logMessage;
 
@@ -17,29 +17,63 @@ public class AWSLogMessage {
     /**
      * Detects the type of log message.
      *
-     * @return
+     * @return A {@code Type} indicating the which kind of log message has been detected.
      */
-    public Type messageType() {
+    public Type detectLogMessageType() {
 
-        // AWS Flow Logs
-        // 2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK
-
-        // Not using a regex here, because it would be quite complicated and hard to maintain.
-        // Performance should not be an issue here, because this will only be executed once when detecting a log message.
-        if ((logMessage.contains(ACTION_ACCEPT) || logMessage.contains(ACTION_REJECT)) &&
-            logMessage.chars().filter(Character::isSpaceChar).count() == 13) {
+        if (isFlowLog()) {
             return Type.FLOW_LOGS;
         }
 
-        // Add more log message types here as needed
-
         return Type.UNKNOWN;
+    }
+
+    /**
+     * Flow logs are space-delimited messages. See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+     *
+     * Sample: 2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK
+     *
+     * Match a message with exactly 13 spaces and either the word ACCEPT or REJECT.
+     * Use simple if checks instead of regex to keep this simple. Performance should not be a concern, since
+     * this is only called once during the healthcheck.
+     *
+     * @return true if message is a flowlog.
+     */
+    public boolean isFlowLog() {
+        boolean hasAction = logMessage.contains("ACCEPT") || logMessage.contains("REJECT");
+        long spaceCount = logMessage.chars().filter(Character::isSpaceChar).count();
+
+        return hasAction && spaceCount == 13;
     }
 
     // One enum value should be added for each type of log message that auto-detect is supported for.
     public enum Type {
 
-        FLOW_LOGS, // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
-        UNKNOWN
+        FLOW_LOGS("AWS Flow Log", CloudWatchFlowLogCodec.NAME), // See https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+        // TODO: Consider renaming this codec to not include the name CloudWatch, since the logs did not necessarily come from CloudWatch.
+        UNKNOWN("Unknown log message", CloudWatchRawLogCodec.NAME);
+
+        private String description;
+
+        // The codec name, which is usually defined as a constant at the top of the codec class.
+        private String codecName;
+
+        Type(String description, String codecName) {
+
+            this.description = description;
+            this.codecName = codecName;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getCodecName() {
+            return codecName;
+        }
+
+        public boolean isUnknown() {
+            return this == UNKNOWN;
+        }
     }
 }

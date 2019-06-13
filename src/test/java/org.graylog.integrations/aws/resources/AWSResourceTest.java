@@ -1,8 +1,10 @@
 package org.graylog.integrations.aws.resources;
 
-import org.graylog.integrations.aws.CloudWatchService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.KinesisService;
+import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
 import org.graylog.integrations.aws.service.AWSService;
+import org.graylog2.plugin.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mock;
@@ -12,6 +14,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+
+import java.util.HashMap;
 
 import static org.mockito.Mockito.when;
 
@@ -39,6 +43,7 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder), new CloudWatchService(logsClientBuilder));
+        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder,
+                                                                           new ObjectMapper(), new HashMap<>()), new CloudWatchService(logsClientBuilder));
     }
 }
