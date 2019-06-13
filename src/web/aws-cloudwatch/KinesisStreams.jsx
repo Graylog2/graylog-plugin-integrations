@@ -5,10 +5,8 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisStreams = ({ onChange, onSubmit, getValue, advOptions }) => {
+const KinesisStreams = ({ onChange, onSubmit, values, advOptions }) => {
   const { toggle, opened } = advOptions();
-
-  console.log('render KinesisStreams');
 
   return (
     <Row>
@@ -19,7 +17,7 @@ const KinesisStreams = ({ onChange, onSubmit, getValue, advOptions }) => {
 
           <Input id="awsCloudWatchKinesisStream"
                  type="select"
-                 value={getValue('awsCloudWatchKinesisStream')}
+                 value={values.awsCloudWatchKinesisStream}
                  onChange={onChange}
                  label="Choose Stream"
                  required>
@@ -31,7 +29,7 @@ const KinesisStreams = ({ onChange, onSubmit, getValue, advOptions }) => {
           </Input>
 
           <FormAdvancedOptions onChange={onChange}
-                               getValue={getValue}
+                               values={values}
                                toggle={toggle}
                                opened={opened} />
 
@@ -45,7 +43,7 @@ const KinesisStreams = ({ onChange, onSubmit, getValue, advOptions }) => {
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
   advOptions: PropTypes.func.isRequired,
 };
 

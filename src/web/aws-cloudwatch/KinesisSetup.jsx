@@ -5,7 +5,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisSetup = ({ getValue, onChange, onSubmit, advOptions }) => {
+const KinesisSetup = ({ values, onChange, onSubmit, advOptions }) => {
   const { toggle, opened } = advOptions();
 
   return (
@@ -20,12 +20,12 @@ const KinesisSetup = ({ getValue, onChange, onSubmit, advOptions }) => {
                  label="Kinesis Stream Name"
                  placeholder="Create Stream Name"
                  onChange={onChange}
-                 value={getValue('awsCloudWatchKinesisStream')}
+                 defaultValue={values.awsCloudWatchKinesisStream}
                  required />
 
           <Input id="awsCloudWatchAwsGroupName"
                  type="select"
-                 value={getValue('awsCloudWatchAwsGroupName')}
+                 value={values.awsCloudWatchAwsGroupName}
                  onChange={onChange}
                  label="CloudWatch Group Name"
                  required>
@@ -37,7 +37,7 @@ const KinesisSetup = ({ getValue, onChange, onSubmit, advOptions }) => {
           </Input>
 
           <FormAdvancedOptions onChange={onChange}
-                               getValue={getValue}
+                               values={values}
                                toggle={toggle}
                                opened={opened} />
 
@@ -51,7 +51,7 @@ const KinesisSetup = ({ getValue, onChange, onSubmit, advOptions }) => {
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
   advOptions: PropTypes.func.isRequired,
 };
 

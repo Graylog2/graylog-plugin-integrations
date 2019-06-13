@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
-const FormAdvancedOptions = ({ onChange, getValue, toggle, opened }) => {
+const FormAdvancedOptions = ({ onChange, values, toggle, opened }) => {
   return (
     <div>
       <ToggleAdvancedOptions onClick={toggle} type="button">
@@ -14,32 +14,32 @@ const FormAdvancedOptions = ({ onChange, getValue, toggle, opened }) => {
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="1"
-               defaultChecked={getValue('awsCloudWatchGlobalInput')}
+               defaultChecked={values.awsCloudWatchGlobalInput}
                onChange={onChange}
                label="Global Input" />
 
         <Input id="awsCloudWatchAssumeARN"
                type="text"
-               value={getValue('awsCloudWatchAssumeARN')}
+               value={values.awsCloudWatchAssumeARN}
                onChange={onChange}
                label="AWS assume role ARN" />
 
         <Input id="awsCloudWatchBatchSize"
                type="number"
-               value={getValue('awsCloudWatchBatchSize')}
+               value={values.awsCloudWatchBatchSize}
                onChange={onChange}
                label="Kinesis Record batch size" />
 
         <Input id="awsCloudWatchThrottleEnabled"
                type="checkbox"
                value="1"
-               defaultChecked={getValue('awsCloudWatchThrottleEnabled')}
+               defaultChecked={values.awsCloudWatchThrottleEnabled}
                onChange={onChange}
                label="Enable Throttle" />
 
         <Input id="awsCloudWatchThrottleWait"
                type="number"
-               value={getValue('awsCloudWatchThrottleWait')}
+               value={values.awsCloudWatchThrottleWait}
                onChange={onChange}
                label="Throttled wait milliseconds" />
       </AdvancedOptionsContent>
@@ -49,7 +49,7 @@ const FormAdvancedOptions = ({ onChange, getValue, toggle, opened }) => {
 
 FormAdvancedOptions.propTypes = {
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
   opened: PropTypes.bool.isRequired,
 };

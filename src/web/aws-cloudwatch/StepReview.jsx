@@ -14,7 +14,6 @@ const StepReview = ({ getAllValues, onSubmit }) => {
             <pre>{JSON.stringify(getAllValues(), null, 2)}</pre>
           </code>
 
-<<<<<<< HEAD
           <Button type="submit">Complete CloudWatch Setup</Button>
         </form>
       </Col>
@@ -28,23 +27,3 @@ StepReview.propTypes = {
 };
 
 export default StepReview;
-=======
-  render() {
-    const { getAllValues, onSubmit } = this.props;
-
-    return (
-      <Row>
-        <Col md="8">
-          <form onSubmit={onSubmit}>
-            <p></p>Review All The Things
-
-            <code><pre>{JSON.stringify(getAllValues(), null, 2)}</pre></code>
-
-            <Button type="submit">Complete CloudWatch Setup</Button>
-          </form>
-        </Col>
-      </Row>
-    )
-  }
-}
->>>>>>> Cleanup
