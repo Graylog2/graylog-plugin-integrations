@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws;
 
+import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.service.AWSService;
 import org.junit.Before;
@@ -40,5 +41,18 @@ public class AWSServiceTest {
         assertTrue(availableRegions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
         assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK",
                      20, availableRegions.size());
+    }
+
+    @Test
+    public void testAvailableServices() {
+
+        AvailableAWSServiceSummmary services = awsService.getAvailableServices();
+
+        // There should be one service.
+        assertEquals(1, services.total());
+        assertEquals(1, services.services().size());
+
+        // CloudWatch should be in the list of available services.
+        assertTrue(services.services().stream().anyMatch(s -> s.name().equals("CloudWatch")));
     }
 }
