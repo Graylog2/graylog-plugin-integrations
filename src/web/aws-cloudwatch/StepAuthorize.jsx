@@ -29,7 +29,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  rows={4} />
 
           <Input id="awsCloudWatchAwsKey"
-                 type="text"
+                 type="password"
                  label="AWS Key"
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
@@ -38,7 +38,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  required />
 
           <Input id="awsCloudWatchAwsSecret"
-                 type="text"
+                 type="password"
                  label="AWS Secret"
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}

@@ -41,16 +41,10 @@ export default class AWSCloudWatch extends Component {
 
     this.state = {
       visibleAdvancedOptions: false,
-      currentStep: 'review',
-      enabledSteps: ['authorize', 'kinesis-setup', 'health-check', 'review'],
+      currentStep: 'authorize',
+      enabledSteps: ['authorize'],
       formData: {
         ...DEFAULT_SETTINGS,
-        awsCloudWatchName: 'Some Name',
-        awsCloudWatchDescription: 'A Description',
-        awsCloudWatchAwsKey: 'key123',
-        awsCloudWatchAwsSecret: 'secretabc',
-        awsCloudWatchAwsRegion: 'us-west-1',
-        awsCloudWatchKinesisStream: 'stream-name-2',
       },
       logOutput: JSON.stringify(this.logOutput, null, 2),
     };
@@ -102,6 +96,10 @@ export default class AWSCloudWatch extends Component {
     });
   }
 
+  handleEditClick = nextStep => () => {
+    this.handleStepChange(nextStep);
+  }
+
   toggleAdvancedOptions = () => {
     const { visibleAdvancedOptions } = this.state;
 
@@ -141,7 +139,10 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'review',
         title: 'AWS CloudWatch Review',
-        component: (<StepReview onSubmit={this.handleSubmit} values={formData} logOutput={logOutput} />),
+        component: (<StepReview onSubmit={this.handleSubmit}
+                                values={formData}
+                                logOutput={logOutput}
+                                onEditClick={this.handleEditClick} />),
         disabled: this.isDisabledStep('review'),
       },
     ];
