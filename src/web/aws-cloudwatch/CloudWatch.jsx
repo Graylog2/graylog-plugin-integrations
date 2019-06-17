@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
+import _ from 'lodash';
 
 import Wizard from 'components/common/Wizard';
 import PageHeader from 'components/common/PageHeader';
@@ -60,15 +61,72 @@ export default class AWSCloudWatch extends Component {
     return !enabledSteps.includes(step);
   };
 
+  // handleFieldUpdate = ({ target }) => {
+  //   const { formData } = this.state;
+  //   const isChecked = Object.keys(target).includes('checked');
+  //   let { value } = target;
+
+  //   if (isChecked) {
+  //     value = target.checked ? value : '';
+  //   }
+
+  //   this.setState({
+  //     formData: {
+  //       ...formData,
+  //       [target.name || target.id]: value,
+  //     },
+  //   });
+  // }
+
   handleFieldUpdate = ({ target }) => {
     const { formData } = this.state;
-    const value = Object.keys(target).includes('checked') ? target.checked : target.value;
+    const isChecked = Object.keys(target).includes('checked');
+    const id = target.name || target.id;
+    let { value } = target;
+    let newFormData = {};
+
+    if (isChecked) {
+      value = target.checked ? value : '';
+    }
+
+    /*
+    TODO:
+      - Move the formData to Reflux
+      - Using HOC, have StyledInput grab Reflux values
+      - Render bsStyle according to Reflux formData
+    */
+
+    newFormData = formData.map((field) => {
+      if (field.id === id) {
+        return {
+          ...field,
+          value,
+        };
+      }
+
+      return field;
+    });
+
+    // const existingData = _.findIndex(formData, field => id === field.id);
+
+    // if (existingData !== -1) {
+    //   newFormData = {
+    //     ...formData,
+    //     [existingData]: {
+    //       ...formData[existingData],
+    //       value,
+    //     },
+    //   };
+    // } else {
+    //   newFormData = formData;
+    //   newFormData.push({
+    //     id,
+    //     value,
+    //   });
+    // }
 
     this.setState({
-      formData: {
-        ...formData,
-        [target.name || target.id]: value,
-      },
+      formData: newFormData,
     });
   }
 

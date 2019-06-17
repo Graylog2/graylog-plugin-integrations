@@ -83,7 +83,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
 StepAuthorize.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
+  values: PropTypes.array.isRequired,
 };
 
 const DisappearingInputs = styled(StyledInput)`

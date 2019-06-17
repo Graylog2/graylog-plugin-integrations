@@ -82,7 +82,7 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
 StepReview.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onEditClick: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
+  values: PropTypes.array.isRequired,
   logOutput: PropTypes.string.isRequired,
 };
 

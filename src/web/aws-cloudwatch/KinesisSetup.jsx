@@ -49,7 +49,7 @@ const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visib
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
+  values: PropTypes.array.isRequired,
   toggleAdvancedOptions: PropTypes.func.isRequired,
   visibleAdvancedOptions: PropTypes.bool.isRequired,
 };

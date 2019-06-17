@@ -8,7 +8,7 @@ import StyledInput from '../common/StyledInput';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
-const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
+const KinesisStreams = ({ onChange, onSubmit, formErrors, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
   return (
     <Row>
       <Col>
@@ -21,6 +21,7 @@ const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, vis
                        value={values.awsCloudWatchKinesisStream}
                        onChange={onChange}
                        label="Choose Stream"
+                       hasError={formErrors.awsCloudWatchKinesisStream}
                        required>
             <option value="">Choose Kinesis Stream</option>
             <option value="stream-name-1">Stream Name 1</option>
@@ -42,9 +43,14 @@ const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, vis
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
+  values: PropTypes.array.isRequired,
   toggleAdvancedOptions: PropTypes.func.isRequired,
   visibleAdvancedOptions: PropTypes.bool.isRequired,
+  formErrors: PropTypes.object,
+};
+
+KinesisStreams.defaultProps = {
+  formErrors: {},
 };
 
 export default KinesisStreams;
