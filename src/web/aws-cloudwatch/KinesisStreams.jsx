@@ -24,6 +24,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
                        value={formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : ''}
                        onChange={onChange}
                        label="Choose Stream"
+                       hasError={formErrors.awsCloudWatchKinesisStream}
                        required>
             <option value="">Choose Kinesis Stream</option>
             <option value="stream-name-1">Stream Name 1</option>
