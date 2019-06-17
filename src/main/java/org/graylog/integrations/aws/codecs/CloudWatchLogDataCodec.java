@@ -1,4 +1,4 @@
-package org.graylog.integrations.aws.codec;
+package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;

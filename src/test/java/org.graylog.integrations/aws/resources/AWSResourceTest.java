@@ -42,7 +42,10 @@ public class AWSResourceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
 
         // Set up the chain of mocks.
-        awsResource = new AWSResource(new AWSService(), new KinesisService(kinesisClientBuilder,
-                                                                           new ObjectMapper(), new HashMap<>()), new CloudWatchService(logsClientBuilder));
+        awsResource = new AWSResource(new AWSService(null, null, null),
+                                      new KinesisService(kinesisClientBuilder,
+                                                         new ObjectMapper(),
+                                                         new HashMap<>()),
+                                      new CloudWatchService(logsClientBuilder));
     }
 }

@@ -16,7 +16,7 @@ public class AWSServiceTest {
 
     @Before
     public void setUp() {
-        awsService = new AWSService();
+        awsService = new AWSService(null, null, null);
     }
 
     @Test

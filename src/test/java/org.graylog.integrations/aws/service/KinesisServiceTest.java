@@ -177,26 +177,26 @@ public class KinesisServiceTest {
     private byte[] buildKinesisRecordPayload() throws IOException {
 
         final String messageData = "{\n" +
-                "  \"messageType\": \"DATA_MESSAGE\",\n" +
-                "  \"owner\": \"459220251735\",\n" +
-                "  \"logGroup\": \"test-flowlogs\",\n" +
-                "  \"logStream\": \"eni-3423-all\",\n" +
-                "  \"subscriptionFilters\": [\n" +
-                "    \"filter\"\n" +
-                "  ],\n" +
-                "  \"logEvents\": [\n" +
-                "    {\n" +
-                "      \"id\": \"3423\",\n" +
-                "      \"timestamp\": 1559738144000,\n" +
-                "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"id\": \"3423\",\n" +
-                "      \"timestamp\": 1559738144000,\n" +
-                "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
+                                   "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                                   "  \"owner\": \"459220251735\",\n" +
+                                   "  \"logGroup\": \"test-flowlogs\",\n" +
+                                   "  \"logStream\": \"eni-3423-all\",\n" +
+                                   "  \"subscriptionFilters\": [\n" +
+                                   "    \"filter\"\n" +
+                                   "  ],\n" +
+                                   "  \"logEvents\": [\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    },\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    }\n" +
+                                   "  ]\n" +
+                                   "}";
 
         // Compress the test record, as CloudWatch subscriptions are compressed.
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);

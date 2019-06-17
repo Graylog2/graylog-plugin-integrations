@@ -1,7 +1,7 @@
 package org.graylog.integrations.aws;
 
-import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
 
 /**
  * A helper class that supports the ability to detect the type of AWS log message.

@@ -118,4 +118,62 @@ public class AWSResource implements PluginRestResource {
         KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
         return Response.accepted().entity(response).build();
     }
+
+    /**
+     * Save the new CloudWatch integration.
+     *
+     *  curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/save' \
+     *  -v \
+     *  -X POST \
+     *  -H 'X-Requested-By: just-a-test' \
+     *  -H 'Content-Type: application/json' \
+     *  -H 'Accept: application/json' \
+     *  --compressed \
+     *  --data-binary '{
+     *   "title": "Test",
+     *   "type": "org.graylog.aws.inputs.flowlogs.FlowLogsInput",
+     *   "configuration": {
+     *     "throttling_allowed": false,
+     *     "kinesis_max_throttled_wait": 60000,
+     *     "aws_region": "us-east-1",
+     *     "aws_access_key": "test",
+     *     "aws_secret_key": "test",
+     *     "aws_assume_role_arn": "test",
+     *     "kinesis_stream_name": "test",
+     *     "kinesis_record_batch_size": 10000
+     *   },
+     *   "global": false,
+     *   "node": "e065896b-8a9a-4f45-83f2-e740525ed035"
+     * }'
+     *
+     * // Advanced Settings
+     *   awsCloudWatchGlobalInput: '', // '' == false || '1' == true
+     *   awsCloudWatchAssumeARN: '',  // default ''
+     *   awsCloudWatchBatchSize: '10000', // default 10,000
+     *   awsCloudWatchThrottleEnabled: '', // '' == false || '1' == true
+     *   awsCloudWatchThrottleWait: '1000', // default 1,000
+     *
+     *   // Standard Fields
+     *   awsCloudWatchName: 'test',  // String
+     *   awsCloudWatchDescription: 'test', // Long String
+     *   awsCloudWatchAwsKey: '123', // 20  alphanumeric characters starting with "AK"
+     *   awsCloudWatchAwsSecret: '123', // 40 characters in standard base-64 syntax
+     *   awsCloudWatchAwsRegion: 'us-east-2', // String
+     *   awsCloudWatchKinesisStream: 'stream-name-2', // String
+     * }
+     */
+    @POST
+    @Timed
+    @Path("/kinesis/save")
+    @ApiOperation( value = "Save a new Kinesis input" )
+    @RequiresPermissions(RestPermissions.INPUTS_CREATE)
+    @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
+    public Response create(@ApiParam(name = "JSON body", required = true)
+                           @Valid @NotNull KinesisInputCreateRequest saveRequest) throws ValidationException, NotFoundException, org.graylog2.database.NotFoundException, org.graylog2.plugin.database.ValidationException {
+
+        awsService.saveInput(saveRequest, getCurrentUser());
+
+        // TODO: Identify if this method needs to return a specific response with the id of the new input;
+        return Response.ok().build();
+    }
 }
