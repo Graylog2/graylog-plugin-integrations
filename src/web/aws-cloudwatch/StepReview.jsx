@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 import { Link } from 'react-router';
 
-import { Input } from 'components/bootstrap';
 import Routes from 'routing/Routes';
 
 import DEFAULT_VALUES from './default_values';
+
+import StyledForm from '../common/StyledForm';
+import StyledInput from '../common/StyledInput';
 
 const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
   const defaultOutput = (key, enabled = true) => {
@@ -28,8 +30,8 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
 
   return (
     <Row>
-      <Col md={8}>
-        <form onSubmit={onSubmit}>
+      <Col>
+        <StyledForm onSubmit={onSubmit} buttonContent="Complete CloudWatch Setup">
           <h2>Final Review</h2>
 
           <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
@@ -64,16 +66,14 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
             <p>Parsed as FlowLog, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
-            <Input id="awsCloudWatchLog"
-                   type="textarea"
-                   label=""
-                   value={logOutput}
-                   rows={10}
-                   disabled />
+            <StyledInput id="awsCloudWatchLog"
+                         type="textarea"
+                         label=""
+                         value={logOutput}
+                         rows={10}
+                         disabled />
           </Container>
-
-          <Button type="submit" bsStyle="primary">Complete CloudWatch Setup</Button>
-        </form>
+        </StyledForm>
       </Col>
     </Row>
   );
