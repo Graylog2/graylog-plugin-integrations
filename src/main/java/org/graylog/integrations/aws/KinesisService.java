@@ -133,6 +133,36 @@ public class KinesisService {
         return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
     }
 
+    private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
+        LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
+
+        final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
+        LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
+
+        // Assume that the payload is from CloudWatch.
+        // Extract messages, so that they can be committed to journal one by one.
+        final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
+
+        if (LOG.isTraceEnabled()) {
+            // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
+            LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents().size());
+        }
+
+        // Pick just one log entry.
+        Optional<CloudWatchLogEntry> logEntryOptional =
+                data.logEvents().stream()
+                        .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
+
+        if (!logEntryOptional.isPresent()) {
+            LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
+            return KinesisHealthCheckResponse.create(false,
+                                                     AWSLogMessage.Type.UNKNOWN.toString(),
+                                                     "The Kinesis stream does not contain any messages.", request.logGroupName());
+        }
+
+        return detectMessage(logEntryOptional.get().message(), request.streamName(), request.logGroupName());
+    }
+
     /**
      * Detect the message type.
      *
