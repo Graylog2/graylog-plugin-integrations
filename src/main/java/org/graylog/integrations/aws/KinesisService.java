@@ -341,7 +341,7 @@ public class KinesisService {
      *
      * @param kinesisStream The name of the Kinesis stream
      * @param kinesisClient The KinesClient interface
-     * @return A list of all the records in a Kinesis stream
+     * @return A sample size of records (between 0-5 records) in a Kinesis stream
      */
     public static List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
 
@@ -349,43 +349,50 @@ public class KinesisService {
         // Create ListShard request and response and designate the Kinesis stream
         ListShardsRequest listShardsRequest = ListShardsRequest.builder().streamName(kinesisStream).build();
         ListShardsResponse listShardsResponse = kinesisClient.listShards(listShardsRequest);
-
-        String shardId;
         int shardNum = listShardsResponse.shards().size();
         List<Record> recordsList = new ArrayList<>();
-        // Iterate through the shards that exist
+
+        String shardId;
         String nextShardIterator;
-        for (int i = 0; i < shardNum; i++) {
-            shardId = listShardsResponse.shards().get(i).shardId();
-            GetShardIteratorRequest getShardIteratorRequest =
-                    GetShardIteratorRequest.builder()
-                            .shardId(shardId)
-                            .streamName(kinesisStream)
-                            .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
-                            .build();
-            String currentShardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
-            GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(currentShardIterator).build();
-            GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
-            boolean stayOnCurrentShard = true;
 
-            // Loop until shardIterator is current
-            while (stayOnCurrentShard) {
-                int recordSize = getRecordsResponse.records().size();
-                for (int k = 0; k < recordSize; k++) {
-                    recordsList.add(getRecordsResponse.records().get(k));
-                }
-                // Set the nextShardIterator
-                nextShardIterator = getRecordsResponse.nextShardIterator();
-                getRecordsRequest = GetRecordsRequest.builder().shardIterator(nextShardIterator).build();
-                getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
+        int recordsSampleSize = 5; // Hardcoded for now
 
-                // Find when the shardIterator is current
-                if (getRecordsResponse.millisBehindLatest() == 0 && recordSize == 0) {
-                    stayOnCurrentShard = false;
+            // Iterate through the shards that exist
+            for (int i = 0; i < shardNum; i++) {
+                shardId = listShardsResponse.shards().get(i).shardId();
+                GetShardIteratorRequest getShardIteratorRequest =
+                        GetShardIteratorRequest.builder()
+                                .shardId(shardId)
+                                .streamName(kinesisStream)
+                                .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
+                                .build();
+                String currentShardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
+                GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(currentShardIterator).build();
+                GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
+                boolean stayOnCurrentShard = true;
+
+                // Loop until shardIterator is current
+                while (stayOnCurrentShard) {
+                    int recordSize = getRecordsResponse.records().size();
+                    for (int k = 0; k < recordSize; k++) {
+                        recordsList.add(getRecordsResponse.records().get(k));
+                        // Return as soon as sample size is met
+                        if(recordsList.size() == recordsSampleSize){
+                            return recordsList;
+                        }
+                    }
+                    // Set the nextShardIterator
+                    nextShardIterator = getRecordsResponse.nextShardIterator();
+                    getRecordsRequest = GetRecordsRequest.builder().shardIterator(nextShardIterator).build();
+                    getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
+
+                    // Find when the shardIterator is current
+                    if (getRecordsResponse.millisBehindLatest() == 0 && recordSize == 0) {
+                        stayOnCurrentShard = false;
+                    }
                 }
             }
-        }
-        return recordsList;
+            return recordsList;
     }
     // TODO Add method for auto-setup with stream creation and subscription.
 }
