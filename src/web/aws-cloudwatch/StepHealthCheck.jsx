@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
-import { Input } from 'components/bootstrap';
-
 import { LogOutputContext } from './context/LogOutput';
+
+import StyledInput from '../common/StyledInput';
 import FormWrap from '../common/FormWrap';
 
 const StepHealthCheck = ({ onSubmit }) => {
@@ -19,12 +19,12 @@ const StepHealthCheck = ({ onSubmit }) => {
 
           <span><i className="fa fa-smile-o fa-2x" /> Great! Looks like a well formatted Flow Log.</span>
 
-          <Input id="awsCloudWatchLog"
-                 type="textarea"
-                 label="Formatted CloudWatch Log"
-                 value={logOutput}
-                 rows={10}
-                 disabled />
+          <StyledInput id="awsCloudWatchLog"
+                       type="textarea"
+                       label="Formatted CloudWatch Log"
+                       value={logOutput}
+                       rows={10}
+                       disabled />
         </FormWrap>
       </Col>
     </Row>
