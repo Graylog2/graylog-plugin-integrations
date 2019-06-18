@@ -12,7 +12,7 @@ const formDataHook = () => {
   const getFieldData = (field) => {
     const fieldData = _.find(formData, fields => fields.id === field);
 
-    return fieldData || { id: 'NotFound', value: '', error: true };
+    return fieldData || { id: 'NotFound', value: '', error: true, errorMessage: `Unable to find field ${field}` };
   };
 
   const getFieldValue = (field) => {
@@ -23,10 +23,18 @@ const formDataHook = () => {
     return currentValue || defaultValue;
   };
 
-  const setFormData = ({ id, value }) => dispatch({
-    type: 'UPDATE_FORM_DATA',
-    value: { id, value },
-  });
+  const setFormData = (id, updatedFormData) => {
+    if (!id) {
+      // eslint-disable-next-line
+      console.warn('setFormData Hook requires `id`.');
+      return false;
+    }
+
+    return dispatch({
+      type: 'UPDATE_FORM_DATA',
+      value: { id, ...updatedFormData },
+    });
+  };
 
   return {
     getFormData,

@@ -1,65 +1,49 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
+
+import formDataHook from '../aws-cloudwatch/hooks/formData';
 import formValidation from '../utils/formValidation';
 
-export default class StyledInput extends Component {
-  static propTypes = {
-    onChange: PropTypes.func,
-    errorMessage: PropTypes.string,
-  }
+export default function StyledInput({ help, required, onChange, id: inputId, ...restProps }) {
+  const { getFieldData } = formDataHook();
+  const { error: hasError, errorMessage } = getFieldData(inputId);
 
-  static defaultProps = {
-    onChange: () => {},
-    errorMessage: undefined,
-  }
-
-  state = {
-    invalid: false,
-    errorOutput: undefined,
-  }
-
-  checkValidity = (event) => {
-    /* TODO:
-      - extract this into a helper function
-      - Accept the node element, return boolean
-      - http://alistapart.com/article/forward-thinking-form-validation/#section6
-      - Pass or set bsStyle={'success' || 'warning' || 'error' || null}
-      - Maybe pass or set `invalid` as prop
-    */
-
-    const { errorMessage, onChange } = this.props;
+  const checkValidity = (event) => {
     const errorOutput = formValidation.checkInputValidity(event.target, errorMessage);
 
-    this.setState({
-      invalid: !!errorOutput,
-      errorOutput: errorOutput,
-    });
-
-    onChange(event);
+    onChange(event, { error: !!errorOutput, errorMessage: errorOutput });
   };
 
-  render() {
-    const { errorOutput, invalid } = this.state;
+  console.log('StyledInput', inputId, restProps);
 
-    return (
-      <React.Fragment>
-        <AnInputThatIsStyled {...this.props}
-                             onChange={this.checkValidity}
-                             invalid={invalid}
-                             help={invalid && <RequiredText>{errorOutput}</RequiredText>} />
+  return (
+    <React.Fragment>
+      <Input {...restProps}
+             id={inputId}
+             onChange={checkValidity}
+             bsStyle={required ? (hasError && 'error') : null}
+             required={required}
+             help={(required && <RequiredText>{errorMessage}</RequiredText>) || help} />
 
-      </React.Fragment>
-    );
-  }
+    </React.Fragment>
+  );
 }
 
-// Remove unnecessary props before generating component
-const AnInputThatIsStyled = styled(({ invalid, errorMessage, ...rest }) => <Input {...rest} />)`
-  border-color: ${props => (props.invalid ? '#AD0707' : 'inherit')};
-`;
+StyledInput.propTypes = {
+  onChange: PropTypes.func,
+  id: PropTypes.string.isRequired,
+  required: PropTypes.bool,
+  help: PropTypes.array,
+};
+
+StyledInput.defaultProps = {
+  onChange: () => {},
+  required: false,
+  help: null,
+};
 
 const RequiredText = styled.span`
   color: rgba(173, 7, 7, 0.7);

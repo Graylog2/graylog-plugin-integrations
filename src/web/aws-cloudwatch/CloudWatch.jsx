@@ -31,7 +31,7 @@ const CloudWatch = () => {
     setCurrentStep(nextStep);
   };
 
-  const handleFieldUpdate = ({ target }) => {
+  const handleFieldUpdate = (target, { error, errorMessage }) => {
     const isChecked = Object.keys(target).includes('checked');
     const id = target.name || target.id;
     let { value } = target;
@@ -40,7 +40,7 @@ const CloudWatch = () => {
       value = target.checked ? value : '';
     }
 
-    setFormData({ id, value });
+    setFormData(id, { value, error, errorMessage });
   };
 
   const handleSubmit = (event) => {

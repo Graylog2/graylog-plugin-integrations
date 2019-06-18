@@ -18,8 +18,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
           {/* Fighting AutoComplete Forms */}
-          <DisappearingInputs id="name" type="text" />
-          <DisappearingInputs id="password" type="password" />
+          <DisappearingInput id="name" type="text" />
+          <DisappearingInput id="password" type="password" />
           {/* Continue on, Nothing to See Here */}
 
           <StyledInput id="awsCloudWatchName"
@@ -29,7 +29,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        placeholder="CloudWatch Integration Name"
                        label="Name"
                        autoComplete="off"
-                       errorMessage="Please provide a name for your new integration."
                        required />
 
           <StyledInput id="awsCloudWatchDescription"
@@ -49,7 +48,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        autoComplete="off"
                        pattern="AK[A-Z0-9]{18}"
                        minLength="20"
-                       errorMessage='Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK"'
                        required />
 
           <StyledInput id="awsCloudWatchAwsSecret"
@@ -61,7 +59,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        autoComplete="off"
                        pattern="[A-Za-z0-9/+=]{40}"
                        minLength="40"
-                       errorMessage="Your AWS Secret will be a 40-character long, base-64 encoded string"
                        required />
 
           <StyledInput id="awsCloudWatchAwsRegion"
@@ -69,7 +66,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        value={getFieldValue('awsCloudWatchAwsRegion')}
                        onChange={onChange}
                        label="Region"
-                       errorMessage="Provide the region your CloudWatch instance is deployed."
                        required>
             <option value="">Choose Region</option>
             <option value="us-east-2">US East (Ohio)</option>
@@ -88,7 +84,7 @@ StepAuthorize.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-const DisappearingInputs = styled(StyledInput)`
+const DisappearingInput = styled.input`
   position: fixed;
   top: -500vh;
   left: -500vw;

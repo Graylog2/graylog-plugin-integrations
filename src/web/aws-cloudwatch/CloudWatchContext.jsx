@@ -27,8 +27,8 @@ const CloudWatchProvider = ({ children }) => {
   const initialState = {
     availableSteps: [],
     visibleAdvancedOptions: false,
-    currentStep: 'kinesis-setup',
-    enabledSteps: ['authorize', 'kinesis-setup'],
+    currentStep: 'authorize',
+    enabledSteps: ['authorize'],
     formData: [
       ...FIELDS,
     ],
@@ -53,7 +53,7 @@ const CloudWatchProvider = ({ children }) => {
 
       case 'UPDATE_FORM_DATA': {
         const { formData } = state;
-        const { value: { id, value } } = action;
+        const { value: { id, value, error, errorMessage } } = action;
         const existingFields = formData.map(field => field.id);
         let updatedFormData = formData;
 
@@ -61,8 +61,10 @@ const CloudWatchProvider = ({ children }) => {
           updatedFormData = formData.map((field) => {
             if (field.id === id) { // loop through and find the existing field
               return {
-                ...field,
-                value: value, // spread existing data and update value
+                ...field, // spread existing data and update values as necessary
+                value: field.value !== value ? value : field.value,
+                error: field.error !== error ? error : false,
+                errorMessage: field.errorMessage !== errorMessage ? errorMessage : '',
               };
             }
 
@@ -70,7 +72,7 @@ const CloudWatchProvider = ({ children }) => {
           });
         } else {
           // Add new field to formData
-          updatedFormData = [...updatedFormData, { id, value }];
+          updatedFormData = [...updatedFormData, { id, value, error, errorMessage }];
         }
 
         return {
