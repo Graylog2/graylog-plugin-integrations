@@ -1,17 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
+import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
 import Routes from 'routing/Routes';
-
 import { Input } from 'components/bootstrap';
-
-import StyledForm from '../common/StyledForm';
 
 import formDataHook from './hooks/formData';
 import logHook from './hooks/log';
+
+import FormWrap from '../common/FormWrap';
 
 const StepReview = ({ onSubmit, onEditClick }) => {
   const { getFieldData, getFieldValue } = formDataHook();
@@ -32,8 +31,8 @@ const StepReview = ({ onSubmit, onEditClick }) => {
 
   return (
     <Row>
-      <Col>
-        <StyledForm onSubmit={onSubmit} buttonContent="Complete CloudWatch Setup">
+      <Col md={8}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Complete CloudWatch Setup">
           <h2>Final Review</h2>
 
           <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
@@ -66,7 +65,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             </ReviewItems>
 
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
-            <p>Parsed as FlowLog, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
+            <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
             <Input id="awsCloudWatchLog"
                    type="textarea"
@@ -75,7 +74,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                    rows={10}
                    disabled />
           </Container>
-        </StyledForm>
+        </FormWrap>
       </Col>
     </Row>
   );
