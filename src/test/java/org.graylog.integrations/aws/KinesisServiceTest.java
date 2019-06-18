@@ -17,20 +17,31 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
+import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
+import software.amazon.awssdk.services.kinesis.model.GetShardIteratorResponse;
+import software.amazon.awssdk.services.kinesis.model.ListShardsRequest;
+import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
+import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.Shard;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.zip.GZIPOutputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -132,11 +143,22 @@ public class KinesisServiceTest {
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
-
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
                                                .streamNames(TWO_TEST_STREAMS)
                                                .hasMoreStreams(false).build());
+
+        Shard shard = Shard.builder().shardId("shardId-1234").build();
+        when(kinesisClient.listShards(isA(ListShardsRequest.class)))
+                .thenReturn(ListShardsResponse.builder().shards(shard).build());
+
+        when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
+                .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
+
+        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildKinesisRecordPayload())).build();
+        when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
+                .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
+                .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
@@ -145,6 +167,47 @@ public class KinesisServiceTest {
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
         assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
+    }
+
+
+
+    /**
+     * Build the data payload for the CloudWatch Kinesis subscription record.
+     *
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
+     */
+    private byte[] buildKinesisRecordPayload() throws IOException {
+
+        final String messageData = "{\n" +
+                "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                "  \"owner\": \"459220251735\",\n" +
+                "  \"logGroup\": \"test-flowlogs\",\n" +
+                "  \"logStream\": \"eni-3423-all\",\n" +
+                "  \"subscriptionFilters\": [\n" +
+                "    \"filter\"\n" +
+                "  ],\n" +
+                "  \"logEvents\": [\n" +
+                "    {\n" +
+                "      \"id\": \"3423\",\n" +
+                "      \"timestamp\": 1559738144000,\n" +
+                "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"id\": \"3423\",\n" +
+                "      \"timestamp\": 1559738144000,\n" +
+                "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        // Compress the test record, as CloudWatch subscriptions are compressed.
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
+        final GZIPOutputStream gzip = new GZIPOutputStream(bos);
+        gzip.write(messageData.getBytes());
+        gzip.close();
+        final byte[] compressed = bos.toByteArray();
+        bos.close();
+        return compressed;
     }
 
     @Test
@@ -200,7 +263,7 @@ public class KinesisServiceTest {
 
     }
 
-    // TODO Add retrieveKinesisLogs test
+    // TODO Add retrieveRecords test
 
     @Test
     public void testMessageFormat() {
@@ -215,5 +278,55 @@ public class KinesisServiceTest {
         assertTrue(summary.contains("id"));
         assertTrue(summary.contains("src_addr"));
         assertTrue(summary.contains("port"));
+    }
+
+    @Test
+    public void testSelectRandomRecord() {
+
+        // Test empty list
+        List<Record> fakeRecordList = new ArrayList<>();
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.selectRandomRecord(fakeRecordList))
+                               .isExactlyInstanceOf(IllegalArgumentException.class)
+                               .hasMessageContaining("Records list can not be empty.");
+
+        // Test list with records
+        fakeRecordList.add(Record.builder().build());
+        fakeRecordList.add(Record.builder().build());
+        fakeRecordList.add(Record.builder().build());
+        Record record = kinesisService.selectRandomRecord(fakeRecordList);
+
+        // Test a record returns
+        assertNotNull(record);
+    }
+
+    @Test
+    public void testRetrieveRecords() throws ExecutionException, IOException {
+
+        Shard shard = Shard.builder().shardId("shardId-1234").build();
+        when(kinesisClient.listShards(isA(ListShardsRequest.class)))
+                .thenReturn(ListShardsResponse.builder().shards(shard).build());
+
+        when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
+                .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
+
+        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildKinesisRecordPayload())).build();
+        GetRecordsResponse recordsResponse = GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build();
+        when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse)
+                .thenReturn(recordsResponse);
+
+        List<Record> fakeRecordsList = kinesisService.retrieveRecords("kinesisStream",kinesisClient);
+        assertEquals(fakeRecordsList.size(),10);
+
     }
 }

@@ -28,7 +28,7 @@ public abstract class CloudWatchLogEvent {
     private static final String MESSAGE = "message";
 
     @JsonProperty(ID)
-    public abstract long id();
+    public abstract String id(); // A very long sequence of digits stored as a String
 
     @JsonProperty(TIMESTAMP)
     public abstract long timestamp();
@@ -37,7 +37,7 @@ public abstract class CloudWatchLogEvent {
     public abstract String message();
 
     @JsonCreator
-    public static CloudWatchLogEvent create(@JsonProperty(ID) long id,
+    public static CloudWatchLogEvent create(@JsonProperty(ID) String id,
                                             @JsonProperty(TIMESTAMP) long timestamp,
                                             @JsonProperty(MESSAGE) String message) {
         return new AutoValue_CloudWatchLogEvent(id, timestamp, message);
