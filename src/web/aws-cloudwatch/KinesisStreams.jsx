@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
+import { Input } from 'components/bootstrap';
+
 import StyledForm from '../common/StyledForm';
-import StyledInput from '../common/StyledInput';
 
 import formDataHook from './hooks/formData';
 import advancedOptionsHook from './hooks/advancedOptions';
@@ -21,18 +22,18 @@ const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
           <h2>Choose Kinesis Stream</h2>
           <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
 
-          <StyledInput id="awsCloudWatchKinesisStream"
-                       type="select"
-                       value={getFieldValue('awsCloudWatchKinesisStream')}
-                       onChange={onChange}
-                       label="Choose Stream"
-                       required>
+          <Input id="awsCloudWatchKinesisStream"
+                 type="select"
+                 value={getFieldValue('awsCloudWatchKinesisStream')}
+                 onChange={onChange}
+                 label="Choose Stream"
+                 required>
             <option value="">Choose Kinesis Stream</option>
             <option value="stream-name-1">Stream Name 1</option>
             <option value="stream-name-2">Stream Name 2</option>
             <option value="stream-name-3">Stream Name 3</option>
             <option value="stream-name-4">Stream Name 4</option>
-          </StyledInput>
+          </Input>
 
           <FormAdvancedOptions onChange={onChange}
                                toggle={toggleAdvancedOptions}

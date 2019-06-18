@@ -6,10 +6,9 @@ import { Link } from 'react-router';
 
 import Routes from 'routing/Routes';
 
-import DEFAULT_VALUES from './default_values';
+import { Input } from 'components/bootstrap';
 
 import StyledForm from '../common/StyledForm';
-import StyledInput from '../common/StyledInput';
 
 import formDataHook from './hooks/formData';
 import logHook from './hooks/log';
@@ -20,17 +19,13 @@ const StepReview = ({ onSubmit, onEditClick }) => {
 
   const defaultOutput = (key, enabled = true) => {
     const fieldData = getFieldData(key);
-    if (!enabled) {
-      return (
-        <React.Fragment>
-          {fieldData.defaultValue} <small>(default)</small>
-        </React.Fragment>
-      );
-    }
+    const outputValue = getFieldValue(key);
+    const Default = <small>(default)</small>;
+    const isDefault = (fieldData.defaultValue === fieldData.value) || !enabled;
 
     return (
       <React.Fragment>
-        {fieldData.value} {fieldData.defaultValue === fieldData.value && <small>(default)</small>}
+        {enabled ? outputValue : fieldData.defaultValue} {isDefault && Default}
       </React.Fragment>
     );
   };
@@ -73,12 +68,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
             <p>Parsed as FlowLog, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
-            <StyledInput id="awsCloudWatchLog"
-                         type="textarea"
-                         label=""
-                         value={getLog()}
-                         rows={10}
-                         disabled />
+            <Input id="awsCloudWatchLog"
+                   type="textarea"
+                   label=""
+                   value={getLog()}
+                   rows={10}
+                   disabled />
           </Container>
         </StyledForm>
       </Col>

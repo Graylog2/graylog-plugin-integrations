@@ -53,7 +53,7 @@ const CloudWatchProvider = ({ children }) => {
 
       case 'UPDATE_FORM_DATA': {
         const { formData } = state;
-        const { value: { id, value, error, errorMessage } } = action;
+        const { value: { id, value } } = action;
         const existingFields = formData.map(field => field.id);
         let updatedFormData = formData;
 
@@ -63,8 +63,6 @@ const CloudWatchProvider = ({ children }) => {
               return {
                 ...field, // spread existing data and update values as necessary
                 value: field.value !== value ? value : field.value,
-                error: field.error !== error ? error : false,
-                errorMessage: field.errorMessage !== errorMessage ? errorMessage : '',
               };
             }
 
@@ -72,7 +70,7 @@ const CloudWatchProvider = ({ children }) => {
           });
         } else {
           // Add new field to formData
-          updatedFormData = [...updatedFormData, { id, value, error, errorMessage }];
+          updatedFormData = [...updatedFormData, { id, value }];
         }
 
         return {
