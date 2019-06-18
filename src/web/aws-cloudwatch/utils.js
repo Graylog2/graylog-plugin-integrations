@@ -1,12 +1,3 @@
-// const DEFAULT_SETTINGS = {
-//   /* Default Advanced Values */
-//   awsCloudWatchGlobalInput: '',
-//   awsCloudWatchAssumeARN: '',
-//   awsCloudWatchBatchSize: '10000',
-//   awsCloudWatchThrottleEnabled: '',
-//   awsCloudWatchThrottleWait: '1000',
-// };
-
 const FIELDS = [
   /*
   Available options
@@ -38,41 +29,36 @@ const FIELDS = [
     id: 'awsCloudWatchThrottleWait',
     defaultValue: '1000',
   },
-  // authorize: [
-  //   {
-  //     id: 'awsCloudWatchName',
-  //     invalidMessage: 'Please provide a name for your new integration.',
-  //     label: 'Name',
-  //   },
-  //   {
-  //     id: 'awsCloudWatchDescription',
-  //     label: 'Name',
-  //   },
-  //   {
-  //     id: 'awsCloudWatchAwsKey',
-  //     invalidMessage: 'Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".',
-  //     label: 'Name',
-  //   },
-  //   {
-  //     id: 'awsCloudWatchAwsSecret',
-  //     invalidMessage: 'Your AWS Secret will be a 40-character long, base-64 encoded string.',
-  //     label: 'Name',
-  //   },
-  //   {
-  //     id: 'awsCloudWatchAwsRegion',
-  //     label: 'Name',
-  //   },
-  // ],
-  // 'kinesis-setup': [
-  //   {
-  //     id: 'awsCloudWatchKinesisStream',
-  //     label: 'Name',
-  //   },
-  //   {
-  //     id: 'awsCloudWatchAwsGroupName',
-  //     label: 'Name',
-  //   },
-  // ],
+  // Authorize
+  {
+    id: 'awsCloudWatchName',
+    invalidMessage: 'Please provide a name for your new integration.',
+    value: 'Name',
+  },
+  {
+    id: 'awsCloudWatchDescription',
+    value: 'Description',
+  },
+  {
+    id: 'awsCloudWatchAwsKey',
+    invalidMessage: 'Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".',
+    value: 'AKQQQQQQQQQQQQQQQQQQ',
+  },
+  {
+    id: 'awsCloudWatchAwsSecret',
+    invalidMessage: 'Your AWS Secret will be a 40-character long, base-64 encoded string.',
+    value: 'X3lvdXJfYXdzX3NlY3JldF8wMDAwMDAwMDAwMA==',
+  },
+  {
+    id: 'awsCloudWatchAwsRegion',
+    value: 'us-east-2',
+  },
+  // {
+  //   id: 'awsCloudWatchKinesisStream',
+  // },
+  // {
+  //   id: 'awsCloudWatchAwsGroupName',
+  // },
 ];
 
 export default FIELDS;
