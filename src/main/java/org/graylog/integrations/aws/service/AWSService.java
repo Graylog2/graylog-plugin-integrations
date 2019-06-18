@@ -1,10 +1,23 @@
 package org.graylog.integrations.aws.service;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
-import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
+import org.graylog.integrations.aws.inputs.AWSInput;
+import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.transports.KinesisTransport;
+import org.graylog2.database.NotFoundException;
+import org.graylog2.inputs.Input;
+import org.graylog2.inputs.InputService;
+import org.graylog2.plugin.configuration.ConfigurationException;
+import org.graylog2.plugin.database.ValidationException;
+import org.graylog2.plugin.database.users.User;
+import org.graylog2.plugin.inputs.MessageInput;
+import org.graylog2.plugin.system.NodeId;
+import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
+import org.graylog2.shared.inputs.MessageInputFactory;
+import org.graylog2.shared.inputs.NoSuchInputTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -12,12 +25,15 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
-import java.util.ArrayList;
+import javax.ws.rs.BadRequestException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service for all AWS CloudWatch business logic and SDK usages.
+ * Service for all AWS CloudWatch business logic.
+ * <p>
+ * This layer should not directly use the AWS SDK. All SDK operations should be performed in AWSClient.
  */
 public class AWSService {
 
@@ -109,19 +125,39 @@ public class AWSService {
         return AvailableAWSServiceSummmary.create(services, services.size());
     }
 
-      * Save the AWS Input
+    /**
+     * Save the AWS Input
      */
-    public void saveInput(KinesisInputCreateRequest request, User user) throws ValidationException, NotFoundException {
+    public void saveInput(KinesisInputCreateRequest request, User user) throws Exception {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         // TODO: Correctly handle global field.
         // TODO: Do we save the description?
         final HashMap<String, Object> configuration = new HashMap<>();
-        configuration.put(KinesisTransport.CK_AWS_REGION, request.region());
-        // TODO: Put the remaining configuration values.
+        AWSInputType inputType = AWSInputType.valueOf(request.getAwsInputType());
+        configuration.put(AWSInput.CK_AWS_INPUT_TYPE, inputType);
+        configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
+        configuration.put(AWSInput.CK_DESCRIPTION, request.description());
+        configuration.put(AWSInput.CK_GLOBAL, request.region());
+        configuration.put(AWSInput.CK_AWS_REGION, request.region());
+        configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKey());
+        configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretKey());
+        configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleARN());
 
-        final InputCreateRequest inputCreateRequest = InputCreateRequest.create(request.name(), AWSInput.TYPE, false, configuration, nodeId.toString());
+        if (inputType.isKinesis()) {
+            configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
+            configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
+            configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.enableThrottling());
+            // TODO: Put the remaining configuration values.
+        } else {
+            throw new Exception("The specified input type is not supported.");
+        }
 
+        final InputCreateRequest inputCreateRequest = InputCreateRequest.create(request.name(),
+                                                                                AWSInput.TYPE,
+                                                                                false,
+                                                                                configuration,
+                                                                                nodeId.toString());
         try {
             // Create the input object and save it to the database.
             final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.toString());

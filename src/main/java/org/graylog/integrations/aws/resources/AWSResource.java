@@ -31,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Web endpoints for the AWS integration.
- * Full base URL for requests in this class: http://api/plugins/org.graylog.integrations/aws/
  */
 @RequiresAuthentication
 @Api(value = "AWS", description = "AWS integrations")
@@ -169,7 +168,7 @@ public class AWSResource implements PluginRestResource {
     @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
     public Response create(@ApiParam(name = "JSON body", required = true)
-                           @Valid @NotNull KinesisInputCreateRequest saveRequest) throws ValidationException, NotFoundException, org.graylog2.database.NotFoundException, org.graylog2.plugin.database.ValidationException {
+                           @Valid @NotNull KinesisInputCreateRequest saveRequest) throws Exception {
 
         awsService.saveInput(saveRequest, getCurrentUser());
 

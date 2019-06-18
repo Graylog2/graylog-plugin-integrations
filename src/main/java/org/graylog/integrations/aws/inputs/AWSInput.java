@@ -18,28 +18,26 @@ package org.graylog.integrations.aws.inputs;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.AWSUtils;
+import org.graylog.integrations.aws.codecs.AWSMetaCodec;
 import org.graylog.integrations.aws.transports.KinesisTransport;
-import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
-import org.graylog.integrations.inputs.paloalto.PaloAltoTemplateDefaults;
-import org.graylog.integrations.inputs.paloalto.PaloAltoTemplates;
-import org.graylog2.inputs.transports.SyslogTcpTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
 import org.graylog2.plugin.buffers.InputBuffer;
 import org.graylog2.plugin.configuration.Configuration;
+import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.DropdownField;
+import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
-
-import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_SYSTEM_TEMPLATE;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_THREAT_TEMPLATE;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoCodec.CK_TRAFFIC_TEMPLATE;
 
 public class AWSInput extends MessageInput {
 
@@ -48,39 +46,50 @@ public class AWSInput extends MessageInput {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSInput.class);
 
+    /**
+     * Specifies one of the {@code AWSInputType} choices, which indicates which codec and transport
+     * should be used.
+     */
+    public static final String CK_AWS_INPUT_TYPE = "aws_input_type";
+    public static final String CK_TITLE = "title";
+    public static final String CK_DESCRIPTION = "description";
+    public static final String CK_GLOBAL = "global";
+    public static final String CK_AWS_REGION = "aws_region";
+    public static final String CK_ACCESS_KEY = "aws_access_key";
+    public static final String CK_SECRET_KEY = "aws_secret_key";
+    public static final String CK_ASSUME_ROLE_ARN = "aws_assume_role_arn";
+
     @Inject
     public AWSInput(@Assisted Configuration configuration,
                     MetricRegistry metricRegistry,
                     KinesisTransport.Factory transport,
                     LocalMetricRegistry localRegistry,
-                    PaloAltoCodec.Factory codec,
+                    AWSMetaCodec.Factory codec,
                     Config config,
                     Descriptor descriptor,
                     ServerStatus serverStatus) {
-        super(
-                metricRegistry,
-                configuration,
-                transport.create(configuration),
-                localRegistry,
-                codec.create(configuration),
-                config,
-                descriptor,
-                serverStatus);
+        super(metricRegistry,
+              configuration,
+              transport.create(configuration),
+              localRegistry,
+              codec.create(configuration),
+              config,
+              descriptor,
+              serverStatus);
     }
 
     @Override
     public void launch(InputBuffer buffer) throws MisfireException {
 
-        // Parse the templates to log any errors immediately on input startup.
-        PaloAltoTemplates templates = PaloAltoTemplates.newInstance(configuration.getString(CK_SYSTEM_TEMPLATE, PaloAltoTemplateDefaults.SYSTEM_TEMPLATE),
-                                                                    configuration.getString(CK_THREAT_TEMPLATE, PaloAltoTemplateDefaults.THREAT_TEMPLATE),
-                                                                    configuration.getString(CK_TRAFFIC_TEMPLATE, PaloAltoTemplateDefaults.TRAFFIC_TEMPLATE));
-
-        if (templates.hasErrors()) {
-            throw new MisfireException(templates.errorMessageSummary("\n"));
-        }
-
+        LOG.info("Starting AWS Input...");
         super.launch(buffer);
+    }
+
+    @Override
+    public void stop() {
+
+        LOG.info("Stopping AWS Input...");
+        super.stop();
     }
 
     @FactoryClass
@@ -104,10 +113,51 @@ public class AWSInput extends MessageInput {
     @ConfigClass
     public static class Config extends MessageInput.Config {
 
-        // TODO: Create metacodec and transport that dynamically picks the correct one based on the type of input.
         @Inject
-        public Config(KinesisTransport.Factory transport, CloudWatchFlowLogCodec.Factory codec) {
+        public Config(KinesisTransport.Factory transport, AWSMetaCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
+        }
+
+        @Override
+        public ConfigurationRequest combinedRequestedConfiguration() {
+            ConfigurationRequest request = super.combinedRequestedConfiguration();
+
+            // These config values will be shared amongst many AWS codecs and transports.
+            request.addField(new DropdownField(
+                    CK_AWS_REGION,
+                    "AWS Region",
+                    Region.US_EAST_1.id(),
+                    AWSUtils.buildRegionChoices(),
+                    "The AWS region the Kinesis stream is running in.",
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
+
+            request.addField(new TextField(
+                    CK_ACCESS_KEY,
+                    "AWS access key",
+                    "",
+                    "Access key of an AWS user with sufficient permissions. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL
+            ));
+
+            request.addField(new TextField(
+                    CK_SECRET_KEY,
+                    "AWS secret key",
+                    "",
+                    "Secret key of an AWS user with sufficient permissions. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL,
+                    TextField.Attribute.IS_PASSWORD
+            ));
+
+            request.addField(new TextField(
+                    CK_ASSUME_ROLE_ARN,
+                    "AWS assume role ARN",
+                    "",
+                    "Role ARN with required permissions (cross account access)",
+                    ConfigurationField.Optional.OPTIONAL
+            ));
+
+            return request;
         }
     }
 }

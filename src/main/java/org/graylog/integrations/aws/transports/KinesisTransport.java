@@ -33,16 +33,12 @@ public class KinesisTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(KinesisTransport.class);
     public static final String NAME = "kinesis-transport";
 
-    public static final String CK_AWS_REGION = "aws_region";
-    public static final String CK_ACCESS_KEY = "aws_access_key";
-    public static final String CK_SECRET_KEY = "aws_secret_key";
-    public static final String CK_ASSUME_ROLE_ARN = "aws_assume_role_arn";
     public static final String CK_KINESIS_STREAM_NAME = "kinesis_stream_name";
     public static final String CK_KINESIS_RECORD_BATCH_SIZE = "kinesis_record_batch_size";
     public static final String CK_KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait";
 
-    public static final int DEFAULT_BATCH_SIZE = 10000;
-    public static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
+    private static final int DEFAULT_BATCH_SIZE = 10000;
+    private static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
 
     private final LocalMetricRegistry localRegistry;
 
@@ -104,40 +100,6 @@ public class KinesisTransport extends ThrottleableTransport {
                     "The maximum time that the Kinesis input will pause for when in a throttled state. If this time is exceeded, then the Kinesis consumer will shut down until the throttled state is cleared. Recommended default: 60,000 ms",
                     ConfigurationField.Optional.OPTIONAL,
                     NumberField.Attribute.ONLY_POSITIVE));
-
-            r.addField(new DropdownField(
-                    CK_AWS_REGION,
-                    "AWS Region",
-                    Region.US_EAST_1.id(),
-                    AWSUtils.buildRegionChoices(),
-                    "The AWS region the Kinesis stream is running in.",
-                    ConfigurationField.Optional.NOT_OPTIONAL
-            ));
-
-            r.addField(new TextField(
-                    CK_ACCESS_KEY,
-                    "AWS access key",
-                    "",
-                    "Access key of an AWS user with sufficient permissions. (See documentation)",
-                    ConfigurationField.Optional.OPTIONAL
-            ));
-
-            r.addField(new TextField(
-                    CK_SECRET_KEY,
-                    "AWS secret key",
-                    "",
-                    "Secret key of an AWS user with sufficient permissions. (See documentation)",
-                    ConfigurationField.Optional.OPTIONAL,
-                    TextField.Attribute.IS_PASSWORD
-            ));
-
-            r.addField(new TextField(
-                    CK_ASSUME_ROLE_ARN,
-                    "AWS assume role ARN",
-                    "",
-                    "Role ARN with required permissions (cross account access)",
-                    ConfigurationField.Optional.OPTIONAL
-            ));
 
             r.addField(new TextField(
                     CK_KINESIS_STREAM_NAME,

@@ -32,6 +32,7 @@ public abstract class KinesisInputCreateRequest {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
+    private static final String AWS_INPUT_TYPE = "aws_input_type";
     private static final String AWS_ACCESS_KEY = "aws_access_key";
     private static final String AWS_SECRET_KEY = "aws_secret_key";
     private static final String STREAM_NAME = "stream_name";
@@ -46,6 +47,9 @@ public abstract class KinesisInputCreateRequest {
 
     @JsonProperty(DESCRIPTION)
     public abstract String description();
+
+    @JsonProperty(AWS_INPUT_TYPE)
+    public abstract String getAwsInputType();
 
     @JsonProperty(AWS_ACCESS_KEY)
     public abstract String awsAccessKey();
@@ -74,6 +78,7 @@ public abstract class KinesisInputCreateRequest {
     @JsonCreator
     public static KinesisInputCreateRequest create(@JsonProperty(NAME) String name,
                                                    @JsonProperty(DESCRIPTION) String description,
+                                                   @JsonProperty(AWS_INPUT_TYPE) String awsInputType,
                                                    @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
                                                    @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
                                                    @JsonProperty(STREAM_NAME) String streamName,
@@ -82,6 +87,6 @@ public abstract class KinesisInputCreateRequest {
                                                    @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                    @JsonProperty(GLOBAL) boolean global,
                                                    @JsonProperty(ENABLE_THROTTLING) boolean enableThrottling) {
-        return new AutoValue_KinesisInputCreateRequest(name, description, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling);
+        return new AutoValue_KinesisInputCreateRequest(name, description, awsInputType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling);
     }
 }
