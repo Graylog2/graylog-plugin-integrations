@@ -22,15 +22,16 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
+import software.amazon.awssdk.services.kinesis.model.Record;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -215,5 +216,24 @@ public class KinesisServiceTest {
         assertTrue(summary.contains("id"));
         assertTrue(summary.contains("src_addr"));
         assertTrue(summary.contains("port"));
+    }
+
+    @Test
+    public void testSelectRandomRecord() {
+
+        // Test empty list
+        List<Record> fakeRecordList = new ArrayList<>();
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.selectRandomRecord(fakeRecordList))
+                               .isExactlyInstanceOf(IllegalArgumentException.class)
+                               .hasMessageContaining("Records list can not be empty.");
+
+        // Test list with records
+        fakeRecordList.add(Record.builder().build());
+        fakeRecordList.add(Record.builder().build());
+        fakeRecordList.add(Record.builder().build());
+        Record record = kinesisService.selectRandomRecord(fakeRecordList);
+
+        // Test a record returns
+        assertNotNull(record);
     }
 }

@@ -7,7 +7,9 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
@@ -55,7 +57,7 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int EIGHT_BITS = 8;
-    public static final int RECORDS_SAMPLE_SIZE = 10;
+    private static final int RECORDS_SAMPLE_SIZE = 10;
 
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
@@ -71,11 +73,11 @@ public class KinesisService {
         this.availableCodecs = availableCodecs;
     }
 
-    public KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey) {
+    private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey) {
 
         return kinesisClientBuilder.region(Region.of(regionName))
-                .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
-                .build();
+                                   .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
+                                   .build();
     }
 
     /**
@@ -96,8 +98,6 @@ public class KinesisService {
 
         LOG.info("Executing healthCheck");
         LOG.info("Requesting a list of streams to find out if the indicated stream exists.");
-
-
         // Get all the Kinesis streams that exist for a user and region
         final List<String> kinesisStreams = getKinesisStreams(request.region(),
                                                               request.awsAccessKeyId(),
@@ -105,9 +105,9 @@ public class KinesisService {
 
         // Check if Kinesis stream exists
         final boolean streamExists = kinesisStreams.stream()
-                .anyMatch(streamName -> streamName.equals(request.streamName()));
+                                                   .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
-            String explanation = "The requested stream was not found.";
+            String explanation = String.format("The requested stream [%s] was not found.", request.streamName());
             LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
@@ -119,7 +119,7 @@ public class KinesisService {
         KinesisClient kinesisClient =
                 createClient(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey());
 
-        // Retrieve one records from the kinesis stream
+        // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
         if (records.size() == 0) {
             String explanation = "The Kinesis stream does not contain any messages.";
@@ -129,10 +129,9 @@ public class KinesisService {
                                                      explanation, request.logGroupName());
         }
 
-        // Check if payload is compressed
+        // Select random record from list, and check if the payload is compressed
         final byte[] payloadBytes = selectRandomRecord(records).data().asByteArray();
         if (isCompressed(payloadBytes)) {
-
             return handleCompressedMessages(request, payloadBytes);
         }
 
@@ -171,8 +170,8 @@ public class KinesisService {
                 retryer.call(() -> {
                     final String lastStreamName = streamNames.get(streamNames.size() - 1);
                     final ListStreamsRequest moreStreamsRequest = ListStreamsRequest.builder()
-                            .exclusiveStartStreamName(lastStreamName)
-                            .limit(KINESIS_LIST_STREAMS_LIMIT).build();
+                                                                                    .exclusiveStartStreamName(lastStreamName)
+                                                                                    .limit(KINESIS_LIST_STREAMS_LIMIT).build();
                     final ListStreamsResponse moreSteamsResponse = kinesisClient.listStreams(moreStreamsRequest);
                     streamNames.addAll(moreSteamsResponse.streamNames());
 
@@ -226,7 +225,7 @@ public class KinesisService {
         // Pick just one log entry.
         Optional<CloudWatchLogEntry> logEntryOptional =
                 data.logEvents().stream()
-                        .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
+                    .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
 
         if (!logEntryOptional.isPresent()) {
             LOG.info("One log messages was successfully selected from the CloudWatch payload.");
@@ -245,7 +244,7 @@ public class KinesisService {
      * @param kinesisClient The KinesClient interface
      * @return A sample size of records (between 0-5 records) in a Kinesis stream
      */
-    public static List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
+    static List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
 
         // TODO add error logging
         // Create ListShard request and response and designate the Kinesis stream
@@ -258,10 +257,10 @@ public class KinesisService {
             String shardId = listShardsResponse.shards().get(i).shardId();
             GetShardIteratorRequest getShardIteratorRequest =
                     GetShardIteratorRequest.builder()
-                            .shardId(shardId)
-                            .streamName(kinesisStream)
-                            .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
-                            .build();
+                                           .shardId(shardId)
+                                           .streamName(kinesisStream)
+                                           .shardIteratorType(ShardIteratorType.TRIM_HORIZON)
+                                           .build();
             String shardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
             boolean stayOnCurrentShard = true;
             LOG.info("Got first batch of records");
@@ -289,8 +288,6 @@ public class KinesisService {
             }
         }
         return recordsList;
-
-
     }
 
     /**
@@ -304,7 +301,7 @@ public class KinesisService {
     private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
 
         LOG.info("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}]",
-                  logMessage, streamName, logGroupName);
+                 logMessage, streamName, logGroupName);
 
         final AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
         final AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
@@ -374,7 +371,7 @@ public class KinesisService {
      * packets: 1
      * ...
      */
-    public String buildMessageSummary(Message message, String fullMessage) {
+    String buildMessageSummary(Message message, String fullMessage) {
 
         // Build up a representation of the message.
         final StringBuilder builder = new StringBuilder();
@@ -392,14 +389,11 @@ public class KinesisService {
         return builder.toString();
     }
 
-    public Record selectRandomRecord(List<Record> recordsList) {
+    Record selectRandomRecord(List<Record> recordsList) {
+
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(recordsList), "Records list can not be empty.");
+
         Random rand = new Random();
         return recordsList.get(rand.nextInt(recordsList.size()));
     }
-
-    // TODO Create Kinesis Stream
-
-    // TODO Subscribe to Kinesis Stream
-
-    // TODO Add method for auto-setup with stream creation and subscription.
 }
