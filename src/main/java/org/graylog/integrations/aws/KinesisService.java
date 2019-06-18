@@ -244,7 +244,7 @@ public class KinesisService {
      * @param kinesisClient The KinesClient interface
      * @return A sample size of records (between 0-5 records) in a Kinesis stream
      */
-    static List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
+    List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
 
         // TODO add error logging
         // Create ListShard request and response and designate the Kinesis stream
@@ -282,7 +282,7 @@ public class KinesisService {
                 }
 
                 // Find when the shardIterator is current
-                if (getRecordsResponse.millisBehindLatest() == 0 && recordSize == 0) {
+                if (getRecordsResponse.millisBehindLatest() == 0) {
                     stayOnCurrentShard = false;
                 }
             }
