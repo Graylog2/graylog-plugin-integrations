@@ -11,19 +11,26 @@ import DEFAULT_VALUES from './default_values';
 import StyledForm from '../common/StyledForm';
 import StyledInput from '../common/StyledInput';
 
-const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
+import formDataHook from './hooks/formData';
+import logHook from './hooks/log';
+
+const StepReview = ({ onSubmit, onEditClick }) => {
+  const { getFieldData, getFieldValue } = formDataHook();
+  const { getLog } = logHook();
+
   const defaultOutput = (key, enabled = true) => {
+    const fieldData = getFieldData(key);
     if (!enabled) {
       return (
         <React.Fragment>
-          {DEFAULT_VALUES[key]} <small>(default)</small>
+          {fieldData.defaultValue} <small>(default)</small>
         </React.Fragment>
       );
     }
 
     return (
       <React.Fragment>
-        {values[key]} {DEFAULT_VALUES[key] === values[key] && <small>(default)</small>}
+        {fieldData.value} {fieldData.defaultValue === fieldData.value && <small>(default)</small>}
       </React.Fragment>
     );
   };
@@ -39,27 +46,27 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Name</strong><span>{values.awsCloudWatchName}</span></li>
-              { values.awsCloudWatchDescription
-                && <li><strong>Description</strong><span>{values.awsCloudWatchDescription}</span></li>
+              <li><strong>Name</strong><span>{getFieldValue('awsCloudWatchName')}</span></li>
+              { getFieldValue('awsCloudWatchDescription')
+                && <li><strong>Description</strong><span>{getFieldValue('awsCloudWatchDescription')}</span></li>
               }
-              <li><strong>AWS Key</strong><span>AK************{values.awsCloudWatchAwsKey.slice(-6)}</span></li>
-              {/* <li><strong>AWS Secret</strong><span>{values.awsCloudWatchAwsSecret}</span></li> */}
-              <li><strong>AWS Region</strong><span>{values.awsCloudWatchAwsRegion}</span></li>
+              <li><strong>AWS Key</strong><span>AK************{getFieldValue('awsCloudWatchAwsKey').slice(-6)}</span></li>
+              {/* <li><strong>AWS Secret</strong><span>{getFieldValue('awsCloudWatchAwsSecret')}</span></li> */}
+              <li><strong>AWS Region</strong><span>{getFieldValue('awsCloudWatchAwsRegion')}</span></li>
             </ReviewItems>
 
             <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Stream</strong><span>{values.awsCloudWatchKinesisStream}</span></li>
-              <li><strong>Global Input</strong><span>{values.awsCloudWatchGlobalInput ? 'true' : 'false'}</span></li>
-              <li><strong>AWS Assumed ARN Role</strong><span>{values.awsCloudWatchAssumeARN || 'None'}</span></li>
+              <li><strong>Stream</strong><span>{getFieldValue('awsCloudWatchKinesisStream')}</span></li>
+              <li><strong>Global Input</strong><span>{getFieldValue('awsCloudWatchGlobalInput') ? 'true' : 'false'}</span></li>
+              <li><strong>AWS Assumed ARN Role</strong><span>{getFieldValue('awsCloudWatchAssumeARN') || 'None'}</span></li>
               <li>
                 <strong>Record Batch Size</strong>
                 <span>{defaultOutput('awsCloudWatchBatchSize')}</span>
               </li>
               <li>
                 <strong>Throttled Wait (ms)</strong>
-                <span>{defaultOutput('awsCloudWatchThrottleWait', values.awsCloudWatchThrottleEnabled)}</span>
+                <span>{defaultOutput('awsCloudWatchThrottleWait', getFieldValue('awsCloudWatchThrottleEnabled'))}</span>
               </li>
             </ReviewItems>
 
@@ -69,7 +76,7 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
             <StyledInput id="awsCloudWatchLog"
                          type="textarea"
                          label=""
-                         value={logOutput}
+                         value={getLog()}
                          rows={10}
                          disabled />
           </Container>
@@ -82,8 +89,6 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
 StepReview.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onEditClick: PropTypes.func.isRequired,
-  values: PropTypes.array.isRequired,
-  logOutput: PropTypes.string.isRequired,
 };
 
 const Container = styled.div`

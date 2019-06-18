@@ -5,10 +5,15 @@ import { Col, Row } from 'react-bootstrap';
 import StyledForm from '../common/StyledForm';
 import StyledInput from '../common/StyledInput';
 
+import formDataHook from './hooks/formData';
+import advancedOptionsHook from './hooks/advancedOptions';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
-const KinesisStreams = ({ onChange, onSubmit, formErrors, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
+const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
+  const { getFieldValue } = formDataHook();
+  const { getAdvancedOptionsVisiblity } = advancedOptionsHook();
+
   return (
     <Row>
       <Col>
@@ -18,10 +23,9 @@ const KinesisStreams = ({ onChange, onSubmit, formErrors, values, toggleAdvanced
 
           <StyledInput id="awsCloudWatchKinesisStream"
                        type="select"
-                       value={values.awsCloudWatchKinesisStream}
+                       value={getFieldValue('awsCloudWatchKinesisStream')}
                        onChange={onChange}
                        label="Choose Stream"
-                       hasError={formErrors.awsCloudWatchKinesisStream}
                        required>
             <option value="">Choose Kinesis Stream</option>
             <option value="stream-name-1">Stream Name 1</option>
@@ -31,9 +35,8 @@ const KinesisStreams = ({ onChange, onSubmit, formErrors, values, toggleAdvanced
           </StyledInput>
 
           <FormAdvancedOptions onChange={onChange}
-                               values={values}
                                toggle={toggleAdvancedOptions}
-                               visible={visibleAdvancedOptions} />
+                               visible={getAdvancedOptionsVisiblity()} />
         </StyledForm>
       </Col>
     </Row>
@@ -43,14 +46,7 @@ const KinesisStreams = ({ onChange, onSubmit, formErrors, values, toggleAdvanced
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.array.isRequired,
   toggleAdvancedOptions: PropTypes.func.isRequired,
-  visibleAdvancedOptions: PropTypes.bool.isRequired,
-  formErrors: PropTypes.object,
-};
-
-KinesisStreams.defaultProps = {
-  formErrors: {},
 };
 
 export default KinesisStreams;

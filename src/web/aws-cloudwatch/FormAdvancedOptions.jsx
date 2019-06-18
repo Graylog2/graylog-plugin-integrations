@@ -3,7 +3,11 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
-const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
+import formDataHook from './hooks/formData';
+
+const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
+  const { getFieldValue } = formDataHook();
+
   return (
     <div>
       <ToggleAdvancedOptions onClick={toggle} type="button">
@@ -14,32 +18,32 @@ const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="global-input"
-               defaultChecked={values.awsCloudWatchGlobalInput}
+               defaultChecked={getFieldValue('awsCloudWatchGlobalInput')}
                onChange={onChange}
                label="Global Input" />
 
         <Input id="awsCloudWatchAssumeARN"
                type="text"
-               value={values.awsCloudWatchAssumeARN}
+               value={getFieldValue('awsCloudWatchAssumeARN')}
                onChange={onChange}
                label="AWS assume role ARN" />
 
         <Input id="awsCloudWatchBatchSize"
                type="number"
-               value={values.awsCloudWatchBatchSize}
+               value={getFieldValue('awsCloudWatchBatchSize')}
                onChange={onChange}
                label="Kinesis Record batch size" />
 
         <Input id="awsCloudWatchThrottleEnabled"
                type="checkbox"
                value="throttle-enabled"
-               defaultChecked={values.awsCloudWatchThrottleEnabled}
+               defaultChecked={getFieldValue('awsCloudWatchThrottleEnabled')}
                onChange={onChange}
                label="Enable Throttle" />
 
         <Input id="awsCloudWatchThrottleWait"
                type="number"
-               value={values.awsCloudWatchThrottleWait}
+               value={getFieldValue('awsCloudWatchThrottleWait')}
                onChange={onChange}
                label="Throttled wait milliseconds" />
       </AdvancedOptionsContent>
@@ -49,7 +53,6 @@ const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
 
 FormAdvancedOptions.propTypes = {
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
   toggle: PropTypes.func.isRequired,
   visible: PropTypes.bool.isRequired,
 };

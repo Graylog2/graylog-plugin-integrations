@@ -6,8 +6,13 @@ import StyledForm from '../common/StyledForm';
 import StyledInput from '../common/StyledInput';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
+import formDataHook from './hooks/formData';
+import advancedOptionsHook from './hooks/advancedOptions';
 
-const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visibleAdvancedOptions }) => {
+const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
+  const { getFieldValue } = formDataHook();
+  const { getAdvancedOptionsVisiblity } = advancedOptionsHook();
+
   return (
     <Row>
       <Col>
@@ -20,12 +25,12 @@ const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visib
                        label="Kinesis Stream Name"
                        placeholder="Create Stream Name"
                        onChange={onChange}
-                       defaultValue={values.awsCloudWatchKinesisStream}
+                       defaultValue={getFieldValue('awsCloudWatchKinesisStream')}
                        required />
 
           <StyledInput id="awsCloudWatchAwsGroupName"
                        type="select"
-                       value={values.awsCloudWatchAwsGroupName}
+                       value={getFieldValue('awsCloudWatchAwsGroupName')}
                        onChange={onChange}
                        label="CloudWatch Group Name"
                        required>
@@ -37,9 +42,8 @@ const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visib
           </StyledInput>
 
           <FormAdvancedOptions onChange={onChange}
-                               values={values}
                                toggle={toggleAdvancedOptions}
-                               visible={visibleAdvancedOptions} />
+                               visible={getAdvancedOptionsVisiblity()} />
         </StyledForm>
       </Col>
     </Row>
@@ -49,9 +53,7 @@ const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visib
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.array.isRequired,
   toggleAdvancedOptions: PropTypes.func.isRequired,
-  visibleAdvancedOptions: PropTypes.bool.isRequired,
 };
 
 export default KinesisSetup;

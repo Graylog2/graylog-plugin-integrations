@@ -3,10 +3,13 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
+import formDataHook from './hooks/formData';
 import StyledForm from '../common/StyledForm';
 import StyledInput from '../common/StyledInput';
 
-const StepAuthorize = ({ onChange, onSubmit, values }) => {
+const StepAuthorize = ({ onChange, onSubmit }) => {
+  const { getFieldValue } = formDataHook();
+
   return (
     <Row>
       <Col>
@@ -21,7 +24,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
 
           <StyledInput id="awsCloudWatchName"
                        type="text"
-                       value={values.awsCloudWatchName}
+                       value={getFieldValue('awsCloudWatchName')}
                        onChange={onChange}
                        placeholder="CloudWatch Integration Name"
                        label="Name"
@@ -34,7 +37,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                        label="Description"
                        placeholder="CloudWatch Integration Description"
                        onChange={onChange}
-                       value={values.awsCloudWatchDescription}
+                       value={getFieldValue('awsCloudWatchDescription')}
                        rows={4} />
 
           <StyledInput id="awsCloudWatchAwsKey"
@@ -42,7 +45,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                        label="AWS Key"
                        placeholder="CloudWatch Integration AWS Key"
                        onChange={onChange}
-                       value={values.awsCloudWatchAwsKey}
+                       value={getFieldValue('awsCloudWatchAwsKey')}
                        autoComplete="off"
                        pattern="AK[A-Z0-9]{18}"
                        minLength="20"
@@ -54,7 +57,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                        label="AWS Secret"
                        placeholder="CloudWatch Integration AWS Secret"
                        onChange={onChange}
-                       value={values.awsCloudWatchAwsSecret}
+                       value={getFieldValue('awsCloudWatchAwsSecret')}
                        autoComplete="off"
                        pattern="[A-Za-z0-9/+=]{40}"
                        minLength="40"
@@ -63,7 +66,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
 
           <StyledInput id="awsCloudWatchAwsRegion"
                        type="select"
-                       value={values.awsCloudWatchAwsRegion}
+                       value={getFieldValue('awsCloudWatchAwsRegion')}
                        onChange={onChange}
                        label="Region"
                        errorMessage="Provide the region your CloudWatch instance is deployed."
@@ -83,7 +86,6 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
 StepAuthorize.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.array.isRequired,
 };
 
 const DisappearingInputs = styled(StyledInput)`
