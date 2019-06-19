@@ -1,4 +1,4 @@
-package org.graylog.integrations.aws.cloudwatch;
+package org.graylog.integrations.aws.service;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;

@@ -1,10 +1,9 @@
 package org.graylog.integrations.aws.resources;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.graylog.integrations.aws.KinesisService;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
+import org.graylog.integrations.aws.service.KinesisService;
+import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.AWSService;
-import org.graylog2.plugin.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.Mock;

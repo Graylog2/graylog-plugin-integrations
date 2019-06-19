@@ -5,8 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.graylog.integrations.aws.KinesisService;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
+import org.graylog.integrations.aws.service.KinesisService;
+import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
@@ -31,8 +31,8 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Web endpoints for the AWS integration.
+ * Full base URL for requests in this class: http://api/plugins/org.graylog.integrations/aws/
  */
-
 @RequiresAuthentication
 @Api(value = "AWS", description = "AWS integrations")
 @Path("/aws")
@@ -51,7 +51,6 @@ public class AWSResource implements PluginRestResource {
         this.cloudWatchService = cloudWatchService;
     }
 
-    // GET AWS regions
     @GET
     @Timed
     @Path("/regions")
@@ -60,35 +59,24 @@ public class AWSResource implements PluginRestResource {
         return awsService.getAvailableRegions();
     }
 
-    /**
-     * Performs an AWS HealthCheck
-     *
-     * Sample CURL command for executing this method. Use this to model the UI request.
-     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
-     *
-     * curl http://someuser:somepass@localhost:9000/api/plugins/org.graylog.integrations/aws/availableServices
-     */
     @GET
     @Timed
     @Path("/availableServices")
     @ApiOperation(value = "Get all available AWS services")
     public AvailableAWSServiceSummmary getAvailableServices() {
-
         return awsService.getAvailableServices();
     }
 
-    // GET CloudWatch log group names
+    // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
     @Path("/cloudWatch/logGroups/{regionName}")
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
     public List<String> getLogGroupNames(@ApiParam(name = "regionName", required = true)
                                          @PathParam("regionName") String regionName) {
-
         return cloudWatchService.getLogGroupNames(regionName);
     }
 
-    // GET Kinesis Streams
     // TODO: Rework to accept a form post body with credentials
     @GET
     @Timed
@@ -96,7 +84,6 @@ public class AWSResource implements PluginRestResource {
     @ApiOperation(value = "Get all available AWS Kinesis streams for the specified region")
     public List<String> getKinesisStreams(@ApiParam(name = "regionName", required = true)
                                           @PathParam("regionName") String regionName) throws ExecutionException {
-
         return kinesisService.getKinesisStreams(regionName, null, null);
     }
 
@@ -128,15 +115,7 @@ public class AWSResource implements PluginRestResource {
             response = KinesisHealthCheckResponse.class
     )
     public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
-
-        // TODO: Check permissions?
-
-        // Call into service layer to handle business logic.
         KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
-
         return Response.accepted().entity(response).build();
     }
-
-    // TODO  GET kinesisAutomatedSetup
-    // getRegion, getlogGroupNames, subscribeToStream
 }
