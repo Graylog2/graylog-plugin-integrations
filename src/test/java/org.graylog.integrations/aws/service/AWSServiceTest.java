@@ -1,8 +1,7 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.service;
 
 import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
-import org.graylog.integrations.aws.service.AWSService;
 import org.junit.Before;
 import org.junit.Test;
 

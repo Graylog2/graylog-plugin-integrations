@@ -1,12 +1,12 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.service.AWSLogMessage;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
@@ -169,8 +169,6 @@ public class KinesisServiceTest {
         assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
     }
 
-
-
     /**
      * Build the data payload for the CloudWatch Kinesis subscription record.
      *
@@ -300,7 +298,7 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void testRetrieveRecords() throws ExecutionException, IOException {
+    public void testRetrieveRecords() throws IOException {
 
         Shard shard = Shard.builder().shardId("shardId-1234").build();
         when(kinesisClient.listShards(isA(ListShardsRequest.class)))
@@ -325,8 +323,7 @@ public class KinesisServiceTest {
                 .thenReturn(recordsResponse)
                 .thenReturn(recordsResponse);
 
-        List<Record> fakeRecordsList = kinesisService.retrieveRecords("kinesisStream",kinesisClient);
-        assertEquals(fakeRecordsList.size(),10);
-
+        List<Record> fakeRecordsList = kinesisService.retrieveRecords("kinesisStream", kinesisClient);
+        assertEquals(fakeRecordsList.size(), 10);
     }
 }

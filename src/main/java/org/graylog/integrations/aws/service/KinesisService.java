@@ -1,4 +1,4 @@
-package org.graylog.integrations.aws;
+package org.graylog.integrations.aws.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,12 +11,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.service.AWSLogMessage;
-import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
@@ -42,7 +41,6 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,13 +48,16 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Service for all AWS Kinesis business logic and SDK usages.
+ */
 public class KinesisService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
 
+    private static final int EIGHT_BITS = 8;
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
-    private static final int EIGHT_BITS = 8;
     private static final int RECORDS_SAMPLE_SIZE = 10;
 
     private final KinesisClientBuilder kinesisClientBuilder;
@@ -76,19 +77,19 @@ public class KinesisService {
     private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey) {
 
         return kinesisClientBuilder.region(Region.of(regionName))
-                                   .credentialsProvider(AWSService.validateCredentials(accessKeyId, secretAccessKey))
+                                   .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
                                    .build();
     }
 
     /**
      * The Health Check performs the following actions:
      * <p>
-     * 1) Get all the Kinesis streams
+     * 1) Get all the Kinesis streams.
      * 2) Check if the supplied stream exists.
-     * 3) Retrieve one record from Kinesis stream
-     * 4) Check if the payload is compressed
+     * 3) Retrieve one record from Kinesis stream.
+     * 4) Check if the payload is compressed.
      * 5) Detect the type of log message.
-     * 6) Parse the message if is of a known type
+     * 6) Parse the message if is of a known type.
      *
      * @param request The request, which indicates which stream region to health check
      * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
@@ -96,8 +97,8 @@ public class KinesisService {
      */
     public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
-        LOG.info("Executing healthCheck");
-        LOG.info("Requesting a list of streams to find out if the indicated stream exists.");
+        LOG.debug("Executing healthCheck");
+        LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
         // Get all the Kinesis streams that exist for a user and region
         final List<String> kinesisStreams = getKinesisStreams(request.region(),
                                                               request.awsAccessKeyId(),
@@ -114,7 +115,7 @@ public class KinesisService {
                                                      explanation, request.logGroupName());
         }
 
-        LOG.info("The stream [{}] exists", request.streamName());
+        LOG.debug("The stream [{}] exists", request.streamName());
 
         KinesisClient kinesisClient =
                 createClient(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey());
@@ -136,7 +137,7 @@ public class KinesisService {
         }
 
         // Detect the type of message
-        return detectMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
+        return detectAndParseMessage(new String(payloadBytes), request.streamName(), request.logGroupName());
     }
 
     /**
@@ -147,7 +148,7 @@ public class KinesisService {
      */
     public List<String> getKinesisStreams(String regionName, String accessKeyId, String secretAccessKey) throws ExecutionException {
 
-        LOG.info("List Kinesis streams for region [{}]", regionName);
+        LOG.debug("List Kinesis streams for region [{}]", regionName);
 
         // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
@@ -185,7 +186,7 @@ public class KinesisService {
                 LOG.error("Failed to get all stream names after {} attempts. Proceeding to return currently obtained streams.", KINESIS_LIST_STREAMS_MAX_ATTEMPTS);
             }
         }
-        LOG.info("Kinesis streams queried: [{}]", streamNames);
+        LOG.debug("Kinesis streams queried: [{}]", streamNames);
         return streamNames;
     }
 
@@ -202,16 +203,27 @@ public class KinesisService {
 
             // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
             final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
-            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS); // The >> operator shifts the GZIP magic number to the second byte.
+            // The >> operator shifts the GZIP magic number to the second byte.
+            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
             return firstByteIsMagicNumber && secondByteIsMagicNumber;
         }
     }
 
+    /**
+     * CloudWatch Kinesis subscription payloads are always compressed. Detecting a compressed payload is currently
+     * how the Health Check identifies that the payload has been sent from CloudWatch.
+     *
+     * @param request      The Health Check request.
+     * @param payloadBytes The raw compressed binary payload from Kinesis.
+     * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
+     * message.
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"/>
+     */
     private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
-        LOG.info("The supplied payload is GZip compressed. Proceeding to decompress.");
+        LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
 
         final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
-        LOG.info("They payload was decompressed successfully. size [{}]", bytes.length);
+        LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
 
         // Assume that the payload is from CloudWatch.
         // Extract messages, so that they can be committed to journal one by one.
@@ -228,13 +240,13 @@ public class KinesisService {
                     .map(le -> CloudWatchLogEntry.create(data.logGroup(), data.logStream(), le.timestamp(), le.message())).findAny();
 
         if (!logEntryOptional.isPresent()) {
-            LOG.info("One log messages was successfully selected from the CloudWatch payload.");
+            LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
             return KinesisHealthCheckResponse.create(false,
                                                      AWSLogMessage.Type.UNKNOWN.toString(),
                                                      "The Kinesis stream does not contain any messages.", request.logGroupName());
         }
 
-        return detectMessage(logEntryOptional.get().message(), request.streamName(), request.logGroupName());
+        return detectAndParseMessage(logEntryOptional.get().message(), request.streamName(), request.logGroupName());
     }
 
     /**
@@ -246,16 +258,16 @@ public class KinesisService {
      */
     List<Record> retrieveRecords(String kinesisStream, KinesisClient kinesisClient) {
 
-        // TODO add error logging
+        LOG.debug("About to retrieve logs records from Kinesis.");
         // Create ListShard request and response and designate the Kinesis stream
-        ListShardsRequest listShardsRequest = ListShardsRequest.builder().streamName(kinesisStream).build();
-        ListShardsResponse listShardsResponse = kinesisClient.listShards(listShardsRequest);
-        List<Record> recordsList = new ArrayList<>();
+        final ListShardsRequest listShardsRequest = ListShardsRequest.builder().streamName(kinesisStream).build();
+        final ListShardsResponse listShardsResponse = kinesisClient.listShards(listShardsRequest);
+        final List<Record> recordsList = new ArrayList<>();
 
         // Iterate through the shards that exist
         for (int i = 0; i < listShardsResponse.shards().size(); i++) {
-            String shardId = listShardsResponse.shards().get(i).shardId();
-            GetShardIteratorRequest getShardIteratorRequest =
+            final String shardId = listShardsResponse.shards().get(i).shardId();
+            final GetShardIteratorRequest getShardIteratorRequest =
                     GetShardIteratorRequest.builder()
                                            .shardId(shardId)
                                            .streamName(kinesisStream)
@@ -263,30 +275,33 @@ public class KinesisService {
                                            .build();
             String shardIterator = kinesisClient.getShardIterator(getShardIteratorRequest).shardIterator();
             boolean stayOnCurrentShard = true;
-            LOG.info("Got first batch of records");
+            LOG.debug("Retrieved shard id: [{}] with shard iterator: [{}]", shardId, shardIterator);
             // Loop until shardIterator is current
             while (stayOnCurrentShard) {
                 // Set the nextShardIterator
-                LOG.info("Getting more records");
-                GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(shardIterator).build();
-                GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
+                LOG.debug("Getting more records");
+                final GetRecordsRequest getRecordsRequest = GetRecordsRequest.builder().shardIterator(shardIterator).build();
+                final GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
                 shardIterator = getRecordsResponse.nextShardIterator();
 
-                int recordSize = getRecordsResponse.records().size();
+                final int recordSize = getRecordsResponse.records().size();
                 for (int k = 0; k < recordSize; k++) {
                     recordsList.add(getRecordsResponse.records().get(k));
                     // Return as soon as sample size is met
                     if (recordsList.size() == RECORDS_SAMPLE_SIZE) {
+                        LOG.debug("Returning the list of records now that sample size [{}] has been met.", RECORDS_SAMPLE_SIZE);
                         return recordsList;
                     }
                 }
 
                 // Find when the shardIterator is current
                 if (getRecordsResponse.millisBehindLatest() == 0) {
+                    LOG.debug("Found the end of the shard. No more records returned from the shard.");
                     stayOnCurrentShard = false;
                 }
             }
         }
+        LOG.debug("Returning the list with [{}] records.", recordsList.size());
         return recordsList;
     }
 
@@ -298,18 +313,18 @@ public class KinesisService {
      * @param logGroupName The log group name.
      * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
-    private KinesisHealthCheckResponse detectMessage(String logMessage, String streamName, String logGroupName) {
+    private KinesisHealthCheckResponse detectAndParseMessage(String logMessage, String streamName, String logGroupName) {
 
-        LOG.info("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}]",
-                 logMessage, streamName, logGroupName);
+        LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}].",
+                  logMessage, streamName, logGroupName);
 
         final AWSLogMessage awsLogMessage = new AWSLogMessage(logMessage);
         final AWSLogMessage.Type type = awsLogMessage.detectLogMessageType();
 
-        LOG.info("The message is type [{}]", type);
+        LOG.debug("The message is type [{}]", type);
 
         // Build the specific default response type for the message. This might be overridden below.
-        String responseMessage = String.format("Success! The message is an %s!", type.getDescription());
+        final String responseMessage = String.format("Success. The message is an %s.", type.getDescription());
 
         // Parse the Flow Log message
         final CloudWatchLogEntry logEvent = CloudWatchLogEntry.create(logGroupName, streamName, DateTime.now().getMillis() / 1000, logMessage);
@@ -318,7 +333,7 @@ public class KinesisService {
         // All messages will resolve to a particular codec. Event Unknown messages will resolve to the raw logs codec.
         final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(type.getCodecName());
         if (codecFactory == null) {
-            String explanation = String.format(Locale.ENGLISH, "A codec with name [%s] could not be found.", type.getCodecName());
+            final String explanation = String.format("A codec with name [%s] could not be found.", type.getCodecName());
             LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
         }
@@ -333,19 +348,21 @@ public class KinesisService {
             fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
         } catch (JsonProcessingException e) {
             LOG.error("An error occurred decoding Flow Log message.", e);
-            String explanation = String.format(Locale.ENGLISH, "Message decoding failed. More information might be " +
-                    "available by enabling Debug logging. message [%s]", logMessage);
+            final String explanation = String.format("Message decoding failed. More information might be " +
+                                                             "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
-        // Check if parsing message returns null
+        // Check if parsing message returns null.
         if (fullyParsedMessage == null) {
-            String explanation = String.format(Locale.ENGLISH, "Message decoding failed. More information might be " +
-                    "available by enabling Debug logging. message [%s]", logMessage);
+            final String explanation = String.format("Message decoding failed. More information might be " +
+                                                       "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
             return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
         }
+
+        LOG.debug("Successfully parsed message type [{}] with codec [{}].", type, type.getCodecName());
 
         return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
                                                  responseMessage,
@@ -373,7 +390,7 @@ public class KinesisService {
      */
     String buildMessageSummary(Message message, String fullMessage) {
 
-        // Build up a representation of the message.
+        // Build up a multi-line string representation of the message.
         final StringBuilder builder = new StringBuilder();
         final String cleanMessage = fullMessage.replaceAll("\\n", "").replaceAll("\\t", "");
 
@@ -393,7 +410,7 @@ public class KinesisService {
 
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(recordsList), "Records list can not be empty.");
 
-        Random rand = new Random();
-        return recordsList.get(rand.nextInt(recordsList.size()));
+        LOG.debug("Selecting a random Record from the sample list.");
+        return recordsList.get(new Random().nextInt(recordsList.size()));
     }
 }
