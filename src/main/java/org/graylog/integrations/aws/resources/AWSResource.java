@@ -8,6 +8,7 @@ import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.graylog.integrations.aws.KinesisService;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.service.AWSService;
@@ -57,6 +58,23 @@ public class AWSResource implements PluginRestResource {
     @ApiOperation(value = "Get all available AWS regions")
     public List<RegionResponse> getAwsRegions() {
         return awsService.getAvailableRegions();
+    }
+
+    /**
+     * Performs an AWS HealthCheck
+     *
+     * Sample CURL command for executing this method. Use this to model the UI request.
+     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
+     *
+     * curl http://someuser:somepass@localhost:9000/api/plugins/org.graylog.integrations/aws/availableServices
+     */
+    @GET
+    @Timed
+    @Path("/availableServices")
+    @ApiOperation(value = "Get all available AWS services")
+    public AvailableAWSServiceSummmary getAvailableServices() {
+
+        return awsService.getAvailableServices();
     }
 
     // GET CloudWatch log group names
