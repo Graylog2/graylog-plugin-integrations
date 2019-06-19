@@ -8,7 +8,7 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AvailableAWSService {
+public abstract class AvailableService {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
@@ -31,11 +31,11 @@ public abstract class AvailableAWSService {
     @JsonProperty(LEARN_MORE_LINK)
     public abstract String LearnMoreLink();
 
-    public static AvailableAWSService create(@JsonProperty(NAME) String name,
-                                             @JsonProperty(DESCRIPTION) String description,
-                                             @JsonProperty(POLICY) String policy,
-                                             @JsonProperty(HELPER_TEXT) String helperText,
-                                             @JsonProperty(LEARN_MORE_LINK) String LearnMoreLink) {
-        return new AutoValue_AvailableAWSService(name, description, policy, helperText, LearnMoreLink);
+    public static AvailableService create(@JsonProperty(NAME) String name,
+                                          @JsonProperty(DESCRIPTION) String description,
+                                          @JsonProperty(POLICY) String policy,
+                                          @JsonProperty(HELPER_TEXT) String helperText,
+                                          @JsonProperty(LEARN_MORE_LINK) String LearnMoreLink) {
+        return new AutoValue_AvailableService(name, description, policy, helperText, LearnMoreLink);
     }
 }

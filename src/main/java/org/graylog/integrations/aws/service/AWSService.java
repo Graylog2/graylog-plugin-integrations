@@ -2,9 +2,9 @@ package org.graylog.integrations.aws.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
-import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
-import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
-import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.resources.responses.AvailableService;
+import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
+import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -26,7 +26,7 @@ public class AWSService {
     /**
      * @return A list of all available regions.
      */
-    public List<RegionResponse> getAvailableRegions() {
+    public List<RegionsResponse> getAvailableRegions() {
 
         return Region.regions().stream()
                      // Ignore the global region. CloudWatch and Kinesis cannot be used with global regions.
@@ -35,7 +35,7 @@ public class AWSService {
                          // Build a single AWSRegionResponse with id, description, and displayValue.
                          RegionMetadata regionMetadata = r.metadata();
                          String displayValue = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
-                         return RegionResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
+                         return RegionsResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
                      }).collect(Collectors.toList());
     }
 
@@ -54,16 +54,16 @@ public class AWSService {
     /**
      * @return A list of available AWS services supported by the AWS Graylog AWS integration.
      */
-    public AvailableAWSServiceSummmary getAvailableServices() {
+    public AvailableServiceResponse getAvailableServices() {
 
-        ArrayList<AvailableAWSService> services = new ArrayList<>();
-        AvailableAWSService cloudWatchService =
-                AvailableAWSService.create("CloudWatch",
+        ArrayList<AvailableService> services = new ArrayList<>();
+        AvailableService cloudWatchService =
+                AvailableService.create("CloudWatch",
                                            "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
                                                    "in real time. AWS CloudWatch is a monitoring and management service built " +
                                                    "for developers, system operators, site reliability engineers (SRE), " +
                                                    "and IT managers.",
-                                           "{\n" +
+                                        "{\n" +
                                                    "  \"Version\": \"2019-06-19\",\n" +
                                                    "  \"Statement\": [\n" +
                                                    "    {\n" +
@@ -90,10 +90,10 @@ public class AWSService {
                                                    "    }\n" +
                                                    "  ]\n" +
                                                    "}",
-                                           "Requires Kinesis",
-                                           "https://aws.amazon.com/cloudwatch/"
+                                        "Requires Kinesis",
+                                        "https://aws.amazon.com/cloudwatch/"
                 );
         services.add(cloudWatchService);
-        return AvailableAWSServiceSummmary.create(services, services.size());
+        return AvailableServiceResponse.create(services, services.size());
     }
 }

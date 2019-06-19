@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class KinesisHealthCheckResponse {
+public abstract class HealthCheckResponse {
 
     private static final String SUCCESS = "success";
     private static final String LOG_TYPE = "log_type";
@@ -36,10 +36,10 @@ public abstract class KinesisHealthCheckResponse {
     @JsonProperty(MESSAGE_SUMMARY)
     public abstract String messageSummary();
 
-    public static KinesisHealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
-                                                    @JsonProperty(LOG_TYPE) String logType,
-                                                    @JsonProperty(EXPLANATION) String explanation,
-                                                    @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
-        return new AutoValue_KinesisHealthCheckResponse(success, logType, explanation, messageSummary);
+    public static HealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
+                                             @JsonProperty(LOG_TYPE) String logType,
+                                             @JsonProperty(EXPLANATION) String explanation,
+                                             @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
+        return new AutoValue_HealthCheckResponse(success, logType, explanation, messageSummary);
     }
 }

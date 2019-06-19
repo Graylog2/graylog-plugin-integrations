@@ -1,7 +1,7 @@
 package org.graylog.integrations.aws.service;
 
-import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
-import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
+import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,12 +22,12 @@ public class AWSServiceTest {
     @Test
     public void regionTest() {
 
-        List<RegionResponse> availableRegions = awsService.getAvailableRegions();
+        List<RegionsResponse> availableRegions = awsService.getAvailableRegions();
 
         // Use a loop presence check.
         // Check format of random region.
         boolean foundEuWestRegion = false;
-        for (RegionResponse availableRegion : availableRegions) {
+        for (RegionsResponse availableRegion : availableRegions) {
 
             if (availableRegion.regionId().equals("eu-west-2")) {
                 foundEuWestRegion = true;
@@ -45,7 +45,7 @@ public class AWSServiceTest {
     @Test
     public void testAvailableServices() {
 
-        AvailableAWSServiceSummmary services = awsService.getAvailableServices();
+        AvailableServiceResponse services = awsService.getAvailableServices();
 
         // There should be one service.
         assertEquals(1, services.total());

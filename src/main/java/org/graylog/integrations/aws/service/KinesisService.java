@@ -15,7 +15,8 @@ import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
@@ -95,24 +96,24 @@ public class KinesisService {
      * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
      * message.
      */
-    public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
+    public HealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
         LOG.debug("Executing healthCheck");
         LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
         // Get all the Kinesis streams that exist for a user and region
-        final List<String> kinesisStreams = getKinesisStreams(request.region(),
-                                                              request.awsAccessKeyId(),
-                                                              request.awsSecretAccessKey());
+        final StreamsResponse streamsResponse = getKinesisStreamNames(request.region(),
+                                                                      request.awsAccessKeyId(),
+                                                                      request.awsSecretAccessKey());
 
         // Check if Kinesis stream exists
-        final boolean streamExists = kinesisStreams.stream()
-                                                   .anyMatch(streamName -> streamName.equals(request.streamName()));
+        final boolean streamExists = streamsResponse.streams().stream()
+                                                    .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
             String explanation = String.format("The requested stream [%s] was not found.", request.streamName());
             LOG.error(explanation);
-            return KinesisHealthCheckResponse.create(false,
-                                                     AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     explanation, request.logGroupName());
+            return HealthCheckResponse.create(false,
+                                              AWSLogMessage.Type.UNKNOWN.toString(),
+                                              explanation, request.logGroupName());
         }
 
         LOG.debug("The stream [{}] exists", request.streamName());
@@ -125,9 +126,9 @@ public class KinesisService {
         if (records.size() == 0) {
             String explanation = "The Kinesis stream does not contain any messages.";
             LOG.error(explanation);
-            return KinesisHealthCheckResponse.create(false,
-                                                     AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     explanation, request.logGroupName());
+            return HealthCheckResponse.create(false,
+                                              AWSLogMessage.Type.UNKNOWN.toString(),
+                                              explanation, request.logGroupName());
         }
 
         // Select random record from list, and check if the payload is compressed
@@ -146,7 +147,7 @@ public class KinesisService {
      * @param regionName The AWS region to query Kinesis stream names from.
      * @return A list of all available Kinesis streams in the supplied region.
      */
-    public List<String> getKinesisStreams(String regionName, String accessKeyId, String secretAccessKey) throws ExecutionException {
+    public StreamsResponse getKinesisStreamNames(String regionName, String accessKeyId, String secretAccessKey) throws ExecutionException {
 
         LOG.debug("List Kinesis streams for region [{}]", regionName);
 
@@ -187,7 +188,7 @@ public class KinesisService {
             }
         }
         LOG.debug("Kinesis streams queried: [{}]", streamNames);
-        return streamNames;
+        return StreamsResponse.create(streamNames, streamNames.size());
     }
 
     /**
@@ -219,7 +220,7 @@ public class KinesisService {
      * message.
      * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"/>
      */
-    private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
+    private HealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
 
         final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
@@ -241,9 +242,9 @@ public class KinesisService {
 
         if (!logEntryOptional.isPresent()) {
             LOG.debug("One log messages was successfully selected from the CloudWatch payload.");
-            return KinesisHealthCheckResponse.create(false,
-                                                     AWSLogMessage.Type.UNKNOWN.toString(),
-                                                     "The Kinesis stream does not contain any messages.", request.logGroupName());
+            return HealthCheckResponse.create(false,
+                                              AWSLogMessage.Type.UNKNOWN.toString(),
+                                              "The Kinesis stream does not contain any messages.", request.logGroupName());
         }
 
         return detectAndParseMessage(logEntryOptional.get().message(), request.streamName(), request.logGroupName());
@@ -313,7 +314,7 @@ public class KinesisService {
      * @param logGroupName The log group name.
      * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
-    private KinesisHealthCheckResponse detectAndParseMessage(String logMessage, String streamName, String logGroupName) {
+    private HealthCheckResponse detectAndParseMessage(String logMessage, String streamName, String logGroupName) {
 
         LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}].",
                   logMessage, streamName, logGroupName);
@@ -335,7 +336,7 @@ public class KinesisService {
         if (codecFactory == null) {
             final String explanation = String.format("A codec with name [%s] could not be found.", type.getCodecName());
             LOG.error(explanation);
-            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
+            return HealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
         // Parse the message with the selected codec.
@@ -349,24 +350,24 @@ public class KinesisService {
         } catch (JsonProcessingException e) {
             LOG.error("An error occurred decoding Flow Log message.", e);
             final String explanation = String.format("Message decoding failed. More information might be " +
-                                                             "available by enabling Debug logging. message [%s]", logMessage);
+                                                     "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
-            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
+            return HealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
         // Check if parsing message returns null.
         if (fullyParsedMessage == null) {
             final String explanation = String.format("Message decoding failed. More information might be " +
-                                                       "available by enabling Debug logging. message [%s]", logMessage);
+                                                     "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
-            return KinesisHealthCheckResponse.create(false, type.toString(), explanation, null);
+            return HealthCheckResponse.create(false, type.toString(), explanation, null);
         }
 
         LOG.debug("Successfully parsed message type [{}] with codec [{}].", type, type.getCodecName());
 
-        return KinesisHealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
-                                                 responseMessage,
-                                                 buildMessageSummary(fullyParsedMessage, logEvent.message()));
+        return HealthCheckResponse.create(true, awsLogMessage.detectLogMessageType().toString(),
+                                          responseMessage,
+                                          buildMessageSummary(fullyParsedMessage, logEvent.message()));
     }
 
     /**
