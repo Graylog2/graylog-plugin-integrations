@@ -5,6 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
@@ -12,13 +14,18 @@ import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummm
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.service.AWSService;
+import org.graylog2.audit.AuditEventTypes;
+import org.graylog2.audit.jersey.AuditEvent;
 import org.graylog2.plugin.rest.PluginRestResource;
+import org.graylog2.shared.rest.resources.RestResource;
+import org.graylog2.shared.security.RestPermissions;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -37,7 +44,7 @@ import java.util.concurrent.ExecutionException;
 @Path("/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AWSResource implements PluginRestResource {
+public class AWSResource extends RestResource implements PluginRestResource {
 
     private AWSService awsService;
     private KinesisService kinesisService;
@@ -145,20 +152,22 @@ public class AWSResource implements PluginRestResource {
      *   "node": "e065896b-8a9a-4f45-83f2-e740525ed035"
      * }'
      *
-     * // Advanced Settings
-     *   awsCloudWatchGlobalInput: '', // '' == false || '1' == true
-     *   awsCloudWatchAssumeARN: '',  // default ''
-     *   awsCloudWatchBatchSize: '10000', // default 10,000
-     *   awsCloudWatchThrottleEnabled: '', // '' == false || '1' == true
-     *   awsCloudWatchThrottleWait: '1000', // default 1,000
      *
-     *   // Standard Fields
-     *   awsCloudWatchName: 'test',  // String
-     *   awsCloudWatchDescription: 'test', // Long String
-     *   awsCloudWatchAwsKey: '123', // 20  alphanumeric characters starting with "AK"
-     *   awsCloudWatchAwsSecret: '123', // 40 characters in standard base-64 syntax
-     *   awsCloudWatchAwsRegion: 'us-east-2', // String
-     *   awsCloudWatchKinesisStream: 'stream-name-2', // String
+     * Settings from the UI:
+     * Advanced Settings
+     * awsCloudWatchGlobalInput: '', // '' == false || '1' == true
+     * awsCloudWatchAssumeARN: '',  // default ''
+     * awsCloudWatchBatchSize: '10000', // default 10,000
+     * awsCloudWatchThrottleEnabled: '', // '' == false || '1' == true
+     * awsCloudWatchThrottleWait: '1000', // default 1,000
+     *
+     * Standard Fields
+     * awsCloudWatchName: 'test',  // String
+     * awsCloudWatchDescription: 'test', // Long String
+     * awsCloudWatchAwsKey: '123', // 20  alphanumeric characters starting with "AK"
+     * awsCloudWatchAwsSecret: '123', // 40 characters in standard base-64 syntax
+     * awsCloudWatchAwsRegion: 'us-east-2', // String
+     * awsCloudWatchKinesisStream: 'stream-name-2', // String
      * }
      */
     @POST

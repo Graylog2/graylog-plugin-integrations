@@ -3,15 +3,17 @@ package org.graylog.integrations.aws.service;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
+import org.graylog.integrations.aws.AWSInputType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
+import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
+import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.database.NotFoundException;
 import org.graylog2.inputs.Input;
 import org.graylog2.inputs.InputService;
 import org.graylog2.plugin.configuration.ConfigurationException;
-import org.graylog2.plugin.database.ValidationException;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.system.NodeId;
@@ -26,6 +28,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
 import javax.ws.rs.BadRequestException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -176,5 +179,4 @@ public class AWSService {
             throw new BadRequestException("Missing or invalid input configuration.", e);
         }
     }
-
 }

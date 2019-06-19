@@ -3,8 +3,8 @@ package org.graylog.integrations.aws.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.aws.AWSLogMessage;
-import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog2.plugin.Message;
@@ -41,7 +41,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPOutputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
