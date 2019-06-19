@@ -65,8 +65,8 @@ public class AWSService {
         ArrayList<AvailableAWSService> services = new ArrayList<>();
         AvailableAWSService cloudWatchService =
                 AvailableAWSService.create("CloudWatch",
-                                           "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs" +
-                                           "in real time. Amazon CloudWatch is a monitoring and management service built" +
+                                           "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
+                                           "in real time. AWS CloudWatch is a monitoring and management service built " +
                                            "for developers, system operators, site reliability engineers (SRE), " +
                                            "and IT managers.",
                                            "{\n" +
