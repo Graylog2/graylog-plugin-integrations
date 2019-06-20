@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.service;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
@@ -31,6 +32,7 @@ import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +70,29 @@ public class AWSService {
                          String displayValue = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
                          return RegionResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
                      }).collect(Collectors.toList());
+    }
+
+    /**
+     * Build a list of region choices with both a value (persisted in configuration) and display value (shown to the user).
+     *
+     * The display value is formatted nicely: "EU (London): eu-west-2"
+     * The value is eventually passed to Regions.of() to get the actual region object: eu-west-2
+     * @return a choices map with configuration value map keys and display value map values.
+     */
+    public static Map<String, String> buildRegionChoices() {
+        Map<String, String> regions = Maps.newHashMap();
+        for (Region region : Region.regions()) {
+
+            // Ignore the global region. CloudWatch and Kinesis cannot be used with global regions.
+            if (region.isGlobalRegion()) {
+                continue;
+            }
+
+            RegionMetadata regionMetadata = RegionMetadata.of(region);
+            String displayValue = String.format("%s: %s", regionMetadata.description(), region.id());
+            regions.put(region.id(), displayValue);
+        }
+        return regions;
     }
 
     /**
@@ -135,9 +160,8 @@ public class AWSService {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         // TODO: Correctly handle global field.
-        // TODO: Do we save the description?
         final HashMap<String, Object> configuration = new HashMap<>();
-        AWSMessageType inputType = AWSMessageType.valueOf(request.getAwsInputType());
+        AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());
         configuration.put(AWSInput.CK_AWS_INPUT_TYPE, inputType);
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
@@ -151,7 +175,6 @@ public class AWSService {
             configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
             configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
             configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.enableThrottling());
-            // TODO: Put the remaining configuration values.
         } else {
             throw new Exception("The specified input type is not supported.");
         }

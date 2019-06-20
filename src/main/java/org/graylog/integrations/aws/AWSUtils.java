@@ -18,22 +18,4 @@ public class AWSUtils {
     // This is a non-instantiable utils class.
     private AWSUtils() {
     }
-
-    /**
-     * Build a list of region choices with both a value (persisted in configuration) and display value (shown to the user).
-     *
-     * The display value is formatted nicely: "EU (London): eu-west-2"
-     * The value is eventually passed to Regions.of() to get the actual region object: eu-west-2
-     * @return a choices map with configuration value map keys and display value map values.
-     */
-    public static Map<String, String> buildRegionChoices() {
-        Map<String, String> regions = Maps.newHashMap();
-        for (Region region : Region.regions()) {
-
-            RegionMetadata regionMetadata = RegionMetadata.of(region);
-            String displayValue = String.format("%s: %s", regionMetadata.description(), region.id());
-            regions.put(region.id(), displayValue);
-        }
-        return regions;
-    }
 }

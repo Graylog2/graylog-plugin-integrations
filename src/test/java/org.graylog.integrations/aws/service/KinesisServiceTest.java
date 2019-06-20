@@ -158,9 +158,6 @@ public class KinesisServiceTest {
     }
 
     private KinesisHealthCheckResponse executeHealthCheckTest(byte[] payloadData) throws IOException, ExecutionException {
-        // TODO: This test verifies the path that CloudWatch flow logs are being sent.
-        //  Add a test for the case when an unknown CloudWatch format is sent, and also
-        //  when a non-CloudWatch payload is provided.
 
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
@@ -182,7 +179,6 @@ public class KinesisServiceTest {
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
-        // TODO: Additional mock prep will be needed when reading from Kinesis is added.
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
                                                                              "key", "secret", TEST_STREAM_1, "");
         return kinesisService.healthCheck(request);

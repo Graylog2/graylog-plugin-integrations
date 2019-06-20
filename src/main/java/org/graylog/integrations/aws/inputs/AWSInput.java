@@ -20,6 +20,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.AWSUtils;
 import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
@@ -39,10 +40,13 @@ import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
 
+/**
+ * General AWS input for all types of supported AWS logs.
+ */
 public class AWSInput extends MessageInput {
 
     public static final String NAME = "AWS Input";
-    public static final String TYPE = "org.graylog.integrations.aws.input.AWSInput";
+    public static final String TYPE = "org.graylog.integrations.aws.inputs.AWSInput";
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSInput.class);
 
@@ -127,7 +131,7 @@ public class AWSInput extends MessageInput {
                     CK_AWS_REGION,
                     "AWS Region",
                     Region.US_EAST_1.id(),
-                    AWSUtils.buildRegionChoices(),
+                    AWSService.buildRegionChoices(),
                     "The AWS region the Kinesis stream is running in.",
                     ConfigurationField.Optional.NOT_OPTIONAL
             ));

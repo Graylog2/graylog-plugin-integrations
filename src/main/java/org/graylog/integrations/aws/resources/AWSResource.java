@@ -128,7 +128,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
     /**
      * Save the new CloudWatch integration.
      *
-     *  curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/save' \
+     *  curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
      *  -v \
      *  -X POST \
      *  -H 'X-Requested-By: just-a-test' \
@@ -136,22 +136,18 @@ public class AWSResource extends RestResource implements PluginRestResource {
      *  -H 'Accept: application/json' \
      *  --compressed \
      *  --data-binary '{
-     *   "title": "Test",
-     *   "type": "org.graylog.aws.inputs.flowlogs.FlowLogsInput",
-     *   "configuration": {
-     *     "throttling_allowed": false,
-     *     "kinesis_max_throttled_wait": 60000,
-     *     "aws_region": "us-east-1",
-     *     "aws_access_key": "test",
-     *     "aws_secret_key": "test",
-     *     "aws_assume_role_arn": "test",
-     *     "kinesis_stream_name": "test",
-     *     "kinesis_record_batch_size": 10000
-     *   },
-     *   "global": false,
-     *   "node": "e065896b-8a9a-4f45-83f2-e740525ed035"
+     *      "aws_access_key": "",
+     *      "aws_secret_key": "",
+     *      "region": "us-east-1",
+     *      "name": "New Flow Logs",
+     *      "description": "Some flow logs.",
+     *      "aws_input_type": "KINESIS_FLOW_LOGS",
+     *      "stream_name": "flow-logs",
+     *      "batch_size": 10000,
+     *      "assume_role_arn": "",
+     *      "global": false,
+     *      "enable_throttling": false
      * }'
-     *
      *
      * Settings from the UI:
      * Advanced Settings

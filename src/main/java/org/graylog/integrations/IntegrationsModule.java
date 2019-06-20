@@ -83,6 +83,7 @@ public class IntegrationsModule extends PluginModule {
         addRestResource(AWSResource.class);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+        addMessageInput(AWSInput.class);
         addCodec(AWSMetaCodec.NAME, AWSMetaCodec.class);
         addCodec(CloudWatchFlowLogCodec.NAME, CloudWatchFlowLogCodec.class);
         addCodec(CloudWatchRawLogCodec.NAME, CloudWatchRawLogCodec.class);
