@@ -49,6 +49,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        autoComplete="off"
                        pattern="AK[A-Z0-9]{18}"
                        minLength="20"
+                       help='Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".'
                        required />
 
           <StyledInput id="awsCloudWatchAwsSecret"
@@ -60,6 +61,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        autoComplete="off"
                        pattern="[A-Za-z0-9/+=]{40}"
                        minLength="40"
+                       help="Your AWS Secret will be a 40-character long, base-64 encoded string."
                        required />
 
           <StyledInput id="awsCloudWatchAwsRegion"
@@ -67,6 +69,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                        value={formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : ''}
                        onChange={onChange}
                        label="Region"
+                       help="Provide the region your CloudWatch instance is deployed."
                        required>
             <option value="">Choose Region</option>
             <option value="us-east-2">US East (Ohio)</option>

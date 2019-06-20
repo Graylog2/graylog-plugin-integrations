@@ -3,7 +3,6 @@ const FIELDS = [
   Available options
   {
     id: Reference used in API transaction [required]
-    label: Text that renders in UI
     defaultValue: Value that will render as default
     invalidMessage: Custom error message if field is invalid
   }
@@ -41,17 +40,15 @@ const FIELDS = [
   },
   {
     id: 'awsCloudWatchAwsKey',
-    invalidMessage: 'Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".',
-    value: 'AKQQQQQQQQQQQQQQQQQQ',
+    // value: 'AKQQQQQQQQQQQQQQQQQQ',
   },
   {
     id: 'awsCloudWatchAwsSecret',
-    invalidMessage: 'Your AWS Secret will be a 40-character long, base-64 encoded string.',
-    value: 'X3lvdXJfYXdzX3NlY3JldF8wMDAwMDAwMDAwMA==',
+    // value: 'X3lvdXJfYXdzX3NlY3JldF8wMDAwMDAwMDAwMA==',
   },
   {
     id: 'awsCloudWatchAwsRegion',
-    value: 'us-east-2',
+    // value: 'us-east-2',
   },
   // {
   //   id: 'awsCloudWatchKinesisStream',
@@ -61,4 +58,20 @@ const FIELDS = [
   // },
 ];
 
-export default FIELDS;
+function normalizeFields(fields) {
+  const normal = {
+    defaultValue: '',
+    dirty: false,
+    error: false,
+    value: '',
+  };
+
+  return fields.map((field) => {
+    return {
+      ...normal,
+      ...field,
+    };
+  });
+}
+
+export default normalizeFields(FIELDS);

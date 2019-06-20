@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
 import formValidation from '../utils/formValidation';
@@ -61,6 +60,4 @@ const AnInputThatIsStyled = styled(({ invalid, errorMessage, ...rest }) => <Inpu
   border-color: ${props => (props.invalid ? '#AD0707' : 'inherit')};
 `;
 
-const RequiredText = styled.span`
-  color: rgba(173, 7, 7, 0.7);
-`;
+export default StyledInput;

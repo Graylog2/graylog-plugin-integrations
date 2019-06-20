@@ -9,6 +9,19 @@ const formDataHook = () => {
     return formData;
   };
 
+  const setFormData = (id, { value, error, dirty }) => {
+    if (!id) {
+      // eslint-disable-next-line
+      console.warn('setFormData Hook requires `id`.');
+      return false;
+    }
+
+    return dispatch({
+      type: 'SET_FIELD_VALUE',
+      value: { id, value, error, dirty },
+    });
+  };
+
   const getFieldData = (field) => {
     const fieldData = _.find(formData, fields => fields.id === field);
 
@@ -23,16 +36,11 @@ const formDataHook = () => {
     return currentValue || defaultValue;
   };
 
-  const setFormData = ({ id, value }) => dispatch({
-    type: 'UPDATE_FORM_DATA',
-    value: { id, value },
-  });
-
   return {
     getFormData,
-    setFormData,
     getFieldData,
     getFieldValue,
+    setFormData,
   };
 };
 

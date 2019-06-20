@@ -51,7 +51,7 @@ const CloudWatchProvider = ({ children }) => {
         };
       }
 
-      case 'UPDATE_FORM_DATA': {
+      case 'SET_FIELD_VALUE': {
         const { formData } = state;
         const { value: { id, value } } = action;
         const existingFields = formData.map(field => field.id);

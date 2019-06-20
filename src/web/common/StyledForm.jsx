@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
-import formValidation from '../utils/formValidation';
-
 export default class StyledForm extends Component {
   static propTypes = {
     children: PropTypes.any.isRequired,
@@ -22,8 +20,11 @@ export default class StyledForm extends Component {
 
   onSubmit = (event) => {
     const { onSubmit } = this.props;
-    if (formValidation.isFormValid(this.currentForm)) {
+
+    if (this.currentForm.checkValidity()) {
       onSubmit(event);
+    } else {
+      onSubmit(false, this.currentForm);
     }
   };
 

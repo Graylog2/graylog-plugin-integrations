@@ -2,16 +2,17 @@ import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
+import formValidation from 'utils/formValidation';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
-
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
 import { LogOutputContext } from './context/LogOutput';
 import TEMPORARY_LOG from './context/temporary_log';
+
 
 const CloudWatch = () => {
   const {
@@ -40,7 +41,21 @@ const CloudWatch = () => {
     setFormData(id, { value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event, form) => {
+    if (!event && form) {
+      const formElements = Array.from(form.elements);
+
+      formElements.forEach((field) => {
+        const errorOutput = formValidation.checkInputValidity(field);
+
+        if (field.id && errorOutput) {
+          setFormData(field.id, { error: true });
+        }
+      });
+
+      return false;
+    }
+
     event.preventDefault();
 
     const nextStep = availableSteps.indexOf(currentStep) + 1;
@@ -53,6 +68,8 @@ const CloudWatch = () => {
       setCurrentStep(key);
       setEnabledStep(key);
     }
+
+    return false;
   };
 
   const wizardSteps = [
