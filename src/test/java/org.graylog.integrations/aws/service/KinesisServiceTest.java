@@ -3,6 +3,7 @@ package org.graylog.integrations.aws.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.aws.AWSLogMessage;
+import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
@@ -116,28 +117,47 @@ public class KinesisServiceTest {
 
         // Verify that an ACCEPT flow log us detected as a flow log.
         AWSLogMessage logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK");
-        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.detectLogMessageType());
+        assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, logMessage.detectLogMessageType());
 
         // Verify that an ACCEPT flow log us detected as a flow log.
         logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT OK");
-        assertEquals(AWSLogMessage.Type.FLOW_LOGS, logMessage.detectLogMessageType());
+        assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, logMessage.detectLogMessageType());
 
         // Verify that a message with 14 spaces (instead of 13) is not identified as a flow log.
         logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT OK ONE-MORE-WORD");
-        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
+        assertEquals(AWSMessageType.KINESIS_RAW, logMessage.detectLogMessageType());
 
         // Verify that a message with 12 spaces (instead of 13) is not identified as a flow log.
         logMessage = new AWSLogMessage("2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 REJECT");
-        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
+        assertEquals(AWSMessageType.KINESIS_RAW, logMessage.detectLogMessageType());
 
         // Verify that it's detected as unknown
         logMessage = new AWSLogMessage("haha this is not a real log message");
-        assertEquals(AWSLogMessage.Type.UNKNOWN, logMessage.detectLogMessageType());
+        assertEquals(AWSMessageType.KINESIS_RAW, logMessage.detectLogMessageType());
     }
 
     @Test
-    public void healthCheck() throws ExecutionException, IOException {
+    public void healthCheckFlowLog() throws ExecutionException, IOException {
 
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload());
+        assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
+    }
+
+    @Test
+    public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
+
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload());
+        assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
+    }
+
+    @Test
+    public void healthCheckRawKinesisLog() throws ExecutionException, IOException {
+
+        KinesisHealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes());
+        assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
+    }
+
+    private KinesisHealthCheckResponse executeHealthCheckTest(byte[] payloadData) throws IOException, ExecutionException {
         // TODO: This test verifies the path that CloudWatch flow logs are being sent.
         //  Add a test for the case when an unknown CloudWatch format is sent, and also
         //  when a non-CloudWatch payload is provided.
@@ -157,7 +177,7 @@ public class KinesisServiceTest {
         when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
-        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildKinesisRecordPayload())).build();
+        final Record record = Record.builder().data(SdkBytes.fromByteArray(payloadData)).build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
@@ -165,18 +185,15 @@ public class KinesisServiceTest {
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
                                                                              "key", "secret", TEST_STREAM_1, "");
-        KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
-
-        // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
-        assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
+        return kinesisService.healthCheck(request);
     }
 
     /**
-     * Build the data payload for the CloudWatch Kinesis subscription record.
+     * Build a data payload for a Flow Log CloudWatch Kinesis subscription record.
      *
      * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
      */
-    private byte[] buildKinesisRecordPayload() throws IOException {
+    private byte[] buildCloudWatchFlowLogPayload() throws IOException {
 
         final String messageData = "{\n" +
                                    "  \"messageType\": \"DATA_MESSAGE\",\n" +
@@ -201,6 +218,43 @@ public class KinesisServiceTest {
                                    "}";
 
         // Compress the test record, as CloudWatch subscriptions are compressed.
+        return compressPayload(messageData);
+    }
+
+    /**
+     * Build a data payload for a raw CloudWatch Kinesis subscription record.
+     *
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
+     */
+    private byte[] buildCloudWatchRawPayload() throws IOException {
+
+        final String messageData = "{\n" +
+                                   "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                                   "  \"owner\": \"459220251735\",\n" +
+                                   "  \"logGroup\": \"test-flowlogs\",\n" +
+                                   "  \"logStream\": \"eni-3423-all\",\n" +
+                                   "  \"subscriptionFilters\": [\n" +
+                                   "    \"filter\"\n" +
+                                   "  ],\n" +
+                                   "  \"logEvents\": [\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"Just a raw message\"\n" +
+                                   "    },\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"Just another raw message\"\n" +
+                                   "    }\n" +
+                                   "  ]\n" +
+                                   "}";
+
+        // Compress the test record, as CloudWatch subscriptions are compressed.
+        return compressPayload(messageData);
+    }
+
+    private byte[] compressPayload(String messageData) throws IOException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
         final GZIPOutputStream gzip = new GZIPOutputStream(bos);
         gzip.write(messageData.getBytes());
@@ -309,7 +363,7 @@ public class KinesisServiceTest {
         when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
-        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildKinesisRecordPayload())).build();
+        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildCloudWatchRawPayload())).build();
         GetRecordsResponse recordsResponse = GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(recordsResponse)

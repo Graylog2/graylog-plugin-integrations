@@ -58,7 +58,7 @@ public class FlowLogMessage {
     }
 
     @Nullable
-    public static FlowLogMessage fromLogEvent(final CloudWatchLogEntry logEvent) {
+    public static FlowLogMessage fromLogEvent(final KinesisLogEntry logEvent) {
         final String[] parts = logEvent.message().split(" ");
 
         if (parts.length != 14) {

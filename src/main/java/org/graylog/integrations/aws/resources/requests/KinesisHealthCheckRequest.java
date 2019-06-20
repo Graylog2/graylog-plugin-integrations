@@ -41,6 +41,4 @@ public abstract class KinesisHealthCheckRequest implements AWSRequest {
                                                    @JsonProperty(LOG_GROUP_NAME) String logGroupName) {
         return new AutoValue_KinesisHealthCheckRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, logGroupName);
     }
-
-
 }

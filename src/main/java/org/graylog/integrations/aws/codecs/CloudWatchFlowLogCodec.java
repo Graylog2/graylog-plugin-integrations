@@ -3,7 +3,7 @@ package org.graylog.integrations.aws.codecs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.AWSUtils;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
+import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.cloudwatch.IANAProtocolNumbers;
 import org.graylog2.plugin.Message;
@@ -34,7 +34,7 @@ public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
         try {
             final FlowLogMessage flowLogMessage = FlowLogMessage.fromLogEvent(logEvent);
 

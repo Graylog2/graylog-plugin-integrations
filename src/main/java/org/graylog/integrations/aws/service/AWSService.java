@@ -3,7 +3,7 @@ package org.graylog.integrations.aws.service;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
-import org.graylog.integrations.aws.AWSInputType;
+import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
@@ -137,7 +137,7 @@ public class AWSService {
         // TODO: Correctly handle global field.
         // TODO: Do we save the description?
         final HashMap<String, Object> configuration = new HashMap<>();
-        AWSInputType inputType = AWSInputType.valueOf(request.getAwsInputType());
+        AWSMessageType inputType = AWSMessageType.valueOf(request.getAwsInputType());
         configuration.put(AWSInput.CK_AWS_INPUT_TYPE, inputType);
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());

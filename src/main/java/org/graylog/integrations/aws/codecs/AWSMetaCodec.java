@@ -2,7 +2,7 @@ package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
+import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -25,7 +25,7 @@ public class AWSMetaCodec extends CloudWatchLogDataCodec {
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
 
         // TODO: Select the correct codec and and decode the message.
         return null;

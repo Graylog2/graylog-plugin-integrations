@@ -1,8 +1,5 @@
 package org.graylog.integrations.aws;
 
-import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
-
 /**
  * A helper class that supports the ability to detect the type of AWS log message.
  */
@@ -19,13 +16,13 @@ public class AWSLogMessage {
      *
      * @return A {@code Type} indicating the which kind of log message has been detected.
      */
-    public Type detectLogMessageType() {
+    public AWSMessageType detectLogMessageType() {
 
         if (isFlowLog()) {
-            return Type.FLOW_LOGS;
+            return AWSMessageType.KINESIS_FLOW_LOGS;
         }
 
-        return Type.UNKNOWN;
+        return AWSMessageType.KINESIS_RAW;
     }
 
     /**
@@ -44,35 +41,5 @@ public class AWSLogMessage {
         long spaceCount = logMessage.chars().filter(Character::isSpaceChar).count();
 
         return hasAction && spaceCount == 13;
-    }
-
-    // One enum value should be added for each type of log message that auto-detect is supported for.
-    public enum Type {
-
-        FLOW_LOGS("AWS Flow Log", CloudWatchFlowLogCodec.NAME),
-        UNKNOWN("Unknown log message", CloudWatchRawLogCodec.NAME);
-
-        private String description;
-
-        // The codec name, which is usually defined as a constant at the top of the codec class.
-        private String codecName;
-
-        Type(String description, String codecName) {
-
-            this.description = description;
-            this.codecName = codecName;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public String getCodecName() {
-            return codecName;
-        }
-
-        public boolean isUnknown() {
-            return this == UNKNOWN;
-        }
     }
 }
