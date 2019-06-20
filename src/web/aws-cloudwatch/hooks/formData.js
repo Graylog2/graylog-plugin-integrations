@@ -9,7 +9,7 @@ const formDataHook = () => {
     return formData;
   };
 
-  const setFormData = (id, { value, error, dirty }) => {
+  const setFormData = (id, { value, error = false, dirty = true }) => {
     if (!id) {
       // eslint-disable-next-line
       console.warn('setFormData Hook requires `id`.');
