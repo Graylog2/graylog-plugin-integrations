@@ -3,14 +3,17 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 import { FormDataContext } from './context/FormData';
+import { StreamsContext } from './context/Streams';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
 import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';
 import Routes from '../common/Routes';
+import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
+  const { streams } = useContext(StreamsContext);
 
   return (
     <Row>
@@ -25,11 +28,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="Choose Stream"
                           required>
-            <option value="">Choose Kinesis Stream</option>
-            <option value="stream-name-1">Stream Name 1</option>
-            <option value="stream-name-2">Stream Name 2</option>
-            <option value="stream-name-3">Stream Name 3</option>
-            <option value="stream-name-4">Stream Name 4</option>
+            {renderOptions(streams, 'Choose Kinesis Stream')}
           </ValidatedInput>
 
           <FormAdvancedOptions onChange={onChange} />

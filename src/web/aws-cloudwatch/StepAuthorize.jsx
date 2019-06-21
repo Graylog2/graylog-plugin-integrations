@@ -4,18 +4,37 @@ import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
+import { RegionsContext } from './context/Regions';
+import { StreamsContext } from './context/Streams';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
+import { renderOptions } from '../common/Options';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
+  const { availableRegions, setRegions } = useContext(RegionsContext);
+  const { setStreams } = useContext(StreamsContext);
+
+  const isRegionsLoading = availableRegions.length === 0;
+  const cleanAvailableRegions = availableRegions.map(region => ({ value: region.region_id, label: region.display_value }));
+
+  if (isRegionsLoading) {
+    setRegions();
+  }
+
+  const handleSubmit = (response) => {
+    if (!response.error) {
+      setStreams().then(() => {
+        onSubmit();
+      });
+    }
+  };
 
   return (
     <Row>
-      <Col md={8}>
-        <FormWrap onSubmit={onSubmit}
-                  buttonContent="Authorize &amp; Choose Stream">
+      <Col>
+        <FormWrap onSubmit={handleSubmit} buttonContent="Authorize &amp; Choose Stream">
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
@@ -69,12 +88,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="Region"
                           help="Provide the region your CloudWatch instance is deployed."
+                          disabled={isRegionsLoading}
                           required>
-            <option value="">Choose Region</option>
-            <option value="us-east-2">US East (Ohio)</option>
-            <option value="us-east-1">US East (N. Virginia)</option>
-            <option value="us-west-1">US West (N. California)</option>
-            <option value="us-west-2">US West (Oregon)</option>
+            {renderOptions(cleanAvailableRegions, 'Choose AWS Region', isRegionsLoading)}
           </ValidatedInput>
         </FormWrap>
       </Col>

@@ -7,6 +7,7 @@ import PageHeader from 'components/common/PageHeader';
 import { FormDataProvider } from './context/FormData';
 import { StepsProvider } from './context/Steps';
 import { LogOutputProvider } from './context/LogOutput';
+import { StreamsProvider } from './context/Streams';
 import CloudWatch from './CloudWatch';
 
 const CloudWatchApp = ({ params: { step } }) => {
@@ -14,17 +15,19 @@ const CloudWatchApp = ({ params: { step } }) => {
     <StepsProvider>
       <FormDataProvider>
         <LogOutputProvider>
-          <Row>
-            <Col md={12}>
-              <PageHeader title="AWS Integration">
-                <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
-              </PageHeader>
-            </Col>
+          <StreamsProvider>
+            <Row>
+              <Col md={12}>
+                <PageHeader title="AWS Integration">
+                  <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
+                </PageHeader>
+              </Col>
 
-            <Col md={12}>
-              <CloudWatch wizardStep={step} />
-            </Col>
-          </Row>
+              <Col md={12}>
+                <CloudWatch wizardStep={step} />
+              </Col>
+            </Row>
+          </StreamsProvider>
         </LogOutputProvider>
       </FormDataProvider>
     </StepsProvider>
