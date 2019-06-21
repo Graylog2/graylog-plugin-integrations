@@ -28,7 +28,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -57,7 +56,7 @@ public class AWSResource implements PluginRestResource {
     @Timed
     @Path("/regions")
     @ApiOperation(value = "Get all available AWS regions")
-    public List<RegionsResponse> getAwsRegions() {
+    public RegionsResponse getAwsRegions() {
         return awsService.getAvailableRegions();
     }
 
