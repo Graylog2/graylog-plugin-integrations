@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
@@ -173,7 +173,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
     @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
     public Response create(@ApiParam(name = "JSON body", required = true)
-                           @Valid @NotNull KinesisInputCreateRequest saveRequest) throws Exception {
+                           @Valid @NotNull AWSInputCreateRequest saveRequest) throws Exception {
 
         awsService.saveInput(saveRequest, getCurrentUser());
 

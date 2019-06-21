@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
-import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableAWSService;
 import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
@@ -156,13 +156,14 @@ public class AWSService {
     /**
      * Save the AWS Input
      */
-    public void saveInput(KinesisInputCreateRequest request, User user) throws Exception {
+    public void saveInput(AWSInputCreateRequest request, User user) throws Exception {
+
+        // TODO: Validate input args.
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         // TODO: Correctly handle global field.
         final HashMap<String, Object> configuration = new HashMap<>();
-        AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());
-        configuration.put(AWSInput.CK_AWS_INPUT_TYPE, inputType);
+        configuration.put(AWSInput.CK_AWS_INPUT_TYPE, request.awsMessageType());
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
         configuration.put(AWSInput.CK_GLOBAL, request.region());
@@ -171,6 +172,7 @@ public class AWSService {
         configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretKey());
         configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleARN());
 
+        AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());
         if (inputType.isKinesis()) {
             configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
             configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
