@@ -157,13 +157,13 @@ public class AWSService {
 
     /**
      * Save the AWS Input
+     *
+     * This method takes the individual input params in the {@link AWSInputCreateRequest} and creates/saves
+     * an input with them.
      */
     public void saveInput(AWSInputCreateRequest request, User user) throws Exception {
 
-        // TODO: Validate input args.
-
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
-        // TODO: Correctly handle global field.
         final HashMap<String, Object> configuration = new HashMap<>();
         configuration.put(AWSInput.CK_AWS_INPUT_TYPE, request.awsMessageType());
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
@@ -184,18 +184,18 @@ public class AWSService {
             throw new Exception("The specified input type is not supported.");
         }
 
+        // Create and save the input.
         final InputCreateRequest inputCreateRequest = InputCreateRequest.create(request.name(),
                                                                                 AWSInput.TYPE,
                                                                                 false,
                                                                                 configuration,
                                                                                 nodeId.toString());
         try {
-            // Create the input object and save it to the database.
             final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.toString());
             messageInput.checkConfiguration();
             final Input input = this.inputService.create(messageInput.asMap());
             final String newInputId = inputService.save(input);
-            LOG.debug("New AWS input created. id [{}] request [{}]", newInputId, request );
+            LOG.debug("New AWS input created. id [{}] request [{}]", newInputId, request);
 
         } catch (NoSuchInputTypeException e) {
             LOG.error("There is no such input type registered.", e);
