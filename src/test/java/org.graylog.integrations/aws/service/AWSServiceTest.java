@@ -5,6 +5,7 @@ import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
 import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.inputs.Input;
 import org.graylog2.inputs.InputServiceImpl;
 import org.graylog2.plugin.database.users.User;
@@ -63,6 +64,7 @@ public class AWSServiceTest {
 
     @Test
     public void testSaveInput() throws Exception {
+
         when(nodeId.toString()).thenReturn("node-id");
         when(inputService.create(isA(HashMap.class))).thenCallRealMethod();
         when(inputService.save(isA(Input.class))).thenReturn("input-id");
@@ -70,7 +72,7 @@ public class AWSServiceTest {
         when(messageInputFactory.create(isA(InputCreateRequest.class), isA(String.class), isA(String.class))).thenReturn(messageInput);
 
         AWSInputCreateRequest request =
-                AWSInputCreateRequest.create("AWS Input",
+                AWSInputCreateRequest .create("AWS Input",
                                              "An AWS Input",
                                              AWSMessageType.KINESIS_FLOW_LOGS.toString(),
                                              "a-key", "a-secret",
@@ -79,30 +81,31 @@ public class AWSServiceTest {
                                              10000,
                                              "",
                                              false,
-                                             true);
+                                             true,
+                                              60);
         awsService.saveInput(request, user);
 
         // Verify that inputService received a valid input to save.
         final ArgumentCaptor<InputCreateRequest> argumentCaptor = ArgumentCaptor.forClass(InputCreateRequest.class);
         verify(messageInputFactory, times(1)).create(argumentCaptor.capture(), eq("a-user-name"), eq("node-id"));
 
-        // Just verify that the input create request was prepared correctly.
-        // It's too hard to mock the full inputService.save process.
+        // Just verify that the input create request was prepared correctly. This verifies the important argument
+        // transposition logic.
+        // It's too hard to mock the full inputService.save process, so we are not going to check the final resulting input.
         InputCreateRequest input = argumentCaptor.getValue();
         assertEquals("AWS Input", input.title());
         assertEquals(AWSInput.TYPE, input.type());
         assertFalse(input.global());
-        assertEquals("us-east-1", input.configuration().get("aws_region"));
-        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get("aws_input_type"));
-        assertEquals("a-key", input.configuration().get("aws_access_key"));
-        assertEquals("a-secret", input.configuration().get("aws_secret_key"));
-        assertEquals("a-stream", input.configuration().get("kinesis_stream_name"));
-        assertEquals(true, input.configuration().get("kinesis_max_throttled_wait"));
-        assertEquals("An AWS Input", input.configuration().get("description"));
-        assertEquals("us-east-1", input.configuration().get("global"));
-        assertEquals("AWS Input", input.configuration().get("title"));
-        assertEquals(10000, input.configuration().get("kinesis_record_batch_size"));
-
+        assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
+        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_INPUT_TYPE));
+        assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
+        assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
+        assertEquals("An AWS Input", input.configuration().get(AWSInput.CK_DESCRIPTION));
+        assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
+        assertEquals("AWS Input", input.configuration().get(MessageInput.FIELD_TITLE));
+        assertEquals("a-stream", input.configuration().get(KinesisTransport.CK_KINESIS_STREAM_NAME));
+        assertEquals(60, input.configuration().get(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS));
+        assertEquals(10000, input.configuration().get(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE));
     }
 
     @Test

@@ -17,6 +17,7 @@ import org.graylog2.inputs.InputService;
 import org.graylog2.plugin.configuration.ConfigurationException;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
+import org.graylog2.plugin.inputs.transports.ThrottleableTransport;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
 import org.graylog2.shared.inputs.MessageInputFactory;
@@ -77,6 +78,7 @@ public class AWSService {
      *
      * The display value is formatted nicely: "EU (London): eu-west-2"
      * The value is eventually passed to Regions.of() to get the actual region object: eu-west-2
+     *
      * @return a choices map with configuration value map keys and display value map values.
      */
     public static Map<String, String> buildRegionChoices() {
@@ -166,7 +168,8 @@ public class AWSService {
         configuration.put(AWSInput.CK_AWS_INPUT_TYPE, request.awsMessageType());
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
-        configuration.put(AWSInput.CK_GLOBAL, request.region());
+        configuration.put(AWSInput.CK_GLOBAL, request.global());
+        configuration.put(ThrottleableTransport.CK_THROTTLING_ALLOWED, request.throttlingAllowed());
         configuration.put(AWSInput.CK_AWS_REGION, request.region());
         configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKey());
         configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretKey());
@@ -176,7 +179,7 @@ public class AWSService {
         if (inputType.isKinesis()) {
             configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
             configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
-            configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.enableThrottling());
+            configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.kinesisMaxThrottledWaitMs());
         } else {
             throw new Exception("The specified input type is not supported.");
         }
@@ -190,11 +193,9 @@ public class AWSService {
             // Create the input object and save it to the database.
             final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.toString());
             messageInput.checkConfiguration();
-
             final Input input = this.inputService.create(messageInput.asMap());
-
-            // TODO: What do we need this for? For saving to the DB?
             final String newInputId = inputService.save(input);
+            LOG.debug("New AWS input created. id [{}] request [{}]", newInputId, request );
 
         } catch (NoSuchInputTypeException e) {
             LOG.error("There is no such input type registered.", e);

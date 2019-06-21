@@ -126,7 +126,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
     }
 
     /**
-     * Save the new CloudWatch integration.
+     * Save the new AWS CloudWatch integration.
      *
      *  curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
      *  -v \
@@ -148,27 +148,10 @@ public class AWSResource extends RestResource implements PluginRestResource {
      *      "global": false,
      *      "enable_throttling": false
      * }'
-     *
-     * Settings from the UI:
-     * Advanced Settings
-     * awsCloudWatchGlobalInput: '', // '' == false || '1' == true
-     * awsCloudWatchAssumeARN: '',  // default ''
-     * awsCloudWatchBatchSize: '10000', // default 10,000
-     * awsCloudWatchThrottleEnabled: '', // '' == false || '1' == true
-     * awsCloudWatchThrottleWait: '1000', // default 1,000
-     *
-     * Standard Fields
-     * awsCloudWatchName: 'test',  // String
-     * awsCloudWatchDescription: 'test', // Long String
-     * awsCloudWatchAwsKey: '123', // 20  alphanumeric characters starting with "AK"
-     * awsCloudWatchAwsSecret: '123', // 40 characters in standard base-64 syntax
-     * awsCloudWatchAwsRegion: 'us-east-2', // String
-     * awsCloudWatchKinesisStream: 'stream-name-2', // String
-     * }
      */
     @POST
     @Timed
-    @Path("/kinesis/save")
+    @Path("/save")
     @ApiOperation( value = "Save a new Kinesis input" )
     @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
@@ -177,7 +160,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
 
         awsService.saveInput(saveRequest, getCurrentUser());
 
-        // TODO: Identify if this method needs to return a specific response with the id of the new input;
+        // TODO: Identify if this method needs to return a specific response with the id of the new input.
         return Response.ok().build();
     }
 }
