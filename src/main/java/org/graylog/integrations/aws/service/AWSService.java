@@ -67,36 +67,36 @@ public class AWSService {
         AvailableService cloudWatchService =
                 AvailableService.create("CloudWatch",
                                         "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
-                                                "in real time. AWS CloudWatch is a monitoring and management service built " +
-                                                "for developers, system operators, site reliability engineers (SRE), " +
-                                                "and IT managers.",
+                                        "in real time. AWS CloudWatch is a monitoring and management service built " +
+                                        "for developers, system operators, site reliability engineers (SRE), " +
+                                        "and IT managers.",
                                         "{\n" +
-                                                "  \"Version\": \"2019-06-19\",\n" +
-                                                "  \"Statement\": [\n" +
-                                                "    {\n" +
-                                                "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
-                                                "      \"Effect\": \"Allow\",\n" +
-                                                "      \"Action\": [\n" +
-                                                "        \"cloudwatch:PutMetricData\",\n" +
-                                                "        \"dynamodb:CreateTable\",\n" +
-                                                "        \"dynamodb:DescribeTable\",\n" +
-                                                "        \"dynamodb:GetItem\",\n" +
-                                                "        \"dynamodb:PutItem\",\n" +
-                                                "        \"dynamodb:Scan\",\n" +
-                                                "        \"dynamodb:UpdateItem\",\n" +
-                                                "        \"ec2:DescribeInstances\",\n" +
-                                                "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
-                                                "        \"ec2:DescribeNetworkInterfaces\",\n" +
-                                                "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
-                                                "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
-                                                "        \"kinesis:GetRecords\",\n" +
-                                                "        \"kinesis:GetShardIterator\",\n" +
-                                                "        \"kinesis:ListShards\"\n" +
-                                                "      ],\n" +
-                                                "      \"Resource\": \"*\"\n" +
-                                                "    }\n" +
-                                                "  ]\n" +
-                                                "}",
+                                        "  \"Version\": \"2019-06-19\",\n" +
+                                        "  \"Statement\": [\n" +
+                                        "    {\n" +
+                                        "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
+                                        "      \"Effect\": \"Allow\",\n" +
+                                        "      \"Action\": [\n" +
+                                        "        \"cloudwatch:PutMetricData\",\n" +
+                                        "        \"dynamodb:CreateTable\",\n" +
+                                        "        \"dynamodb:DescribeTable\",\n" +
+                                        "        \"dynamodb:GetItem\",\n" +
+                                        "        \"dynamodb:PutItem\",\n" +
+                                        "        \"dynamodb:Scan\",\n" +
+                                        "        \"dynamodb:UpdateItem\",\n" +
+                                        "        \"ec2:DescribeInstances\",\n" +
+                                        "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
+                                        "        \"ec2:DescribeNetworkInterfaces\",\n" +
+                                        "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
+                                        "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
+                                        "        \"kinesis:GetRecords\",\n" +
+                                        "        \"kinesis:GetShardIterator\",\n" +
+                                        "        \"kinesis:ListShards\"\n" +
+                                        "      ],\n" +
+                                        "      \"Resource\": \"*\"\n" +
+                                        "    }\n" +
+                                        "  ]\n" +
+                                        "}",
                                         "Requires Kinesis",
                                         "https://aws.amazon.com/cloudwatch/"
                 );
