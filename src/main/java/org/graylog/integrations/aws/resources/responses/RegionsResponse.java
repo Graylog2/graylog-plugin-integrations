@@ -5,31 +5,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import java.util.List;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
 public abstract class RegionsResponse {
 
-    private static final String REGION_ID = "region_id";
-    private static final String REGION_DESCRIPTION = "region_description";
-    private static final String DISPLAY_VALUE = "display_value";
+    private static final String REGIONS = "regions";
+    private static final String TOTAL = "total";
 
-    // eu-west-2
-    @JsonProperty(REGION_ID)
-    public abstract String regionId();
+    @JsonProperty(REGIONS)
+    public abstract List<AWSRegion> regions();
 
-    // EU (London)
-    @JsonProperty(REGION_DESCRIPTION)
-    public abstract String regionDescription();
+    @JsonProperty(TOTAL)
+    public abstract long total();
 
-    // The combination of both the name and description for display in the UI:
-    // EU (London): eu-west-2
-    @JsonProperty(DISPLAY_VALUE)
-    public abstract String displayValue();
-
-    public static RegionsResponse create(@JsonProperty(REGION_ID) String regionId,
-                                         @JsonProperty(REGION_DESCRIPTION) String regionDescription,
-                                         @JsonProperty(DISPLAY_VALUE) String displayValue) {
-        return new AutoValue_RegionsResponse(regionId, regionDescription, displayValue);
+    public static RegionsResponse create(@JsonProperty(REGIONS) List<AWSRegion> regions,
+                                         @JsonProperty(TOTAL) long total) {
+        return new AutoValue_RegionsResponse(regions, total);
     }
 }

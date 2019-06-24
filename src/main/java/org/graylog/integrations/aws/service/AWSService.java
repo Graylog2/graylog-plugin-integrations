@@ -2,6 +2,7 @@ package org.graylog.integrations.aws.service;
 
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang.StringUtils;
+import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableService;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.resources.responses.RegionsResponse;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,17 +28,22 @@ public class AWSService {
     /**
      * @return A list of all available regions.
      */
-    public List<RegionsResponse> getAvailableRegions() {
+    public RegionsResponse getAvailableRegions() {
 
-        return Region.regions().stream()
-                     // Ignore the global region. CloudWatch and Kinesis cannot be used with global regions.
-                     .filter(r -> !r.isGlobalRegion())
-                     .map(r -> {
-                         // Build a single AWSRegionResponse with id, description, and displayValue.
-                         RegionMetadata regionMetadata = r.metadata();
-                         String displayValue = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
-                         return RegionsResponse.create(regionMetadata.id(), regionMetadata.description(), displayValue);
-                     }).collect(Collectors.toList());
+        List<AWSRegion> regions =
+                Region.regions().stream()
+                      // Ignore the global region. CloudWatch and Kinesis cannot be used with global regions.
+                      .filter(r -> !r.isGlobalRegion())
+                      .map(r -> {
+                          // Build a single AWSRegionResponse with id, description, and displayValue.
+                          RegionMetadata regionMetadata = r.metadata();
+                          String label = String.format("%s: %s", regionMetadata.description(), regionMetadata.id());
+                          return AWSRegion.create(regionMetadata.id(), label);
+                      })
+                      .sorted(Comparator.comparing(AWSRegion::regionId))
+                      .collect(Collectors.toList());
+
+        return RegionsResponse.create(regions, regions.size());
     }
 
     /**
@@ -59,37 +66,37 @@ public class AWSService {
         ArrayList<AvailableService> services = new ArrayList<>();
         AvailableService cloudWatchService =
                 AvailableService.create("CloudWatch",
-                                           "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
-                                                   "in real time. AWS CloudWatch is a monitoring and management service built " +
-                                                   "for developers, system operators, site reliability engineers (SRE), " +
-                                                   "and IT managers.",
+                                        "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
+                                        "in real time. AWS CloudWatch is a monitoring and management service built " +
+                                        "for developers, system operators, site reliability engineers (SRE), " +
+                                        "and IT managers.",
                                         "{\n" +
-                                                   "  \"Version\": \"2019-06-19\",\n" +
-                                                   "  \"Statement\": [\n" +
-                                                   "    {\n" +
-                                                   "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
-                                                   "      \"Effect\": \"Allow\",\n" +
-                                                   "      \"Action\": [\n" +
-                                                   "        \"cloudwatch:PutMetricData\",\n" +
-                                                   "        \"dynamodb:CreateTable\",\n" +
-                                                   "        \"dynamodb:DescribeTable\",\n" +
-                                                   "        \"dynamodb:GetItem\",\n" +
-                                                   "        \"dynamodb:PutItem\",\n" +
-                                                   "        \"dynamodb:Scan\",\n" +
-                                                   "        \"dynamodb:UpdateItem\",\n" +
-                                                   "        \"ec2:DescribeInstances\",\n" +
-                                                   "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
-                                                   "        \"ec2:DescribeNetworkInterfaces\",\n" +
-                                                   "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
-                                                   "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
-                                                   "        \"kinesis:GetRecords\",\n" +
-                                                   "        \"kinesis:GetShardIterator\",\n" +
-                                                   "        \"kinesis:ListShards\"\n" +
-                                                   "      ],\n" +
-                                                   "      \"Resource\": \"*\"\n" +
-                                                   "    }\n" +
-                                                   "  ]\n" +
-                                                   "}",
+                                        "  \"Version\": \"2019-06-19\",\n" +
+                                        "  \"Statement\": [\n" +
+                                        "    {\n" +
+                                        "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
+                                        "      \"Effect\": \"Allow\",\n" +
+                                        "      \"Action\": [\n" +
+                                        "        \"cloudwatch:PutMetricData\",\n" +
+                                        "        \"dynamodb:CreateTable\",\n" +
+                                        "        \"dynamodb:DescribeTable\",\n" +
+                                        "        \"dynamodb:GetItem\",\n" +
+                                        "        \"dynamodb:PutItem\",\n" +
+                                        "        \"dynamodb:Scan\",\n" +
+                                        "        \"dynamodb:UpdateItem\",\n" +
+                                        "        \"ec2:DescribeInstances\",\n" +
+                                        "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
+                                        "        \"ec2:DescribeNetworkInterfaces\",\n" +
+                                        "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
+                                        "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
+                                        "        \"kinesis:GetRecords\",\n" +
+                                        "        \"kinesis:GetShardIterator\",\n" +
+                                        "        \"kinesis:ListShards\"\n" +
+                                        "      ],\n" +
+                                        "      \"Resource\": \"*\"\n" +
+                                        "    }\n" +
+                                        "  ]\n" +
+                                        "}",
                                         "Requires Kinesis",
                                         "https://aws.amazon.com/cloudwatch/"
                 );
