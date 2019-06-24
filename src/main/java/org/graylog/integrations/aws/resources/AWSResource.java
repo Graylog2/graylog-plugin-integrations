@@ -63,7 +63,7 @@ public class AWSResource implements PluginRestResource {
 
     @GET
     @Timed
-    @Path("/availableServices")
+    @Path("/available_services")
     @ApiOperation(value = "Get all available AWS services")
     public AvailableServiceResponse getAvailableServices() {
         return awsService.getAvailableServices();
@@ -86,8 +86,8 @@ public class AWSResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/cloudWatch/logGroups")
-    @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region")
+    @Path("/cloudwatch/log_groups")
+    @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region.")
     public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) {
         return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -110,7 +110,7 @@ public class AWSResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/kinesis/streams")
-    @ApiOperation(value = "Get all available Kinesis streams for the specified region")
+    @ApiOperation(value = "Get all available Kinesis streams for the specified region.")
     public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) throws ExecutionException {
         return kinesisService.getKinesisStreamNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -136,7 +136,7 @@ public class AWSResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/kinesis/healthCheck")
+    @Path("/kinesis/health_check")
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = HealthCheckResponse.class
