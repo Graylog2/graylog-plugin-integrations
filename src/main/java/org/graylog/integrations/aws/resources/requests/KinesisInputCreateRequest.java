@@ -23,12 +23,13 @@ import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
 /**
- * This request is used to save a new Kinesis AWS input.
+ * This request is used to save a new Kinesis AWS input. Each type of AWS input will use it's own request
+ * object due to typically very unique required fields for each.
  */
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSInputCreateRequest {
+public abstract class KinesisInputCreateRequest {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
@@ -79,20 +80,19 @@ public abstract class AWSInputCreateRequest {
     @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS)
     public abstract int kinesisMaxThrottledWaitMs();
 
-
     @JsonCreator
-    public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
-                                               @JsonProperty(DESCRIPTION) String description,
-                                               @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
-                                               @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
-                                               @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
-                                               @JsonProperty(STREAM_NAME) String streamName,
-                                               @JsonProperty(REGION) String region,
-                                               @JsonProperty(BATCH_SIZE) int batchSize,
-                                               @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                               @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
-                                               @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
-        return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
+    public static KinesisInputCreateRequest create(@JsonProperty(NAME) String name,
+                                                   @JsonProperty(DESCRIPTION) String description,
+                                                   @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
+                                                   @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
+                                                   @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
+                                                   @JsonProperty(STREAM_NAME) String streamName,
+                                                   @JsonProperty(REGION) String region,
+                                                   @JsonProperty(BATCH_SIZE) int batchSize,
+                                                   @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                                   @JsonProperty(GLOBAL) boolean global,
+                                                   @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
+                                                   @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
+        return new AutoValue_KinesisInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
     }
 }
