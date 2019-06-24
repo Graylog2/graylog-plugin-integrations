@@ -36,7 +36,6 @@ public class AWSServiceTest {
         assertTrue(foundEuWestRegion);
 
         // Use one liner presence checks.
-        assertTrue(regions.stream().anyMatch(r -> r.regionDescription().equals("EU (Stockholm)")));
         assertTrue(regions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
         assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK", 20, regions.size());
     }
