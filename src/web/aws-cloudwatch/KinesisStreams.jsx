@@ -4,6 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { StreamsContext } from './context/Streams';
+import { LogOutputContext } from './context/LogOutput';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
 import FormWrap from '../common/FormWrap';
@@ -14,11 +15,20 @@ import { renderOptions } from '../common/Options';
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { streams } = useContext(StreamsContext);
+  const { setLogOutput } = useContext(LogOutputContext);
+
+  const handleSubmit = (response) => {
+    if (!response.error) {
+      setLogOutput().then(() => {
+        onSubmit();
+      });
+    }
+  };
 
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit} buttonContent="Verify Stream &amp; Format">
+        <FormWrap onSubmit={handleSubmit} buttonContent="Verify Stream &amp; Format">
           <h2>Choose Kinesis Stream</h2>
           <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
 

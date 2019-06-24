@@ -17,7 +17,12 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   const { setStreams } = useContext(StreamsContext);
 
   const isRegionsLoading = availableRegions.length === 0;
-  const cleanAvailableRegions = availableRegions.map(region => ({ value: region.region_id, label: region.display_value }));
+  const cleanAvailableRegions = availableRegions.map(region => (
+    {
+      value: region.region_id,
+      label: region.display_value,
+    }
+  ));
 
   if (isRegionsLoading) {
     setRegions();

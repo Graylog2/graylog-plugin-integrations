@@ -10,8 +10,6 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
-import { LogOutputContext } from './context/LogOutput';
-import TEMPORARY_LOG from './context/temporary_log';
 
 const CloudWatch = () => {
   const {
@@ -23,7 +21,6 @@ const CloudWatch = () => {
     setEnabledStep,
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
-  const { setLogOutput } = useContext(LogOutputContext);
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -62,8 +59,6 @@ const CloudWatch = () => {
 
     if (availableSteps[nextStep]) {
       const key = availableSteps[nextStep];
-
-      setLogOutput(TEMPORARY_LOG); // TODO: Move to step specific setting
 
       setCurrentStep(key);
       setEnabledStep(key);

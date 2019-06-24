@@ -39,11 +39,13 @@ const FIELDS = [
   },
   {
     id: 'awsCloudWatchAwsKey',
-    value: 'AKQQQQQQQQQQQQQQQQQQ',
+    value: 'AKIAWV25I6RLR6LN7Q32',
+    // value: 'AKQQQQQQQQQQQQQQQQQQ',
   },
   {
     id: 'awsCloudWatchAwsSecret',
-    value: 'X3lvdXJfYXdzX3NlY3JldF8wMDAwMDAwMDAwMA==',
+    value: 'LrSKpYNlSTaEp/vEOCpF+Rukx/U2YKALCKZ4PfgI',
+    // value: 'X3lvdXJfYXdzX3NlY3JldF8wMDAwMDAwMDAwMA==',
   },
   {
     id: 'awsCloudWatchAwsRegion',
