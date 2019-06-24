@@ -151,8 +151,8 @@ public class AWSResource extends RestResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/save")
-    @ApiOperation( value = "Save a new Kinesis input" )
+    @Path("/inputs")
+    @ApiOperation( value = "Save a new AWS input" )
     @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
     public Response create(@ApiParam(name = "JSON body", required = true)

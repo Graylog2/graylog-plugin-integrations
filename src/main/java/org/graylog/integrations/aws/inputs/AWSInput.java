@@ -45,7 +45,7 @@ import javax.inject.Inject;
  */
 public class AWSInput extends MessageInput {
 
-    public static final String NAME = "AWS Input";
+    public static final String NAME = "AWS";
     public static final String TYPE = "org.graylog.integrations.aws.inputs.AWSInput";
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSInput.class);
@@ -84,15 +84,11 @@ public class AWSInput extends MessageInput {
 
     @Override
     public void launch(InputBuffer buffer) throws MisfireException {
-
-        LOG.info("Starting AWS Input...");
         super.launch(buffer);
     }
 
     @Override
     public void stop() {
-
-        LOG.info("Stopping AWS Input...");
         super.stop();
     }
 
