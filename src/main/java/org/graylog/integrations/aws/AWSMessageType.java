@@ -51,32 +51,28 @@ public enum AWSMessageType {
         return transportFactory;
     }
 
-    public boolean isKinesis() {
-        return this.source.equals(Source.KINESIS);
-    }
-
     public String getLabel() {
         return label;
-    }
-
-    public boolean isFlowLog() {
-        return this == KINESIS_FLOW_LOGS;
-    }
-
-    public boolean isRaw() {
-        return this == KINESIS_RAW;
-    }
-
-    public boolean isUnknown() {
-        return this == UNKNOWN;
     }
 
     public String getCodecName() {
         return codecName;
     }
 
+    /**
+     * @return True if the {@link AWSMessageType} enum instance has a Kinesis source.
+     */
+    public boolean isKinesis() {
+        return this.source.equals(Source.KINESIS);
+    }
+
+    /**
+     * Each source will require its own specific set of input configuration fields. Multiple {@link AWSMessageType}
+     * enum instances might correspond to the same source and thus require the same configuration fields.
+     * For example, {@code AWSMessageType.KINESIS_RAW} and {@code AWSMessageType.KINESIS_FLOW_LOGS}
+     * correspond to two different types of AWS messages, but share a common KINESIS source.
+     */
     public enum Source {
-        CLOUD_WATCH,
         KINESIS
     }
 }

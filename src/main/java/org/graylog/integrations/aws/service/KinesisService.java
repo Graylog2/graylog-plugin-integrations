@@ -138,8 +138,7 @@ public class KinesisService {
         // Cloud Watch message payloads are always compressed.
         AWSMessageType.Source messageSource = AWSMessageType.Source.KINESIS;
         return detectAndParseMessage(new String(payloadBytes), request.streamName(),
-                                     request.logGroupName(),
-                                     messageSource);
+                                     request.logGroupName());
     }
 
     /**
@@ -251,8 +250,7 @@ public class KinesisService {
 
         return detectAndParseMessage(logEntryOptional.get().message(),
                                      request.streamName(),
-                                     request.logGroupName(),
-                                     AWSMessageType.Source.CLOUD_WATCH);
+                                     request.logGroupName());
     }
 
     /**
@@ -317,11 +315,9 @@ public class KinesisService {
      * @param logMessage   A string containing the actual log message.
      * @param streamName   The stream name.
      * @param logGroupName The log group name.
-     * @param messageSource
      * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
-    private KinesisHealthCheckResponse detectAndParseMessage(String logMessage, String streamName, String logGroupName,
-                                                             AWSMessageType.Source messageSource) {
+    private KinesisHealthCheckResponse detectAndParseMessage(String logMessage, String streamName, String logGroupName) {
 
         LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}].",
                   logMessage, streamName, logGroupName);
