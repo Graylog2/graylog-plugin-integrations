@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
@@ -16,6 +18,11 @@ public abstract class CloudWatchLogEntry {
     private static final String TIMESTAMP = "timestamp";
     private static final String MESSAGE = "message";
 
+    /**
+     * Log Group is optional, since messages may have been written directly to Kinesis without using CloudWatch.
+     * Only CloudWatch messages written VIA Kinesis CloudWatch subscriptions will contain a log group.
+     */
+    @Nullable
     @JsonProperty(LOG_GROUP)
     public abstract String logGroup();
 
