@@ -29,9 +29,8 @@ public abstract class CloudWatchLogDataCodec extends AbstractCodec {
     public Message decode(@Nonnull RawMessage rawMessage) {
         try {
             final CloudWatchLogEntry entry = objectMapper.readValue(rawMessage.getPayload(), CloudWatchLogEntry.class);
-
             try {
-                return decodeLogData(entry, entry.logGroup(), entry.logStream());
+                return decodeLogData(entry);
             } catch (Exception e) {
                 LOG.error("Couldn't decode log event <{}>", entry);
 
@@ -44,7 +43,7 @@ public abstract class CloudWatchLogDataCodec extends AbstractCodec {
     }
 
     @Nullable
-    protected abstract Message decodeLogData(@Nonnull final CloudWatchLogEntry event, @Nonnull final String logGroup, @Nonnull final String logStream);
+    protected abstract Message decodeLogData(@Nonnull final CloudWatchLogEntry entry);
 
     @Nonnull
     @Override

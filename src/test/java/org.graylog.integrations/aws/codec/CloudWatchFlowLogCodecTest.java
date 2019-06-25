@@ -27,7 +27,7 @@ public class CloudWatchFlowLogCodecTest {
 
         String flowLogMessage = "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK";
         final CloudWatchLogEntry logEvent = CloudWatchLogEntry.create("logGroup", "logStream", DateTime.now().getMillis() / 1000, flowLogMessage);
-        Message message = codec.decodeLogData(logEvent, logEvent.logGroup(), logEvent.logStream());
+        Message message = codec.decodeLogData(logEvent);
 
         Assert.assertEquals("logGroup", message.getField("aws_log_group"));
         Assert.assertEquals("logStream", message.getField("aws_log_stream"));

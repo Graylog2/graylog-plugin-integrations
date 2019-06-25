@@ -34,7 +34,7 @@ public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent) {
         try {
             final FlowLogMessage flowLogMessage = FlowLogMessage.fromLogEvent(logEvent);
 
@@ -49,8 +49,10 @@ public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
                     flowLogMessage.getTimestamp()
             );
             result.addFields(buildFields(flowLogMessage));
-            result.addField(AWSUtils.FIELD_LOG_GROUP, logGroup);
-            result.addField(AWSUtils.FIELD_LOG_STREAM, logStream);
+
+            logEvent.logGroup().ifPresent(group -> result.addField(AWSUtils.FIELD_LOG_GROUP, group));
+            logEvent.logStream().ifPresent(stream -> result.addField(AWSUtils.FIELD_LOG_STREAM, stream));
+
             result.addField(AWSUtils.SOURCE_GROUP_IDENTIFIER, true);
 
             return result;

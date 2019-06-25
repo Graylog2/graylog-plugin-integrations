@@ -26,7 +26,7 @@ public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent) {
         try {
             final String source = configuration.getString(CloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-raw-logs");
             Message result = new Message(
@@ -34,8 +34,9 @@ public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
                     source,
                     new DateTime(logEvent.timestamp())
             );
-            result.addField(AWSUtils.FIELD_LOG_GROUP, logGroup);
-            result.addField(AWSUtils.FIELD_LOG_STREAM, logStream);
+
+            logEvent.logGroup().ifPresent(group -> result.addField(AWSUtils.FIELD_LOG_GROUP, group));
+            logEvent.logStream().ifPresent(stream -> result.addField(AWSUtils.FIELD_LOG_STREAM, stream));
 
             return result;
         } catch (Exception e) {
