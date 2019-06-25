@@ -42,7 +42,7 @@ public abstract class CloudWatchLogEntry {
                                             @JsonProperty(LOG_STREAM) String logStream,
                                             @JsonProperty(TIMESTAMP) long timestamp,
                                             @JsonProperty(MESSAGE) String message) {
-        return new AutoValue_CloudWatchLogEntry(new Optional<>(logGroup), new Optional<>(logStream),
+        return new AutoValue_CloudWatchLogEntry(Optional.of(logGroup), Optional.of(logStream),
                                                 timestamp, message);
     }
 }
