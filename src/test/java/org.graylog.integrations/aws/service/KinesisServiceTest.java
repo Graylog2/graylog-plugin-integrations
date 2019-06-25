@@ -6,7 +6,8 @@ import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
@@ -163,7 +164,7 @@ public class KinesisServiceTest {
         // TODO: Additional mock prep will be needed when reading from Kinesis is added.
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
                                                                              "key", "secret", TEST_STREAM_1, "");
-        KinesisHealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
+        HealthCheckResponse healthCheckResponse = kinesisService.healthCheck(request);
 
         // Hard-coded to flow logs for now. This will be mocked out with a real message at some point
         assertEquals(AWSLogMessage.Type.FLOW_LOGS.toString(), healthCheckResponse.logType());
@@ -210,13 +211,13 @@ public class KinesisServiceTest {
 
     @Test
     public void testGetStreamsCredentials() {
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "", ""))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", ""))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS access key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "dsfadsdf", ""))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "dsfadsdf", ""))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS secret key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreams(TEST_REGION, "", "dsfadsdf"))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "dsfadsdf"))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS access key is required");
     }
@@ -235,8 +236,9 @@ public class KinesisServiceTest {
                                                .hasMoreStreams(false).build());
 
 
-        List<String> kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, "accessKey", "secretKey");
-        assertEquals(2, kinesisStreams.size());
+        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey");
+        assertEquals(2, streamsResponse.total());
+        assertEquals(2, streamsResponse.streams().size());
 
         // Test with stream paging functionality. This will be the case when a large number of Kinesis streams
         // are present on a particular AWS account.
@@ -254,14 +256,12 @@ public class KinesisServiceTest {
                                                .streamNames(TWO_TEST_STREAMS)
                                                .hasMoreStreams(false).build()); // Indicate no more streams.
 
-        kinesisStreams = kinesisService.getKinesisStreams(TEST_REGION, "accessKey", "secretKey");
+        streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey");
 
         // There should be 4 total streams (two from each page).
-        assertEquals(4, kinesisStreams.size());
-
+        assertEquals(4, streamsResponse.total());
+        assertEquals(4, streamsResponse.streams().size());
     }
-
-    // TODO Add retrieveRecords test
 
     @Test
     public void testMessageFormat() {

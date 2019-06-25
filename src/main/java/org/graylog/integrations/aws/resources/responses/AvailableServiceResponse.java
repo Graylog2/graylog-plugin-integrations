@@ -10,19 +10,19 @@ import java.util.List;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AvailableAWSServiceSummmary {
+public abstract class AvailableServiceResponse {
 
     private static final String SERVICES = "services";
     private static final String TOTAL = "total";
 
     @JsonProperty(SERVICES)
-    public abstract List<AvailableAWSService> services();
+    public abstract List<AvailableService> services();
 
     @JsonProperty(TOTAL)
     public abstract long total();
 
-    public static AvailableAWSServiceSummmary create(@JsonProperty(SERVICES) List<AvailableAWSService> services,
-                                                     @JsonProperty(TOTAL) long total) {
-        return new AutoValue_AvailableAWSServiceSummmary(services, total);
+    public static AvailableServiceResponse create(@JsonProperty(SERVICES) List<AvailableService> services,
+                                                  @JsonProperty(TOTAL) long total) {
+        return new AutoValue_AvailableServiceResponse(services, total);
     }
 }
