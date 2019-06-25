@@ -24,7 +24,7 @@ public enum AWSMessageType {
     KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", CloudWatchRawLogCodec.NAME,
                       CloudWatchRawLogCodec.Factory.class, KinesisTransport.Factory.class),
 
-    UNKNOWN();`` ``
+    UNKNOWN();
 
     private Source source;
     private String label;
