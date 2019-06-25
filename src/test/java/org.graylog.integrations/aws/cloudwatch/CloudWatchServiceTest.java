@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws.cloudwatch;
 
+import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.junit.Before;
 import org.junit.Rule;
@@ -7,6 +8,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
@@ -51,6 +53,7 @@ public class CloudWatchServiceTest {
 
         // Perform test setup. Return the builder and client when appropriate.
         when(logsClientBuilder.region(isA(Region.class))).thenReturn(logsClientBuilder);
+        when(logsClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(logsClientBuilder);
         when(logsClientBuilder.build()).thenReturn(cloudWatchLogsClient);
 
         // Create a fake response that contains three log groups.
@@ -67,22 +70,22 @@ public class CloudWatchServiceTest {
         when(logGroupsIterable.iterator()).thenReturn(responses.iterator());
         when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
 
-        ArrayList<String> logGroupNames = cloudWatchService.getLogGroupNames("us-east-1");
+        final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(Region.US_EAST_1.id(), "key", "secret");
 
         // Inspect the log groups returned and verify the contents and size.
         assertEquals("The number of groups should be because the two responses " +
-                     "with 3 groups each were provided.", 6, logGroupNames.size());
+                     "with 3 groups each were provided.", 6, logGroupsResponse.total());
 
         // Loop example to verify presence of a specific log group.
         boolean foundGroup = false;
-        for (String logGroupName : logGroupNames) {
+        for (String logGroupName : logGroupsResponse.logGroups()) {
             if (logGroupName.equals("group-1")) {
                 foundGroup = true;
             }
         }
         assertTrue(foundGroup);
 
-        // One line with stream.
-        assertTrue(logGroupNames.stream().anyMatch(logGroupName -> logGroupName.equals("group-2")));
+        // One line check with stream.
+        assertTrue(logGroupsResponse.logGroups().stream().anyMatch(logGroupName -> logGroupName.equals("group-2")));
     }
 }

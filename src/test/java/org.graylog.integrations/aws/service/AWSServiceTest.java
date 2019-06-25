@@ -3,8 +3,8 @@ package org.graylog.integrations.aws.service;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
-import org.graylog.integrations.aws.resources.responses.AvailableAWSServiceSummmary;
-import org.graylog.integrations.aws.resources.responses.RegionResponse;
+import org.graylog.integrations.aws.resources.responses.AWSRegion;
+import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.inputs.Input;
 import org.graylog2.inputs.InputServiceImpl;
@@ -111,30 +111,28 @@ public class AWSServiceTest {
     @Test
     public void regionTest() {
 
-        List<RegionResponse> availableRegions = awsService.getAvailableRegions();
+        List<AWSRegion> regions = awsService.getAvailableRegions().regions();
 
         // Use a loop presence check.
         // Check format of random region.
         boolean foundEuWestRegion = false;
-        for (RegionResponse availableRegion : availableRegions) {
+        for (AWSRegion availableAWSRegion : regions) {
 
-            if (availableRegion.regionId().equals("eu-west-2")) {
+            if (availableAWSRegion.regionId().equals("eu-west-2")) {
                 foundEuWestRegion = true;
             }
         }
         assertTrue(foundEuWestRegion);
 
         // Use one liner presence checks.
-        assertTrue(availableRegions.stream().anyMatch(r -> r.regionDescription().equals("EU (Stockholm)")));
-        assertTrue(availableRegions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
-        assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK",
-                     20, availableRegions.size());
+        assertTrue(regions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
+        assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK", 20, regions.size());
     }
 
     @Test
     public void testAvailableServices() {
 
-        AvailableAWSServiceSummmary services = awsService.getAvailableServices();
+        AvailableServiceResponse services = awsService.getAvailableServices();
 
         // There should be one service.
         assertEquals(1, services.total());

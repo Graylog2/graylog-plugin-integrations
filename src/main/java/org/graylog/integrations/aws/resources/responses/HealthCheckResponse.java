@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class KinesisHealthCheckResponse {
+public abstract class HealthCheckResponse {
 
     private static final String SUCCESS = "success";
     private static final String INPUT_TYPE = "input_type";
@@ -37,19 +37,19 @@ public abstract class KinesisHealthCheckResponse {
     @JsonProperty(MESSAGE_SUMMARY)
     public abstract String messageSummary();
 
-    public static KinesisHealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
-                                                    @JsonProperty(INPUT_TYPE) AWSMessageType inputType,
-                                                    @JsonProperty(EXPLANATION) String explanation,
-                                                    @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
-        return new AutoValue_KinesisHealthCheckResponse(success, inputType, explanation, messageSummary);
+    public static HealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
+                                             @JsonProperty(INPUT_TYPE) AWSMessageType inputType,
+                                             @JsonProperty(EXPLANATION) String explanation,
+                                             @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
+        return new AutoValue_HealthCheckResponse(success, inputType, explanation, messageSummary);
     }
 
     /**
      * Create failed/unknown message type response.
-     * @return a {@link KinesisHealthCheckResponse} instance
+     * @return a {@link HealthCheckResponse} instance
      */
-    public static KinesisHealthCheckResponse createFailed(@JsonProperty(EXPLANATION) String explanation,
-                                                          @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
-        return new AutoValue_KinesisHealthCheckResponse(false, AWSMessageType.UNKNOWN, explanation, messageSummary);
+    public static HealthCheckResponse createFailed(@JsonProperty(EXPLANATION) String explanation,
+                                                   @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
+        return new AutoValue_HealthCheckResponse(false, AWSMessageType.UNKNOWN, explanation, messageSummary);
     }
 }
