@@ -19,8 +19,10 @@ import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog2.audit.AuditEventTypes;
 import org.graylog2.audit.jersey.AuditEvent;
+import org.graylog2.inputs.Input;
 import org.graylog2.plugin.rest.PluginRestResource;
-import org.graylog2.shared.rest.resources.RestResource;
+import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
+import org.graylog2.shared.inputs.MessageInputFactory;
 import org.graylog2.shared.security.RestPermissions;
 
 import javax.inject.Inject;
@@ -45,14 +47,16 @@ import java.util.concurrent.ExecutionException;
 @Path("/aws")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AWSResource extends RestResource implements PluginRestResource {
+public class AWSResource extends AbstractInputsResource implements PluginRestResource {
 
     private AWSService awsService;
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
 
     @Inject
-    public AWSResource(AWSService awsService, KinesisService kinesisService, CloudWatchService cloudWatchService) {
+    public AWSResource(AWSService awsService, KinesisService kinesisService, CloudWatchService cloudWatchService,
+                       MessageInputFactory messageInputFactory) {
+        super(messageInputFactory.getAvailableInputs());
         this.awsService = awsService;
         this.kinesisService = kinesisService;
         this.cloudWatchService = cloudWatchService;
@@ -186,9 +190,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
     public Response create(@ApiParam(name = "JSON body", required = true)
                            @Valid @NotNull AWSInputCreateRequest saveRequest) throws Exception {
 
-        awsService.saveInput(saveRequest, getCurrentUser());
-
-        // TODO: Identify if this method needs to return a specific response with the id of the new input.
-        return Response.ok().build();
+        Input input = awsService.saveInput(saveRequest, getCurrentUser());
+        return Response.ok().entity(getInputSummary(input)).build();
     }
 }

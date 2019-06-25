@@ -166,7 +166,7 @@ public class AWSService {
      * This method takes the individual input params in the {@link AWSInputCreateRequest} and creates/saves
      * an input with them.
      */
-    public void saveInput(AWSInputCreateRequest request, User user) throws Exception {
+    public Input saveInput(AWSInputCreateRequest request, User user) throws Exception {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         final HashMap<String, Object> configuration = new HashMap<>();
@@ -201,7 +201,7 @@ public class AWSService {
             final Input input = this.inputService.create(messageInput.asMap());
             final String newInputId = inputService.save(input);
             LOG.debug("New AWS input created. id [{}] request [{}]", newInputId, request);
-
+            return input;
         } catch (NoSuchInputTypeException e) {
             LOG.error("There is no such input type registered.", e);
             throw new NotFoundException("There is no such input type registered.", e);
