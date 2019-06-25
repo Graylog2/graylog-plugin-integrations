@@ -2,7 +2,7 @@ package org.graylog.integrations.aws.service;
 
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
-import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.transports.KinesisTransport;
@@ -71,18 +71,18 @@ public class AWSServiceTest {
         when(user.getName()).thenReturn("a-user-name");
         when(messageInputFactory.create(isA(InputCreateRequest.class), isA(String.class), isA(String.class))).thenReturn(messageInput);
 
-        KinesisInputCreateRequest request =
-                KinesisInputCreateRequest.create("AWS Input",
-                                                 "An AWS Input",
-                                                 AWSMessageType.KINESIS_FLOW_LOGS.toString(),
-                                                 "a-key", "a-secret",
-                                                 "a-stream",
-                                                 Region.US_EAST_1.id(),
-                                                 10000,
-                                                 "",
-                                                 false,
-                                                 true,
-                                                 60);
+        AWSInputCreateRequest request =
+                AWSInputCreateRequest.create("AWS Input",
+                                             "An AWS Input",
+                                             AWSMessageType.KINESIS_FLOW_LOGS.toString(),
+                                             "a-key", "a-secret",
+                                             "a-stream",
+                                             Region.US_EAST_1.id(),
+                                             10000,
+                                             "",
+                                             false,
+                                             true,
+                                             60);
         awsService.saveInput(request, user);
 
         // Verify that inputService received a valid input to save.

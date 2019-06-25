@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -154,7 +154,7 @@ public class AWSResource extends RestResource implements PluginRestResource {
     }
 
     /**
-     * Save the new AWS CloudWatch integration.
+     * Create a new AWS input.
      *
      * curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
      * -v \
@@ -179,12 +179,12 @@ public class AWSResource extends RestResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/kinesis/inputs")
-    @ApiOperation(value = "Save a new AWS Kinesis input")
+    @Path("/inputs")
+    @ApiOperation(value = "Create a new AWS input.")
     @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
     public Response create(@ApiParam(name = "JSON body", required = true)
-                           @Valid @NotNull KinesisInputCreateRequest saveRequest) throws Exception {
+                           @Valid @NotNull AWSInputCreateRequest saveRequest) throws Exception {
 
         awsService.saveInput(saveRequest, getCurrentUser());
 

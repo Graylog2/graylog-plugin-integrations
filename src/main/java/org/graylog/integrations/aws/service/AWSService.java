@@ -6,7 +6,7 @@ import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
-import org.graylog.integrations.aws.resources.requests.KinesisInputCreateRequest;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableService;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
@@ -163,10 +163,10 @@ public class AWSService {
     /**
      * Save the AWS Input
      *
-     * This method takes the individual input params in the {@link KinesisInputCreateRequest} and creates/saves
+     * This method takes the individual input params in the {@link AWSInputCreateRequest} and creates/saves
      * an input with them.
      */
-    public void saveInput(KinesisInputCreateRequest request, User user) throws Exception {
+    public void saveInput(AWSInputCreateRequest request, User user) throws Exception {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         final HashMap<String, Object> configuration = new HashMap<>();

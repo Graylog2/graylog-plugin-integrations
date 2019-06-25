@@ -29,7 +29,7 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class KinesisInputCreateRequest {
+public abstract class AWSInputCreateRequest {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
@@ -81,18 +81,18 @@ public abstract class KinesisInputCreateRequest {
     public abstract int kinesisMaxThrottledWaitMs();
 
     @JsonCreator
-    public static KinesisInputCreateRequest create(@JsonProperty(NAME) String name,
-                                                   @JsonProperty(DESCRIPTION) String description,
-                                                   @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
-                                                   @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
-                                                   @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
-                                                   @JsonProperty(STREAM_NAME) String streamName,
-                                                   @JsonProperty(REGION) String region,
-                                                   @JsonProperty(BATCH_SIZE) int batchSize,
-                                                   @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                                   @JsonProperty(GLOBAL) boolean global,
-                                                   @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
-                                                   @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
-        return new AutoValue_KinesisInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
+    public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
+                                               @JsonProperty(DESCRIPTION) String description,
+                                               @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
+                                               @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
+                                               @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
+                                               @JsonProperty(STREAM_NAME) String streamName,
+                                               @JsonProperty(REGION) String region,
+                                               @JsonProperty(BATCH_SIZE) int batchSize,
+                                               @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                               @JsonProperty(GLOBAL) boolean global,
+                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
+                                               @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
+        return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
     }
 }
