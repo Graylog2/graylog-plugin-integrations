@@ -333,23 +333,6 @@ public class KinesisServiceTest {
         assertEquals(4, streamsResponse.streams().size());
     }
 
-    // TODO Add retrieveRecords test
-
-    @Test
-    public void testMessageFormat() {
-
-        HashMap<String, Object> fields = new HashMap<>();
-        fields.put("_id", "123");
-        fields.put("src_addr", "Dan");
-        fields.put("port", 80);
-
-        String summary = kinesisService.buildMessageSummary(new Message(fields), "The full message");
-        assertEquals("The summary should have 4 lines", 4, summary.split("\n").length);
-        assertTrue(summary.contains("id"));
-        assertTrue(summary.contains("src_addr"));
-        assertTrue(summary.contains("port"));
-    }
-
     @Test
     public void testSelectRandomRecord() {
 

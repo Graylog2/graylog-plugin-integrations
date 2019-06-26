@@ -373,44 +373,7 @@ public class KinesisService {
 
         return HealthCheckResponse.create(true, awsMessageType,
                                           responseMessage,
-                                          buildMessageSummary(fullyParsedMessage, logEvent.message()));
-    }
-
-    /**
-     * Prepare a string summary of all fields. This wil be displayed on the Health Check results page.
-     * The purpose is to provide the user with a summary of the parsed fields.
-     * <p>
-     * Note that the {@code org.graylog2.plugin.Message.toString()} method is not suitable for this, since it is a
-     * one-line summary. Multi-line is important for clarity.
-     *
-     * @param message     The fully parsed {@code org.graylog2.plugin.Message} object.
-     * @param fullMessage The full, unparsed message string.
-     * @return a summary of fields in the following format:
-     * <p>
-     * full_message: 2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK
-     * protocol_number: 6
-     * src_addr: 172.1.1.2
-     * source: aws-flowlogs
-     * message: eni-3244234 ACCEPT TCP 172.1.1.2:80 -> 172.1.1.2:2264
-     * packets: 1
-     * ...
-     */
-    String buildMessageSummary(Message message, String fullMessage) {
-
-        // Build up a multi-line string representation of the message.
-        final StringBuilder builder = new StringBuilder();
-        final String cleanMessage = fullMessage.replaceAll("\\n", "").replaceAll("\\t", "");
-
-        // Append the entire message.
-        builder.append("full_message: ");
-        builder.append(StringUtils.abbreviate(cleanMessage, 225)); // Shorten if too long.
-
-        // Append the field values.
-        builder.append("\n");
-        final Map<String, Object> filteredFields = Maps.newHashMap(message.getFields());
-        Joiner.on("\n").withKeyValueSeparator(": ").appendTo(builder, filteredFields);
-
-        return builder.toString();
+                                          fullyParsedMessage.getFields());
     }
 
     Record selectRandomRecord(List<Record> recordsList) {
