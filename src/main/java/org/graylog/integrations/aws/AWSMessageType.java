@@ -1,6 +1,6 @@
 package org.graylog.integrations.aws;
 
-import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.inputs.codecs.AbstractCodec;
 import org.graylog2.plugin.inputs.codecs.Codec;
@@ -17,12 +17,12 @@ public enum AWSMessageType {
     /**
      * A raw string stored in CloudWatch or Kinesis.
      */
-    KINESIS_RAW(Source.KINESIS, "Raw", CloudWatchRawLogCodec.NAME,
+    KINESIS_RAW(Source.KINESIS, "Raw", KinesisRawLogCodec.NAME,
                 AbstractCodec.Factory.class, KinesisTransport.Factory.class),
 
     // Flow Logs delivered to Kinesis via CloudWatch subscriptions.
-    KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", CloudWatchRawLogCodec.NAME,
-                      CloudWatchRawLogCodec.Factory.class, KinesisTransport.Factory.class),
+    KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", KinesisRawLogCodec.NAME,
+                      KinesisRawLogCodec.Factory.class, KinesisTransport.Factory.class),
 
     UNKNOWN();
 

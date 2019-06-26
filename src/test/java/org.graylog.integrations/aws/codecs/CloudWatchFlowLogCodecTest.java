@@ -11,12 +11,12 @@ import org.junit.Test;
 
 public class CloudWatchFlowLogCodecTest {
 
-    private CloudWatchFlowLogCodec codec;
+    private KinesisCloudWatchFlowLogCodec codec;
 
     @Before
     public void setUp() {
 
-        this.codec = new CloudWatchFlowLogCodec(Configuration.EMPTY_CONFIGURATION, new ObjectMapper());
+        this.codec = new KinesisCloudWatchFlowLogCodec(Configuration.EMPTY_CONFIGURATION, new ObjectMapper());
     }
 
     /**
@@ -26,8 +26,8 @@ public class CloudWatchFlowLogCodecTest {
     public void testFlowLogCodecValues() {
 
         String flowLogMessage = "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK";
-        final KinesisLogEntry logEvent = KinesisLogEntry.create("logGroup", "logStream", DateTime.now().getMillis() / 1000, flowLogMessage);
-        Message message = codec.decodeLogData(logEvent, logEvent.logGroup(), logEvent.logStream());
+        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "logGroup", "logStream", DateTime.now().getMillis() / 1000, flowLogMessage);
+        Message message = codec.decodeLogData(logEvent);
 
         Assert.assertEquals("logGroup", message.getField("aws_log_group"));
         Assert.assertEquals("logStream", message.getField("aws_log_stream"));

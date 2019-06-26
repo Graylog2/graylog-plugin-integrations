@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-public class AWSMetaCodec extends CloudWatchLogDataCodec {
+public class AWSMetaCodec extends KinesisLogDataCodec {
     public static final String NAME = "AWSMetaCodec";
 
     @Inject
@@ -25,7 +25,7 @@ public class AWSMetaCodec extends CloudWatchLogDataCodec {
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent) {
 
         // TODO: Select the correct codec and and decode the message.
         return null;

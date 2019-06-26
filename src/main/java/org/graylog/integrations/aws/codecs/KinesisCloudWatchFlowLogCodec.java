@@ -2,7 +2,6 @@ package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.AWSUtils;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.cloudwatch.IANAProtocolNumbers;
@@ -21,20 +20,20 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
+public class KinesisCloudWatchFlowLogCodec extends KinesisLogDataCodec {
     public static final String NAME = "FlowLog";
 
     private final IANAProtocolNumbers protocolNumbers;
 
     @Inject
-    public CloudWatchFlowLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
+    public KinesisCloudWatchFlowLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
         super(configuration, objectMapper);
         this.protocolNumbers = new IANAProtocolNumbers();
     }
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent) {
         try {
             final FlowLogMessage flowLogMessage = FlowLogMessage.fromLogEvent(logEvent);
 
@@ -42,16 +41,16 @@ public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
                 return null;
             }
 
-            final String source = configuration.getString(CloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-flowlogs");
+            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-flowlogs");
             final Message result = new Message(
                     buildSummary(flowLogMessage),
                     source,
-                    flowLogMessage.getTimestamp()
-            );
+                    flowLogMessage.getTimestamp() );
             result.addFields(buildFields(flowLogMessage));
-            result.addField(AWSUtils.FIELD_LOG_GROUP, logGroup);
-            result.addField(AWSUtils.FIELD_LOG_STREAM, logStream);
-            result.addField(AWSUtils.SOURCE_GROUP_IDENTIFIER, true);
+            result.addField(FIELD_KINESIS_STREAM, logEvent.kinesisStream());
+            result.addField(FIELD_LOG_GROUP, logEvent.logGroup());
+            result.addField(FIELD_LOG_STREAM, logEvent.logStream());
+            result.addField(SOURCE_GROUP_IDENTIFIER, true);
 
             return result;
         } catch (Exception e) {
@@ -94,9 +93,9 @@ public class CloudWatchFlowLogCodec extends CloudWatchLogDataCodec {
     }
 
     @FactoryClass
-    public interface Factory extends Codec.Factory<CloudWatchFlowLogCodec> {
+    public interface Factory extends Codec.Factory<KinesisCloudWatchFlowLogCodec> {
         @Override
-        CloudWatchFlowLogCodec create(Configuration configuration);
+        KinesisCloudWatchFlowLogCodec create(Configuration configuration);
 
         @Override
         Config getConfig();

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.codecs.CloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codecs.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -76,14 +76,14 @@ public class KinesisServiceTest {
         availableCodecs = new HashMap<>();
 
         // Prepare test codecs. These have to be manually instantiated for the test context.
-        availableCodecs.put(CloudWatchRawLogCodec.NAME, new CloudWatchRawLogCodec.Factory() {
+        availableCodecs.put(KinesisRawLogCodec.NAME, new KinesisRawLogCodec.Factory() {
             @Override
-            public CloudWatchRawLogCodec create(Configuration configuration) {
-                return new CloudWatchRawLogCodec(configuration, new ObjectMapper());
+            public KinesisRawLogCodec create(Configuration configuration) {
+                return new KinesisRawLogCodec(configuration, new ObjectMapper());
             }
 
             @Override
-            public CloudWatchRawLogCodec.Config getConfig() {
+            public KinesisRawLogCodec.Config getConfig() {
                 return null;
             }
 
@@ -93,14 +93,14 @@ public class KinesisServiceTest {
             }
         });
 
-        availableCodecs.put(CloudWatchFlowLogCodec.NAME, new CloudWatchFlowLogCodec.Factory() {
+        availableCodecs.put(KinesisCloudWatchFlowLogCodec.NAME, new KinesisCloudWatchFlowLogCodec.Factory() {
             @Override
-            public CloudWatchFlowLogCodec create(Configuration configuration) {
-                return new CloudWatchFlowLogCodec(configuration, new ObjectMapper());
+            public KinesisCloudWatchFlowLogCodec create(Configuration configuration) {
+                return new KinesisCloudWatchFlowLogCodec(configuration, new ObjectMapper());
             }
 
             @Override
-            public CloudWatchFlowLogCodec.Config getConfig() {
+            public KinesisCloudWatchFlowLogCodec.Config getConfig() {
                 return null;
             }
 
@@ -181,7 +181,7 @@ public class KinesisServiceTest {
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             "key", "secret", TEST_STREAM_1, "");
+                                                                             "key", "secret", TEST_STREAM_1);
         return kinesisService.healthCheck(request);
     }
 

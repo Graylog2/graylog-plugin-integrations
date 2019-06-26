@@ -33,7 +33,6 @@ public abstract class HealthCheckResponse {
     // A JSON representation of the message. This will be displayed in the UI to show the user
     // that we have identified the message type. The user can then verify that the parsed
     // message looks correct.
-    @Nullable
     @JsonProperty(MESSAGE_SUMMARY)
     public abstract String messageSummary();
 
@@ -48,8 +47,7 @@ public abstract class HealthCheckResponse {
      * Create failed/unknown message type response.
      * @return a {@link HealthCheckResponse} instance
      */
-    public static HealthCheckResponse createFailed(@JsonProperty(EXPLANATION) String explanation,
-                                                   @JsonProperty(MESSAGE_SUMMARY) String messageSummary) {
-        return new AutoValue_HealthCheckResponse(false, AWSMessageType.UNKNOWN, explanation, messageSummary);
+    public static HealthCheckResponse createFailed(@JsonProperty(EXPLANATION) String explanation) {
+        return new AutoValue_HealthCheckResponse(false, AWSMessageType.UNKNOWN, explanation, "");
     }
 }
