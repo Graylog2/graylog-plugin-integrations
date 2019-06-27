@@ -12,6 +12,9 @@ import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +39,7 @@ import software.amazon.awssdk.services.kinesis.model.Shard;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +76,8 @@ public class KinesisServiceTest {
     @Before
     public void setUp() {
 
+        ObjectMapper objectMapper = new ObjectMapperProvider().get();
+
         // Create an AWS client with a mock KinesisClientBuilder
         availableCodecs = new HashMap<>();
 
@@ -79,7 +85,7 @@ public class KinesisServiceTest {
         availableCodecs.put(KinesisRawLogCodec.NAME, new KinesisRawLogCodec.Factory() {
             @Override
             public KinesisRawLogCodec create(Configuration configuration) {
-                return new KinesisRawLogCodec(configuration, new ObjectMapper());
+                return new KinesisRawLogCodec(configuration, objectMapper);
             }
 
             @Override
@@ -96,7 +102,7 @@ public class KinesisServiceTest {
         availableCodecs.put(KinesisCloudWatchFlowLogCodec.NAME, new KinesisCloudWatchFlowLogCodec.Factory() {
             @Override
             public KinesisCloudWatchFlowLogCodec create(Configuration configuration) {
-                return new KinesisCloudWatchFlowLogCodec(configuration, new ObjectMapper());
+                return new KinesisCloudWatchFlowLogCodec(configuration, objectMapper);
             }
 
             @Override
@@ -110,7 +116,7 @@ public class KinesisServiceTest {
             }
         });
 
-        kinesisService = new KinesisService(kinesisClientBuilder, new ObjectMapper(), availableCodecs);
+        kinesisService = new KinesisService(kinesisClientBuilder, objectMapper, availableCodecs);
     }
 
     @Test
@@ -140,25 +146,34 @@ public class KinesisServiceTest {
     @Test
     public void healthCheckFlowLog() throws ExecutionException, IOException {
 
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload());
+        // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
+        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
+                                                              Instant.now());
         assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
+        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
     }
 
     @Test
     public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
 
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload());
+        // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
+        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
+        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
     }
 
     @Test
     public void healthCheckRawKinesisLog() throws ExecutionException, IOException {
 
-        HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes());
+        // Use a specific log arrival time to ensure correct timezone is set on resulting message.
+        // 2000-01-01T01:01:01Z
+        Instant logArrivalTime = Instant.ofEpochMilli(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeZone.UTC).getMillis());
+        HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
+        assertTrue(response.messageSummary().contains("timestamp: 2000-01-01T01:01:01.000Z"));
     }
 
-    private HealthCheckResponse executeHealthCheckTest(byte[] payloadData) throws IOException, ExecutionException {
+    private HealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
 
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
@@ -175,7 +190,10 @@ public class KinesisServiceTest {
         when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
-        final Record record = Record.builder().data(SdkBytes.fromByteArray(payloadData)).build();
+        final Record record = Record.builder()
+                                    .approximateArrivalTimestamp(recordArrivalTime)
+                                    .data(SdkBytes.fromByteArray(payloadData))
+                                    .build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
@@ -236,12 +254,12 @@ public class KinesisServiceTest {
                                    "  \"logEvents\": [\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
                                    "      \"message\": \"Just a raw message\"\n" +
                                    "    },\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
                                    "      \"message\": \"Just another raw message\"\n" +
                                    "    }\n" +
                                    "  ]\n" +
@@ -361,7 +379,10 @@ public class KinesisServiceTest {
         when(kinesisClient.getShardIterator(isA(GetShardIteratorRequest.class)))
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
-        final Record record = Record.builder().data(SdkBytes.fromByteArray(buildCloudWatchRawPayload())).build();
+        final Record record = Record.builder()
+                                    .approximateArrivalTimestamp(Instant.now())
+                                    .data(SdkBytes.fromByteArray(buildCloudWatchRawPayload()))
+                                    .build();
         GetRecordsResponse recordsResponse = GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(recordsResponse)

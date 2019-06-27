@@ -25,6 +25,7 @@ import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.plugin.journal.RawMessage;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
@@ -130,13 +131,15 @@ public class KinesisService {
         }
 
         // Select random record from list, and check if the payload is compressed
-        final byte[] payloadBytes = selectRandomRecord(records).data().asByteArray();
+        Record record = selectRandomRecord(records);
+        final byte[] payloadBytes = record.data().asByteArray();
         if (isCompressed(payloadBytes)) {
             return handleCompressedMessages(request, payloadBytes);
         }
 
-        // Detect the type of message
-        return detectAndParseMessage(new String(payloadBytes), DateTime.now().getMillis() / 1000, request.streamName(), "", "");
+        // The best timestamp available is the approximate arrival time of the message to the Kinesis stream.
+        DateTime timestamp = new DateTime(record.approximateArrivalTimestamp().toEpochMilli(), DateTimeZone.UTC);
+        return detectAndParseMessage(new String(payloadBytes), timestamp, request.streamName(), "", "");
     }
 
     /**
@@ -244,7 +247,8 @@ public class KinesisService {
         }
 
         CloudWatchLogEvent logEntry = logEntryOptional.get();
-        return detectAndParseMessage(logEntry.message(), logEntry.timestamp(),
+        DateTime timestamp = new DateTime(logEntry.timestamp(), DateTimeZone.UTC);
+        return detectAndParseMessage(logEntry.message(), timestamp,
                                      request.streamName(), data.logGroup(), data.logStream());
     }
 
@@ -314,7 +318,8 @@ public class KinesisService {
      * @param logStreamName     The CloudWatch log stream name.
      * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
-    private HealthCheckResponse detectAndParseMessage(String logMessage, long timestamp, String kinesisStreamName, String logGroupName, String logStreamName) {
+    private HealthCheckResponse detectAndParseMessage(String logMessage, DateTime timestamp, String kinesisStreamName,
+                                                      String logGroupName, String logStreamName) {
 
         LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}].",
                   logMessage, kinesisStreamName, logGroupName);

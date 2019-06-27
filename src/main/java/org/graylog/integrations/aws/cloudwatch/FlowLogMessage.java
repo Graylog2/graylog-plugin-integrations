@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.cloudwatch;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ public class FlowLogMessage {
         }
 
         return new FlowLogMessage(
-                new DateTime(Long.valueOf(logEvent.timestamp())),
+                new DateTime(logEvent.timestamp(), DateTimeZone.UTC),
                 safeInteger(parts[0]),
                 parts[1],
                 parts[2],

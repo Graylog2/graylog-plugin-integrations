@@ -1,10 +1,11 @@
 package org.graylog.integrations.aws.codecs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,8 @@ public class CloudWatchFlowLogCodecTest {
     @Before
     public void setUp() {
 
-        this.codec = new KinesisCloudWatchFlowLogCodec(Configuration.EMPTY_CONFIGURATION, new ObjectMapper());
+        this.codec = new KinesisCloudWatchFlowLogCodec(Configuration.EMPTY_CONFIGURATION,
+                                                       new ObjectMapperProvider().get());
     }
 
     /**
@@ -26,7 +28,8 @@ public class CloudWatchFlowLogCodecTest {
     public void testFlowLogCodecValues() {
 
         String flowLogMessage = "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK";
-        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "logGroup", "logStream", DateTime.now().getMillis() / 1000, flowLogMessage);
+        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "logGroup", "logStream",
+                                                                DateTime.now(DateTimeZone.UTC), flowLogMessage);
         Message message = codec.decodeLogData(logEvent);
 
         Assert.assertEquals("logGroup", message.getField("aws_log_group"));

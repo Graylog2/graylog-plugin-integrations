@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
+import org.joda.time.DateTime;
 
 @JsonAutoDetect
 @AutoValue
@@ -32,7 +33,7 @@ public abstract class KinesisLogEntry {
     public abstract String logStream();
 
     @JsonProperty(TIMESTAMP)
-    public abstract long timestamp();
+    public abstract DateTime timestamp();
 
     @JsonProperty(MESSAGE)
     public abstract String message();
@@ -41,7 +42,7 @@ public abstract class KinesisLogEntry {
     public static KinesisLogEntry create(@JsonProperty(KINESIS_STREAM) String kinesisStream,
                                          @JsonProperty(LOG_GROUP) String logGroup,
                                          @JsonProperty(LOG_STREAM) String logStream,
-                                         @JsonProperty(TIMESTAMP) long timestamp,
+                                         @JsonProperty(TIMESTAMP) DateTime timestamp,
                                          @JsonProperty(MESSAGE) String message) {
         return new AutoValue_KinesisLogEntry(kinesisStream, logGroup, logStream, timestamp, message);
     }
