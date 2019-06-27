@@ -17,16 +17,18 @@
 package org.graylog.integrations;
 
 import org.graylog.integrations.aws.AWSPermissions;
-import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
+import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
+import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
+import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.AWSResource;
+import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
@@ -41,6 +43,7 @@ import java.util.Set;
 public class IntegrationsModule extends PluginModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
+
     /**
      * Returns all configuration beans required by this plugin.
      *
@@ -71,17 +74,21 @@ public class IntegrationsModule extends PluginModule {
          *
          * addConfigBeans();
          */
+
         // Palo Alto Networks
         LOG.debug("Registering message input: {}", PaloAltoTCPInput.NAME);
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         // AWS
+        addCodec(AWSMetaCodec.NAME, AWSMetaCodec.class);
+        addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
+        addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
+        addMessageInput(AWSInput.class);
         addPermissions(AWSPermissions.class);
         addRestResource(AWSResource.class);
+        addTransport(KinesisTransport.NAME, KinesisTransport.class);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
-        addCodec(CloudWatchFlowLogCodec.NAME, CloudWatchFlowLogCodec.class);
-        addCodec(CloudWatchRawLogCodec.NAME, CloudWatchRawLogCodec.class);
     }
 }

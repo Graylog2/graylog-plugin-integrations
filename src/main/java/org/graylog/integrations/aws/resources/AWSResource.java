@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
+import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
@@ -17,7 +18,13 @@ import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
+import org.graylog2.audit.AuditEventTypes;
+import org.graylog2.audit.jersey.AuditEvent;
+import org.graylog2.inputs.Input;
 import org.graylog2.plugin.rest.PluginRestResource;
+import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
+import org.graylog2.shared.inputs.MessageInputFactory;
+import org.graylog2.shared.security.RestPermissions;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -41,14 +48,16 @@ import java.util.concurrent.ExecutionException;
 @RequiresAuthentication
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class AWSResource implements PluginRestResource {
+public class AWSResource extends AbstractInputsResource implements PluginRestResource {
 
     private AWSService awsService;
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
 
     @Inject
-    public AWSResource(AWSService awsService, KinesisService kinesisService, CloudWatchService cloudWatchService) {
+    public AWSResource(AWSService awsService, KinesisService kinesisService, CloudWatchService cloudWatchService,
+                       MessageInputFactory messageInputFactory) {
+        super(messageInputFactory.getAvailableInputs());
         this.awsService = awsService;
         this.kinesisService = kinesisService;
         this.cloudWatchService = cloudWatchService;
@@ -57,8 +66,8 @@ public class AWSResource implements PluginRestResource {
     @GET
     @Timed
     @Path("/regions")
-    @RequiresPermissions(AWSPermissions.AWS_READ)
     @ApiOperation(value = "Get all available AWS regions")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public RegionsResponse getAwsRegions() {
         return awsService.getAvailableRegions();
     }
@@ -66,8 +75,8 @@ public class AWSResource implements PluginRestResource {
     @GET
     @Timed
     @Path("/available_services")
-    @RequiresPermissions(AWSPermissions.AWS_READ)
     @ApiOperation(value = "Get all available AWS services")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public AvailableServiceResponse getAvailableServices() {
         return awsService.getAvailableServices();
     }
@@ -90,8 +99,8 @@ public class AWSResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/cloudwatch/log_groups")
-    @RequiresPermissions(AWSPermissions.AWS_READ)
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region.")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) {
         return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -114,8 +123,8 @@ public class AWSResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/kinesis/streams")
-    @RequiresPermissions(AWSPermissions.AWS_READ)
     @ApiOperation(value = "Get all available Kinesis streams for the specified region.")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) throws ExecutionException {
         return kinesisService.getKinesisStreamNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -142,13 +151,50 @@ public class AWSResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/kinesis/health_check")
-    @RequiresPermissions(AWSPermissions.AWS_READ)
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = HealthCheckResponse.class
     )
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
         HealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
         return Response.accepted().entity(response).build();
+    }
+
+    /**
+     * Create a new AWS input.
+     *
+     * curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
+     * -v \
+     * -X POST \
+     * -H 'X-Requested-By: just-a-test' \
+     * -H 'Content-Type: application/json' \
+     * -H 'Accept: application/json' \
+     * --compressed \
+     * --data-binary '{
+     * "aws_access_key": "",
+     * "aws_secret_key": "",
+     * "region": "us-east-1",
+     * "name": "New Flow Logs",
+     * "description": "Some flow logs.",
+     * "aws_input_type": "KINESIS_FLOW_LOGS",
+     * "stream_name": "flow-logs",
+     * "batch_size": 10000,
+     * "assume_role_arn": "",
+     * "global": false,
+     * "enable_throttling": false
+     * }'
+     */
+    @POST
+    @Timed
+    @Path("/inputs")
+    @ApiOperation(value = "Create a new AWS input.")
+    @RequiresPermissions(RestPermissions.INPUTS_CREATE)
+    @AuditEvent(type = AuditEventTypes.MESSAGE_INPUT_CREATE)
+    public Response create(@ApiParam(name = "JSON body", required = true)
+                           @Valid @NotNull AWSInputCreateRequest saveRequest) throws Exception {
+
+        Input input = awsService.saveInput(saveRequest, getCurrentUser());
+        return Response.ok().entity(getInputSummary(input)).build();
     }
 }

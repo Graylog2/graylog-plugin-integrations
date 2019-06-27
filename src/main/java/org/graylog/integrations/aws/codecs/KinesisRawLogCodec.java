@@ -1,9 +1,8 @@
-package org.graylog.integrations.aws.codec;
+package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.AWSUtils;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEntry;
+import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
@@ -16,26 +15,27 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
+public class KinesisRawLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "CloudWatchRawLog";
 
     @Inject
-    public CloudWatchRawLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
+    public KinesisRawLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
         super(configuration, objectMapper);
     }
 
     @Nullable
     @Override
-    public Message decodeLogData(@Nonnull final CloudWatchLogEntry logEvent, @Nonnull final String logGroup, @Nonnull final String logStream) {
+    public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent) {
         try {
-            final String source = configuration.getString(CloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-raw-logs");
+            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-raw-logs");
             Message result = new Message(
                     logEvent.message(),
                     source,
                     new DateTime(logEvent.timestamp())
             );
-            result.addField(AWSUtils.FIELD_LOG_GROUP, logGroup);
-            result.addField(AWSUtils.FIELD_LOG_STREAM, logStream);
+            result.addField(FIELD_KINESIS_STREAM, logEvent.kinesisStream());
+            result.addField(FIELD_LOG_GROUP, logEvent.logGroup());
+            result.addField(FIELD_LOG_STREAM, logEvent.logStream());
 
             return result;
         } catch (Exception e) {
@@ -49,9 +49,9 @@ public class CloudWatchRawLogCodec extends CloudWatchLogDataCodec {
     }
 
     @FactoryClass
-    public interface Factory extends Codec.Factory<CloudWatchRawLogCodec> {
+    public interface Factory extends Codec.Factory<KinesisRawLogCodec> {
         @Override
-        CloudWatchRawLogCodec create(Configuration configuration);
+        KinesisRawLogCodec create(Configuration configuration);
 
         @Override
         Config getConfig();

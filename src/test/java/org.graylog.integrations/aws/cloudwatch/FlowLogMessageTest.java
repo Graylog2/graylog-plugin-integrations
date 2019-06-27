@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.cloudwatch;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class FlowLogMessageTest {
 
     @Test
-    public void testFromPartsDoesNotFailWithMissingIntegerFields() throws Exception {
+    public void testFromPartsDoesNotFailWithMissingIntegerFields() {
         final String[] strings = {
                 "-",
                 "foo",
@@ -27,7 +28,9 @@ public class FlowLogMessageTest {
                 "OK"
         };
 
-        final CloudWatchLogEntry logEvent = CloudWatchLogEntry.create( "helloGroup", "helloStream", DateTime.now().getMillis() / 1000, String.join(" ", strings));
+        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "helloGroup", "helloStream",
+                                                                DateTime.now(DateTimeZone.UTC),
+                                                                String.join(" ", strings));
         final FlowLogMessage m = FlowLogMessage.fromLogEvent(logEvent);
 
         assertEquals(m.getDestinationPort(), 0);
@@ -37,7 +40,7 @@ public class FlowLogMessageTest {
     }
 
     @Test
-    public void testFromPartsDoesNotFailWithMissingLongFields() throws Exception {
+    public void testFromPartsDoesNotFailWithMissingLongFields() {
         final String[] strings = {
                 "1",
                 "foo",
@@ -55,7 +58,9 @@ public class FlowLogMessageTest {
                 "OK"
         };
 
-        final CloudWatchLogEntry logEvent = CloudWatchLogEntry.create( "helloGroup", "helloStream", DateTime.now().getMillis() / 1000, String.join(" ", strings));
+        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "helloGroup", "helloStream",
+                                                                DateTime.now(DateTimeZone.UTC),
+                                                                String.join(" ", strings));
         final FlowLogMessage m = FlowLogMessage.fromLogEvent(logEvent);
 
         assertEquals(m.getBytes(), 0);
