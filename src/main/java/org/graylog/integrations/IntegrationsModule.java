@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations;
 
+import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.codecs.AWSMetaCodec;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
@@ -42,6 +43,7 @@ import java.util.Set;
 public class IntegrationsModule extends PluginModule {
 
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationsModule.class);
+
     /**
      * Returns all configuration beans required by this plugin.
      *
@@ -79,14 +81,14 @@ public class IntegrationsModule extends PluginModule {
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         // AWS
-        addMessageInput(AWSInput.class);
-        addRestResource(AWSResource.class);
-        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
-        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
-        addMessageInput(AWSInput.class);
         addCodec(AWSMetaCodec.NAME, AWSMetaCodec.class);
         addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
         addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
+        addMessageInput(AWSInput.class);
+        addPermissions(AWSPermissions.class);
+        addRestResource(AWSResource.class);
         addTransport(KinesisTransport.NAME, KinesisTransport.class);
+        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
+        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
     }
 }

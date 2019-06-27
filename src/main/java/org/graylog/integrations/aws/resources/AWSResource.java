@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
@@ -42,9 +43,9 @@ import java.util.concurrent.ExecutionException;
  * Web endpoints for the AWS integration.
  * Full base URL for requests in this class: http://api/plugins/org.graylog.integrations/aws/
  */
-@RequiresAuthentication
 @Api(value = "AWS", description = "AWS integrations")
 @Path("/aws")
+@RequiresAuthentication
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AWSResource extends AbstractInputsResource implements PluginRestResource {
@@ -66,6 +67,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @Timed
     @Path("/regions")
     @ApiOperation(value = "Get all available AWS regions")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public RegionsResponse getAwsRegions() {
         return awsService.getAvailableRegions();
     }
@@ -73,8 +75,8 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @GET
     @Timed
     @Path("/available_services")
-    @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @ApiOperation(value = "Get all available AWS services")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public AvailableServiceResponse getAvailableServices() {
         return awsService.getAvailableServices();
     }
@@ -97,8 +99,8 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @POST
     @Timed
     @Path("/cloudwatch/log_groups")
-    @RequiresPermissions(RestPermissions.INPUTS_CREATE)
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region.")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) {
         return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -122,6 +124,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @Timed
     @Path("/kinesis/streams")
     @ApiOperation(value = "Get all available Kinesis streams for the specified region.")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) throws ExecutionException {
         return kinesisService.getKinesisStreamNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
     }
@@ -152,6 +155,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
             response = HealthCheckResponse.class
     )
+    @RequiresPermissions(AWSPermissions.AWS_READ)
     public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
         HealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
         return Response.accepted().entity(response).build();
