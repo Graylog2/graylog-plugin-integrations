@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations;
 
+import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.codec.CloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codec.CloudWatchRawLogCodec;
 import org.graylog.integrations.aws.resources.AWSResource;
@@ -75,8 +76,9 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
+        // AWS
+        addPermissions(AWSPermissions.class);
         addRestResource(AWSResource.class);
-
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
         addCodec(CloudWatchFlowLogCodec.NAME, CloudWatchFlowLogCodec.class);
