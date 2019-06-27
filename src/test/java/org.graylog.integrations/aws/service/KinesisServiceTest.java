@@ -48,7 +48,6 @@ import java.util.zip.GZIPOutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -143,24 +142,30 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void healthCheckFlowLog() throws ExecutionException, IOException {
+    public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
         HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
                                                               Instant.now());
         assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
-        assertEquals(response.messageSummary().get("timestamp"),
-                     new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC));
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC),
+                     response.messageSummary().get("timestamp"));
+        assertEquals(21, response.messageSummary().size());
+        assertEquals(6,response.messageSummary().get("protocol_number"));
+        assertEquals("TCP",response.messageSummary().get("protocol"));
+        assertEquals(1L,response.messageSummary().get("packets"));
+        assertEquals("172.1.1.2",response.messageSummary().get("dst_addr"));
     }
 
     @Test
-    public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
+    public void healthCheckCloudWatchRaw() throws ExecutionException, IOException {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
         HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertEquals(response.messageSummary().get("timestamp"),
-                     new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC));
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC),
+                     response.messageSummary().get("timestamp"));
+        assertEquals(7, response.messageSummary().size());
     }
 
     @Test
@@ -171,8 +176,9 @@ public class KinesisServiceTest {
         Instant logArrivalTime = Instant.ofEpochMilli(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeZone.UTC).getMillis());
         HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertEquals(response.messageSummary().get("timestamp"),
-                     new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC));
+        assertEquals(new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC),
+                     response.messageSummary().get("timestamp"));
+        assertEquals(5, response.messageSummary().size());
     }
 
     private HealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {

@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws;
 
+import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.inputs.codecs.AbstractCodec;
@@ -21,8 +22,8 @@ public enum AWSMessageType {
                 AbstractCodec.Factory.class, KinesisTransport.Factory.class),
 
     // Flow Logs delivered to Kinesis via CloudWatch subscriptions.
-    KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", KinesisRawLogCodec.NAME,
-                      KinesisRawLogCodec.Factory.class, KinesisTransport.Factory.class),
+    KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", KinesisCloudWatchFlowLogCodec.NAME,
+                      KinesisCloudWatchFlowLogCodec.Factory.class, KinesisTransport.Factory.class),
 
     UNKNOWN();
 
