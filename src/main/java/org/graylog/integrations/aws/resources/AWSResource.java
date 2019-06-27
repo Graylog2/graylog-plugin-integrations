@@ -54,7 +54,6 @@ public class AWSResource implements PluginRestResource {
         this.cloudWatchService = cloudWatchService;
     }
 
-
     @GET
     @Timed
     @Path("/regions")
