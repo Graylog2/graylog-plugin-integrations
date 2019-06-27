@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws.codecs;
 
+import com.google.inject.assistedinject.Assisted;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -11,12 +12,14 @@ import org.graylog2.plugin.journal.RawMessage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 public class AWSMetaCodec extends AbstractCodec {
 
     public static final String NAME = "AWSMetaCodec";
 
-    public AWSMetaCodec(Configuration configuration) {
+    @Inject
+    public AWSMetaCodec(@Assisted Configuration configuration) {
         super(configuration);
     }
 
