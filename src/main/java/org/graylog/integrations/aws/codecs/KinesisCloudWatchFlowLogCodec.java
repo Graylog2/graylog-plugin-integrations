@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class KinesisCloudWatchFlowLogCodec extends KinesisLogDataCodec {
+public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "FlowLog";
 
     private final IANAProtocolNumbers protocolNumbers;

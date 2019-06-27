@@ -14,18 +14,18 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 
-public abstract class KinesisLogDataCodec extends AbstractCodec {
+public abstract class AbstractKinesisCodec extends AbstractCodec {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KinesisLogDataCodec.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractKinesisCodec.class);
 
-    public static final String SOURCE_GROUP_IDENTIFIER = "aws_source";
-    public static final String FIELD_KINESIS_STREAM = "aws_kinesis_stream";
-    public static final String FIELD_LOG_GROUP = "aws_log_group";
-    public static final String FIELD_LOG_STREAM = "aws_log_stream";
+    static final String SOURCE_GROUP_IDENTIFIER = "aws_source";
+    static final String FIELD_KINESIS_STREAM = "aws_kinesis_stream";
+    static final String FIELD_LOG_GROUP = "aws_log_group";
+    static final String FIELD_LOG_STREAM = "aws_log_stream";
 
     private final ObjectMapper objectMapper;
 
-    KinesisLogDataCodec(Configuration configuration, ObjectMapper objectMapper) {
+    AbstractKinesisCodec(Configuration configuration, ObjectMapper objectMapper) {
         super(configuration);
         this.objectMapper = objectMapper;
     }
