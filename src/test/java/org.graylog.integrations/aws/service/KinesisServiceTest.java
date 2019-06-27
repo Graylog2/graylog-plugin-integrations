@@ -7,7 +7,7 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
@@ -145,27 +145,27 @@ public class KinesisServiceTest {
     public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
-                                                              Instant.now());
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
+                                                                     Instant.now());
         assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
-        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC),
-                     response.messageSummary().get("timestamp"));
-        assertEquals(21, response.messageSummary().size());
-        assertEquals(6,response.messageSummary().get("protocol_number"));
-        assertEquals("TCP",response.messageSummary().get("protocol"));
-        assertEquals(1L,response.messageSummary().get("packets"));
-        assertEquals("172.1.1.2",response.messageSummary().get("dst_addr"));
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(21, fields.size());
+        assertEquals(6, fields.get("protocol_number"));
+        assertEquals("TCP", fields.get("protocol"));
+        assertEquals(1L, fields.get("packets"));
+        assertEquals("172.1.1.2", fields.get("dst_addr"));
     }
 
     @Test
     public void healthCheckCloudWatchRaw() throws ExecutionException, IOException {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC),
-                     response.messageSummary().get("timestamp"));
-        assertEquals(7, response.messageSummary().size());
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(7, fields.size());
     }
 
     @Test
@@ -174,14 +174,14 @@ public class KinesisServiceTest {
         // Use a specific log arrival time to ensure correct timezone is set on resulting message.
         // 2000-01-01T01:01:01Z
         Instant logArrivalTime = Instant.ofEpochMilli(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeZone.UTC).getMillis());
-        HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
+        KinesisHealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertEquals(new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC),
-                     response.messageSummary().get("timestamp"));
-        assertEquals(5, response.messageSummary().size());
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(5, fields.size());
     }
 
-    private HealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
+    private KinesisHealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
 
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);

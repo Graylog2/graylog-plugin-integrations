@@ -11,7 +11,7 @@ import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
-import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -153,11 +153,11 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @Path("/kinesis/health_check")
     @ApiOperation(
             value = "Attempt to retrieve logs from the indicated AWS log group with the specified credentials.",
-            response = HealthCheckResponse.class
+            response = KinesisHealthCheckResponse.class
     )
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
-        HealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
+        KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
         return Response.accepted().entity(response).build();
     }
 
