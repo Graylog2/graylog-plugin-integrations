@@ -9,7 +9,6 @@ import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
-import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
@@ -150,7 +149,8 @@ public class KinesisServiceTest {
         HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
                                                               Instant.now());
         assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
+        assertEquals(response.messageSummary().get("timestamp"),
+                     new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC));
     }
 
     @Test
@@ -159,7 +159,8 @@ public class KinesisServiceTest {
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
         HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
+        assertEquals(response.messageSummary().get("timestamp"),
+                     new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC));
     }
 
     @Test
@@ -170,7 +171,8 @@ public class KinesisServiceTest {
         Instant logArrivalTime = Instant.ofEpochMilli(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeZone.UTC).getMillis());
         HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2000-01-01T01:01:01.000Z"));
+        assertEquals(response.messageSummary().get("timestamp"),
+                     new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC));
     }
 
     private HealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
