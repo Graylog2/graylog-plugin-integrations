@@ -1,6 +1,5 @@
 package org.graylog.integrations.aws.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSLogMessage;
@@ -76,7 +75,7 @@ public class KinesisServiceTest {
 
         kinesisService = new KinesisService(kinesisClientBuilder,
                                             new ObjectMapperProvider().get(),
-                                            AWSTestingUtils.buildAWSCodecs());
+                                            AWSTestingUtils.buildTestCodecs());
     }
 
     @Test

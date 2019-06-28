@@ -3,8 +3,10 @@ package org.graylog.integrations;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
+import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
+import org.graylog2.plugin.inputs.transports.Transport;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 
 import java.util.HashMap;
@@ -16,7 +18,7 @@ public class AWSTestingUtils {
     private AWSTestingUtils() {
     }
 
-    public static Map<String, Codec.Factory<? extends Codec>> buildAWSCodecs() {
+    public static Map<String, Codec.Factory<? extends Codec>> buildTestCodecs() {
         // Create an AWS client with a mock KinesisClientBuilder
         Map<String, Codec.Factory<? extends Codec>> availableCodecs = new HashMap<>();
 
