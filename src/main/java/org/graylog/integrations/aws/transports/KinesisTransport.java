@@ -53,6 +53,7 @@ public class KinesisTransport extends ThrottleableTransport {
 
     @Override
     public void doLaunch(MessageInput input) throws MisfireException {
+        LOG.info("Starting Kinesis Transport");
     }
 
     private Consumer<byte[]> kinesisCallback(final MessageInput input) {
@@ -61,7 +62,7 @@ public class KinesisTransport extends ThrottleableTransport {
 
     @Override
     public void doStop() {
-
+        LOG.info("Stopping");
     }
 
     @Override
