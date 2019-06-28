@@ -27,29 +27,30 @@ public class CloudWatchFlowLogCodecTest {
     @Test
     public void testFlowLogCodecValues() {
 
-        String flowLogMessage = "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK";
-        final KinesisLogEntry logEvent = KinesisLogEntry.create("kinesisStream", "logGroup", "logStream",
-                                                                DateTime.now(DateTimeZone.UTC), flowLogMessage);
-        Message message = codec.decodeLogData(logEvent);
-
-        Assert.assertEquals("logGroup", message.getField("aws_log_group"));
-        Assert.assertEquals("logStream", message.getField("aws_log_stream"));
-        Assert.assertEquals(6, message.getField("protocol_number"));
-        Assert.assertEquals("172.1.1.2", message.getField("src_addr"));
-        Assert.assertEquals("aws-flowlogs", message.getField("source"));
+        final String flowLogMessage = "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK";
+        final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
+        final KinesisLogEntry logEvent = KinesisLogEntry.create("a-stream", "log-group", "log-stream",
+                                                                timestamp, flowLogMessage);
+        final Message message = codec.decodeLogData(logEvent);
+        Assert.assertEquals("log-group", message.getField(AbstractKinesisCodec.FIELD_LOG_GROUP));
+        Assert.assertEquals("log-stream", message.getField(AbstractKinesisCodec.FIELD_LOG_STREAM));
+        Assert.assertEquals("a-stream", message.getField(AbstractKinesisCodec.FIELD_KINESIS_STREAM));
+        Assert.assertEquals(6, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_PROTOCOL_NUMBER));
+        Assert.assertEquals("172.1.1.2", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_SRC_ADDR));
+        Assert.assertEquals(KinesisCloudWatchFlowLogCodec.SOURCE, message.getField("source"));
         Assert.assertEquals("eni-3244234 ACCEPT TCP 172.1.1.2:80 -> 172.1.1.2:2264", message.getField("message"));
-        Assert.assertEquals(1L, message.getField("packets"));
-        Assert.assertEquals(80, message.getField("src_port"));
-        Assert.assertEquals(60, message.getField("capture_window_duration_seconds"));
-        Assert.assertEquals("TCP", message.getField("protocol"));
-        Assert.assertEquals("423432432432", message.getField("account_id"));
-        Assert.assertEquals("eni-3244234", message.getField("interface_id"));
-        Assert.assertEquals("OK", message.getField("log_status"));
-        Assert.assertEquals(52L, message.getField("bytes"));
-        Assert.assertEquals(true, message.getField("aws_source"));
-        Assert.assertEquals("172.1.1.2", message.getField("dst_addr"));
-        Assert.assertEquals(2264, message.getField("dst_port"));
-        Assert.assertEquals("ACCEPT", message.getField("action"));
-        Assert.assertNotNull(message.getTimestamp());
+        Assert.assertEquals(1L, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_PACKETS));
+        Assert.assertEquals(80, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_SRC_PORT));
+        Assert.assertEquals(60, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_CAPTURE_WINDOW_DURATION));
+        Assert.assertEquals("TCP", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_PROTOCOL));
+        Assert.assertEquals("423432432432", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_ACCOUNT_ID));
+        Assert.assertEquals("eni-3244234", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_INTERFACE_ID));
+        Assert.assertEquals("OK", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_LOG_STATUS));
+        Assert.assertEquals(52L, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_BYTES));
+        Assert.assertEquals(true, message.getField(KinesisCloudWatchFlowLogCodec.SOURCE_GROUP_IDENTIFIER));
+        Assert.assertEquals("172.1.1.2", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_DST_ADDR));
+        Assert.assertEquals(2264, message.getField(KinesisCloudWatchFlowLogCodec.FIELD_DST_PORT));
+        Assert.assertEquals("ACCEPT", message.getField(KinesisCloudWatchFlowLogCodec.FIELD_ACTION));
+        Assert.assertEquals(timestamp, message.getTimestamp());
     }
 }

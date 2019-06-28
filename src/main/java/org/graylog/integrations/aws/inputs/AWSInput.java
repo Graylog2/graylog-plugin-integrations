@@ -53,7 +53,7 @@ public class AWSInput extends MessageInput {
      * Specifies one of the {@code AWSInputType} choices, which indicates which codec and transport
      * should be used.
      */
-    public static final String CK_AWS_INPUT_TYPE = "aws_input_type";
+    public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
     public static final String CK_TITLE = "title";
     public static final String CK_DESCRIPTION = "description";
     public static final String CK_GLOBAL = "global";
