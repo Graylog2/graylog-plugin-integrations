@@ -17,10 +17,9 @@ public class AWSTestingUtils {
     }
 
     public static Map<String, Codec.Factory<? extends Codec>> buildAWSCodecs() {
-        // Create an AWS client with a mock KinesisClientBuilder
-        Map<String, Codec.Factory<? extends Codec>> availableCodecs = new HashMap<>();
 
         // Prepare test codecs. These have to be manually instantiated for the test context.
+        Map<String, Codec.Factory<? extends Codec>> availableCodecs = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapperProvider().get();
         availableCodecs.put(KinesisRawLogCodec.NAME, new KinesisRawLogCodec.Factory() {
             @Override
