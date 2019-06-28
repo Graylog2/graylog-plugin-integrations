@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-public class AWSMetaCodecTest {
+public class AWSCodecTest {
 
     private ObjectMapper objectMapper;
 
@@ -33,7 +33,7 @@ public class AWSMetaCodecTest {
         final HashMap<String, Object> configMap = new HashMap<>();
         configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
         final Configuration configuration = new Configuration(configMap);
-        final AWSMetaCodec codec = new AWSMetaCodec(configuration, AWSTestingUtils.buildAWSCodecs());
+        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildAWSCodecs());
 
         DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
@@ -68,7 +68,7 @@ public class AWSMetaCodecTest {
         final HashMap<String, Object> configMap = new HashMap<>();
         configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
         final Configuration configuration = new Configuration(configMap);
-        final AWSMetaCodec codec = new AWSMetaCodec(configuration, AWSTestingUtils.buildAWSCodecs());
+        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildAWSCodecs());
 
         final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,

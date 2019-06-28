@@ -19,16 +19,16 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Map;
 
-public class AWSMetaCodec extends AbstractCodec {
+public class AWSCodec extends AbstractCodec {
 
     public static final String NAME = "AWSMetaCodec";
-    private static final Logger LOG = LoggerFactory.getLogger(AWSMetaCodec.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AWSCodec.class);
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
     @Inject
-    public AWSMetaCodec(@Assisted Configuration configuration,
-                        Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
+    public AWSCodec(@Assisted Configuration configuration,
+                    Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
         super(configuration);
         this.availableCodecs = availableCodecs;
     }
@@ -58,9 +58,9 @@ public class AWSMetaCodec extends AbstractCodec {
     }
 
     @FactoryClass
-    public interface Factory extends Codec.Factory<AWSMetaCodec> {
+    public interface Factory extends Codec.Factory<AWSCodec> {
         @Override
-        AWSMetaCodec create(Configuration configuration);
+        AWSCodec create(Configuration configuration);
 
         @Override
         Config getConfig();

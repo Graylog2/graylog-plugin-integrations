@@ -18,7 +18,7 @@ package org.graylog.integrations.aws.inputs;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
@@ -67,7 +67,7 @@ public class AWSInput extends MessageInput {
                     MetricRegistry metricRegistry,
                     KinesisTransport.Factory transport,
                     LocalMetricRegistry localRegistry,
-                    AWSMetaCodec.Factory codec,
+                    AWSCodec.Factory codec,
                     Config config,
                     Descriptor descriptor,
                     ServerStatus serverStatus) {
@@ -113,7 +113,7 @@ public class AWSInput extends MessageInput {
     public static class Config extends MessageInput.Config {
 
         @Inject
-        public Config(KinesisTransport.Factory transport, AWSMetaCodec.Factory codec) {
+        public Config(KinesisTransport.Factory transport, AWSCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
         }
 
