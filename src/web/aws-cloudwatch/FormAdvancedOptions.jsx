@@ -13,7 +13,7 @@ const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
       <AdvancedOptionsContent visible={visible}>
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
-               value="1"
+               value="global-input"
                defaultChecked={values.awsCloudWatchGlobalInput}
                onChange={onChange}
                label="Global Input" />
@@ -32,7 +32,7 @@ const FormAdvancedOptions = ({ onChange, values, toggle, visible }) => {
 
         <Input id="awsCloudWatchThrottleEnabled"
                type="checkbox"
-               value="1"
+               value="throttle-enabled"
                defaultChecked={values.awsCloudWatchThrottleEnabled}
                onChange={onChange}
                label="Enable Throttle" />

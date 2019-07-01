@@ -31,6 +31,11 @@ export default class AWSCloudWatch extends Component {
         awsCloudWatchThrottleEnabled: '',
         awsCloudWatchThrottleWait: '1000',
         /* End Default Values */
+        awsCloudWatchName: 'Test',
+        awsCloudWatchDescription: 'Desc',
+        awsCloudWatchAwsKey: 'ABC',
+        awsCloudWatchAwsSecret: '123',
+        awsCloudWatchAwsRegion: 'us-east-2',
       },
     };
   }
@@ -47,12 +52,7 @@ export default class AWSCloudWatch extends Component {
 
   handleFieldUpdate = ({ target }) => {
     const { formData } = this.state;
-    const isChecked = Object.keys(target).includes('checked');
-    let { value } = target;
-
-    if (isChecked) {
-      value = target.checked ? value : '';
-    }
+    const value = Object.keys(target).includes('checked') ? target.checked : target.value;
 
     this.setState({
       formData: {
