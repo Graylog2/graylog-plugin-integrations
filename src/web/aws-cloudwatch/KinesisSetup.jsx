@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
+import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
+const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visibleAdvancedOptions }) => {
   return (
     <Row>
       <Col md={8}>
@@ -17,12 +18,12 @@ const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
                  label="Kinesis Stream Name"
                  placeholder="Create Stream Name"
                  onChange={onChange}
-                 value={getValue('awsCloudWatchKinesisStream')}
+                 defaultValue={values.awsCloudWatchKinesisStream}
                  required />
 
           <Input id="awsCloudWatchAwsGroupName"
                  type="select"
-                 value={getValue('awsCloudWatchAwsGroupName')}
+                 value={values.awsCloudWatchAwsGroupName}
                  onChange={onChange}
                  label="CloudWatch Group Name"
                  required>
@@ -32,6 +33,11 @@ const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
             <option value="group-name-3">Group Name 3</option>
             <option value="group-name-4">Group Name 4</option>
           </Input>
+
+          <FormAdvancedOptions onChange={onChange}
+                               values={values}
+                               toggle={toggleAdvancedOptions}
+                               visible={visibleAdvancedOptions} />
 
           <Button type="submit">Verify &amp; Format</Button>
         </form>
@@ -43,7 +49,9 @@ const KinesisSetup = ({ getValue, onChange, onSubmit }) => {
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
+  toggleAdvancedOptions: PropTypes.func.isRequired,
+  visibleAdvancedOptions: PropTypes.bool.isRequired,
 };
 
 export default KinesisSetup;

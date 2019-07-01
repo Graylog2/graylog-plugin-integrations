@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
+import FormAdvancedOptions from './FormAdvancedOptions';
 
-const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
+const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
   return (
     <Row>
       <Col md={8}>
@@ -14,7 +15,7 @@ const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
 
           <Input id="awsCloudWatchKinesisStream"
                  type="select"
-                 value={getValue('awsCloudWatchKinesisStream')}
+                 value={values.awsCloudWatchKinesisStream}
                  onChange={onChange}
                  label="Choose Stream"
                  required>
@@ -24,6 +25,11 @@ const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
             <option value="stream-name-3">Stream Name 3</option>
             <option value="stream-name-4">Stream Name 4</option>
           </Input>
+
+          <FormAdvancedOptions onChange={onChange}
+                               values={values}
+                               toggle={toggleAdvancedOptions}
+                               visible={visibleAdvancedOptions} />
 
           <Button type="submit">Verify Stream &amp; Format</Button>
         </form>
@@ -35,7 +41,9 @@ const KinesisStreams = ({ onChange, onSubmit, getValue }) => {
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
+  toggleAdvancedOptions: PropTypes.func.isRequired,
+  visibleAdvancedOptions: PropTypes.bool.isRequired,
 };
 
 export default KinesisStreams;

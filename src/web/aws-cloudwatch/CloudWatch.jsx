@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
-// import UserNotification from 'util/UserNotification';
 import Wizard from 'components/common/Wizard';
 
 import StepAuthorize from './StepAuthorize';
@@ -20,64 +19,28 @@ export default class AWSCloudWatch extends Component {
   constructor(props) {
     super(props);
 
-    this.wizardSteps = [
-      {
-        key: 'authorize',
-        title: 'AWS CloudWatch Authorize',
-        component: (<StepAuthorize onSubmit={this.handleSubmit}
-                                   onChange={this.handleFieldUpdate}
-                                   getValue={this.getFormData} />),
-      },
-      {
-        key: 'kinesis-setup',
-        title: 'AWS CloudWatch Kinesis Setup',
-        component: (<StepKinesis onSubmit={this.handleSubmit}
-                                 onChange={this.handleFieldUpdate}
-                                 getValue={this.getFormData}
-                                 hasStreams />),
-      },
-      {
-        key: 'health-check',
-        title: 'AWS CloudWatch Health Check',
-        component: (<StepHealthCheck onSubmit={this.handleSubmit} />),
-      },
-      {
-        key: 'review',
-        title: 'AWS CloudWatch Review',
-        component: (<StepReview onSubmit={this.handleSubmit} getAllValues={this.getAllFormData} />),
-      },
-    ];
-
     this.state = {
+      visibleAdvancedOptions: false,
       currentStep: 'authorize',
       enabledSteps: ['authorize'],
-      formData: {},
-      wizardSteps: this.wizardWithDisabledSteps(),
+      formData: {
+        /* Default Advanced Values */
+        awsCloudWatchGlobalInput: '',
+        awsCloudWatchAssumeARN: '',
+        awsCloudWatchBatchSize: '10000',
+        awsCloudWatchThrottleEnabled: '',
+        awsCloudWatchThrottleWait: '1000',
+        /* End Default Values */
+        awsCloudWatchName: 'Test',
+        awsCloudWatchDescription: 'Desc',
+        awsCloudWatchAwsKey: 'ABC',
+        awsCloudWatchAwsSecret: '123',
+        awsCloudWatchAwsRegion: 'us-east-2',
+      },
     };
-
-    this.availableSteps = this.wizardSteps.map(step => step.key);
   }
-
-  wizardWithDisabledSteps = () => {
-    return this.wizardSteps.map(step => (
-      {
-        ...step,
-        disabled: this.isDisabledStep(step.key),
-      }
-    ));
-  }
-
-  /* eslint-disable-next-line react/destructuring-assignment */
-  getFormData = value => this.state.formData[value];
-
-  /* eslint-disable-next-line react/destructuring-assignment */
-  getAllFormData = () => this.state.formData;
 
   isDisabledStep = (step) => {
-    if (!this.state) {
-      return true;
-    }
-
     const { enabledSteps } = this.state;
 
     if (!enabledSteps || enabledSteps.length === 0) {
@@ -89,11 +52,12 @@ export default class AWSCloudWatch extends Component {
 
   handleFieldUpdate = ({ target }) => {
     const { formData } = this.state;
+    const value = Object.keys(target).includes('checked') ? target.checked : target.value;
 
     this.setState({
       formData: {
         ...formData,
-        [target.id]: target.value,
+        [target.name || target.id]: value,
       },
     });
   }
@@ -104,16 +68,12 @@ export default class AWSCloudWatch extends Component {
     const { currentStep, enabledSteps } = this.state;
     const nextStep = this.availableSteps.indexOf(currentStep) + 1;
 
-    if (this.wizardSteps[nextStep]) {
-      const { key } = this.wizardSteps[nextStep];
+    if (this.availableSteps[nextStep]) {
+      const key = this.availableSteps[nextStep];
 
       this.setState({
         enabledSteps: [...enabledSteps, key],
         currentStep: key,
-      }, () => {
-        this.setState({
-          wizardSteps: this.wizardWithDisabledSteps(),
-        });
       });
     }
 
@@ -126,8 +86,50 @@ export default class AWSCloudWatch extends Component {
     });
   }
 
+  toggleAdvancedOptions = () => {
+    const { visibleAdvancedOptions } = this.state;
+
+    this.setState({
+      visibleAdvancedOptions: !visibleAdvancedOptions,
+    });
+  }
+
   render() {
-    const { currentStep, wizardSteps } = this.state;
+    const { currentStep, formData, visibleAdvancedOptions } = this.state;
+    const wizardSteps = [
+      {
+        key: 'authorize',
+        title: 'AWS CloudWatch Authorize',
+        component: (<StepAuthorize onSubmit={this.handleSubmit}
+                                   onChange={this.handleFieldUpdate}
+                                   values={formData} />),
+        disabled: this.isDisabledStep('authorize'),
+      },
+      {
+        key: 'kinesis-setup',
+        title: 'AWS CloudWatch Kinesis Setup',
+        component: (<StepKinesis onSubmit={this.handleSubmit}
+                                 onChange={this.handleFieldUpdate}
+                                 values={formData}
+                                 toggleAdvancedOptions={this.toggleAdvancedOptions}
+                                 visibleAdvancedOptions={visibleAdvancedOptions}
+                                 hasStreams />),
+        disabled: this.isDisabledStep('kinesis-setup'),
+      },
+      {
+        key: 'health-check',
+        title: 'AWS CloudWatch Health Check',
+        component: (<StepHealthCheck onSubmit={this.handleSubmit} />),
+        disabled: this.isDisabledStep('health-check'),
+      },
+      {
+        key: 'review',
+        title: 'AWS CloudWatch Review',
+        component: (<StepReview onSubmit={this.handleSubmit} values={formData} />),
+        disabled: this.isDisabledStep('review'),
+      },
+    ];
+    this.availableSteps = wizardSteps.map(step => step.key);
 
     return (
       <Row>
