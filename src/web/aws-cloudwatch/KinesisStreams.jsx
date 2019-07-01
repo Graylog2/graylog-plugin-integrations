@@ -4,6 +4,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
+import ROUTES from '../common/Routes';
 
 const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, visibleAdvancedOptions }) => {
   return (
@@ -11,7 +12,7 @@ const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, vis
       <Col md={8}>
         <form onSubmit={onSubmit}>
           <h2>Choose Kinesis Stream</h2>
-          <p>Below is a list of all the Streams we found configured within Kinesis. Please choose the Stream you would like us to parse, or follow the directions to begin <a href="/aws/cloudwatch/kinesis-setup">setting up your CloudWatch Group</a> to feed into a new Kinesis Stream.</p>
+          <p>Below is a list of all the Streams we found configured within Kinesis. Please choose the Stream you would like us to parse, or follow the directions to begin <a href={ROUTES.INTEGRATIONS.CLOUDWATCH_STEP('kinesis-setup')}>setting up your CloudWatch Group</a> to feed into a new Kinesis Stream.</p>
 
           <Input id="awsCloudWatchKinesisStream"
                  type="select"
