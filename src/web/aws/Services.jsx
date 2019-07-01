@@ -1,13 +1,13 @@
 import React from 'react';
 
-import ROUTES from '../common/Routes';
+import Routes from '../common/Routes';
 
 const Services = () => {
   return (
     <div>
         List of Services.
 
-      <ul><li><a href={ROUTES.INTEGRATIONS.CLOUDWATCH}>CloudWatch</a></li></ul>
+      <ul><li><a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.index}>CloudWatch</a></li></ul>
     </div>
   );
 };

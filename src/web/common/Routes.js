@@ -1,11 +1,13 @@
-const ROUTES = {
+const Routes = {
   INTEGRATIONS: {
     AWS: {
-      SERVICES: () => '/integrations/aws',
-      CLOUDWATCH: () => '/integrations/aws/cloudwatch',
-      CLOUDWATCH_STEP: step => `/integrations/aws/cloudwatch/${step}`,
+      SERVICES: '/integrations/aws',
+      CLOUDWATCH: {
+        index: '/integrations/aws/cloudwatch',
+        step: step => `/integrations/aws/cloudwatch/${step}`,
+      },
     },
   },
 };
 
-export default ROUTES;
+export default Routes;
