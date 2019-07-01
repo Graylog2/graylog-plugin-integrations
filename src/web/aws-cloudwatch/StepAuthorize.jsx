@@ -4,7 +4,7 @@ import { Button, Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
-const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
+const StepAuthorize = ({ onChange, onSubmit, values }) => {
   return (
     <Row>
       <Col md={8}>
@@ -14,7 +14,7 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
 
           <Input id="awsCloudWatchName"
                  type="text"
-                 defaultValue={getValue('awsCloudWatchName')}
+                 defaultValue={values.awsCloudWatchName}
                  onChange={onChange}
                  placeholder="CloudWatch Integration Name"
                  label="Name"
@@ -25,14 +25,14 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
                  label="Description"
                  placeholder="CloudWatch Integration Description"
                  onChange={onChange}
-                 value={getValue('awsCloudWatchDescription')} />
+                 value={values.awsCloudWatchDescription} />
 
           <Input id="awsCloudWatchAwsKey"
                  type="text"
                  label="AWS Key"
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
-                 defaultValue={getValue('awsCloudWatchAwsKey')}
+                 defaultValue={values.awsCloudWatchAwsKey}
                  autoComplete="off"
                  required />
 
@@ -41,13 +41,13 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
                  label="AWS Secret"
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
-                 defaultValue={getValue('awsCloudWatchAwsSecret')}
+                 defaultValue={values.awsCloudWatchAwsSecret}
                  autoComplete="new-password"
                  required />
 
           <Input id="awsCloudWatchAwsRegion"
                  type="select"
-                 value={getValue('awsCloudWatchAwsRegion')}
+                 value={values.awsCloudWatchAwsRegion}
                  onChange={onChange}
                  label="Region"
                  required>
@@ -68,7 +68,7 @@ const StepAuthorize = ({ onChange, onSubmit, getValue }) => {
 StepAuthorize.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  values: PropTypes.object.isRequired,
 };
 
 export default StepAuthorize;
