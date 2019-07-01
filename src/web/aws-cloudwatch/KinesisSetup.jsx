@@ -4,7 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
-import StyledForm from '../common/StyledForm';
+import FormWrap from '../common/FormWrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import formDataHook from './hooks/formData';
@@ -16,8 +16,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
 
   return (
     <Row>
-      <Col>
-        <StyledForm onSubmit={onSubmit} buttonContent="Verify &amp; Format">
+      <Col md={8}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Verify &amp; Format">
           <h2>Create Kinesis Stream</h2>
           <p>We&apos;re going to get started setting up your Kinesis Stream, just give us a name and choose the related CloudWatch Group. We&apos;ll handle the hard stuff!</p>
 
@@ -45,7 +45,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
           <FormAdvancedOptions onChange={onChange}
                                toggle={toggleAdvancedOptions}
                                visible={getAdvancedOptionsVisiblity()} />
-        </StyledForm>
+        </FormWrap>
       </Col>
     </Row>
   );

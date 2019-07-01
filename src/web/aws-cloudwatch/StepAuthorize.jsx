@@ -6,15 +6,15 @@ import styled from '@emotion/styled';
 import { Input } from 'components/bootstrap';
 
 import formDataHook from './hooks/formData';
-import StyledForm from '../common/StyledForm';
+import FormWrap from '../common/FormWrap';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { getFieldValue } = formDataHook();
 
   return (
     <Row>
-      <Col>
-        <StyledForm onSubmit={onSubmit} buttonContent="Authorize &amp; Choose Stream">
+      <Col md={8}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Authorize &amp; Choose Stream">
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
@@ -74,7 +74,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
             <option value="us-west-1">US West (N. California)</option>
             <option value="us-west-2">US West (Oregon)</option>
           </Input>
-        </StyledForm>
+        </FormWrap>
       </Col>
     </Row>
   );

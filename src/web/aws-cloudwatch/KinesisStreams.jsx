@@ -4,7 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
-import StyledForm from '../common/StyledForm';
+import FormWrap from '../common/FormWrap';
 
 import formDataHook from './hooks/formData';
 import advancedOptionsHook from './hooks/advancedOptions';
@@ -17,8 +17,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
 
   return (
     <Row>
-      <Col>
-        <StyledForm onSubmit={onSubmit} buttonContent="Verify Stream &amp; Format">
+      <Col md={8}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Verify Stream &amp; Format">
           <h2>Choose Kinesis Stream</h2>
           <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
 
@@ -38,7 +38,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
           <FormAdvancedOptions onChange={onChange}
                                toggle={toggleAdvancedOptions}
                                visible={getAdvancedOptionsVisiblity()} />
-        </StyledForm>
+        </FormWrap>
       </Col>
     </Row>
   );

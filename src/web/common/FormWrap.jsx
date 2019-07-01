@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
-import styled from '@emotion/styled';
 
 import formValidation from '../utils/formValidation';
 
-export default class StyledForm extends Component {
+export default class FormWrap extends Component {
   static propTypes = {
     children: PropTypes.any.isRequired,
     onSubmit: PropTypes.func,
@@ -36,7 +35,7 @@ export default class StyledForm extends Component {
     const { children, buttonContent } = this.props;
 
     return (
-      <AFormThatIsStyled onSubmit={this.prevent} autoComplete="off" ref={(form) => { this.currentForm = form; }}>
+      <form onSubmit={this.prevent} autoComplete="off" ref={(form) => { this.currentForm = form; }}>
         {children}
 
         <Button type="button"
@@ -44,12 +43,7 @@ export default class StyledForm extends Component {
                 bsStyle="primary">
           {buttonContent}
         </Button>
-      </AFormThatIsStyled>
+      </form>
     );
   }
 }
-
-const AFormThatIsStyled = styled.form`
-  width: 550px;
-  margin: 0 auto;
-`;
