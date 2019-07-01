@@ -1,14 +1,12 @@
 package org.graylog.integrations.aws.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
-import org.graylog2.plugin.Message;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
@@ -39,7 +37,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +44,6 @@ import java.util.zip.GZIPOutputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -104,22 +100,30 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void healthCheckFlowLog() throws ExecutionException, IOException {
-
-        // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
-                                                              Instant.now());
-        assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
-    }
-
-    @Test
     public void healthCheckCloudWatchFlowLog() throws ExecutionException, IOException {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
-        HealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchFlowLogPayload(),
+                                                                     Instant.now());
+        assertEquals(AWSMessageType.KINESIS_FLOW_LOGS, response.inputType());
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(21, fields.size());
+        assertEquals(6, fields.get("protocol_number"));
+        assertEquals("TCP", fields.get("protocol"));
+        assertEquals(1L, fields.get("packets"));
+        assertEquals("172.1.1.2", fields.get("dst_addr"));
+    }
+
+    @Test
+    public void healthCheckCloudWatchRaw() throws ExecutionException, IOException {
+
+        // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
+        KinesisHealthCheckResponse response = executeHealthCheckTest(buildCloudWatchRawPayload(), Instant.now());
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2019-06-05T12:35:44.000Z"));
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(7, fields.size());
     }
 
     @Test
@@ -128,12 +132,14 @@ public class KinesisServiceTest {
         // Use a specific log arrival time to ensure correct timezone is set on resulting message.
         // 2000-01-01T01:01:01Z
         Instant logArrivalTime = Instant.ofEpochMilli(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeZone.UTC).getMillis());
-        HealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
+        KinesisHealthCheckResponse response = executeHealthCheckTest("This is a test raw log".getBytes(), logArrivalTime);
         assertEquals(AWSMessageType.KINESIS_RAW, response.inputType());
-        assertTrue(response.messageSummary().contains("timestamp: 2000-01-01T01:01:01.000Z"));
+        Map<String, Object> fields = response.messageFields();
+        assertEquals(new DateTime("2000-01-01T01:01:01.000Z", DateTimeZone.UTC), fields.get("timestamp"));
+        assertEquals(5, fields.size());
     }
 
-    private HealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
+    private KinesisHealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
 
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
@@ -291,23 +297,6 @@ public class KinesisServiceTest {
         // There should be 4 total streams (two from each page).
         assertEquals(4, streamsResponse.total());
         assertEquals(4, streamsResponse.streams().size());
-    }
-
-    // TODO Add retrieveRecords test
-
-    @Test
-    public void testMessageFormat() {
-
-        HashMap<String, Object> fields = new HashMap<>();
-        fields.put("_id", "123");
-        fields.put("src_addr", "Dan");
-        fields.put("port", 80);
-
-        String summary = kinesisService.buildMessageSummary(new Message(fields), "The full message");
-        assertEquals("The summary should have 4 lines", 4, summary.split("\n").length);
-        assertTrue(summary.contains("id"));
-        assertTrue(summary.contains("src_addr"));
-        assertTrue(summary.contains("port"));
     }
 
     @Test
