@@ -9,7 +9,7 @@ import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
-import { DEFAULT_SETTINGS } from './util';
+import DEFAULT_VALUES from './default_values';
 
 export default class AWSCloudWatch extends Component {
   static propTypes = {
@@ -44,7 +44,7 @@ export default class AWSCloudWatch extends Component {
       currentStep: 'authorize',
       enabledSteps: ['authorize'],
       formData: {
-        ...DEFAULT_SETTINGS,
+        ...DEFAULT_VALUES,
       },
       logOutput: JSON.stringify(this.logOutput, null, 2),
     };

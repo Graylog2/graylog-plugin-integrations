@@ -7,21 +7,21 @@ import { Link } from 'react-router';
 import { Input } from 'components/bootstrap';
 import Routes from 'routing/Routes';
 
-import { DEFAULT_SETTINGS } from './util';
+import DEFAULT_VALUES from './default_values';
 
 const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
   const defaultOutput = (key, enabled = true) => {
     if (!enabled) {
       return (
         <React.Fragment>
-          {DEFAULT_SETTINGS[key]} <small>(default)</small>
+          {DEFAULT_VALUES[key]} <small>(default)</small>
         </React.Fragment>
       );
     }
 
     return (
       <React.Fragment>
-        {values[key]} {DEFAULT_SETTINGS[key] === values[key] && <small>(default)</small>}
+        {values[key]} {DEFAULT_VALUES[key] === values[key] && <small>(default)</small>}
       </React.Fragment>
     );
   };
