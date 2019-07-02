@@ -64,7 +64,7 @@ public enum AWSMessageType {
      * @return True if the {@link AWSMessageType} enum instance has a Kinesis source.
      */
     public boolean isKinesis() {
-        return this.source.equals(Source.KINESIS);
+        return Source.KINESIS.equals(this.source);
     }
 
     /**
