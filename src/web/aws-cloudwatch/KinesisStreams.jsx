@@ -12,7 +12,7 @@ const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, vis
       <Col md={8}>
         <form onSubmit={onSubmit}>
           <h2>Choose Kinesis Stream</h2>
-          <p>Below is a list of all the Streams we found configured within Kinesis. Please choose the Stream you would like us to parse, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Group</a> to feed into a new Kinesis Stream.</p>
+          <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
 
           <Input id="awsCloudWatchKinesisStream"
                  type="select"
