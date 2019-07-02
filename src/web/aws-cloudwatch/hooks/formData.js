@@ -5,14 +5,18 @@ import { CloudWatchContext } from '../CloudWatchContext';
 const formDataHook = () => {
   const { state: { formData }, dispatch } = useContext(CloudWatchContext);
 
-  const getFormData = () => {
-    return formData;
-  };
+  const getFormData = () => formData;
 
   const getFieldData = (field) => {
     const fieldData = _.find(formData, fields => fields.id === field);
+    const errorResponse = {
+      id: 'NotFound',
+      value: '',
+      error: true,
+      errorMessage: `Unable to find field ${field}`,
+    };
 
-    return fieldData || { id: 'NotFound', value: '', error: true, errorMessage: `Unable to find field ${field}` };
+    return fieldData || errorResponse;
   };
 
   const getFieldValue = (field) => {

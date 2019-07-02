@@ -1,7 +1,7 @@
 import React, { createContext, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
-import DEFAULT_VALUES from './utils';
+import DEFAULT_VALUES from './default_values';
 
 const logOutput = { // Demo Data until API is wired
   full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',

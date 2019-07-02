@@ -3,7 +3,6 @@ const DEFAULT_VALUES = [
   Available options
   {
     id: Reference used in API transaction [required]
-    label: Text that renders in UI
     defaultValue: Value that will render as default
   }
   */

@@ -4,9 +4,7 @@ import { CloudWatchContext } from '../CloudWatchContext';
 const logHook = () => {
   const { state: { logOutput } } = useContext(CloudWatchContext);
 
-  const getLog = () => {
-    return logOutput;
-  };
+  const getLog = () => logOutput;
 
   return {
     getLog,

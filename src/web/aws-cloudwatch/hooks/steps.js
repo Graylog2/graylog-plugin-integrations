@@ -17,18 +17,14 @@ const stepsHook = () => {
     value: step,
   });
 
-  const getCurrentStep = () => {
-    return currentStep;
-  };
+  const getCurrentStep = () => currentStep;
 
   const setCurrentStep = step => dispatch({
     type: 'SET_CURRENT_STEP',
     value: step,
   });
 
-  const getAvailableSteps = () => {
-    return availableSteps;
-  };
+  const getAvailableSteps = () => availableSteps;
 
   const setAvailableSteps = steps => dispatch({
     type: 'SET_AVAILABLE_STEPS',

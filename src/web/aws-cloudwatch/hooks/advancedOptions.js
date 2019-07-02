@@ -4,9 +4,7 @@ import { CloudWatchContext } from '../CloudWatchContext';
 const advancedOptionsHook = () => {
   const { state: { visibleAdvancedOptions }, dispatch } = useContext(CloudWatchContext);
 
-  const getAdvancedOptionsVisiblity = () => {
-    return visibleAdvancedOptions;
-  };
+  const getAdvancedOptionsVisiblity = () => visibleAdvancedOptions;
 
   const toggleAdvancedOptionsVisiblity = () => dispatch({
     type: 'SET_ADVANCED_VISIBILITY',
