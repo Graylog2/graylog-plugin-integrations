@@ -31,7 +31,7 @@ const KinesisStreams = ({ onChange, onSubmit, values, toggleAdvancedOptions, vis
                                toggle={toggleAdvancedOptions}
                                visible={visibleAdvancedOptions} />
 
-          <Button type="submit">Verify Stream &amp; Format</Button>
+          <Button type="submit" bsStyle="primary">Verify Stream &amp; Format</Button>
         </form>
       </Col>
     </Row>

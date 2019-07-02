@@ -25,10 +25,11 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  label="Description"
                  placeholder="CloudWatch Integration Description"
                  onChange={onChange}
-                 value={values.awsCloudWatchDescription} />
+                 value={values.awsCloudWatchDescription}
+                 rows={4} />
 
           <Input id="awsCloudWatchAwsKey"
-                 type="text"
+                 type="password"
                  label="AWS Key"
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
@@ -42,7 +43,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
                  defaultValue={values.awsCloudWatchAwsSecret}
-                 autoComplete="new-password"
+                 autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchAwsRegion"
@@ -58,7 +59,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
             <option value="us-west-2">US West (Oregon)</option>
           </Input>
 
-          <Button type="submit">Authorize &amp; Choose Stream</Button>
+          <Button type="submit" bsStyle="primary">Authorize &amp; Choose Stream</Button>
         </form>
       </Col>
     </Row>

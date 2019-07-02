@@ -39,7 +39,7 @@ const KinesisSetup = ({ values, onChange, onSubmit, toggleAdvancedOptions, visib
                                toggle={toggleAdvancedOptions}
                                visible={visibleAdvancedOptions} />
 
-          <Button type="submit">Verify &amp; Format</Button>
+          <Button type="submit" bsStyle="primary">Verify &amp; Format</Button>
         </form>
       </Col>
     </Row>

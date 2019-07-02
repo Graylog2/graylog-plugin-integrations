@@ -3,17 +3,37 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 import Wizard from 'components/common/Wizard';
+import PageHeader from 'components/common/PageHeader';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
+import DEFAULT_VALUES from './default_values';
 
 export default class AWSCloudWatch extends Component {
   static propTypes = {
     params: PropTypes.shape({
       step: PropTypes.string,
     }).isRequired,
+  }
+
+  logOutput = { // Demo Data until API is wired
+    full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',
+    version: 2,
+    'account-id': 123456789010,
+    'interface-id': 'eni-abc123de',
+    src_addr: '172.31.16.139',
+    dst_addr: '172.31.16.21',
+    src_port: 20641,
+    dst_port: 22,
+    protocol: 6,
+    packets: 20,
+    bytes: 4249,
+    start: 1418530010,
+    end: 1418530070,
+    action: 'ACCEPT',
+    'log-status': 'OK',
   }
 
   constructor(props) {
@@ -24,19 +44,9 @@ export default class AWSCloudWatch extends Component {
       currentStep: 'authorize',
       enabledSteps: ['authorize'],
       formData: {
-        /* Default Advanced Values */
-        awsCloudWatchGlobalInput: '',
-        awsCloudWatchAssumeARN: '',
-        awsCloudWatchBatchSize: '10000',
-        awsCloudWatchThrottleEnabled: '',
-        awsCloudWatchThrottleWait: '1000',
-        /* End Default Values */
-        awsCloudWatchName: 'Test',
-        awsCloudWatchDescription: 'Desc',
-        awsCloudWatchAwsKey: 'ABC',
-        awsCloudWatchAwsSecret: '123',
-        awsCloudWatchAwsRegion: 'us-east-2',
+        ...DEFAULT_VALUES,
       },
+      logOutput: JSON.stringify(this.logOutput, null, 2),
     };
   }
 
@@ -86,6 +96,10 @@ export default class AWSCloudWatch extends Component {
     });
   }
 
+  handleEditClick = nextStep => () => {
+    this.handleStepChange(nextStep);
+  }
+
   toggleAdvancedOptions = () => {
     const { visibleAdvancedOptions } = this.state;
 
@@ -95,7 +109,7 @@ export default class AWSCloudWatch extends Component {
   }
 
   render() {
-    const { currentStep, formData, visibleAdvancedOptions } = this.state;
+    const { currentStep, formData, logOutput, visibleAdvancedOptions } = this.state;
     const wizardSteps = [
       {
         key: 'authorize',
@@ -119,13 +133,16 @@ export default class AWSCloudWatch extends Component {
       {
         key: 'health-check',
         title: 'AWS CloudWatch Health Check',
-        component: (<StepHealthCheck onSubmit={this.handleSubmit} />),
+        component: (<StepHealthCheck onSubmit={this.handleSubmit} logOutput={logOutput} />),
         disabled: this.isDisabledStep('health-check'),
       },
       {
         key: 'review',
         title: 'AWS CloudWatch Review',
-        component: (<StepReview onSubmit={this.handleSubmit} values={formData} />),
+        component: (<StepReview onSubmit={this.handleSubmit}
+                                values={formData}
+                                logOutput={logOutput}
+                                onEditClick={this.handleEditClick} />),
         disabled: this.isDisabledStep('review'),
       },
     ];
@@ -133,6 +150,11 @@ export default class AWSCloudWatch extends Component {
 
     return (
       <Row>
+        <Col md={12}>
+          <PageHeader title="AWS Integration">
+            <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
+          </PageHeader>
+        </Col>
         <Col md={12}>
           <Wizard steps={wizardSteps}
                   activeStep={currentStep}
