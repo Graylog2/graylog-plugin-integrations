@@ -1,7 +1,7 @@
 import React, { createContext, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
-import FIELDS from './utils';
+import DEFAULT_VALUES from './utils';
 
 const logOutput = { // Demo Data until API is wired
   full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',
@@ -30,7 +30,7 @@ const CloudWatchProvider = ({ children }) => {
     currentStep: 'authorize',
     enabledSteps: ['authorize'],
     formData: [
-      ...FIELDS,
+      ...DEFAULT_VALUES,
     ],
     logOutput: JSON.stringify(logOutput, null, 2),
   };

@@ -32,13 +32,8 @@ const CloudWatch = () => {
   };
 
   const handleFieldUpdate = ({ target }) => {
-    const isChecked = Object.keys(target).includes('checked');
     const id = target.name || target.id;
-    let { value } = target;
-
-    if (isChecked) {
-      value = target.checked ? value : '';
-    }
+    const value = Object.keys(target).includes('checked') ? target.checked : target.value;
 
     setFormData(id, { value });
   };
