@@ -62,7 +62,7 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
             </ReviewItems>
 
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
-            <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
+            <p>Parsed as FlowLog, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
             <Input id="awsCloudWatchLog"
                    type="textarea"
