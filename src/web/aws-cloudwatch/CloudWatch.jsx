@@ -39,11 +39,14 @@ const CloudWatch = () => {
   } = stepsHook();
   const { setFormData } = formDataHook();
 
+  const currentStep = getCurrentStep();
+  const availableSteps = getAvailableSteps();
+
   const [isAdvancedOptionsVisible, setAdvancedOptionsVisiblity] = useState(false);
   const [logOutput, setLogOutput] = useState('');
 
-  const handleStepChange = (currentStep) => {
-    setCurrentStep(currentStep);
+  const handleStepChange = (nextStep) => {
+    setCurrentStep(nextStep);
   };
 
   const handleEditClick = nextStep => () => {
@@ -60,8 +63,7 @@ const CloudWatch = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const availableSteps = getAvailableSteps();
-    const nextStep = availableSteps.indexOf(getCurrentStep()) + 1;
+    const nextStep = availableSteps.indexOf(currentStep) + 1;
 
     if (availableSteps[nextStep]) {
       const key = availableSteps[nextStep];
@@ -106,13 +108,13 @@ const CloudWatch = () => {
     },
   ];
 
-  if (getAvailableSteps().length === 0) {
+  if (availableSteps.length === 0) {
     setAvailableSteps(wizardSteps.map(step => step.key));
   }
 
   return (
     <Wizard steps={wizardSteps}
-            activeStep={getCurrentStep()}
+            activeStep={currentStep}
             onStepChange={handleStepChange}
             horizontal
             justified
