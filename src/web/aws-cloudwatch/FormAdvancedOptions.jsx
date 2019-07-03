@@ -8,9 +8,13 @@ import formDataHook from './hooks/formData';
 const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
   const { getFieldValue } = formDataHook();
 
+  const handleToggle = () => {
+    toggle(!visible);
+  };
+
   return (
     <div>
-      <ToggleAdvancedOptions onClick={toggle} type="button">
+      <ToggleAdvancedOptions onClick={handleToggle} type="button">
           Advanced Options <i className="fa fa-angle-right fa-sm" />
       </ToggleAdvancedOptions>
 

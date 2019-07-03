@@ -7,13 +7,11 @@ import { Input } from 'components/bootstrap';
 import FormWrap from '../common/FormWrap';
 
 import formDataHook from './hooks/formData';
-import advancedOptionsHook from './hooks/advancedOptions';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
-const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
+const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
   const { getFieldValue } = formDataHook();
-  const { getAdvancedOptionsVisiblity } = advancedOptionsHook();
 
   return (
     <Row>
@@ -36,8 +34,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
           </Input>
 
           <FormAdvancedOptions onChange={onChange}
-                               toggle={toggleAdvancedOptions}
-                               visible={getAdvancedOptionsVisiblity()} />
+                               toggle={setAdvancedOptionsVisiblity}
+                               visible={isAdvancedOptionsVisible} />
         </FormWrap>
       </Col>
     </Row>
@@ -47,7 +45,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  toggleAdvancedOptions: PropTypes.func.isRequired,
+  isAdvancedOptionsVisible: PropTypes.func.isRequired,
+  setAdvancedOptionsVisiblity: PropTypes.bool.isRequired,
 };
 
 export default KinesisStreams;

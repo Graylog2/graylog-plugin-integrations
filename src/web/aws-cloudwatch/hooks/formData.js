@@ -1,9 +1,11 @@
 import { useContext } from 'react';
 import _ from 'lodash';
-import { CloudWatchContext } from '../CloudWatchContext';
+
+import { FormDataContext } from '../reducers/FormDataContext';
+import { UPDATE_FORM_DATA } from '../../common/constants';
 
 const formDataHook = () => {
-  const { state: { formData }, dispatch } = useContext(CloudWatchContext);
+  const { state: { formData }, dispatch } = useContext(FormDataContext);
 
   const getFormData = () => formData;
 
@@ -35,7 +37,7 @@ const formDataHook = () => {
     }
 
     return dispatch({
-      type: 'UPDATE_FORM_DATA',
+      type: UPDATE_FORM_DATA,
       value: { id, ...updatedFormData },
     });
   };

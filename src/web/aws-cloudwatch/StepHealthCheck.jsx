@@ -5,11 +5,8 @@ import { Col, Row } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 
 import FormWrap from '../common/FormWrap';
-import logHook from './hooks/log';
 
-const StepHealthCheck = ({ onSubmit }) => {
-  const { getLog } = logHook();
-
+const StepHealthCheck = ({ onSubmit, logOutput }) => {
   return (
     <Row>
       <Col md={8}>
@@ -22,7 +19,7 @@ const StepHealthCheck = ({ onSubmit }) => {
           <Input id="awsCloudWatchLog"
                  type="textarea"
                  label="Formatted CloudWatch Log"
-                 value={getLog()}
+                 value={logOutput}
                  rows={10}
                  disabled />
         </FormWrap>
@@ -33,6 +30,7 @@ const StepHealthCheck = ({ onSubmit }) => {
 
 StepHealthCheck.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  logOutput: PropTypes.string.isRequired,
 };
 
 export default StepHealthCheck;

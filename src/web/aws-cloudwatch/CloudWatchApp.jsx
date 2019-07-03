@@ -4,23 +4,26 @@ import { Col, Row } from 'react-bootstrap';
 
 import PageHeader from 'components/common/PageHeader';
 
-import { CloudWatchProvider } from './CloudWatchContext';
+import { FormDataProvider } from './reducers/FormDataContext';
+import { StepsProvider } from './reducers/StepsContext';
 import CloudWatch from './CloudWatch';
 
 function CloudWatchApp({ params: { step } }) {
   return (
-    <CloudWatchProvider>
-      <Row>
-        <Col md={12}>
-          <PageHeader title="AWS Integration">
-            <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
-          </PageHeader>
-        </Col>
-        <Col md={12}>
-          <CloudWatch wizardStep={step} />
-        </Col>
-      </Row>
-    </CloudWatchProvider>
+    <StepsProvider>
+      <FormDataProvider>
+        <Row>
+          <Col md={12}>
+            <PageHeader title="AWS Integration">
+              <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
+            </PageHeader>
+          </Col>
+          <Col md={12}>
+            <CloudWatch wizardStep={step} />
+          </Col>
+        </Row>
+      </FormDataProvider>
+    </StepsProvider>
   );
 }
 

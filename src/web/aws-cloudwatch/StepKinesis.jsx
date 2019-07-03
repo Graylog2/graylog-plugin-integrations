@@ -17,14 +17,16 @@ const StepKinesis = ({ hasStreams, ...restProps }) => {
 
 StepKinesis.propTypes = {
   hasStreams: PropTypes.bool,
-  onSubmit: PropTypes.func.isRequired,
+  isAdvancedOptionsVisible: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-  toggleAdvancedOptions: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
+  setAdvancedOptionsVisiblity: PropTypes.func,
 };
 
 StepKinesis.defaultProps = {
   hasStreams: false,
-  toggleAdvancedOptions: () => {},
+  isAdvancedOptionsVisible: false,
+  setAdvancedOptionsVisiblity: () => {},
 };
 
 export default StepKinesis;

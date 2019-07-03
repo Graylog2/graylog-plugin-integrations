@@ -8,11 +8,9 @@ import FormWrap from '../common/FormWrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import formDataHook from './hooks/formData';
-import advancedOptionsHook from './hooks/advancedOptions';
 
-const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
+const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
   const { getFieldValue } = formDataHook();
-  const { getAdvancedOptionsVisiblity } = advancedOptionsHook();
 
   return (
     <Row>
@@ -43,8 +41,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
           </Input>
 
           <FormAdvancedOptions onChange={onChange}
-                               toggle={toggleAdvancedOptions}
-                               visible={getAdvancedOptionsVisiblity()} />
+                               toggle={setAdvancedOptionsVisiblity}
+                               visible={isAdvancedOptionsVisible} />
         </FormWrap>
       </Col>
     </Row>
@@ -54,7 +52,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleAdvancedOptions }) => {
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  toggleAdvancedOptions: PropTypes.func.isRequired,
+  isAdvancedOptionsVisible: PropTypes.func.isRequired,
+  setAdvancedOptionsVisiblity: PropTypes.bool.isRequired,
 };
 
 export default KinesisSetup;

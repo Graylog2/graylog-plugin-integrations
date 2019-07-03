@@ -8,13 +8,11 @@ import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
 import formDataHook from './hooks/formData';
-import logHook from './hooks/log';
 
 import FormWrap from '../common/FormWrap';
 
-const StepReview = ({ onSubmit, onEditClick }) => {
+const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
   const { getFieldData, getFieldValue } = formDataHook();
-  const { getLog } = logHook();
 
   const defaultOutput = (key, enabled = true) => {
     const fieldData = getFieldData(key);
@@ -70,7 +68,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={getLog()}
+                   value={logOutput}
                    rows={10}
                    disabled />
           </Container>
@@ -83,6 +81,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
 StepReview.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onEditClick: PropTypes.func.isRequired,
+  logOutput: PropTypes.string.isRequired,
 };
 
 const Container = styled.div`
