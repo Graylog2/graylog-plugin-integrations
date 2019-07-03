@@ -10,7 +10,7 @@ import StepReview from './StepReview';
 import stepsHook from './hooks/steps';
 import formDataHook from './hooks/formData';
 
-const exampleLogs = { // Demo Data until API is wired
+const exampleLogs = { // TODO: Demo Data until API is wired
   full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',
   version: 2,
   'account-id': 123456789010,
