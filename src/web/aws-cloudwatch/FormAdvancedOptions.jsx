@@ -6,7 +6,8 @@ import { Input } from 'components/bootstrap';
 import formDataHook from './hooks/formData';
 
 const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
-  const { getFieldValue } = formDataHook();
+  const { getFormData } = formDataHook();
+  const formData = getFormData();
 
   const handleToggle = () => {
     toggle(!visible);
@@ -22,32 +23,32 @@ const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="global-input"
-               defaultChecked={getFieldValue('awsCloudWatchGlobalInput')}
+               defaultChecked={formData.awsCloudWatchGlobalInput ? formData.awsCloudWatchGlobalInput.value : ''}
                onChange={onChange}
                label="Global Input" />
 
         <Input id="awsCloudWatchAssumeARN"
                type="text"
-               value={getFieldValue('awsCloudWatchAssumeARN')}
+               value={formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : ''}
                onChange={onChange}
                label="AWS assume role ARN" />
 
         <Input id="awsCloudWatchBatchSize"
                type="number"
-               value={getFieldValue('awsCloudWatchBatchSize')}
+               value={formData.awsCloudWatchBatchSize.value || formData.awsCloudWatchBatchSize.defaultValue}
                onChange={onChange}
                label="Kinesis Record batch size" />
 
         <Input id="awsCloudWatchThrottleEnabled"
                type="checkbox"
                value="throttle-enabled"
-               defaultChecked={getFieldValue('awsCloudWatchThrottleEnabled')}
+               defaultChecked={formData.awsCloudWatchThrottleEnabled ? formData.awsCloudWatchThrottleEnabled.value : ''}
                onChange={onChange}
                label="Enable Throttle" />
 
         <Input id="awsCloudWatchThrottleWait"
                type="number"
-               value={getFieldValue('awsCloudWatchThrottleWait')}
+               value={formData.awsCloudWatchThrottleWait.value || formData.awsCloudWatchThrottleWait.defaultValue}
                onChange={onChange}
                label="Throttled wait milliseconds" />
       </AdvancedOptionsContent>

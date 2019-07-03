@@ -11,7 +11,8 @@ import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
 const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
-  const { getFieldValue } = formDataHook();
+  const { getFormData } = formDataHook();
+  const formData = getFormData();
 
   return (
     <Row>
@@ -22,7 +23,7 @@ const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvan
 
           <Input id="awsCloudWatchKinesisStream"
                  type="select"
-                 value={getFieldValue('awsCloudWatchKinesisStream')}
+                 value={formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : ''}
                  onChange={onChange}
                  label="Choose Stream"
                  required>
@@ -45,8 +46,8 @@ const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvan
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  isAdvancedOptionsVisible: PropTypes.func.isRequired,
-  setAdvancedOptionsVisiblity: PropTypes.bool.isRequired,
+  isAdvancedOptionsVisible: PropTypes.bool.isRequired,
+  setAdvancedOptionsVisiblity: PropTypes.func.isRequired,
 };
 
 export default KinesisStreams;

@@ -10,7 +10,8 @@ import FormAdvancedOptions from './FormAdvancedOptions';
 import formDataHook from './hooks/formData';
 
 const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
-  const { getFieldValue } = formDataHook();
+  const { getFormData } = formDataHook();
+  const formData = getFormData();
 
   return (
     <Row>
@@ -24,12 +25,12 @@ const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvance
                  label="Kinesis Stream Name"
                  placeholder="Create Stream Name"
                  onChange={onChange}
-                 defaultValue={getFieldValue('awsCloudWatchKinesisStream')}
+                 defaultValue={formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : ''}
                  required />
 
           <Input id="awsCloudWatchAwsGroupName"
                  type="select"
-                 value={getFieldValue('awsCloudWatchAwsGroupName')}
+                 value={formData.awsCloudWatchAwsGroupName ? formData.awsCloudWatchAwsGroupName.value : ''}
                  onChange={onChange}
                  label="CloudWatch Group Name"
                  required>
@@ -52,8 +53,8 @@ const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvance
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  isAdvancedOptionsVisible: PropTypes.func.isRequired,
-  setAdvancedOptionsVisiblity: PropTypes.bool.isRequired,
+  isAdvancedOptionsVisible: PropTypes.bool.isRequired,
+  setAdvancedOptionsVisiblity: PropTypes.func.isRequired,
 };
 
 export default KinesisSetup;

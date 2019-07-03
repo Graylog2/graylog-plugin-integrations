@@ -9,7 +9,8 @@ import formDataHook from './hooks/formData';
 import FormWrap from '../common/FormWrap';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
-  const { getFieldValue } = formDataHook();
+  const { getFormData } = formDataHook();
+  const formData = getFormData();
 
   return (
     <Row>
@@ -25,19 +26,19 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
           <Input id="awsCloudWatchName"
                  type="text"
-                 value={getFieldValue('awsCloudWatchName')}
+                 value={formData.awsCloudWatchName ? formData.awsCloudWatchName.value : ''}
                  onChange={onChange}
                  placeholder="CloudWatch Integration Name"
-                 label="Name"
+                 label="Name of integration"
                  autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchDescription"
                  type="textarea"
-                 label="Description"
+                 label="Integration description"
                  placeholder="CloudWatch Integration Description"
                  onChange={onChange}
-                 value={getFieldValue('awsCloudWatchDescription')}
+                 value={formData.awsCloudWatchDescription ? formData.awsCloudWatchDescription.value : ''}
                  rows={4} />
 
           <Input id="awsCloudWatchAwsKey"
@@ -45,7 +46,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                  label="AWS Key"
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
-                 value={getFieldValue('awsCloudWatchAwsKey')}
+                 value={formData.awsCloudWatchAwsKey ? formData.awsCloudWatchAwsKey.value : ''}
                  autoComplete="off"
                  pattern="AK[A-Z0-9]{18}"
                  minLength="20"
@@ -56,7 +57,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                  label="AWS Secret"
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
-                 value={getFieldValue('awsCloudWatchAwsSecret')}
+                 value={formData.awsCloudWatchAwsSecret ? formData.awsCloudWatchAwsSecret.value : ''}
                  autoComplete="off"
                  pattern="[A-Za-z0-9/+=]{40}"
                  minLength="40"
@@ -64,7 +65,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
           <Input id="awsCloudWatchAwsRegion"
                  type="select"
-                 value={getFieldValue('awsCloudWatchAwsRegion')}
+                 value={formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : ''}
                  onChange={onChange}
                  label="Region"
                  required>

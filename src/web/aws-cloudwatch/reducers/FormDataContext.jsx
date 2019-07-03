@@ -7,36 +7,41 @@ const FormDataContext = createContext();
 
 const FormDataProvider = ({ children }) => {
   const initialState = {
-    formData: [
+    formData: {
       /*
-      Available options
-        {
-          id: Reference used in API transaction [required]
-          defaultValue: Value that will render as default
-        }
+      fieldId: { // Same ID as supplied to <Input />
+        value: '',
+        defaultValue: '', // Update StepReview.jsx & relevant step(s) if you need to output
+      }
       */
-      /* Default Advanced Values */
-      {
-        id: 'awsCloudWatchGlobalInput',
-        defaultValue: '',
-      },
-      {
-        id: 'awsCloudWatchAssumeARN',
-        defaultValue: '',
-      },
-      {
-        id: 'awsCloudWatchBatchSize',
+
+      /* Default Advanced Settings */
+      awsCloudWatchBatchSize: {
         defaultValue: '10000',
       },
-      {
-        id: 'awsCloudWatchThrottleEnabled',
-        defaultValue: '',
-      },
-      {
-        id: 'awsCloudWatchThrottleWait',
+      awsCloudWatchThrottleWait: {
         defaultValue: '1000',
       },
-    ],
+
+      /* Test Settings */
+      // TODO: Remove these before any official launch, but I'm tired of copy/paste during dev
+      awsCloudWatchName: {
+        value: 'Name',
+      },
+      awsCloudWatchDescription: {
+        value: 'Description',
+      },
+      awsCloudWatchAwsKey: {
+        value: 'AKQQQQQQQQQQQQQQQQQQ',
+      },
+      awsCloudWatchAwsSecret: {
+        value: 'XfoodLP3YXdzX3NlY3JldF8wMDNOTDAwMDbeMA==',
+      },
+      awsCloudWatchAwsRegion: {
+        value: 'us-east-2',
+      },
+      /* End Test Settings */
+    },
   };
 
   const reducer = (state, action) => {
@@ -44,24 +49,14 @@ const FormDataProvider = ({ children }) => {
       case UPDATE_FORM_DATA: {
         const { formData } = state;
         const { value: { id, value } } = action;
-        const existingFields = formData.map(field => field.id);
-        let updatedFormData = formData;
 
-        if (existingFields.includes(id)) { // check if it's already been set
-          updatedFormData = formData.map((field) => {
-            if (field.id === id) { // loop through and find the existing field
-              return {
-                ...field, // spread existing data and update values as necessary
-                value: field.value !== value ? value : field.value,
-              };
-            }
-
-            return field;
-          });
-        } else {
-          // Add new field to formData
-          updatedFormData = [...updatedFormData, { id, value }];
-        }
+        const updatedFormData = {
+          ...formData,
+          [id]: {
+            ...formData[id],
+            value,
+          },
+        };
 
         return {
           ...state,

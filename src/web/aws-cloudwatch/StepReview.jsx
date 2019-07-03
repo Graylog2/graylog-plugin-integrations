@@ -11,21 +11,25 @@ import formDataHook from './hooks/formData';
 
 import FormWrap from '../common/FormWrap';
 
+const format = (numString) => {
+  return Number(numString).toLocaleString('en-US');
+};
+
+const Default = ({ value }) => {
+  return (
+    <React.Fragment>
+      {format(value)} <small>(default)</small>
+    </React.Fragment>
+  );
+};
+
+Default.propTypes = {
+  value: PropTypes.string.isRequired,
+};
+
 const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
-  const { getFieldData, getFieldValue } = formDataHook();
-
-  const defaultOutput = (key, enabled = true) => {
-    const fieldData = getFieldData(key);
-    const outputValue = getFieldValue(key);
-    const Default = <small>(default)</small>;
-    const isDefault = (fieldData.defaultValue === fieldData.value) || !enabled;
-
-    return (
-      <React.Fragment>
-        {enabled ? outputValue : fieldData.defaultValue} {isDefault && Default}
-      </React.Fragment>
-    );
-  };
+  const { getFormData } = formDataHook();
+  const formData = getFormData();
 
   return (
     <Row>
@@ -38,27 +42,64 @@ const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Name</strong><span>{getFieldValue('awsCloudWatchName')}</span></li>
-              { getFieldValue('awsCloudWatchDescription')
-                && <li><strong>Description</strong><span>{getFieldValue('awsCloudWatchDescription')}</span></li>
+              <li>
+                <strong>Name</strong>
+                <span>{formData.awsCloudWatchName.value}</span>
+              </li>
+              {
+                formData.awsCloudWatchDescription
+                && (
+                  <li>
+                    <strong>Description</strong>
+                    <span>{formData.awsCloudWatchDescription.value || ''}</span>
+                  </li>
+                )
               }
-              <li><strong>AWS Key</strong><span>AK************{getFieldValue('awsCloudWatchAwsKey').slice(-6)}</span></li>
-              {/* <li><strong>AWS Secret</strong><span>{getFieldValue('awsCloudWatchAwsSecret')}</span></li> */}
-              <li><strong>AWS Region</strong><span>{getFieldValue('awsCloudWatchAwsRegion')}</span></li>
+              <li>
+                <strong>AWS Key</strong>
+                <span>AK************{formData.awsCloudWatchAwsKey.value.slice(-6)}</span>
+              </li>
+              <li>
+                <strong>AWS Region</strong>
+                <span>{formData.awsCloudWatchAwsRegion.value}</span>
+              </li>
             </ReviewItems>
 
             <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Stream</strong><span>{getFieldValue('awsCloudWatchKinesisStream')}</span></li>
-              <li><strong>Global Input</strong><span>{getFieldValue('awsCloudWatchGlobalInput') ? 'true' : 'false'}</span></li>
-              <li><strong>AWS Assumed ARN Role</strong><span>{getFieldValue('awsCloudWatchAssumeARN') || 'None'}</span></li>
+              <li>
+                <strong>Stream</strong>
+                <span>{formData.awsCloudWatchKinesisStream.value}</span>
+              </li>
+              <li>
+                <strong>Global Input</strong>
+                <span>{(formData.awsCloudWatchGlobalInput && formData.awsCloudWatchGlobalInput.value) ? 'true' : 'false'}</span>
+              </li>
+              <li>
+                <strong>AWS Assumed ARN Role</strong>
+                <span>{formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : 'None'}</span>
+              </li>
               <li>
                 <strong>Record Batch Size</strong>
-                <span>{defaultOutput('awsCloudWatchBatchSize')}</span>
+                <span>
+                  {
+                    formData.awsCloudWatchBatchSize.value
+                      ? format(formData.awsCloudWatchBatchSize.value)
+                      : <Default value={formData.awsCloudWatchBatchSize.defaultValue} />
+                  }
+                </span>
               </li>
               <li>
                 <strong>Throttled Wait (ms)</strong>
-                <span>{defaultOutput('awsCloudWatchThrottleWait', getFieldValue('awsCloudWatchThrottleEnabled'))}</span>
+                <span>
+                  {
+                    (formData.awsCloudWatchThrottleEnabled
+                      && formData.awsCloudWatchThrottleEnabled.value
+                      && formData.awsCloudWatchThrottleWait)
+                      ? format(formData.awsCloudWatchThrottleWait.value)
+                      : <Default value={formData.awsCloudWatchThrottleWait.defaultValue} />
+                  }
+                </span>
               </li>
             </ReviewItems>
 
