@@ -5,7 +5,7 @@ import { Col, Row } from 'react-bootstrap';
 import PageHeader from 'components/common/PageHeader';
 
 import { FormDataProvider } from './providers/FormData';
-import { StepsProvider } from './reducers/StepsContext';
+import { StepsProvider } from './providers/Steps';
 import CloudWatch from './CloudWatch';
 
 function CloudWatchApp({ params: { step } }) {
@@ -18,6 +18,7 @@ function CloudWatchApp({ params: { step } }) {
               <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
             </PageHeader>
           </Col>
+
           <Col md={12}>
             <CloudWatch wizardStep={step} />
           </Col>

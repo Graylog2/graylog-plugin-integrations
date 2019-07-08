@@ -7,7 +7,7 @@ import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 
-import stepsHook from './hooks/steps';
+import { StepsContext } from './providers/Steps';
 import { FormDataContext } from './providers/FormData';
 
 const exampleLogs = { // TODO: Demo Data until API is wired
@@ -30,20 +30,18 @@ const exampleLogs = { // TODO: Demo Data until API is wired
 
 const CloudWatch = () => {
   const {
+    availableSteps,
+    currentStep,
     isDisabledStep,
-    getCurrentStep,
+    setAvailableStep,
     setCurrentStep,
     setEnabledStep,
-    getAvailableSteps,
-    setAvailableSteps,
-  } = stepsHook();
+  } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
-
-  const currentStep = getCurrentStep();
-  const availableSteps = getAvailableSteps();
 
   const [isAdvancedOptionsVisible, setAdvancedOptionsVisiblity] = useState(false);
   const [logOutput, setLogOutput] = useState('');
+
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -109,7 +107,7 @@ const CloudWatch = () => {
   ];
 
   if (availableSteps.length === 0) {
-    setAvailableSteps(wizardSteps.map(step => step.key));
+    setAvailableStep(wizardSteps.map(step => step.key));
   }
 
   return (
