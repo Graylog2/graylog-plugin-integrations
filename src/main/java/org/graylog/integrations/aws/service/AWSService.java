@@ -140,7 +140,9 @@ public class AWSService {
                                              "elasticloadbalancing:DescribeLoadBalancers",
                                              "kinesis:GetRecords",
                                              "kinesis:GetShardIterator",
-                                             "kinesis:ListShards");
+                                             "kinesis:ListShards",
+                                             "kinesis:ListStreams",
+                                             "logs:DescribeLogGroups");
 
         AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogCloudWatchPolicy",
                                                                  "Allow",
