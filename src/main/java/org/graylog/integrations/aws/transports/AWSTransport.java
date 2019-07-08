@@ -8,9 +8,6 @@ import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
-import org.graylog2.plugin.configuration.fields.ConfigurationField;
-import org.graylog2.plugin.configuration.fields.NumberField;
-import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
@@ -76,8 +73,8 @@ public class AWSTransport extends ThrottleableTransport {
         final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE));
         final Transport.Factory<? extends Transport> transportFactory = this.availableTransports.get(awsMessageType.getTransportName());
         if (transportFactory == null) {
-            throw new MisfireException(String.format("A codec with name [%s] could not be found.",
-                                                     awsMessageType.getCodecName()));
+            throw new MisfireException(String.format("A transport with name [%s] could not be found.",
+                                                     awsMessageType.getTransportName()));
         }
 
         return transportFactory.create(configuration);
