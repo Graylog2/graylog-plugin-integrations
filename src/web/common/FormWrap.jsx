@@ -1,49 +1,50 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
 import formValidation from '../utils/formValidation';
 
-export default class FormWrap extends Component {
-  static propTypes = {
-    children: PropTypes.any.isRequired,
-    onSubmit: PropTypes.func,
-    buttonContent: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.node,
-    ]),
-  }
+let currentForm;
 
-  static defaultProps = {
-    onSubmit: () => {},
-    buttonContent: 'Submit',
-  }
-
-  onSubmit = (event) => {
-    const { onSubmit } = this.props;
-    if (formValidation.isFormValid(this.currentForm)) {
+const FormWrap = ({ children, buttonContent, onSubmit }) => {
+  const handleSubmit = (event) => {
+    if (formValidation.isFormValid(currentForm)) {
       onSubmit(event);
     }
   };
 
-  prevent = (event) => {
+  const prevent = (event) => {
     event.preventDefault();
     return false;
-  }
+  };
 
-  render() {
-    const { children, buttonContent } = this.props;
+  return (
+    <form onSubmit={prevent}
+          autoComplete="off"
+          ref={(form) => { currentForm = form; }}>
+      {children}
 
-    return (
-      <form onSubmit={this.prevent} autoComplete="off" ref={(form) => { this.currentForm = form; }}>
-        {children}
+      <Button type="button"
+              onClick={handleSubmit}
+              bsStyle="primary">
+        {buttonContent}
+      </Button>
+    </form>
+  );
+};
 
-        <Button type="button"
-                onClick={this.onSubmit}
-                bsStyle="primary">
-          {buttonContent}
-        </Button>
-      </form>
-    );
-  }
-}
+FormWrap.propTypes = {
+  children: PropTypes.any.isRequired,
+  onSubmit: PropTypes.func,
+  buttonContent: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
+};
+
+FormWrap.defaultProps = {
+  onSubmit: () => {},
+  buttonContent: 'Submit',
+};
+
+export default FormWrap;
