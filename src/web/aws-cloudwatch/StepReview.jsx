@@ -8,6 +8,7 @@ import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './providers/FormData';
+import { LogOutputContext } from './providers/LogOutput';
 import FormWrap from '../common/FormWrap';
 
 const format = (numString) => {
@@ -26,8 +27,9 @@ Default.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
+const StepReview = ({ onSubmit, onEditClick }) => {
   const { formData } = useContext(FormDataContext);
+  const { logOutput } = useContext(LogOutputContext);
 
   return (
     <Row>
@@ -120,7 +122,6 @@ const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
 StepReview.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onEditClick: PropTypes.func.isRequired,
-  logOutput: PropTypes.string.isRequired,
 };
 
 const Container = styled.div`

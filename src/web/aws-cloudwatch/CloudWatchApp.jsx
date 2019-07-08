@@ -6,23 +6,26 @@ import PageHeader from 'components/common/PageHeader';
 
 import { FormDataProvider } from './providers/FormData';
 import { StepsProvider } from './providers/Steps';
+import { LogOutputProvider } from './providers/LogOutput';
 import CloudWatch from './CloudWatch';
 
 function CloudWatchApp({ params: { step } }) {
   return (
     <StepsProvider>
       <FormDataProvider>
-        <Row>
-          <Col md={12}>
-            <PageHeader title="AWS Integration">
-              <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
-            </PageHeader>
-          </Col>
+        <LogOutputProvider>
+          <Row>
+            <Col md={12}>
+              <PageHeader title="AWS Integration">
+                <span>Lorem ipsum dolor sit amet consectetur adipisicing elit. Impedit quidem quam laborum voluptatum similique expedita voluptatem saepe.</span>
+              </PageHeader>
+            </Col>
 
-          <Col md={12}>
-            <CloudWatch wizardStep={step} />
-          </Col>
-        </Row>
+            <Col md={12}>
+              <CloudWatch wizardStep={step} />
+            </Col>
+          </Row>
+        </LogOutputProvider>
       </FormDataProvider>
     </StepsProvider>
   );

@@ -9,7 +9,7 @@ import FormWrap from '../common/FormWrap';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './providers/FormData';
 
-const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
+const KinesisSetup = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
 
   return (
@@ -40,9 +40,7 @@ const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvance
             <option value="group-name-4">Group Name 4</option>
           </Input>
 
-          <FormAdvancedOptions onChange={onChange}
-                               toggle={setAdvancedOptionsVisiblity}
-                               visible={isAdvancedOptionsVisible} />
+          <FormAdvancedOptions onChange={onChange} />
         </FormWrap>
       </Col>
     </Row>
@@ -52,8 +50,6 @@ const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvance
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  isAdvancedOptionsVisible: PropTypes.bool.isRequired,
-  setAdvancedOptionsVisiblity: PropTypes.func.isRequired,
 };
 
 export default KinesisSetup;

@@ -10,7 +10,7 @@ import { FormDataContext } from './providers/FormData';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
-const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
+const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
 
   return (
@@ -33,9 +33,7 @@ const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvan
             <option value="stream-name-4">Stream Name 4</option>
           </Input>
 
-          <FormAdvancedOptions onChange={onChange}
-                               toggle={setAdvancedOptionsVisiblity}
-                               visible={isAdvancedOptionsVisible} />
+          <FormAdvancedOptions onChange={onChange} />
         </FormWrap>
       </Col>
     </Row>
@@ -45,8 +43,6 @@ const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvan
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  isAdvancedOptionsVisible: PropTypes.bool.isRequired,
-  setAdvancedOptionsVisiblity: PropTypes.func.isRequired,
 };
 
 export default KinesisStreams;

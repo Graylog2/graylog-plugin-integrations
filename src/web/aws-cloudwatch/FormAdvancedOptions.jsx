@@ -4,12 +4,14 @@ import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './providers/FormData';
+import { AdvancedOptionsContext } from './providers/AdvancedOptions';
 
-const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
+const FormAdvancedOptions = ({ onChange }) => {
   const { formData } = useContext(FormDataContext);
+  const { isAdvancedOptionsVisible, setAdvancedOptionsVisibility } = useContext(AdvancedOptionsContext);
 
   const handleToggle = () => {
-    toggle(!visible);
+    setAdvancedOptionsVisibility(!isAdvancedOptionsVisible);
   };
 
   return (
@@ -18,7 +20,7 @@ const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
           Advanced Options <i className="fa fa-angle-right fa-sm" />
       </ToggleAdvancedOptions>
 
-      <AdvancedOptionsContent visible={visible}>
+      <AdvancedOptionsContent visible={isAdvancedOptionsVisible}>
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="global-input"
@@ -57,13 +59,10 @@ const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
 
 FormAdvancedOptions.propTypes = {
   onChange: PropTypes.func.isRequired,
-  toggle: PropTypes.func.isRequired,
-  visible: PropTypes.bool.isRequired,
 };
 
 const AdvancedOptionsContent = styled.div`
   display: ${props => (props.visible ? 'block' : 'none')};
-
 `;
 
 const ToggleAdvancedOptions = styled.button`

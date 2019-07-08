@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
+import { LogOutputContext } from './providers/LogOutput';
 import FormWrap from '../common/FormWrap';
 
-const StepHealthCheck = ({ onSubmit, logOutput }) => {
+const StepHealthCheck = ({ onSubmit }) => {
+  const { logOutput } = useContext(LogOutputContext);
+
   return (
     <Row>
       <Col md={8}>
@@ -30,7 +33,6 @@ const StepHealthCheck = ({ onSubmit, logOutput }) => {
 
 StepHealthCheck.propTypes = {
   onSubmit: PropTypes.func.isRequired,
-  logOutput: PropTypes.string.isRequired,
 };
 
 export default StepHealthCheck;
