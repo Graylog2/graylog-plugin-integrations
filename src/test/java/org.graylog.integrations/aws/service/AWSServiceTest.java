@@ -1,5 +1,6 @@
 package org.graylog.integrations.aws.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
@@ -124,13 +125,13 @@ public class AWSServiceTest {
         }
         assertTrue(foundEuWestRegion);
 
-        // Use one liner presence checks.
+        // Use none liner presence checks.
         assertTrue(regions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
         assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK", 20, regions.size());
     }
 
     @Test
-    public void testAvailableServices() {
+    public void testAvailableServices() throws JsonProcessingException {
 
         AvailableServiceResponse services = awsService.getAvailableServices();
 
@@ -140,5 +141,13 @@ public class AWSServiceTest {
 
         // CloudWatch should be in the list of available services.
         assertTrue(services.services().stream().anyMatch(s -> s.name().equals("CloudWatch")));
+
+        // Verify that some of the needed actions are present.
+        List<String> actions = services.services().get(0).policy().statement().action();
+        assertTrue(actions.stream().anyMatch(action -> action.contains("cloudwatch")));
+        assertTrue(actions.stream().anyMatch(action -> action.contains("dynamodb")));
+        assertTrue(actions.stream().anyMatch(action -> action.contains("ec2")));
+        assertTrue(actions.stream().anyMatch(action -> action.contains("elasticloadbalancing")));
+        assertTrue(actions.stream().anyMatch(action -> action.contains("kinesis")));
     }
 }

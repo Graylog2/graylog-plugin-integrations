@@ -1,10 +1,14 @@
 package org.graylog.integrations.aws.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.AWSPolicy;
+import org.graylog.integrations.aws.AWSPolicyStatement;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
@@ -32,6 +36,7 @@ import software.amazon.awssdk.regions.RegionMetadata;
 
 import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -117,7 +122,31 @@ public class AWSService {
     /**
      * @return A list of available AWS services supported by the AWS Graylog AWS integration.
      */
-    public AvailableServiceResponse getAvailableServices() {
+    public AvailableServiceResponse getAvailableServices() throws JsonProcessingException {
+
+        // Create an AWSPolicy object that can be serialized into JSON.
+        // The user will use this as a guide to create a policy in their AWS account.
+        List<String> actions = Arrays.asList("cloudwatch:PutMetricData",
+                                             "dynamodb:CreateTable",
+                                             "dynamodb:DescribeTable",
+                                             "dynamodb:GetItem",
+                                             "dynamodb:PutItem",
+                                             "dynamodb:Scan",
+                                             "dynamodb:UpdateItem",
+                                             "ec2:DescribeInstances",
+                                             "ec2:DescribeNetworkInterfaceAttribute",
+                                             "ec2:DescribeNetworkInterfaces",
+                                             "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                                             "elasticloadbalancing:DescribeLoadBalancers",
+                                             "kinesis:GetRecords",
+                                             "kinesis:GetShardIterator",
+                                             "kinesis:ListShards");
+
+        AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogCloudWatchPolicy",
+                                                                 "Allow",
+                                                                 actions,
+                                                                 "*");
+        AWSPolicy awsPolicy = AWSPolicy.create("2019-06-19", statement);
 
         ArrayList<AvailableService> services = new ArrayList<>();
         AvailableService cloudWatchService =
@@ -126,36 +155,9 @@ public class AWSService {
                                         "in real time. AWS CloudWatch is a monitoring and management service built " +
                                         "for developers, system operators, site reliability engineers (SRE), " +
                                         "and IT managers.",
-                                        "{\n" +
-                                        "  \"Version\": \"2019-06-19\",\n" +
-                                        "  \"Statement\": [\n" +
-                                        "    {\n" +
-                                        "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
-                                        "      \"Effect\": \"Allow\",\n" +
-                                        "      \"Action\": [\n" +
-                                        "        \"cloudwatch:PutMetricData\",\n" +
-                                        "        \"dynamodb:CreateTable\",\n" +
-                                        "        \"dynamodb:DescribeTable\",\n" +
-                                        "        \"dynamodb:GetItem\",\n" +
-                                        "        \"dynamodb:PutItem\",\n" +
-                                        "        \"dynamodb:Scan\",\n" +
-                                        "        \"dynamodb:UpdateItem\",\n" +
-                                        "        \"ec2:DescribeInstances\",\n" +
-                                        "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
-                                        "        \"ec2:DescribeNetworkInterfaces\",\n" +
-                                        "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
-                                        "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
-                                        "        \"kinesis:GetRecords\",\n" +
-                                        "        \"kinesis:GetShardIterator\",\n" +
-                                        "        \"kinesis:ListShards\"\n" +
-                                        "      ],\n" +
-                                        "      \"Resource\": \"*\"\n" +
-                                        "    }\n" +
-                                        "  ]\n" +
-                                        "}",
+                                        awsPolicy,
                                         "Requires Kinesis",
-                                        "https://aws.amazon.com/cloudwatch/"
-                );
+                                        "https://aws.amazon.com/cloudwatch/");
         services.add(cloudWatchService);
         return AvailableServiceResponse.create(services, services.size());
     }

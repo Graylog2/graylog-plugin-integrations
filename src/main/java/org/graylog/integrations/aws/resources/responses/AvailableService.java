@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
+import org.graylog.integrations.aws.AWSPolicy;
 
 @JsonAutoDetect
 @AutoValue
@@ -23,7 +24,7 @@ public abstract class AvailableService {
     public abstract String description();
 
     @JsonProperty(POLICY)
-    public abstract String policy();
+    public abstract AWSPolicy policy();
 
     @JsonProperty(HELPER_TEXT)
     public abstract String helperText();
@@ -33,7 +34,7 @@ public abstract class AvailableService {
 
     public static AvailableService create(@JsonProperty(NAME) String name,
                                           @JsonProperty(DESCRIPTION) String description,
-                                          @JsonProperty(POLICY) String policy,
+                                          @JsonProperty(POLICY) AWSPolicy policy,
                                           @JsonProperty(HELPER_TEXT) String helperText,
                                           @JsonProperty(LEARN_MORE_LINK) String learnMoreLink) {
         return new AutoValue_AvailableService(name, description, policy, helperText, learnMoreLink);
