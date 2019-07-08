@@ -15,13 +15,11 @@ import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
 import org.graylog2.plugin.inputs.transports.ThrottleableTransport;
 import org.graylog2.plugin.inputs.transports.Transport;
-import org.graylog2.plugin.journal.RawMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class AWSTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(AWSTransport.class);
@@ -46,8 +44,8 @@ public class AWSTransport extends ThrottleableTransport {
     @Override
     public void doLaunch(MessageInput input) throws MisfireException {
 
-        LOG.info("Start AWSTransport");
-        // Load the codec by message type.
+        LOG.debug("Start AWS Transport");
+        // Load the transport by message type.
         final Transport transport = resolveTransport();
         transport.launch(input);
 
@@ -58,9 +56,9 @@ public class AWSTransport extends ThrottleableTransport {
     @Override
     public void doStop() {
 
-        LOG.info("Stop AWSTransport");
+        LOG.debug("Stop AWS Transport");
         if (resolvedTransport == null) {
-            LOG.error("A codec was not found with this [{}] instance.",
+            LOG.error("A transport was not found with this [{}] instance.",
                       configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE));
         }
         resolvedTransport.stop();
@@ -78,10 +76,6 @@ public class AWSTransport extends ThrottleableTransport {
         }
 
         return transportFactory.create(configuration);
-    }
-
-    private Consumer<byte[]> kinesisCallback(final MessageInput input) {
-        return (data) -> input.processRawMessage(new RawMessage(data));
     }
 
     @Override
