@@ -3,8 +3,8 @@ import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from './providers/FormData';
-import { AdvancedOptionsContext } from './providers/AdvancedOptions';
+import { FormDataContext } from './context/FormData';
+import { AdvancedOptionsContext } from './context/AdvancedOptions';
 
 const FormAdvancedOptions = ({ onChange }) => {
   const { formData } = useContext(FormDataContext);

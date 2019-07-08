@@ -7,7 +7,7 @@ import { Input } from 'components/bootstrap';
 import FormWrap from '../common/FormWrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
-import { FormDataContext } from './providers/FormData';
+import { FormDataContext } from './context/FormData';
 
 const KinesisSetup = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);

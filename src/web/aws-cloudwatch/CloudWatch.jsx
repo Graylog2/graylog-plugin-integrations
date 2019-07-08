@@ -7,10 +7,10 @@ import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 
-import { StepsContext } from './providers/Steps';
-import { FormDataContext } from './providers/FormData';
-import { LogOutputContext } from './providers/LogOutput';
-import TEMPORARY_LOG from './providers/temporary_log';
+import { StepsContext } from './context/Steps';
+import { FormDataContext } from './context/FormData';
+import { LogOutputContext } from './context/LogOutput';
+import TEMPORARY_LOG from './context/temporary_log';
 
 const CloudWatch = () => {
   const {

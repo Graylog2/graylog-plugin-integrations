@@ -7,8 +7,8 @@ import { Link } from 'react-router';
 import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from './providers/FormData';
-import { LogOutputContext } from './providers/LogOutput';
+import { FormDataContext } from './context/FormData';
+import { LogOutputContext } from './context/LogOutput';
 import FormWrap from '../common/FormWrap';
 
 const format = (numString) => {

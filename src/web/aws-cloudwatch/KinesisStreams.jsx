@@ -6,7 +6,7 @@ import { Input } from 'components/bootstrap';
 
 import FormWrap from '../common/FormWrap';
 
-import { FormDataContext } from './providers/FormData';
+import { FormDataContext } from './context/FormData';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 

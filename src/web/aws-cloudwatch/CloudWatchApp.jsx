@@ -4,12 +4,12 @@ import { Col, Row } from 'react-bootstrap';
 
 import PageHeader from 'components/common/PageHeader';
 
-import { FormDataProvider } from './providers/FormData';
-import { StepsProvider } from './providers/Steps';
-import { LogOutputProvider } from './providers/LogOutput';
+import { FormDataProvider } from './context/FormData';
+import { StepsProvider } from './context/Steps';
+import { LogOutputProvider } from './context/LogOutput';
 import CloudWatch from './CloudWatch';
 
-function CloudWatchApp({ params: { step } }) {
+const CloudWatchApp = ({ params: { step } }) => {
   return (
     <StepsProvider>
       <FormDataProvider>
@@ -29,7 +29,7 @@ function CloudWatchApp({ params: { step } }) {
       </FormDataProvider>
     </StepsProvider>
   );
-}
+};
 
 CloudWatchApp.propTypes = {
   params: PropTypes.shape({

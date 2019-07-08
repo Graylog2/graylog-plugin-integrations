@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from './providers/FormData';
+import { FormDataContext } from './context/FormData';
 import FormWrap from '../common/FormWrap';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {

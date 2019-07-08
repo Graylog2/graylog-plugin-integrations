@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import KinesisStreams from './KinesisStreams';
 import KinesisSetup from './KinesisSetup';
-import { AdvancedOptionsProvider } from './providers/AdvancedOptions';
+import { AdvancedOptionsProvider } from './context/AdvancedOptions';
 
 const StepKinesis = ({ hasStreams, ...restProps }) => {
   return (
