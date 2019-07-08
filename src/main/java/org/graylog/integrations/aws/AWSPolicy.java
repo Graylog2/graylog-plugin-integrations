@@ -2,16 +2,19 @@ package org.graylog.integrations.aws;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
+// Define a JSON field order matching AWS examples. This improves readability.
+@JsonPropertyOrder({AWSPolicy.VERSION, AWSPolicy.STATEMENT})
 public abstract class AWSPolicy {
 
-    private static final String VERSION = "Version";
-    private static final String STATEMENT = "Statement";
+    public static final String VERSION = "Version";
+    public static final String STATEMENT = "Statement";
 
     @JsonProperty(VERSION)
     public abstract String version();
