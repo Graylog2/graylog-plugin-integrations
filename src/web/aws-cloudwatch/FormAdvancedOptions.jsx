@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from '@emotion/styled';
 import PropTypes from 'prop-types';
 import { Input } from 'components/bootstrap';
 
-import formDataHook from './hooks/formData';
+import { FormDataContext } from './providers/FormData';
 
 const FormAdvancedOptions = ({ onChange, toggle, visible }) => {
-  const { getFormData } = formDataHook();
-  const formData = getFormData();
+  const { formData } = useContext(FormDataContext);
 
   const handleToggle = () => {
     toggle(!visible);

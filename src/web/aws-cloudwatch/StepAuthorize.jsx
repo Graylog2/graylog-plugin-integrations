@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
 
-import formDataHook from './hooks/formData';
+import { FormDataContext } from './providers/FormData';
 import FormWrap from '../common/FormWrap';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
-  const { getFormData } = formDataHook();
-  const formData = getFormData();
+  const { formData } = useContext(FormDataContext);
 
   return (
     <Row>

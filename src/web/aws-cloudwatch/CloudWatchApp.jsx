@@ -4,7 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 
 import PageHeader from 'components/common/PageHeader';
 
-import { FormDataProvider } from './reducers/FormDataContext';
+import { FormDataProvider } from './providers/FormData';
 import { StepsProvider } from './reducers/StepsContext';
 import CloudWatch from './CloudWatch';
 

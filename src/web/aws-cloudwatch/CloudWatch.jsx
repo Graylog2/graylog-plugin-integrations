@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
 import Wizard from 'components/common/Wizard';
 
@@ -8,7 +8,7 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 
 import stepsHook from './hooks/steps';
-import formDataHook from './hooks/formData';
+import { FormDataContext } from './providers/FormData';
 
 const exampleLogs = { // TODO: Demo Data until API is wired
   full_message: '2 123456789010 eni-abc123de 172.31.16.139 172.31.16.21 20641 22 6 20 4249 1418530010 1418530070 ACCEPT OK',
@@ -37,7 +37,7 @@ const CloudWatch = () => {
     getAvailableSteps,
     setAvailableSteps,
   } = stepsHook();
-  const { setFormData } = formDataHook();
+  const { setFormData } = useContext(FormDataContext);
 
   const currentStep = getCurrentStep();
   const availableSteps = getAvailableSteps();

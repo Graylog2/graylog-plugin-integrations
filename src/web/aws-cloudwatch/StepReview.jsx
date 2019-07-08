@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { Col, Row } from 'react-bootstrap';
@@ -7,8 +7,7 @@ import { Link } from 'react-router';
 import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
-import formDataHook from './hooks/formData';
-
+import { FormDataContext } from './providers/FormData';
 import FormWrap from '../common/FormWrap';
 
 const format = (numString) => {
@@ -28,8 +27,7 @@ Default.propTypes = {
 };
 
 const StepReview = ({ onSubmit, onEditClick, logOutput }) => {
-  const { getFormData } = formDataHook();
-  const formData = getFormData();
+  const { formData } = useContext(FormDataContext);
 
   return (
     <Row>

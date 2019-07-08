@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
@@ -6,13 +6,12 @@ import { Input } from 'components/bootstrap';
 
 import FormWrap from '../common/FormWrap';
 
-import formDataHook from './hooks/formData';
+import { FormDataContext } from './providers/FormData';
 import FormAdvancedOptions from './FormAdvancedOptions';
 import Routes from '../common/Routes';
 
 const KinesisStreams = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
-  const { getFormData } = formDataHook();
-  const formData = getFormData();
+  const { formData } = useContext(FormDataContext);
 
   return (
     <Row>

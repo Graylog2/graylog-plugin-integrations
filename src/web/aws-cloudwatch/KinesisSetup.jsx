@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
@@ -7,11 +7,10 @@ import { Input } from 'components/bootstrap';
 import FormWrap from '../common/FormWrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
-import formDataHook from './hooks/formData';
+import { FormDataContext } from './providers/FormData';
 
 const KinesisSetup = ({ onChange, onSubmit, isAdvancedOptionsVisible, setAdvancedOptionsVisiblity }) => {
-  const { getFormData } = formDataHook();
-  const formData = getFormData();
+  const { formData } = useContext(FormDataContext);
 
   return (
     <Row>
