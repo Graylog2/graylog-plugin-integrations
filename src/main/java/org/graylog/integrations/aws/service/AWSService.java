@@ -50,6 +50,12 @@ public class AWSService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
 
+    /**
+     * The only version supported is 2012-10-17
+     * @see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_version.html">IAM JSON Policy Elements: Version</a>
+     */
+    private static final String AWS_POLICY_VERSION = "2012-10-17";
+
     private final InputService inputService;
     private final MessageInputFactory messageInputFactory;
     private final NodeId nodeId;
@@ -151,7 +157,7 @@ public class AWSService {
                                                                  "Allow",
                                                                  actions,
                                                                  "*");
-        AWSPolicy awsPolicy = AWSPolicy.create("2019-06-19", statement);
+        AWSPolicy awsPolicy = AWSPolicy.create(AWS_POLICY_VERSION, statement);
 
         ArrayList<AvailableService> services = new ArrayList<>();
 
