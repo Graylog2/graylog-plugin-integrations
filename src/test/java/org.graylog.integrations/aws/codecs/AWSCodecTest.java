@@ -35,8 +35,8 @@ public class AWSCodecTest {
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildAWSCodecs());
 
-        DateTime timestamp = DateTime.now(DateTimeZone.UTC);
-        KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
+        final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
+        final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
                                                                  "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK");
 
         Message message = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(kinesisLogEntry)));
