@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import java.util.List;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
@@ -20,10 +22,10 @@ public abstract class AWSPolicy {
     public abstract String version();
 
     @JsonProperty(STATEMENT)
-    public abstract AWSPolicyStatement statement();
+    public abstract List<AWSPolicyStatement> statement();
 
     public static AWSPolicy create(@JsonProperty(VERSION) String version,
-                                   @JsonProperty(STATEMENT) AWSPolicyStatement statement) {
+                                   @JsonProperty(STATEMENT) List<AWSPolicyStatement> statement) {
         return new AutoValue_AWSPolicy(version, statement);
     }
 }

@@ -37,6 +37,7 @@ import software.amazon.awssdk.regions.RegionMetadata;
 import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -157,7 +158,7 @@ public class AWSService {
                                                                  "Allow",
                                                                  actions,
                                                                  "*");
-        AWSPolicy awsPolicy = AWSPolicy.create(AWS_POLICY_VERSION, statement);
+        AWSPolicy awsPolicy = AWSPolicy.create(AWS_POLICY_VERSION, Collections.singletonList(statement));
 
         ArrayList<AvailableService> services = new ArrayList<>();
 
