@@ -6,18 +6,15 @@ import com.github.rholder.retry.RetryException;
 import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.responses.HealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
@@ -99,7 +96,7 @@ public class KinesisService {
      * @return a {@code KinesisHealthCheckResponse}, which indicates the type of detected message and a sample parsed
      * message.
      */
-    public HealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
+    public KinesisHealthCheckResponse healthCheck(KinesisHealthCheckRequest request) throws ExecutionException, IOException {
 
         LOG.debug("Executing healthCheck");
         LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
@@ -114,7 +111,7 @@ public class KinesisService {
         if (!streamExists) {
             String explanation = String.format("The requested stream [%s] was not found.", request.streamName());
             LOG.error(explanation);
-            return HealthCheckResponse.createFailed(explanation);
+            return KinesisHealthCheckResponse.createFailed(explanation);
         }
 
         LOG.debug("The stream [{}] exists", request.streamName());
@@ -127,7 +124,7 @@ public class KinesisService {
         if (records.size() == 0) {
             String explanation = "The Kinesis stream does not contain any messages.";
             LOG.error(explanation);
-            return HealthCheckResponse.createFailed(explanation);
+            return KinesisHealthCheckResponse.createFailed(explanation);
         }
 
         // Select random record from list, and check if the payload is compressed
@@ -221,7 +218,7 @@ public class KinesisService {
      * message.
      * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"/>
      */
-    private HealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
+    private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
 
         final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
@@ -243,7 +240,7 @@ public class KinesisService {
             String message = "The CloudWatch payload did not contain any messages. This should not happen. " +
                              "See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html";
             LOG.debug(message);
-            return HealthCheckResponse.createFailed(message);
+            return KinesisHealthCheckResponse.createFailed(message);
         }
 
         CloudWatchLogEvent logEntry = logEntryOptional.get();
@@ -318,8 +315,8 @@ public class KinesisService {
      * @param logStreamName     The CloudWatch log stream name.
      * @return A {@code KinesisHealthCheckResponse} with the fully parsed message and type.
      */
-    private HealthCheckResponse detectAndParseMessage(String logMessage, DateTime timestamp, String kinesisStreamName,
-                                                      String logGroupName, String logStreamName) {
+    private KinesisHealthCheckResponse detectAndParseMessage(String logMessage, DateTime timestamp, String kinesisStreamName,
+                                                             String logGroupName, String logStreamName) {
 
         LOG.debug("Attempting to detect the type of log message. message [{}] stream [{}] log group [{}].",
                   logMessage, kinesisStreamName, logGroupName);
@@ -342,7 +339,7 @@ public class KinesisService {
         if (codecFactory == null) {
             final String explanation = String.format("A codec with name [%s] could not be found.", awsMessageType.getCodecName());
             LOG.error(explanation);
-            return HealthCheckResponse.createFailed(explanation);
+            return KinesisHealthCheckResponse.createFailed(explanation);
         }
 
         // Parse the message with the selected codec.
@@ -358,7 +355,7 @@ public class KinesisService {
             final String explanation = String.format("Message decoding failed. More information might be " +
                                                      "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
-            return HealthCheckResponse.createFailed(explanation);
+            return KinesisHealthCheckResponse.createFailed(explanation);
         }
 
         // Check if parsing message returns null.
@@ -366,51 +363,14 @@ public class KinesisService {
             final String explanation = String.format("Message decoding failed. More information might be " +
                                                      "available by enabling Debug logging. message [%s]", logMessage);
             LOG.error(explanation);
-            return HealthCheckResponse.createFailed(explanation);
+            return KinesisHealthCheckResponse.createFailed(explanation);
         }
 
         LOG.debug("Successfully parsed message type [{}] with codec [{}].", awsMessageType, awsMessageType.getCodecName());
 
-        return HealthCheckResponse.create(true, awsMessageType,
-                                          responseMessage,
-                                          buildMessageSummary(fullyParsedMessage, logEvent.message()));
-    }
-
-    /**
-     * Prepare a string summary of all fields. This wil be displayed on the Health Check results page.
-     * The purpose is to provide the user with a summary of the parsed fields.
-     * <p>
-     * Note that the {@code org.graylog2.plugin.Message.toString()} method is not suitable for this, since it is a
-     * one-line summary. Multi-line is important for clarity.
-     *
-     * @param message     The fully parsed {@code org.graylog2.plugin.Message} object.
-     * @param fullMessage The full, unparsed message string.
-     * @return a summary of fields in the following format:
-     * <p>
-     * full_message: 2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK
-     * protocol_number: 6
-     * src_addr: 172.1.1.2
-     * source: aws-flowlogs
-     * message: eni-3244234 ACCEPT TCP 172.1.1.2:80 -> 172.1.1.2:2264
-     * packets: 1
-     * ...
-     */
-    String buildMessageSummary(Message message, String fullMessage) {
-
-        // Build up a multi-line string representation of the message.
-        final StringBuilder builder = new StringBuilder();
-        final String cleanMessage = fullMessage.replaceAll("\\n", "").replaceAll("\\t", "");
-
-        // Append the entire message.
-        builder.append("full_message: ");
-        builder.append(StringUtils.abbreviate(cleanMessage, 225)); // Shorten if too long.
-
-        // Append the field values.
-        builder.append("\n");
-        final Map<String, Object> filteredFields = Maps.newHashMap(message.getFields());
-        Joiner.on("\n").withKeyValueSeparator(": ").appendTo(builder, filteredFields);
-
-        return builder.toString();
+        return KinesisHealthCheckResponse.create(true, awsMessageType,
+                                                 responseMessage,
+                                                 fullyParsedMessage.getFields());
     }
 
     Record selectRandomRecord(List<Record> recordsList) {
