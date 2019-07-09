@@ -53,13 +53,16 @@ public class AWSService {
     private final InputService inputService;
     private final MessageInputFactory messageInputFactory;
     private final NodeId nodeId;
+    private final ObjectMapper objectMapper;
 
     @Inject
-    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId) {
+    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId,
+                      ObjectMapper objectMapper) {
 
         this.inputService = inputService;
         this.messageInputFactory = messageInputFactory;
         this.nodeId = nodeId;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -151,13 +154,16 @@ public class AWSService {
         AWSPolicy awsPolicy = AWSPolicy.create("2019-06-19", statement);
 
         ArrayList<AvailableService> services = new ArrayList<>();
+
+        // Deliberately provide the policy JSON as a string. The UI will format and display this to the user.
+        String policy = objectMapper.writeValueAsString(awsPolicy);
         AvailableService cloudWatchService =
                 AvailableService.create("CloudWatch",
                                         "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
                                         "in real time. AWS CloudWatch is a monitoring and management service built " +
                                         "for developers, system operators, site reliability engineers (SRE), " +
                                         "and IT managers.",
-                                        awsPolicy,
+                                        policy,
                                         "Requires Kinesis",
                                         "https://aws.amazon.com/cloudwatch/");
         services.add(cloudWatchService);

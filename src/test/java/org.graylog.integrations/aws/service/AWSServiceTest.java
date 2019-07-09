@@ -1,6 +1,7 @@
 package org.graylog.integrations.aws.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
@@ -13,6 +14,7 @@ import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.inputs.MessageInputFactory;
 import org.junit.Before;
 import org.junit.Rule;
@@ -60,7 +62,7 @@ public class AWSServiceTest {
     @Before
     public void setUp() {
 
-        awsService = new AWSService(inputService, messageInputFactory, nodeId);
+        awsService = new AWSService(inputService, messageInputFactory, nodeId, new ObjectMapperProvider().get());
     }
 
     @Test
@@ -143,11 +145,11 @@ public class AWSServiceTest {
         assertTrue(services.services().stream().anyMatch(s -> s.name().equals("CloudWatch")));
 
         // Verify that some of the needed actions are present.
-        List<String> actions = services.services().get(0).policy().statement().action();
-        assertTrue(actions.stream().anyMatch(action -> action.contains("cloudwatch")));
-        assertTrue(actions.stream().anyMatch(action -> action.contains("dynamodb")));
-        assertTrue(actions.stream().anyMatch(action -> action.contains("ec2")));
-        assertTrue(actions.stream().anyMatch(action -> action.contains("elasticloadbalancing")));
-        assertTrue(actions.stream().anyMatch(action -> action.contains("kinesis")));
+        String policy = services.services().get(0).policy();
+        assertTrue(policy.contains("cloudwatch"));
+        assertTrue(policy.contains("dynamodb"));
+        assertTrue(policy.contains("ec2"));
+        assertTrue(policy.contains("elasticloadbalancing"));
+        assertTrue(policy.contains("kinesis"));
     }
 }

@@ -24,7 +24,7 @@ public abstract class AvailableService {
     public abstract String description();
 
     @JsonProperty(POLICY)
-    public abstract AWSPolicy policy();
+    public abstract String policy();
 
     @JsonProperty(HELPER_TEXT)
     public abstract String helperText();
@@ -34,7 +34,7 @@ public abstract class AvailableService {
 
     public static AvailableService create(@JsonProperty(NAME) String name,
                                           @JsonProperty(DESCRIPTION) String description,
-                                          @JsonProperty(POLICY) AWSPolicy policy,
+                                          @JsonProperty(POLICY) String policy,
                                           @JsonProperty(HELPER_TEXT) String helperText,
                                           @JsonProperty(LEARN_MORE_LINK) String learnMoreLink) {
         return new AutoValue_AvailableService(name, description, policy, helperText, learnMoreLink);
