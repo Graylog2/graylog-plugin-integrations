@@ -148,11 +148,17 @@ public class AWSService {
                                              "ec2:DescribeNetworkInterfaces",
                                              "elasticloadbalancing:DescribeLoadBalancerAttributes",
                                              "elasticloadbalancing:DescribeLoadBalancers",
+                                             "iam:CreateRole",
+                                             "iam:GetRole",
+                                             "iam:PutRolePolicy",
+                                             "kinesis:CreateStream",
+                                             "kinesis:DescribeStream",
                                              "kinesis:GetRecords",
                                              "kinesis:GetShardIterator",
                                              "kinesis:ListShards",
                                              "kinesis:ListStreams",
-                                             "logs:DescribeLogGroups");
+                                             "logs:DescribeLogGroups",
+                                             "logs:PutSubscriptionFilter");
 
         AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogCloudWatchPolicy",
                                                                  "Allow",
