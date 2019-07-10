@@ -13,7 +13,6 @@ import { FormDataContext } from './context/FormData';
 import { LogOutputContext } from './context/LogOutput';
 import TEMPORARY_LOG from './context/temporary_log';
 
-
 const CloudWatch = () => {
   const {
     availableSteps,
@@ -34,14 +33,15 @@ const CloudWatch = () => {
     setCurrentStep(nextStep);
   };
 
-  const handleFieldUpdate = ({ target }) => {
+  const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
     const value = FormUtils.getValueFromInput(target);
 
-    setFormData(id, { value });
+    setFormData(id, { ...fieldData, value });
   };
 
   const handleSubmit = (event, form) => {
+    // TODO: add String.trim() to inputs
     if (!event && form) {
       const formElements = Array.from(form.elements);
 

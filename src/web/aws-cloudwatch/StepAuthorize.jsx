@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
 
-import StyledInput from '../common/StyledInput';
+import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
@@ -23,60 +23,60 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
           <DisappearingInput id="password" type="password" />
           {/* Continue on, Nothing to See Here */}
 
-          <StyledInput id="awsCloudWatchName"
-                       type="text"
-                       value={formData.awsCloudWatchName ? formData.awsCloudWatchName.value : ''}
-                       onChange={onChange}
-                       placeholder="CloudWatch Integration Name"
-                       label="Name of integration"
-                       autoComplete="off"
-                       required />
+          <ValidatedInput id="awsCloudWatchName"
+                          type="text"
+                          fieldData={formData.awsCloudWatchName}
+                          onChange={onChange}
+                          placeholder="CloudWatch Integration Name"
+                          label="Name of integration"
+                          autoComplete="off"
+                          required />
 
-          <StyledInput id="awsCloudWatchDescription"
-                       type="textarea"
-                       label="Integration description"
-                       placeholder="CloudWatch Integration Description"
-                       onChange={onChange}
-                       value={formData.awsCloudWatchDescription ? formData.awsCloudWatchDescription.value : ''}
-                       rows={4} />
+          <ValidatedInput id="awsCloudWatchDescription"
+                          type="textarea"
+                          label="Integration description"
+                          placeholder="CloudWatch Integration Description"
+                          onChange={onChange}
+                          fieldData={formData.awsCloudWatchDescription}
+                          rows={4} />
 
-          <StyledInput id="awsCloudWatchAwsKey"
-                       type="password"
-                       label="AWS Key"
-                       placeholder="CloudWatch Integration AWS Key"
-                       onChange={onChange}
-                       value={formData.awsCloudWatchAwsKey ? formData.awsCloudWatchAwsKey.value : ''}
-                       autoComplete="off"
-                       pattern="AK[A-Z0-9]{18}"
-                       minLength="20"
-                       help='Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".'
-                       required />
+          <ValidatedInput id="awsCloudWatchAwsKey"
+                          type="password"
+                          label="AWS Key"
+                          placeholder="CloudWatch Integration AWS Key"
+                          onChange={onChange}
+                          fieldData={formData.awsCloudWatchAwsKey}
+                          autoComplete="off"
+                          pattern="AK[A-Z0-9]{18}"
+                          minLength="20"
+                          help='Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".'
+                          required />
 
-          <StyledInput id="awsCloudWatchAwsSecret"
-                       type="password"
-                       label="AWS Secret"
-                       placeholder="CloudWatch Integration AWS Secret"
-                       onChange={onChange}
-                       value={formData.awsCloudWatchAwsSecret ? formData.awsCloudWatchAwsSecret.value : ''}
-                       autoComplete="off"
-                       pattern="[A-Za-z0-9/+=]{40}"
-                       minLength="40"
-                       help="Your AWS Secret will be a 40-character long, base-64 encoded string."
-                       required />
+          <ValidatedInput id="awsCloudWatchAwsSecret"
+                          type="password"
+                          label="AWS Secret"
+                          placeholder="CloudWatch Integration AWS Secret"
+                          onChange={onChange}
+                          fieldData={formData.awsCloudWatchAwsSecret}
+                          autoComplete="off"
+                          pattern="[A-Za-z0-9/+=]{40}"
+                          minLength="40"
+                          help="Your AWS Secret will be a 40-character long, base-64 encoded string."
+                          required />
 
-          <StyledInput id="awsCloudWatchAwsRegion"
-                       type="select"
-                       value={formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : ''}
-                       onChange={onChange}
-                       label="Region"
-                       help="Provide the region your CloudWatch instance is deployed."
-                       required>
+          <ValidatedInput id="awsCloudWatchAwsRegion"
+                          type="select"
+                          fieldData={formData.awsCloudWatchAwsRegion}
+                          onChange={onChange}
+                          label="Region"
+                          help="Provide the region your CloudWatch instance is deployed."
+                          required>
             <option value="">Choose Region</option>
             <option value="us-east-2">US East (Ohio)</option>
             <option value="us-east-1">US East (N. Virginia)</option>
             <option value="us-west-1">US West (N. California)</option>
             <option value="us-west-2">US West (Oregon)</option>
-          </StyledInput>
+          </ValidatedInput>
         </FormWrap>
       </Col>
     </Row>

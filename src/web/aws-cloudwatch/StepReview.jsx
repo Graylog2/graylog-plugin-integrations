@@ -5,12 +5,12 @@ import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
 import Routes from 'routing/Routes';
+import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { LogOutputContext } from './context/LogOutput';
 
 import FormWrap from '../common/FormWrap';
-import StyledInput from '../common/StyledInput';
 
 const Default = ({ value }) => {
   return (
@@ -103,12 +103,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
             <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
-            <StyledInput id="awsCloudWatchLog"
-                         type="textarea"
-                         label=""
-                         value={logOutput}
-                         rows={10}
-                         disabled />
+            <Input id="awsCloudWatchLog"
+                   type="textarea"
+                   label=""
+                   value={logOutput}
+                   rows={10}
+                   disabled />
           </Container>
         </FormWrap>
       </Col>
