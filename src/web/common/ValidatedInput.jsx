@@ -1,11 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
 
 import formValidation from '../utils/formValidation';
 
-const ValidatedInput = ({ help, required, onChange, id, fieldData, ...restProps }) => {
+const Label = ({ label, error }) => {
+  if (error) {
+    return (
+      <React.Fragment>
+        {label}
+        <Error><i className="fa fa-exclamation-triangle" /> {error}</Error>
+      </React.Fragment>
+    );
+  }
+
+  return label;
+};
+
+const ValidatedInput = ({ help, onChange, id, label, fieldData, ...restProps }) => {
   const { dirty, error, value } = fieldData;
 
   const handleChange = (event) => {
@@ -16,7 +30,7 @@ const ValidatedInput = ({ help, required, onChange, id, fieldData, ...restProps 
     if (dirty) {
       const errorOutput = formValidation.checkInputValidity(event.target);
 
-      onChange(event, { error: !!errorOutput });
+      onChange(event, { error: errorOutput });
     }
   };
 
@@ -26,22 +40,23 @@ const ValidatedInput = ({ help, required, onChange, id, fieldData, ...restProps 
            onChange={handleChange}
            onBlur={checkValidity}
            bsStyle={(error && dirty && 'error') || null}
-           required={required}
            defaultValue={value}
+           label={<Label label={label} error={error} />}
            help={help} />
   );
 };
 
 ValidatedInput.propTypes = {
-  onChange: PropTypes.func,
-  id: PropTypes.string.isRequired,
-  required: PropTypes.bool,
-  help: PropTypes.string,
   fieldData: PropTypes.shape({
-    error: PropTypes.bool,
+    error: PropTypes.string,
     dirty: PropTypes.bool,
     value: PropTypes.string,
   }),
+  help: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  onChange: PropTypes.func,
+  required: PropTypes.bool,
 };
 
 ValidatedInput.defaultProps = {
@@ -50,9 +65,14 @@ ValidatedInput.defaultProps = {
   help: '',
   fieldData: {
     dirty: false,
-    error: false,
-    value: '',
+    error: undefined,
+    value: undefined,
   },
 };
+
+const Error = styled.span`
+  display: block;
+  font-weight: normal;
+`;
 
 export default ValidatedInput;

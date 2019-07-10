@@ -6,8 +6,9 @@ const formValidation = {
     const isValid = validity.valid;
 
     if (isValid) {
-      return '';
+      return undefined;
     }
+
     const isEmpty = validity.valueMissing;
     const isIncorrectType = validity.typeMismatch;
     const isIncorrectPattern = validity.patternMismatch;

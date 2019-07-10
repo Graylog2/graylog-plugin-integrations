@@ -14,7 +14,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit} buttonContent="Authorize &amp; Choose Stream">
+        <FormWrap onSubmit={onSubmit}
+                  buttonContent="Authorize &amp; Choose Stream">
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
