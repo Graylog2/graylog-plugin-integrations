@@ -15,6 +15,7 @@ import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
@@ -29,7 +30,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
-import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -43,6 +43,7 @@ import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -383,16 +384,22 @@ public class KinesisService {
         return recordsList.get(new Random().nextInt(recordsList.size()));
     }
 
-    public CreateStreamResponse createNewKinesisStream(String streamName, int shardCount, String regionName, String accessKeyId, String secretAccessKey) {
+    // TODO reduce down to only pass KinesNewStreamRequest parameter
+    public KinesisNewStreamResponse createNewKinesisStream(String regionName, String accessKeyId, String secretAccessKey, String streamName, int shardCount) {
 
-        LOG.debug("Creating new Kinesis stream [{}].", streamName);
         final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey);
 
+        LOG.debug("Creating new Kinesis stream [{}].", streamName);
         CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
                                                                      .streamName(streamName)
                                                                      .shardCount(shardCount)
                                                                      .build();
-        return kinesisClient.createStream(createStreamRequest);
+        kinesisClient.createStream(createStreamRequest);
+        //TODO add error handling and logging logic
+        final String responseMessage = String.format("Success. The new stream [{}] was created.");
+        LOG.debug("Success. The new stream [{}] was created.", streamName);
+
+        return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
     }
 
 }
