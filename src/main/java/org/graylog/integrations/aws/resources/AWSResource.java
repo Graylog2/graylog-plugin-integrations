@@ -172,21 +172,13 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     )
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisNewStreamRequest kinesisNewStreamRequest) {
-
-        KinesisNewStreamResponse response =
-                kinesisService.createNewKinesisStream(kinesisNewStreamRequest.region(),
-                                                      kinesisNewStreamRequest.awsAccessKeyId(),
-                                                      kinesisNewStreamRequest.awsSecretAccessKey(),
-                                                      kinesisNewStreamRequest.streamName(),
-                                                      kinesisNewStreamRequest.shardCount());
-
-        return response;
+        return kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
     }
 
     /**
      * Create a new AWS input.
-     *
-     * curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
+     * <p>
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
      * -v \
      * -X POST \
      * -H 'X-Requested-By: just-a-test' \

@@ -14,6 +14,7 @@ import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -30,6 +31,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -384,22 +386,28 @@ public class KinesisService {
         return recordsList.get(new Random().nextInt(recordsList.size()));
     }
 
-    // TODO reduce down to only pass KinesNewStreamRequest parameter
-    public KinesisNewStreamResponse createNewKinesisStream(String regionName, String accessKeyId, String secretAccessKey, String streamName, int shardCount) {
+    /**
+     * Creates a new Kinesis stream.
+     *
+     * @param kinesisNewStreamRequest
+     * @return the status response
+     */
+    public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest kinesisNewStreamRequest) {
+        // TODO add error handling and logging
+        final KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
+                                                         kinesisNewStreamRequest.awsAccessKeyId(),
+                                                         kinesisNewStreamRequest.awsSecretAccessKey());
 
-        final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey);
-
-        LOG.debug("Creating new Kinesis stream [{}].", streamName);
+        LOG.debug("Creating new Kinesis stream [{}].", kinesisNewStreamRequest.streamName());
         CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
-                                                                     .streamName(streamName)
-                                                                     .shardCount(shardCount)
+                                                                     .streamName(kinesisNewStreamRequest.streamName())
+                                                                     .shardCount(kinesisNewStreamRequest.shardCount())
                                                                      .build();
-        kinesisClient.createStream(createStreamRequest);
-        //TODO add error handling and logging logic
-        final String responseMessage = String.format("Success. The new stream [{}] was created.");
-        LOG.debug("Success. The new stream [{}] was created.", streamName);
+
+        CreateStreamResponse createStreamResponse = kinesisClient.createStream(createStreamRequest);
+        String responseMessage = String.format("Success. The new stream [{}] was created.");
+        LOG.debug(responseMessage);
 
         return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
     }
-
 }
