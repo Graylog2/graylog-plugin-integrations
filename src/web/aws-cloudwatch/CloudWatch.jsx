@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
+import FormUtils from 'util/FormsUtils.js';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
@@ -34,7 +35,7 @@ const CloudWatch = () => {
 
   const handleFieldUpdate = ({ target }) => {
     const id = target.name || target.id;
-    const value = Object.keys(target).includes('checked') ? target.checked : target.value;
+    const value = FormUtils.getValueFromInput(target);
 
     setFormData(id, { value });
   };

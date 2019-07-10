@@ -11,14 +11,10 @@ import { FormDataContext } from './context/FormData';
 import { LogOutputContext } from './context/LogOutput';
 import FormWrap from '../common/FormWrap';
 
-const format = (numString) => {
-  return Number(numString).toLocaleString('en-US');
-};
-
 const Default = ({ value }) => {
   return (
     <React.Fragment>
-      {format(value)} <small>(default)</small>
+      {value} <small>(default)</small>
     </React.Fragment>
   );
 };
@@ -73,7 +69,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               </li>
               <li>
                 <strong>Global Input</strong>
-                <span>{(formData.awsCloudWatchGlobalInput && formData.awsCloudWatchGlobalInput.value) ? 'true' : 'false'}</span>
+                <span>{(formData.awsCloudWatchGlobalInput && formData.awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
               </li>
               <li>
                 <strong>AWS Assumed ARN Role</strong>
@@ -84,7 +80,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                 <span>
                   {
                     formData.awsCloudWatchBatchSize.value
-                      ? format(formData.awsCloudWatchBatchSize.value)
+                      ? formData.awsCloudWatchBatchSize.value
                       : <Default value={formData.awsCloudWatchBatchSize.defaultValue} />
                   }
                 </span>
@@ -96,7 +92,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                     (formData.awsCloudWatchThrottleEnabled
                       && formData.awsCloudWatchThrottleEnabled.value
                       && formData.awsCloudWatchThrottleWait)
-                      ? format(formData.awsCloudWatchThrottleWait.value)
+                      ? formData.awsCloudWatchThrottleWait.value
                       : <Default value={formData.awsCloudWatchThrottleWait.defaultValue} />
                   }
                 </span>
