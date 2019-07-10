@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -380,4 +382,17 @@ public class KinesisService {
         LOG.debug("Selecting a random Record from the sample list.");
         return recordsList.get(new Random().nextInt(recordsList.size()));
     }
+
+    public CreateStreamResponse createNewKinesisStream(String streamName, int shardCount, String regionName, String accessKeyId, String secretAccessKey) {
+
+        LOG.debug("Creating new Kinesis stream [{}].", streamName);
+        final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey);
+
+        CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
+                                                                     .streamName(streamName)
+                                                                     .shardCount(shardCount)
+                                                                     .build();
+        return kinesisClient.createStream(createStreamRequest);
+    }
+
 }
