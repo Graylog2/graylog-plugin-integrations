@@ -1,35 +1,36 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
+import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
-import { Input } from 'components/bootstrap';
 import Routes from 'routing/Routes';
+import { Input } from 'components/bootstrap';
 
-import DEFAULT_VALUES from './default_values';
+import { FormDataContext } from './context/FormData';
+import { LogOutputContext } from './context/LogOutput';
+import FormWrap from '../common/FormWrap';
 
-const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
-  const defaultOutput = (key, enabled = true) => {
-    if (!enabled) {
-      return (
-        <React.Fragment>
-          {DEFAULT_VALUES[key]} <small>(default)</small>
-        </React.Fragment>
-      );
-    }
+const Default = ({ value }) => {
+  return (
+    <React.Fragment>
+      {value} <small>(default)</small>
+    </React.Fragment>
+  );
+};
 
-    return (
-      <React.Fragment>
-        {values[key]} {DEFAULT_VALUES[key] === values[key] && <small>(default)</small>}
-      </React.Fragment>
-    );
-  };
+Default.propTypes = {
+  value: PropTypes.string.isRequired,
+};
+
+const StepReview = ({ onSubmit, onEditClick }) => {
+  const { formData } = useContext(FormDataContext);
+  const { logOutput } = useContext(LogOutputContext);
 
   return (
     <Row>
       <Col md={8}>
-        <form onSubmit={onSubmit}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Complete CloudWatch Setup">
           <h2>Final Review</h2>
 
           <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
@@ -37,32 +38,69 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Name</strong><span>{values.awsCloudWatchName}</span></li>
-              { values.awsCloudWatchDescription
-                && <li><strong>Description</strong><span>{values.awsCloudWatchDescription}</span></li>
+              <li>
+                <strong>Name</strong>
+                <span>{formData.awsCloudWatchName.value}</span>
+              </li>
+              {
+                formData.awsCloudWatchDescription
+                && (
+                  <li>
+                    <strong>Description</strong>
+                    <span>{formData.awsCloudWatchDescription.value || ''}</span>
+                  </li>
+                )
               }
-              <li><strong>AWS Key</strong><span>AK************{values.awsCloudWatchAwsKey.slice(-6)}</span></li>
-              {/* <li><strong>AWS Secret</strong><span>{values.awsCloudWatchAwsSecret}</span></li> */}
-              <li><strong>AWS Region</strong><span>{values.awsCloudWatchAwsRegion}</span></li>
+              <li>
+                <strong>AWS Key</strong>
+                <span>AK************{formData.awsCloudWatchAwsKey.value.slice(-6)}</span>
+              </li>
+              <li>
+                <strong>AWS Region</strong>
+                <span>{formData.awsCloudWatchAwsRegion.value}</span>
+              </li>
             </ReviewItems>
 
             <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
             <ReviewItems>
-              <li><strong>Stream</strong><span>{values.awsCloudWatchKinesisStream}</span></li>
-              <li><strong>Global Input</strong><span>{values.awsCloudWatchGlobalInput ? 'true' : 'false'}</span></li>
-              <li><strong>AWS Assumed ARN Role</strong><span>{values.awsCloudWatchAssumeARN || 'None'}</span></li>
+              <li>
+                <strong>Stream</strong>
+                <span>{formData.awsCloudWatchKinesisStream.value}</span>
+              </li>
+              <li>
+                <strong>Global Input</strong>
+                <span>{(formData.awsCloudWatchGlobalInput && formData.awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
+              </li>
+              <li>
+                <strong>AWS Assumed ARN Role</strong>
+                <span>{formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : 'None'}</span>
+              </li>
               <li>
                 <strong>Record Batch Size</strong>
-                <span>{defaultOutput('awsCloudWatchBatchSize')}</span>
+                <span>
+                  {
+                    formData.awsCloudWatchBatchSize.value
+                      ? formData.awsCloudWatchBatchSize.value
+                      : <Default value={formData.awsCloudWatchBatchSize.defaultValue} />
+                  }
+                </span>
               </li>
               <li>
                 <strong>Throttled Wait (ms)</strong>
-                <span>{defaultOutput('awsCloudWatchThrottleWait', values.awsCloudWatchThrottleEnabled)}</span>
+                <span>
+                  {
+                    (formData.awsCloudWatchThrottleEnabled
+                      && formData.awsCloudWatchThrottleEnabled.value
+                      && formData.awsCloudWatchThrottleWait)
+                      ? formData.awsCloudWatchThrottleWait.value
+                      : <Default value={formData.awsCloudWatchThrottleWait.defaultValue} />
+                  }
+                </span>
               </li>
             </ReviewItems>
 
             <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
-            <p>Parsed as FlowLog, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
+            <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
             <Input id="awsCloudWatchLog"
                    type="textarea"
@@ -71,9 +109,7 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
                    rows={10}
                    disabled />
           </Container>
-
-          <Button type="submit" bsStyle="primary">Complete CloudWatch Setup</Button>
-        </form>
+        </FormWrap>
       </Col>
     </Row>
   );
@@ -82,8 +118,6 @@ const StepReview = ({ values, onSubmit, onEditClick, logOutput }) => {
 StepReview.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onEditClick: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
-  logOutput: PropTypes.string.isRequired,
 };
 
 const Container = styled.div`

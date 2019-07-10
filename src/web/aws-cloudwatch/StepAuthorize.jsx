@@ -1,31 +1,43 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
+import styled from '@emotion/styled';
 
 import { Input } from 'components/bootstrap';
 
-const StepAuthorize = ({ onChange, onSubmit, values }) => {
+import { FormDataContext } from './context/FormData';
+import FormWrap from '../common/FormWrap';
+
+const StepAuthorize = ({ onChange, onSubmit }) => {
+  const { formData } = useContext(FormDataContext);
+
   return (
     <Row>
       <Col md={8}>
-        <form onSubmit={onSubmit}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Authorize &amp; Choose Stream">
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
+          {/* Fighting AutoComplete Forms */}
+          <DisappearingInput id="name" type="text" />
+          <DisappearingInput id="password" type="password" />
+          {/* Continue on, Nothing to See Here */}
+
           <Input id="awsCloudWatchName"
                  type="text"
-                 defaultValue={values.awsCloudWatchName}
+                 value={formData.awsCloudWatchName ? formData.awsCloudWatchName.value : ''}
                  onChange={onChange}
                  placeholder="CloudWatch Integration Name"
-                 label="Name"
+                 label="Name of integration"
+                 autoComplete="off"
                  required />
 
           <Input id="awsCloudWatchDescription"
                  type="textarea"
-                 label="Description"
+                 label="Integration description"
                  placeholder="CloudWatch Integration Description"
                  onChange={onChange}
-                 value={values.awsCloudWatchDescription}
+                 value={formData.awsCloudWatchDescription ? formData.awsCloudWatchDescription.value : ''}
                  rows={4} />
 
           <Input id="awsCloudWatchAwsKey"
@@ -33,8 +45,10 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  label="AWS Key"
                  placeholder="CloudWatch Integration AWS Key"
                  onChange={onChange}
-                 defaultValue={values.awsCloudWatchAwsKey}
+                 value={formData.awsCloudWatchAwsKey ? formData.awsCloudWatchAwsKey.value : ''}
                  autoComplete="off"
+                 pattern="AK[A-Z0-9]{18}"
+                 minLength="20"
                  required />
 
           <Input id="awsCloudWatchAwsSecret"
@@ -42,13 +56,15 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
                  label="AWS Secret"
                  placeholder="CloudWatch Integration AWS Secret"
                  onChange={onChange}
-                 defaultValue={values.awsCloudWatchAwsSecret}
+                 value={formData.awsCloudWatchAwsSecret ? formData.awsCloudWatchAwsSecret.value : ''}
                  autoComplete="off"
+                 pattern="[A-Za-z0-9/+=]{40}"
+                 minLength="40"
                  required />
 
           <Input id="awsCloudWatchAwsRegion"
                  type="select"
-                 value={values.awsCloudWatchAwsRegion}
+                 value={formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : ''}
                  onChange={onChange}
                  label="Region"
                  required>
@@ -58,9 +74,7 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
             <option value="us-west-1">US West (N. California)</option>
             <option value="us-west-2">US West (Oregon)</option>
           </Input>
-
-          <Button type="submit" bsStyle="primary">Authorize &amp; Choose Stream</Button>
-        </form>
+        </FormWrap>
       </Col>
     </Row>
   );
@@ -69,7 +83,12 @@ const StepAuthorize = ({ onChange, onSubmit, values }) => {
 StepAuthorize.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  values: PropTypes.object.isRequired,
 };
+
+const DisappearingInput = styled.input`
+  position: fixed;
+  top: -500vh;
+  left: -500vw;
+`;
 
 export default StepAuthorize;
