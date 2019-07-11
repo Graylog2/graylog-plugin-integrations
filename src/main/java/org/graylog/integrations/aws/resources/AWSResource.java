@@ -85,7 +85,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
      * Get all available AWS CloudWatch log groups names for the specified region.
      *
      * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/logGroups' \
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/log_groups' \
      * -X POST \
      * -H 'X-Requested-By: XMLHttpRequest' \
      * -H 'Content-Type: application/json'   \
@@ -135,7 +135,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
      * Sample CURL command for executing this method. Use this to model the UI request.
      * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
      *
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/healthCheck' \
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/health_check' \
      * -X POST \
      * -H 'X-Requested-By: XMLHttpRequest' \
      * -H 'Content-Type: application/json'   \
