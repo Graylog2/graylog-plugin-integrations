@@ -54,7 +54,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               }
               <li>
                 <strong>AWS Key</strong>
-                <span>AK************{formData.awsCloudWatchAwsKey.value.slice(-6)}</span>
+                <span>{formData.awsCloudWatchAwsKey.value}</span>
               </li>
               <li>
                 <strong>AWS Region</strong>

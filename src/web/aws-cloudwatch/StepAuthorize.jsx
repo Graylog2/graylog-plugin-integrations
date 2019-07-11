@@ -48,9 +48,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           fieldData={formData.awsCloudWatchAwsKey}
                           autoComplete="off"
-                          pattern="AK[A-Z0-9]{18}"
-                          minLength="20"
-                          help='Your AWS Key will be 20-character long, alphanumeric string that starts with the letters "AK".'
+                          maxLength="512"
+                          help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
                           required />
 
           <ValidatedInput id="awsCloudWatchAwsSecret"
@@ -60,9 +59,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           fieldData={formData.awsCloudWatchAwsSecret}
                           autoComplete="off"
-                          pattern="[A-Za-z0-9/+=]{40}"
-                          minLength="40"
-                          help="Your AWS Secret will be a 40-character long, base-64 encoded string."
+                          maxLength="512"
+                          help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
                           required />
 
           <ValidatedInput id="awsCloudWatchAwsRegion"
