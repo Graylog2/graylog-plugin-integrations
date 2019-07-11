@@ -4,8 +4,8 @@ import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
-import { RegionsContext } from './context/Regions';
-import { StreamsContext } from './context/Streams';
+// import { StreamsContext } from './context/Streams';
+import regionsHook from './hooks/regions';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -13,9 +13,10 @@ import { renderOptions } from '../common/Options';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { availableRegions, setRegions } = useContext(RegionsContext);
-  const { setStreams } = useContext(StreamsContext);
+  // const { setStreams } = useContext(StreamsContext);
+  const { getRegions, setRegions } = regionsHook();
 
+  const availableRegions = getRegions();
   const isRegionsLoading = availableRegions.length === 0;
   const cleanAvailableRegions = availableRegions.map(region => (
     {
@@ -24,15 +25,19 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     }
   ));
 
-  if (isRegionsLoading) {
-    setRegions();
-  }
+  // console.log('isRegionsLoading', isRegionsLoading);
+  console.log('availableRegions', availableRegions);
+  // console.log('cleanAvailableRegions', cleanAvailableRegions);
+
+  // if (isRegionsLoading) {
+  //   setRegions();
+  // }
 
   const handleSubmit = (response) => {
     if (!response.error) {
-      setStreams().then(() => {
-        onSubmit();
-      });
+      // setStreams().then(() => {
+      //   onSubmit();
+      // });
     }
   };
 
