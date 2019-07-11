@@ -1,46 +1,73 @@
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
+
+import URLUtils from 'util/URLUtils';
+import fetch from 'logic/rest/FetchProvider';
+
+import { FormDataContext } from './FormData';
+import { awsAuth } from './default_settings';
 
 export const ApiContext = createContext();
 
 export const ApiProvider = ({ children }) => {
-  const initialState = {
-    regions: [],
-    streams: [],
-    logSample: '',
+  const [availableRegions, setRegionsState] = useState([]);
+  const [availableStreams, setStreamsState] = useState([]);
+  const [logSample, setLogSampleState] = useState('');
+
+  const setRegions = () => {
+    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/regions');
+
+    return fetch('GET', url).then(response => setRegionsState(response.regions));
   };
 
-  const reducer = (state, action) => {
-    switch (action.type) {
-      case 'SET_REGIONS': {
-        return {
-          ...state,
-          regions: action.value,
-        };
-      }
+  const setStreams = () => {
+    const { formData } = useContext(FormDataContext);
+    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/kinesis/streams');
 
-      case 'SET_STREAMS': {
-        return {
-          ...state,
-          streams: action.value,
-        };
-      }
+    const { key, secret } = awsAuth(formData);
+    const region = formData.awsCloudWatchAwsRegion.value;
 
-      case 'SET_LOG': {
-        return {
-          ...state,
-          logOutput: action.value,
-        };
-      }
+    return fetch('POST', url, {
+      region,
+      aws_access_key_id: key,
+      aws_secret_access_key: secret,
+    }).then((response) => {
+      const streams = response.streams.map(stream => ({ value: stream, label: stream }));
+      setStreamsState(streams);
 
-      default: return state;
-    }
+      return streams;
+    });
   };
 
-  const [apiState, dispatchApi] = useReducer(reducer, initialState);
+  const setLogSample = () => {
+    const { formData } = useContext(FormDataContext);
+    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/kinesis/health_check');
+
+    const { key, secret } = awsAuth(formData);
+    const region = formData.awsCloudWatchAwsRegion.value;
+    const stream = formData.awsCloudWatchKinesisStream.value;
+
+    return fetch('POST', url, {
+      region,
+      aws_access_key_id: key,
+      aws_secret_access_key: secret,
+      stream_name: stream,
+    }).then((response) => {
+      setLogSampleState(JSON.stringify(response.message_fields, null, 2));
+
+      return response;
+    });
+  };
 
   return (
-    <ApiContext.Provider value={{ apiState, dispatchApi }}>
+    <ApiContext.Provider value={{
+      availableStreams,
+      setStreams,
+      availableRegions,
+      setRegions,
+      logSample,
+      setLogSample,
+    }}>
       {children}
     </ApiContext.Provider>
   );

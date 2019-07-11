@@ -29,26 +29,28 @@ const DEFAULT_SETTINGS = {
     value: '123',
   },
   awsCloudWatchAwsRegion: {
-    value: 'us-east-2',
+    value: 'eu-west-1',
   },
   /* End Test Settings */
 };
 
-export const awsAuth = () => {
-  const auth = { key: 'AKXXXXXXXXXXXXXXXXXX', secret: 'SECRETXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX==' };
-
+export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {
   /*
-    Create a sibling file named `aws.js` in the current directory.
-    ```export default () => ({ key: '...', secret: '...' });```
-    This file is already set in .gitignore
+    For development, create a sibling file named `aws.js` in the current directory.
+    ```module.exports = { key: 'YOUR_REAL_KEY', secret: 'YOUR_REAL_SECRET' };```
+    This file is already set in .gitignore so it won't be commited
   */
 
-  // import('./aws')
-  //   .then((awsData) => {
-  //     return awsData.default();
-  //   });
+  let auth = { key: awsCloudWatchAwsKey, secret: awsCloudWatchAwsSecret };
 
-  return Promise.resolve(auth);
+  try {
+    // eslint-disable-next-line global-require
+    auth = require('./aws');
+  } catch (e) {
+    return auth;
+  }
+
+  return auth;
 };
 
 export default DEFAULT_SETTINGS;

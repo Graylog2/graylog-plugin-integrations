@@ -4,8 +4,7 @@ import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
-// import { StreamsContext } from './context/Streams';
-import regionsHook from './hooks/regions';
+import { ApiContext } from './context/Api';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -13,21 +12,17 @@ import { renderOptions } from '../common/Options';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  // const { setStreams } = useContext(StreamsContext);
-  const { getRegions, setRegions } = regionsHook();
+  const { availableRegions, setRegions } = useContext(ApiContext);
 
-  const availableRegions = getRegions();
   const isRegionsLoading = availableRegions.length === 0;
 
   if (isRegionsLoading) {
     setRegions();
   }
 
-  const handleSubmit = (response) => {
-    if (!response.error) {
-      // setStreams().then(() => {
-      onSubmit();
-      // });
+  const handleSubmit = (event) => {
+    if (!event.error) {
+      onSubmit(event);
     }
   };
 

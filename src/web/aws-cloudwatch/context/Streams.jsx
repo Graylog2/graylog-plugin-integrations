@@ -6,6 +6,7 @@ import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
 import { FormDataContext } from './FormData';
+import { awsAuth } from './default_settings';
 
 export const StreamsContext = createContext();
 
@@ -17,8 +18,7 @@ export const StreamsProvider = ({ children }) => {
 
     const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/kinesis/streams');
 
-    const key = formData.awsCloudWatchAwsKey.value;
-    const secret = formData.awsCloudWatchAwsSecret.value;
+    const { key, secret } = awsAuth(formData);
     const region = formData.awsCloudWatchAwsRegion.value;
 
     return fetch('POST', url, {

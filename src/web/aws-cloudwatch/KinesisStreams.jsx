@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
 import { FormDataContext } from './context/FormData';
-import { StreamsContext } from './context/Streams';
-import { LogOutputContext } from './context/LogOutput';
+import { ApiContext } from './context/Api';
 import FormAdvancedOptions from './FormAdvancedOptions';
 
 import FormWrap from '../common/FormWrap';
@@ -14,14 +13,15 @@ import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { streams } = useContext(StreamsContext);
-  const { setLogOutput } = useContext(LogOutputContext);
+  const { availableStreams, setStreams } = useContext(ApiContext);
 
-  const handleSubmit = (response) => {
-    if (!response.error) {
-      setLogOutput().then(() => {
-        onSubmit();
-      });
+  if (availableStreams.length === 0) {
+    setStreams();
+  }
+
+  const handleSubmit = (event) => {
+    if (!event.error) {
+      onSubmit(event);
     }
   };
 
@@ -38,7 +38,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="Choose Stream"
                           required>
-            {renderOptions(streams, 'Choose Kinesis Stream')}
+            {renderOptions(availableStreams, 'Choose Kinesis Stream')}
           </ValidatedInput>
 
           <FormAdvancedOptions onChange={onChange} />

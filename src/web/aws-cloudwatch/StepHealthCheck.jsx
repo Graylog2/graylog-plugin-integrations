@@ -4,12 +4,16 @@ import { Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
-import { LogOutputContext } from './context/LogOutput';
+import { ApiContext } from './context/Api';
 
 import FormWrap from '../common/FormWrap';
 
 const StepHealthCheck = ({ onSubmit }) => {
-  const { logOutput } = useContext(LogOutputContext);
+  const { logSample, setLogSample } = useContext(ApiContext);
+
+  if (!logSample) {
+    setLogSample();
+  }
 
   return (
     <Row>
@@ -23,7 +27,7 @@ const StepHealthCheck = ({ onSubmit }) => {
           <Input id="awsCloudWatchLog"
                  type="textarea"
                  label="Formatted CloudWatch Log"
-                 value={logOutput}
+                 value={logSample}
                  rows={10}
                  disabled />
         </FormWrap>
