@@ -9,14 +9,12 @@ const regionsHook = () => {
   const { apiState: { regions }, dispatchApi } = useContext(ApiContext);
 
   const setRegions = () => {
-    console.log('setRegions hook');
     const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/regions');
 
     return fetch('GET', url).then((response) => {
-      console.log('fetch resp', response);
       dispatchApi({
         type: 'SET_REGIONS',
-        value: response,
+        value: response.regions,
       });
     });
   };

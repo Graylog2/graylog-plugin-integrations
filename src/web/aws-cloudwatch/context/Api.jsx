@@ -11,8 +11,6 @@ export const ApiProvider = ({ children }) => {
   };
 
   const reducer = (state, action) => {
-    console.log('reducer', action, state);
-
     switch (action.type) {
       case 'SET_REGIONS': {
         return {

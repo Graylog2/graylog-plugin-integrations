@@ -40,7 +40,7 @@ const ValidatedInput = ({ help, onChange, id, label, fieldData, ...restProps }) 
            onChange={handleChange}
            onBlur={checkValidity}
            bsStyle={(error && dirty && 'error') || null}
-           defaultValue={value}
+           value={value}
            label={<Label label={label} error={error} />}
            help={help} />
   );

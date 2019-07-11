@@ -18,32 +18,22 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
   const availableRegions = getRegions();
   const isRegionsLoading = availableRegions.length === 0;
-  const cleanAvailableRegions = availableRegions.map(region => (
-    {
-      value: region.region_id,
-      label: region.display_value,
-    }
-  ));
 
-  // console.log('isRegionsLoading', isRegionsLoading);
-  console.log('availableRegions', availableRegions);
-  // console.log('cleanAvailableRegions', cleanAvailableRegions);
-
-  // if (isRegionsLoading) {
-  //   setRegions();
-  // }
+  if (isRegionsLoading) {
+    setRegions();
+  }
 
   const handleSubmit = (response) => {
     if (!response.error) {
       // setStreams().then(() => {
-      //   onSubmit();
+      onSubmit();
       // });
     }
   };
 
   return (
     <Row>
-      <Col>
+      <Col md={8}>
         <FormWrap onSubmit={handleSubmit} buttonContent="Authorize &amp; Choose Stream">
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
@@ -100,7 +90,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           help="Provide the region your CloudWatch instance is deployed."
                           disabled={isRegionsLoading}
                           required>
-            {renderOptions(cleanAvailableRegions, 'Choose AWS Region', isRegionsLoading)}
+            {renderOptions(availableRegions, 'Choose AWS Region', isRegionsLoading)}
           </ValidatedInput>
         </FormWrap>
       </Col>
