@@ -42,7 +42,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           rows={4} />
 
           <ValidatedInput id="awsCloudWatchAwsKey"
-                          type="password"
+                          type="text"
                           label="AWS Key"
                           placeholder="CloudWatch Integration AWS Key"
                           onChange={onChange}
