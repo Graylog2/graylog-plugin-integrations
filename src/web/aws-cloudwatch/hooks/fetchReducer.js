@@ -1,7 +1,11 @@
 const fetchReducer = (state, action) => {
   switch (action.type) {
-    case 'FETCH_INIT':
-      return { ...state, isLoading: true, isError: false };
+    case 'FETCH_LOADING':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
     case 'FETCH_SUCCESS':
       return {
         ...state,

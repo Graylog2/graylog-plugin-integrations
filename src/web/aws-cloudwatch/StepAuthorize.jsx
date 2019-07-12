@@ -19,8 +19,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   const isRegionsLoading = availableRegions.length === 0;
 
   if (isRegionsLoading) {
-    const setRegionsFetchOptions = useFetch(setRegions)[1];
-    setRegionsFetchOptions({ url: '/plugins/org.graylog.integrations/aws/regions' });
+    setRegions();
   }
 
   const handleSubmit = () => {
