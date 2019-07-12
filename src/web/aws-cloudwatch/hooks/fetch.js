@@ -3,30 +3,35 @@ import { useReducer, useContext, useEffect, useState } from 'react';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
+import fetchReducer from './fetchReducer';
+
 import { FormDataContext } from '../context/FormData';
 import { awsAuth } from '../context/default_settings';
 
-const dataFetchReducer = (state, action) => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return { ...state, isLoading: true, isError: false };
-    case 'FETCH_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isError: false,
-        data: action.payload,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isError: true,
-      };
-    default:
-      throw new Error();
-  }
-};
+/* useFetch Custom Hook
+
+Because of [Rules of Hooks](https://reactjs.org/docs/hooks-rules.html) we have to get fancy
+in order to use fetch Promises and hooks.
+
+This function defaults to:
+{
+    method: 'GET',
+    options: {},
+    url: '',
+}
+
+It accepts two callbacks:
+ - the `setHook` that you want to call after fetch
+ - the `callback` that will fire any part of your code you need after fetch
+both default to `() => {}` so neither are required
+
+USE:
+`const [status, setOptions] = useFetch(setNextHook, onFooBar);`
+ - `status` will provide the current reducer state, including `isLoading` and `isError`
+ - `setOptions` will be your hook to call as a submit handler within a subfunction
+
+EXAMPLES: See uses in `src/web/aws-cloudwatch/StepAuthorize.jsx`
+*/
 
 const useFetch = (setHook = () => {}, callback = () => {}) => {
   const { formData } = useContext(FormDataContext);
@@ -35,7 +40,7 @@ const useFetch = (setHook = () => {}, callback = () => {}) => {
     options: {},
     url: '',
   });
-  const [state, dispatch] = useReducer(dataFetchReducer, {
+  const [state, dispatch] = useReducer(fetchReducer, {
     isLoading: false,
     isError: false,
     data: [],

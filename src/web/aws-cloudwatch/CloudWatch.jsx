@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
-// import formValidation from 'utils/formValidation';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
