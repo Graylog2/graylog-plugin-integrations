@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public class  KinesisTransport extends ThrottleableTransport {
+public class KinesisTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(KinesisTransport.class);
     public static final String NAME = "aws-kinesis-transport";
 
@@ -51,9 +51,9 @@ public class  KinesisTransport extends ThrottleableTransport {
     public static final String CK_KINESIS_RECORD_BATCH_SIZE = "kinesis_record_batch_size";
     public static final String CK_KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait";
 
-    private static final int DEFAULT_BATCH_SIZE = 10000;
-    private static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
-    private static final int KINESIS_CONSUMER_STOP_WAIT_MS = 15000;
+    public static final int DEFAULT_BATCH_SIZE = 10000;
+    public static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
+    public static final int KINESIS_CONSUMER_STOP_WAIT_MS = 15000;
 
     private final Configuration configuration;
     private final org.graylog2.Configuration graylogConfiguration;
@@ -147,20 +147,14 @@ public class  KinesisTransport extends ThrottleableTransport {
 
         final AWSPluginConfiguration awsConfig = clusterConfigService.getOrDefault(AWSPluginConfiguration.class,
                                                                                    AWSPluginConfiguration.createDefault());
-        AWSAuthProvider authProvider = new AWSAuthProvider(
-                awsConfig, configuration.getString(CK_ACCESS_KEY),
-                configuration.getString(CK_SECRET_KEY),
-                configuration.getString(CK_AWS_REGION),
-                configuration.getString(CK_ASSUME_ROLE_ARN)
-        );
 
         this.reader = new KinesisConsumer(
                 configuration.getString(CK_KINESIS_STREAM_NAME),
                 Region.getRegion(Regions.fromName(configuration.getString(CK_AWS_REGION))),
                 kinesisCallback(input),
                 awsConfig,
-                authProvider,
-                nodeId,
+                configuration.getString(CK_ACCESS_KEY),
+                configuration.getString(CK_SECRET_KEY), nodeId,
                 graylogConfiguration.getHttpProxyUri() == null ? null : HttpUrl.get(graylogConfiguration.getHttpProxyUri()),
                 this,
                 objectMapper,

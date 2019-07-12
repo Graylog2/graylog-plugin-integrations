@@ -7,6 +7,10 @@ import org.graylog2.plugin.inputs.codecs.AbstractCodec;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.plugin.inputs.transports.Transport;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Identifies the type of input for a particular log source (eg. Cloud Watch or Kinesis) and
  * log format.
@@ -81,5 +85,13 @@ public enum AWSMessageType {
      */
     public enum Source {
         KINESIS
+    }
+
+    /**
+     * @return Return all message types except for UNKNOWN.
+     */
+    public static List<AWSMessageType> getMessageTypes() {
+
+        return Arrays.stream(values()).filter(m -> !m.equals(UNKNOWN)).collect(Collectors.toList());
     }
 }

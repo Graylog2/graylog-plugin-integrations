@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws.transports;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.InvalidStateException;
 import com.amazonaws.services.kinesis.clientlibrary.exceptions.ShutdownException;
@@ -46,7 +48,7 @@ public class KinesisConsumer implements Runnable {
 
     private final Region region;
     private final String kinesisStreamName;
-    private final AWSAuthProvider authProvider;
+    private final AWSStaticCredentialsProvider authProvider;
     private final NodeId nodeId;
     private final HttpUrl proxyUrl;
     private final AWSPluginConfiguration awsConfig;
@@ -68,8 +70,7 @@ public class KinesisConsumer implements Runnable {
                            Region region,
                            Consumer<byte[]> dataHandler,
                            AWSPluginConfiguration awsConfig,
-                           AWSAuthProvider authProvider,
-                           NodeId nodeId,
+                           String awsKey, String awsSecret, NodeId nodeId,
                            @Nullable HttpUrl proxyUrl,
                            KinesisTransport transport,
                            ObjectMapper objectMapper,
@@ -79,7 +80,7 @@ public class KinesisConsumer implements Runnable {
         this.region = requireNonNull(region, "region");
         this.dataHandler = requireNonNull(dataHandler, "dataHandler");
         this.awsConfig = requireNonNull(awsConfig, "awsConfig");
-        this.authProvider = requireNonNull(authProvider, "authProvider");
+        this.authProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecret));
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.proxyUrl = proxyUrl;
         this.transport = transport;
@@ -156,6 +157,7 @@ public class KinesisConsumer implements Runnable {
                 }
 
                 for (Record record : processRecordsInput.getRecords()) {
+                    LOG.info("Processing Kinesis records.");
                     try {
                         // Create a read-only view of the data and use a safe method to convert it to a byte array
                         // as documented in Record#getData(). (using ByteBuffer#array() can fail)
@@ -247,6 +249,7 @@ public class KinesisConsumer implements Runnable {
                 .build();
 
         LOG.debug("Before Kinesis worker runs");
+
         worker.run();
         transport.consumerState.set(KinesisTransportState.STOPPED);
         LOG.debug("After Kinesis worker runs");
