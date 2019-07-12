@@ -2,9 +2,10 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
+import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import FormAdvancedOptions from './FormAdvancedOptions';
+import useFetch from './hooks/fetch';
 
 import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';
@@ -13,12 +14,19 @@ import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { availableStreams } = useContext(ApiContext);
+  const { availableStreams, setLogSample } = useContext(ApiContext);
 
-  const handleSubmit = (event) => {
-    if (!event.error) {
-      onSubmit(event);
-    }
+  const setFetchOptions = useFetch(setLogSample, onSubmit)[1];
+
+  const handleSubmit = () => {
+    setFetchOptions({
+      method: 'POST',
+      url: '/plugins/org.graylog.integrations/aws/kinesis/health_check',
+      options: {
+        region: formData.awsCloudWatchAwsRegion.value,
+        stream_name: formData.awsCloudWatchKinesisStream.value,
+      },
+    });
   };
 
   return (

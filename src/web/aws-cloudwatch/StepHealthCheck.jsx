@@ -9,11 +9,7 @@ import { ApiContext } from './context/Api';
 import FormWrap from '../common/FormWrap';
 
 const StepHealthCheck = ({ onSubmit }) => {
-  const { logSample, setLogSample } = useContext(ApiContext);
-
-  if (!logSample) {
-    setLogSample();
-  }
+  const { logSample } = useContext(ApiContext);
 
   return (
     <Row>

@@ -25,24 +25,8 @@ export const ApiProvider = ({ children }) => {
     setStreamsState(streams);
   };
 
-  const setLogSample = () => {
-    const { formData } = useContext(FormDataContext);
-    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/kinesis/health_check');
-
-    const { key, secret } = awsAuth(formData);
-    const region = formData.awsCloudWatchAwsRegion.value;
-    const stream = formData.awsCloudWatchKinesisStream.value;
-
-    return fetch('POST', url, {
-      region,
-      aws_access_key_id: key,
-      aws_secret_access_key: secret,
-      stream_name: stream,
-    }).then((response) => {
-      setLogSampleState(JSON.stringify(response.message_fields, null, 2));
-
-      return response;
-    });
+  const setLogSample = (response) => {
+    setLogSampleState(JSON.stringify(response.message_fields, null, 2));
   };
 
   return (
