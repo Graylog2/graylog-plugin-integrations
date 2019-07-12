@@ -9,6 +9,7 @@ import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { LogOutputContext } from './context/LogOutput';
+
 import FormWrap from '../common/FormWrap';
 
 const Default = ({ value }) => {
@@ -53,7 +54,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               }
               <li>
                 <strong>AWS Key</strong>
-                <span>AK************{formData.awsCloudWatchAwsKey.value.slice(-6)}</span>
+                <span>{formData.awsCloudWatchAwsKey.value}</span>
               </li>
               <li>
                 <strong>AWS Region</strong>

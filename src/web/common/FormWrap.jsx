@@ -21,6 +21,7 @@ const FormWrap = ({ children, buttonContent, onSubmit }) => {
   return (
     <form onSubmit={prevent}
           autoComplete="off"
+          noValidate
           ref={(form) => { currentForm = form; }}>
       {children}
 
