@@ -57,6 +57,11 @@ public class AWSCodec extends AbstractCodec {
         return message;
     }
 
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
     @FactoryClass
     public interface Factory extends Codec.Factory<AWSCodec> {
         @Override
