@@ -1,10 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
+import useFetch from './hooks/fetch';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -12,18 +13,21 @@ import { renderOptions } from '../common/Options';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { availableRegions, setRegions } = useContext(ApiContext);
+  const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
 
   const isRegionsLoading = availableRegions.length === 0;
-
   if (isRegionsLoading) {
     setRegions();
   }
 
-  const handleSubmit = (event) => {
-    if (!event.error) {
-      onSubmit(event);
-    }
+  const setFetchOptions = useFetch(setStreams, onSubmit)[1];
+
+  const handleSubmit = () => {
+    setFetchOptions({
+      method: 'POST',
+      url: '/plugins/org.graylog.integrations/aws/kinesis/streams',
+      options: { region: formData.awsCloudWatchAwsRegion.value },
+    });
   };
 
   return (

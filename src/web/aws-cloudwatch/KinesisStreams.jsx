@@ -13,11 +13,7 @@ import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { availableStreams, setStreams } = useContext(ApiContext);
-
-  if (availableStreams.length === 0) {
-    setStreams();
-  }
+  const { availableStreams } = useContext(ApiContext);
 
   const handleSubmit = (event) => {
     if (!event.error) {

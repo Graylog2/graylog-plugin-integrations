@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
-import formValidation from 'utils/formValidation';
+// import formValidation from 'utils/formValidation';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
@@ -37,24 +37,8 @@ const CloudWatch = () => {
     setFormData(id, { ...fieldData, value });
   };
 
-  const handleSubmit = (event, form) => {
+  const handleSubmit = () => {
     // TODO: add String.trim() to inputs
-    if (!event && form) {
-      const formElements = Array.from(form.elements);
-
-      formElements.forEach((field) => {
-        const errorOutput = formValidation.checkInputValidity(field);
-
-        if (field.id && errorOutput) {
-          setFormData(field.id, { error: true });
-        }
-      });
-
-      return false;
-    }
-
-    event.preventDefault();
-
     const nextStep = availableSteps.indexOf(currentStep) + 1;
 
     if (availableSteps[nextStep]) {

@@ -2,17 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
-import formValidation from '../utils/formValidation';
-
 let currentForm;
-
 const FormWrap = ({ children, buttonContent, onSubmit }) => {
-  const handleSubmit = (event) => {
-    if (formValidation.isFormValid(currentForm)) {
-      onSubmit(event);
-    }
-  };
-
+  const isValid = currentForm && currentForm.checkValidity();
   const prevent = (event) => {
     event.preventDefault();
     return false;
@@ -26,8 +18,9 @@ const FormWrap = ({ children, buttonContent, onSubmit }) => {
       {children}
 
       <Button type="button"
-              onClick={handleSubmit}
-              bsStyle="primary">
+              onClick={onSubmit}
+              bsStyle="primary"
+              disabled={!isValid}>
         {buttonContent}
       </Button>
     </form>

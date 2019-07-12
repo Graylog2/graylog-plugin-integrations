@@ -20,23 +20,9 @@ export const ApiProvider = ({ children }) => {
     return fetch('GET', url).then(response => setRegionsState(response.regions));
   };
 
-  const setStreams = () => {
-    const { formData } = useContext(FormDataContext);
-    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/kinesis/streams');
-
-    const { key, secret } = awsAuth(formData);
-    const region = formData.awsCloudWatchAwsRegion.value;
-
-    return fetch('POST', url, {
-      region,
-      aws_access_key_id: key,
-      aws_secret_access_key: secret,
-    }).then((response) => {
-      const streams = response.streams.map(stream => ({ value: stream, label: stream }));
-      setStreamsState(streams);
-
-      return streams;
-    });
+  const setStreams = (results) => {
+    const streams = results.streams.map(stream => ({ value: stream, label: stream }));
+    setStreamsState(streams);
   };
 
   const setLogSample = () => {
