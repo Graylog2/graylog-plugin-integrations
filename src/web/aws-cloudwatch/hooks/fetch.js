@@ -7,6 +7,7 @@ import { FormDataContext } from '../context/FormData';
 import { awsAuth } from '../context/default_settings';
 
 const dataFetchReducer = (state, action) => {
+  console.log('action.type', action.type);
   switch (action.type) {
     case 'FETCH_INIT':
       return { ...state, isLoading: true, isError: false };
@@ -49,10 +50,10 @@ const useFetch = (setHook = () => {}, callback = () => {}) => {
     let result;
 
     const fetchData = async () => {
-      dispatch({ type: 'FETCH_INIT' });
-
       try {
         if (qualifiedURL) {
+          dispatch({ type: 'FETCH_INIT' });
+
           result = await fetch(fetchOptions.method, qualifiedURL, {
             aws_access_key_id: key,
             aws_secret_access_key: secret,

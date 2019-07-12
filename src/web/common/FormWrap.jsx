@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
-let currentForm;
-const FormWrap = ({ children, buttonContent, onSubmit }) => {
-  const isValid = currentForm && currentForm.checkValidity();
+const FormWrap = ({ children, buttonContent, loading, onSubmit }) => {
+  const currentForm = useRef();
+  const isDisabled = loading || (currentForm.current && !currentForm.current.checkValidity());
   const prevent = (event) => {
     event.preventDefault();
     return false;
@@ -14,14 +14,14 @@ const FormWrap = ({ children, buttonContent, onSubmit }) => {
     <form onSubmit={prevent}
           autoComplete="off"
           noValidate
-          ref={(form) => { currentForm = form; }}>
+          ref={currentForm}>
       {children}
 
       <Button type="button"
               onClick={onSubmit}
               bsStyle="primary"
-              disabled={!isValid}>
-        {buttonContent}
+              disabled={isDisabled}>
+        {loading ? 'Loading...' : buttonContent}
       </Button>
     </form>
   );
@@ -30,6 +30,7 @@ const FormWrap = ({ children, buttonContent, onSubmit }) => {
 FormWrap.propTypes = {
   children: PropTypes.any.isRequired,
   onSubmit: PropTypes.func,
+  loading: PropTypes.bool,
   buttonContent: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node,
@@ -39,6 +40,7 @@ FormWrap.propTypes = {
 FormWrap.defaultProps = {
   onSubmit: () => {},
   buttonContent: 'Submit',
+  loading: false,
 };
 
 export default FormWrap;
