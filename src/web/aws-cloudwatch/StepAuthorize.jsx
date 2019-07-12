@@ -14,16 +14,17 @@ import { renderOptions } from '../common/Options';
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
+  const [fetchStatus, setStreamsFetchOptions] = useFetch(setStreams, onSubmit);
 
   const isRegionsLoading = availableRegions.length === 0;
+
   if (isRegionsLoading) {
-    setRegions();
+    const setRegionsFetchOptions = useFetch(setRegions)[1];
+    setRegionsFetchOptions({ url: '/plugins/org.graylog.integrations/aws/regions' });
   }
 
-  const [fetchStatus, setFetchOptions] = useFetch(setStreams, onSubmit);
-
   const handleSubmit = () => {
-    setFetchOptions({
+    setStreamsFetchOptions({
       method: 'POST',
       url: '/plugins/org.graylog.integrations/aws/kinesis/streams',
       options: { region: formData.awsCloudWatchAwsRegion.value },

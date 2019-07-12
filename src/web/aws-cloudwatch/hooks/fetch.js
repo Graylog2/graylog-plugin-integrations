@@ -7,7 +7,6 @@ import { FormDataContext } from '../context/FormData';
 import { awsAuth } from '../context/default_settings';
 
 const dataFetchReducer = (state, action) => {
-  console.log('action.type', action.type);
   switch (action.type) {
     case 'FETCH_INIT':
       return { ...state, isLoading: true, isError: false };
