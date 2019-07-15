@@ -56,6 +56,7 @@ public class KinesisService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
 
+    private static final int EIGHT_BITS = 8;
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int RECORDS_SAMPLE_SIZE = 10;
@@ -129,7 +130,7 @@ public class KinesisService {
         // Select random record from list, and check if the payload is compressed
         Record record = selectRandomRecord(records);
         final byte[] payloadBytes = record.data().asByteArray();
-        if (KinesisTransportProcessor.isCompressed(payloadBytes)) {
+        if (isCompressed(payloadBytes)) {
             return handleCompressedMessages(request, payloadBytes);
         }
 
@@ -359,5 +360,24 @@ public class KinesisService {
 
         LOG.debug("Selecting a random Record from the sample list.");
         return recordsList.get(new Random().nextInt(recordsList.size()));
+    }
+
+    /**
+     * Checks if the supplied stream is GZip compressed.
+     *
+     * @param bytes a byte array.
+     * @return true if the byte array is GZip compressed and false if not.
+     */
+    public static boolean isCompressed(byte[] bytes) {
+        if ((bytes == null) || (bytes.length < 2)) {
+            return false;
+        } else {
+
+            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
+            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
+            // The >> operator shifts the GZIP magic number to the second byte.
+            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
+            return firstByteIsMagicNumber && secondByteIsMagicNumber;
+        }
     }
 }

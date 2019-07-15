@@ -23,18 +23,16 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
 import okhttp3.HttpUrl;
-import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
+import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
-import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.system.NodeId;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +53,7 @@ public class KinesisConsumer implements Runnable {
     private final Consumer<byte[]> dataHandler;
     private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
+    private final KinesisTransportProcessor kinesisTransportProcessor;
 
     private Worker worker;
     private KinesisTransport transport;
@@ -66,7 +65,7 @@ public class KinesisConsumer implements Runnable {
      */
     private String lastSuccessfulRecordSequence = null;
 
-    public KinesisConsumer(String kinesisStreamName,
+    public KinesisConsumer(String kinesisStream,
                            Region region,
                            Consumer<byte[]> dataHandler,
                            AWSPluginConfiguration awsConfig,
@@ -75,8 +74,9 @@ public class KinesisConsumer implements Runnable {
                            KinesisTransport transport,
                            ObjectMapper objectMapper,
                            Integer maxThrottledWaitMillis,
-                           Integer recordBatchSize) {
-        this.kinesisStreamName = requireNonNull(kinesisStreamName, "kinesisStreamName");
+                           Integer recordBatchSize,
+                           AWSMessageType awsMessageType) {
+        this.kinesisStreamName = requireNonNull(kinesisStream, "kinesisStream");
         this.region = requireNonNull(region, "region");
         this.dataHandler = requireNonNull(dataHandler, "dataHandler");
         this.awsConfig = requireNonNull(awsConfig, "awsConfig");
@@ -87,6 +87,7 @@ public class KinesisConsumer implements Runnable {
         this.objectMapper = objectMapper;
         this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.recordBatchSize = recordBatchSize;
+        this.kinesisTransportProcessor = new KinesisTransportProcessor(objectMapper, awsMessageType, kinesisStream);
     }
 
     // TODO metrics
@@ -165,23 +166,12 @@ public class KinesisConsumer implements Runnable {
                         final byte[] dataBytes = new byte[dataBuffer.remaining()];
                         dataBuffer.get(dataBytes);
 
-                        // Decompress response.
-                        final byte[] bytes = Tools.decompressGzip(dataBytes).getBytes();
+                        List<KinesisLogEntry> kinesisLogEntries =
+                                kinesisTransportProcessor.processMessages(dataBytes,
+                                                                          record.getApproximateArrivalTimestamp().toInstant());
 
-                        // Extract messages, so that they can be committed to journal one by one.
-                        final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
-                        Iterator<KinesisLogEntry> iterator =
-                                data.logEvents().stream()
-                                    .map(le -> KinesisLogEntry.create(config.getStreamName(),
-                                                                      data.logGroup(),
-                                                                      data.logStream(),
-                                                                      new DateTime(le.timestamp(), DateTimeZone.UTC),
-                                                                      le.message())).iterator();
-
-                        // Push all messages to the Journal.
-                        while (iterator.hasNext()) {
-                            KinesisLogEntry next = iterator.next();
-                            dataHandler.accept(objectMapper.writeValueAsBytes(next));
+                        for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
+                            dataHandler.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                         }
 
                         lastSuccessfulRecordSequence = record.getSequenceNumber();

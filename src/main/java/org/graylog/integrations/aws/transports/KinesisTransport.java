@@ -8,6 +8,8 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
 import okhttp3.HttpUrl;
+import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.cluster.ClusterConfigService;
@@ -159,7 +161,8 @@ public class KinesisTransport extends ThrottleableTransport {
                 this,
                 objectMapper,
                 configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
-                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE)
+                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
+                AWSMessageType.valueOf(configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE))
         );
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
