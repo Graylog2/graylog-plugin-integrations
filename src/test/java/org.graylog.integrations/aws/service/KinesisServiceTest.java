@@ -7,6 +7,7 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.configuration.Configuration;
@@ -25,6 +26,8 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -57,6 +60,7 @@ public class KinesisServiceTest {
     private static final String TEST_STREAM_2 = "test-stream-2";
     private static final String[] TWO_TEST_STREAMS = {TEST_STREAM_1, TEST_STREAM_2};
     private static final String TEST_REGION = Region.EU_WEST_1.id();
+    private static final int SHARD_COUNT = 1;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -391,5 +395,18 @@ public class KinesisServiceTest {
 
         List<Record> fakeRecordsList = kinesisService.retrieveRecords("kinesisStream", kinesisClient);
         assertEquals(fakeRecordsList.size(), 10);
+    }
+
+    @Test
+    public void testCreateNewKinesisStream() {
+
+        KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
+                                                                                         "accessKey", "secretKey", TEST_STREAM_1, SHARD_COUNT);
+        CreateStreamRequest streamRequest = CreateStreamRequest.builder()
+                                                               .streamName(kinesisNewStreamRequest.streamName())
+                                                               .shardCount(kinesisNewStreamRequest.shardCount())
+                                                               .build();
+        when(kinesisClient.createStream(streamRequest)).thenReturn(CreateStreamResponse.builder().build());
+
     }
 }
