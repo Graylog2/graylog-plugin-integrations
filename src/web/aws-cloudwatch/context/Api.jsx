@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
-import { ApiRoutes } from '../common/Routes';
+import { ApiRoutes } from '../../common/Routes';
 
 
 export const ApiContext = createContext();
