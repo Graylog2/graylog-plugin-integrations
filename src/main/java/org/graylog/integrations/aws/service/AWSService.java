@@ -193,7 +193,7 @@ public class AWSService {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         final HashMap<String, Object> configuration = new HashMap<>();
-        configuration.put(AWSInput.CK_AWS_INPUT_TYPE, request.awsMessageType());
+        configuration.put(AWSInput.CK_AWS_MESSAGE_TYPE, request.awsMessageType());
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
         configuration.put(AWSInput.CK_GLOBAL, request.global());

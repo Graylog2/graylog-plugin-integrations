@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 import { Input } from 'components/bootstrap';
 
-const StepHealthCheck = ({ onSubmit, logOutput }) => {
+import { LogOutputContext } from './context/LogOutput';
+
+import FormWrap from '../common/FormWrap';
+
+const StepHealthCheck = ({ onSubmit }) => {
+  const { logOutput } = useContext(LogOutputContext);
+
   return (
     <Row>
       <Col md={8}>
-        <form onSubmit={onSubmit}>
+        <FormWrap onSubmit={onSubmit} buttonContent="Review &amp; Finalize">
           <h2>Create Kinesis Stream</h2>
           <p>We&apos;re going to attempt to parse a single log to help you out! If we&apos;re unable to, or you would like it parsed differently, head on over to <a href="/system/pipelines">Pipeline Rules</a> to set up your own parser!</p>
 
@@ -20,9 +26,7 @@ const StepHealthCheck = ({ onSubmit, logOutput }) => {
                  value={logOutput}
                  rows={10}
                  disabled />
-
-          <Button type="submit" bsStyle="primary">Review &amp; Finalize</Button>
-        </form>
+        </FormWrap>
       </Col>
     </Row>
   );
@@ -30,7 +34,6 @@ const StepHealthCheck = ({ onSubmit, logOutput }) => {
 
 StepHealthCheck.propTypes = {
   onSubmit: PropTypes.func.isRequired,
-  logOutput: PropTypes.string.isRequired,
 };
 
 export default StepHealthCheck;

@@ -100,7 +100,7 @@ public class AWSServiceTest {
         assertEquals(AWSInput.TYPE, input.type());
         assertFalse(input.global());
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
-        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_INPUT_TYPE));
+        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_MESSAGE_TYPE));
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
         assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
         assertEquals("An AWS Input", input.configuration().get(AWSInput.CK_DESCRIPTION));

@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 public class KinesisRawLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "CloudWatchRawLog";
+    static final String SOURCE = "aws-kinesis-raw-logs";
 
     @Inject
     public KinesisRawLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
@@ -27,7 +28,7 @@ public class KinesisRawLogCodec extends AbstractKinesisCodec {
     @Override
     public Message decodeLogData(@Nonnull final KinesisLogEntry logEvent) {
         try {
-            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-raw-logs");
+            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, SOURCE);
             Message result = new Message(
                     logEvent.message(),
                     source,

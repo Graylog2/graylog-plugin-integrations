@@ -86,7 +86,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
      * Get all available AWS CloudWatch log groups names for the specified region.
      *
      * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/logGroups' \
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/log_groups' \
      * -X POST \
      * -H 'X-Requested-By: XMLHttpRequest' \
      * -H 'Content-Type: application/json'   \
@@ -136,7 +136,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
      * Sample CURL command for executing this method. Use this to model the UI request.
      * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
      *
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/healthCheck' \
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/health_check' \
      * -X POST \
      * -H 'X-Requested-By: XMLHttpRequest' \
      * -H 'Content-Type: application/json'   \
@@ -145,8 +145,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
      * "region": "us-east-1",
      * "aws_access_key_id": "some-key",
      * "aws_secret_access_key": "some-secret",
-     * "stream_name": "a-stream",
-     * "log_group_name": "a-log-group"
+     * "stream_name": "a-stream"
      * }'
      */
     @POST
@@ -165,7 +164,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     /**
      * Create a new AWS input.
      *
-     * curl 'http://admin:123123123@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
+     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
      * -v \
      * -X POST \
      * -H 'X-Requested-By: just-a-test' \

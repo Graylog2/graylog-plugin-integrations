@@ -22,6 +22,20 @@ import java.util.Map;
 
 public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "FlowLog";
+    static final String FIELD_ACCOUNT_ID = "account_id";
+    static final String FIELD_INTERFACE_ID = "interface_id";
+    static final String FIELD_SRC_ADDR = "src_addr";
+    static final String FIELD_DST_ADDR = "dst_addr";
+    static final String FIELD_SRC_PORT = "src_port";
+    static final String FIELD_DST_PORT = "dst_port";
+    static final String FIELD_PROTOCOL_NUMBER = "protocol_number";
+    static final String FIELD_PROTOCOL = "protocol";
+    static final String FIELD_PACKETS = "packets";
+    static final String FIELD_BYTES = "bytes";
+    static final String FIELD_CAPTURE_WINDOW_DURATION = "capture_window_duration_seconds";
+    static final String FIELD_ACTION = "action";
+    static final String FIELD_LOG_STATUS = "log_status";
+    static final String SOURCE = "aws-kinesis-flowlogs";
 
     private final IANAProtocolNumbers protocolNumbers;
 
@@ -41,7 +55,7 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
                 return null;
             }
 
-            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, "aws-flowlogs");
+            final String source = configuration.getString(KinesisCloudWatchFlowLogCodec.Config.CK_OVERRIDE_SOURCE, SOURCE);
             final Message result = new Message(
                     buildSummary(flowLogMessage),
                     source,
@@ -71,19 +85,19 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
 
     private Map<String, Object> buildFields(FlowLogMessage msg) {
         return new HashMap<String, Object>() {{
-            put("account_id", msg.getAccountId());
-            put("interface_id", msg.getInterfaceId());
-            put("src_addr", msg.getSourceAddress());
-            put("dst_addr", msg.getDestinationAddress());
-            put("src_port", msg.getSourcePort());
-            put("dst_port", msg.getDestinationPort());
-            put("protocol_number", msg.getProtocolNumber());
-            put("protocol", protocolNumbers.lookup(msg.getProtocolNumber()));
-            put("packets", msg.getPackets());
-            put("bytes", msg.getBytes());
-            put("capture_window_duration_seconds", Seconds.secondsBetween(msg.getCaptureWindowStart(), msg.getCaptureWindowEnd()).getSeconds());
-            put("action", msg.getAction());
-            put("log_status", msg.getLogStatus());
+            put(FIELD_ACCOUNT_ID, msg.getAccountId());
+            put(FIELD_INTERFACE_ID, msg.getInterfaceId());
+            put(FIELD_SRC_ADDR, msg.getSourceAddress());
+            put(FIELD_DST_ADDR, msg.getDestinationAddress());
+            put(FIELD_SRC_PORT, msg.getSourcePort());
+            put(FIELD_DST_PORT, msg.getDestinationPort());
+            put(FIELD_PROTOCOL_NUMBER, msg.getProtocolNumber());
+            put(FIELD_PROTOCOL, protocolNumbers.lookup(msg.getProtocolNumber()));
+            put(FIELD_PACKETS, msg.getPackets());
+            put(FIELD_BYTES, msg.getBytes());
+            put(FIELD_CAPTURE_WINDOW_DURATION, Seconds.secondsBetween(msg.getCaptureWindowStart(), msg.getCaptureWindowEnd()).getSeconds());
+            put(FIELD_ACTION, msg.getAction());
+            put(FIELD_LOG_STATUS, msg.getLogStatus());
         }};
     }
 

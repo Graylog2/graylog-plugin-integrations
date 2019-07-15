@@ -18,7 +18,7 @@ package org.graylog.integrations.aws.inputs;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
@@ -53,7 +53,7 @@ public class AWSInput extends MessageInput {
      * Specifies one of the {@code AWSInputType} choices, which indicates which codec and transport
      * should be used.
      */
-    public static final String CK_AWS_INPUT_TYPE = "aws_input_type";
+    public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
     public static final String CK_TITLE = "title";
     public static final String CK_DESCRIPTION = "description";
     public static final String CK_GLOBAL = "global";
@@ -67,7 +67,7 @@ public class AWSInput extends MessageInput {
                     MetricRegistry metricRegistry,
                     KinesisTransport.Factory transport,
                     LocalMetricRegistry localRegistry,
-                    AWSMetaCodec.Factory codec,
+                    AWSCodec.Factory codec,
                     Config config,
                     Descriptor descriptor,
                     ServerStatus serverStatus) {
@@ -113,7 +113,7 @@ public class AWSInput extends MessageInput {
     public static class Config extends MessageInput.Config {
 
         @Inject
-        public Config(KinesisTransport.Factory transport, AWSMetaCodec.Factory codec) {
+        public Config(KinesisTransport.Factory transport, AWSCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
         }
 
