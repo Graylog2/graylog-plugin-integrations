@@ -29,13 +29,13 @@ public abstract class AvailableService {
     public abstract String helperText();
 
     @JsonProperty(LEARN_MORE_LINK)
-    public abstract String LearnMoreLink();
+    public abstract String learnMoreLink();
 
     public static AvailableService create(@JsonProperty(NAME) String name,
                                           @JsonProperty(DESCRIPTION) String description,
                                           @JsonProperty(POLICY) String policy,
                                           @JsonProperty(HELPER_TEXT) String helperText,
-                                          @JsonProperty(LEARN_MORE_LINK) String LearnMoreLink) {
-        return new AutoValue_AvailableService(name, description, policy, helperText, LearnMoreLink);
+                                          @JsonProperty(LEARN_MORE_LINK) String learnMoreLink) {
+        return new AutoValue_AvailableService(name, description, policy, helperText, learnMoreLink);
     }
 }

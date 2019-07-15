@@ -18,7 +18,6 @@ package org.graylog.integrations.aws.inputs;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.transports.AWSTransport;
@@ -126,15 +125,6 @@ public class AWSInput extends MessageInput {
             ConfigurationRequest request = super.combinedRequestedConfiguration();
 
             // These config values will be shared amongst many AWS codecs and transports.
-
-            request.addField(new DropdownField(
-                    CK_AWS_MESSAGE_TYPE,
-                    "AWS Message Type",
-                    Region.US_EAST_1.id(),
-                    AWSMessageType.getMessageTypes().stream()
-                                  .collect(Collectors.toMap(AWSMessageType::toString, AWSMessageType::getLabel)),
-                    "The AWS region the Kinesis stream is running in.",
-                    ConfigurationField.Optional.NOT_OPTIONAL));
 
             request.addField(new DropdownField(
                     CK_AWS_REGION,

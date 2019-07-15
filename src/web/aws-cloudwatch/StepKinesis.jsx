@@ -3,23 +3,25 @@ import PropTypes from 'prop-types';
 
 import KinesisStreams from './KinesisStreams';
 import KinesisSetup from './KinesisSetup';
+import { AdvancedOptionsProvider } from './context/AdvancedOptions';
 
 const StepKinesis = ({ hasStreams, ...restProps }) => {
   return (
-    <React.Fragment>
-      { hasStreams
-        ? <KinesisStreams {...restProps} />
-        : <KinesisSetup {...restProps} />
-      }
-    </React.Fragment>
+    <AdvancedOptionsProvider>
+      <React.Fragment>
+        { hasStreams
+          ? <KinesisStreams {...restProps} />
+          : <KinesisSetup {...restProps} />
+        }
+      </React.Fragment>
+    </AdvancedOptionsProvider>
   );
 };
 
 StepKinesis.propTypes = {
   hasStreams: PropTypes.bool,
-  onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
-  getValue: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 StepKinesis.defaultProps = {
