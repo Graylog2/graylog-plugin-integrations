@@ -19,21 +19,41 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class KinesisTransportProcessor {
+/**
+ * This class is responsible for decoding the raw Kinesis byte array payload.
+ */
+public class KinesisPayloadDecoder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KinesisTransportProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KinesisPayloadDecoder.class);
 
     private final ObjectMapper objectMapper;
     private final AWSMessageType awsMessageType;
     private final String kinesisStream;
 
     @Inject
-    public KinesisTransportProcessor(ObjectMapper objectMapper, AWSMessageType awsMessageType, String kinesisStream) {
+    public KinesisPayloadDecoder(ObjectMapper objectMapper, AWSMessageType awsMessageType, String kinesisStream) {
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
         this.kinesisStream = kinesisStream;
     }
 
+    /**
+     * Decodes the raw Kinesis byte array message payload.
+     *
+     * <p>The following {@link AWSMessageType} enum values are supported:</p>
+     *
+     * <p>
+     * <strong>{@code AWSMessageType.KINESIS_RAW}</strong>: Raw Kinesis log messages that are converted directly to a string.
+     * <strong>{@code AWSMessageType.KINESIS_FLOW_LOGS}</strong>: CloudWatch flow log messages. These messages are
+     * delivered to Kinesis from CloudWatch in batches within a JSON document.
+     * </p>
+     *
+     * @param payloadBytes A Kinesis payload in byte array form.
+     * @param approximateArrivalTimestamp The approximate instant that the message was written to Kinesis. This is used
+     *                                    for the {@code AWSMessageType.KINESIS_RAW} message timestamp.
+     * @return A list of {@link KinesisLogEntry} messages, which are fully ready to be written to the Graylog Journal.
+     * @throws IOException
+     */
     List<KinesisLogEntry> processMessages(final byte[] payloadBytes, Instant approximateArrivalTimestamp) throws IOException {
 
         // Rely on the AWSMessageType identified in the setup healthCheck.

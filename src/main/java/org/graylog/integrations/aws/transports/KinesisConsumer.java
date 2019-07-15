@@ -53,7 +53,7 @@ public class KinesisConsumer implements Runnable {
     private final Consumer<byte[]> dataHandler;
     private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
-    private final KinesisTransportProcessor kinesisTransportProcessor;
+    private final KinesisPayloadDecoder kinesisPayloadDecoder;
 
     private Worker worker;
     private KinesisTransport transport;
@@ -87,7 +87,7 @@ public class KinesisConsumer implements Runnable {
         this.objectMapper = objectMapper;
         this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.recordBatchSize = recordBatchSize;
-        this.kinesisTransportProcessor = new KinesisTransportProcessor(objectMapper, awsMessageType, kinesisStream);
+        this.kinesisPayloadDecoder = new KinesisPayloadDecoder(objectMapper, awsMessageType, kinesisStream);
     }
 
     // TODO metrics
@@ -167,8 +167,8 @@ public class KinesisConsumer implements Runnable {
                         dataBuffer.get(dataBytes);
 
                         List<KinesisLogEntry> kinesisLogEntries =
-                                kinesisTransportProcessor.processMessages(dataBytes,
-                                                                          record.getApproximateArrivalTimestamp().toInstant());
+                                kinesisPayloadDecoder.processMessages(dataBytes,
+                                                                      record.getApproximateArrivalTimestamp().toInstant());
 
                         for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
                             dataHandler.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
