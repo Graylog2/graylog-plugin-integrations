@@ -389,25 +389,39 @@ public class KinesisService {
     /**
      * Creates a new Kinesis stream.
      *
-     * @param kinesisNewStreamRequest
+     * @param kinesisNewStreamRequest request which contains region, access, secret, region, streamName and shardCount
      * @return the status response
      */
     public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest kinesisNewStreamRequest) {
         // TODO add error handling and logging
-        final KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
-                                                         kinesisNewStreamRequest.awsAccessKeyId(),
-                                                         kinesisNewStreamRequest.awsSecretAccessKey());
+        LOG.debug("Creating Kinesis client with the provided credentials.");
+        KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
+                                                   kinesisNewStreamRequest.awsAccessKeyId(),
+                                                   kinesisNewStreamRequest.awsSecretAccessKey());
 
-        LOG.debug("Creating new Kinesis stream [{}].", kinesisNewStreamRequest.streamName());
+        LOG.debug("Creating new Kinesis stream request [{}].", kinesisNewStreamRequest.streamName());
         CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
                                                                      .streamName(kinesisNewStreamRequest.streamName())
                                                                      .shardCount(kinesisNewStreamRequest.shardCount())
                                                                      .build();
+        LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
+                  kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
 
-        CreateStreamResponse createStreamResponse = kinesisClient.createStream(createStreamRequest);
-        String responseMessage = String.format("Success. The new stream [{}] was created.");
-        LOG.debug(responseMessage);
-
-        return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
+        CreateStreamResponse streamResponse = kinesisClient.createStream(createStreamRequest);
+        String responseMessage;
+        boolean status;
+        if (streamResponse.sdkHttpResponse().isSuccessful()) {
+            status = true;
+            responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
+                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
+            LOG.debug(responseMessage);
+        } else {
+            status = false;
+            responseMessage = String.format("Failed. Attempt to create new Kinesis stream [%s] " +
+                                            "with [%d] shards was not created.",
+                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
+            LOG.debug(responseMessage);
+        }
+        return KinesisNewStreamResponse.create(status, responseMessage, new HashMap<>());
     }
 }
