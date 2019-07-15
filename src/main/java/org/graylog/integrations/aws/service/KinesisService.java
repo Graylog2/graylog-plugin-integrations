@@ -23,6 +23,7 @@ import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.plugin.journal.RawMessage;
+import org.graylog2.shared.utilities.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -407,21 +408,21 @@ public class KinesisService {
         LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
                   kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
 
-        CreateStreamResponse streamResponse = kinesisClient.createStream(createStreamRequest);
         String responseMessage;
-        boolean status;
-        if (streamResponse.sdkHttpResponse().isSuccessful()) {
-            status = true;
+        try {
+            CreateStreamResponse streamResponse = kinesisClient.createStream(createStreamRequest);
             responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
                                             kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
+            return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
+        } catch (Exception e) {
+
+            String specificError = ExceptionUtils.formatMessageCause(e);
+            responseMessage = String.format("Attempt to create new Kinesis stream [%s] " +
+                                            "with [%d] failed due to the following exception: [%s]",
+                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount(),
+                                            specificError);
             LOG.debug(responseMessage);
-        } else {
-            status = false;
-            responseMessage = String.format("Failed. Attempt to create new Kinesis stream [%s] " +
-                                            "with [%d] shards was not created.",
-                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
-            LOG.debug(responseMessage);
+            return KinesisNewStreamResponse.create(false, responseMessage, new HashMap<>());
         }
-        return KinesisNewStreamResponse.create(status, responseMessage, new HashMap<>());
     }
 }
