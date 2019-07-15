@@ -31,7 +31,7 @@ public class AWSCodecTest {
     public void testKinesisFlowLogCodec() throws JsonProcessingException {
 
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
+        configMap.put(AWSCodec.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
@@ -66,7 +66,7 @@ public class AWSCodecTest {
     public void testKinesisRawCodec() throws JsonProcessingException {
 
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
+        configMap.put(AWSCodec.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 

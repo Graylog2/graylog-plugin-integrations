@@ -2,6 +2,7 @@ package org.graylog.integrations.aws.transports;
 
 import com.google.common.eventbus.EventBus;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
@@ -61,7 +62,7 @@ public class AWSTransportTest {
         });
 
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
+        configMap.put(AWSCodec.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
         final Configuration configuration = new Configuration(configMap);
         awsTransport = new AWSTransport(configuration, serverEventBus, localRegistry, availableCodecs);
     }

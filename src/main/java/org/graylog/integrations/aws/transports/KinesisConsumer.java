@@ -22,6 +22,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
+import edu.emory.mathcs.backport.java.util.concurrent.CountDownLatch;
 import okhttp3.HttpUrl;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
@@ -171,6 +172,14 @@ public class KinesisConsumer implements Runnable {
                                                                       record.getApproximateArrivalTimestamp().toInstant());
 
                         for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
+
+
+                            LOG.info("Processing Kinesis record. Pausing.", processRecordsInput.getRecords().size());
+                            try {
+                                new CountDownLatch(1).await(100, edu.emory.mathcs.backport.java.util.concurrent.TimeUnit.MILLISECONDS);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             dataHandler.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                         }
 
@@ -179,6 +188,7 @@ public class KinesisConsumer implements Runnable {
                         LOG.error("Couldn't read Kinesis record from stream <{}>", kinesisStreamName, e);
                     }
                 }
+
 
                 // According to the Kinesis client documentation, we should not checkpoint for every record but
                 // rather periodically.
