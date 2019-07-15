@@ -400,13 +400,13 @@ public class KinesisServiceTest {
     @Test
     public void testCreateNewKinesisStream() {
 
+        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+        when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
         KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
-                                                                                         "accessKey", "secretKey", TEST_STREAM_1, SHARD_COUNT);
-        CreateStreamRequest streamRequest = CreateStreamRequest.builder()
-                                                               .streamName(kinesisNewStreamRequest.streamName())
-                                                               .shardCount(kinesisNewStreamRequest.shardCount())
-                                                               .build();
-        when(kinesisClient.createStream(streamRequest)).thenReturn(CreateStreamResponse.builder().build());
-
+                                                                                         "accessKey", "secretKey",
+                                                                                         TEST_STREAM_1, SHARD_COUNT);
+        kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
     }
 }
