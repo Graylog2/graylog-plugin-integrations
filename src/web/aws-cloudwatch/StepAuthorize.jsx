@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
@@ -15,20 +15,20 @@ import { ApiRoutes } from '../common/Routes';
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
-  const [fetchStatus, setStreamsFetchOptions] = useFetch(setStreams, onSubmit);
+  const [fetchRegionsStatus, setRegionsUrl] = useFetch(setRegions, 'GET');
+  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
+    setStreams,
+    'POST',
+    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+    onSubmit,
+  );
 
-  const isRegionsLoading = availableRegions.length === 0;
-
-  if (isRegionsLoading) {
-    setRegions();
-  }
+  useEffect(() => {
+    setRegionsUrl(ApiRoutes.INTEGRATIONS.AWS.REGIONS);
+  }, []);
 
   const handleSubmit = () => {
-    setStreamsFetchOptions({
-      method: 'POST',
-      url: ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS,
-      options: { region: formData.awsCloudWatchAwsRegion.value },
-    });
+    setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 
   return (
@@ -36,7 +36,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchStatus.isLoading}>
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
@@ -90,9 +90,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="Region"
                           help="Provide the region your CloudWatch instance is deployed."
-                          disabled={isRegionsLoading}
+                          disabled={fetchRegionsStatus.loading}
                           required>
-            {renderOptions(availableRegions, 'Choose AWS Region', isRegionsLoading)}
+            {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
           </ValidatedInput>
         </FormWrap>
       </Col>

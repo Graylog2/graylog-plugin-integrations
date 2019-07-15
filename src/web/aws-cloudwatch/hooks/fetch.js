@@ -1,9 +1,7 @@
-import { useReducer, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
-
-import fetchReducer from './fetchReducer';
 
 import { FormDataContext } from '../context/FormData';
 import { awsAuth } from '../context/default_settings';
@@ -15,38 +13,27 @@ in order to use fetch Promises and hooks.
 
 PARAMETERS:
  - `setHook` that you want to call after fetch [required]
- - `callback` that will fire any part of your code you need after fetch [optional]
+ - `method`: '', [`'GET'` optional]
+ - `options`: '', [`{}` optional]
+ - `callback` that will fire any part of your code you need after fetch [`() => {}` optional]
 
 USE:
-`const [status, setOptions] = useFetch(setNextHook, onFooBar);`
- - `status` will provide the current reducer state, including `isLoading` and `isError`
- - `setOptions` will be your hook to call as a submit handler within a subfunction, it needs the following obect passed:
-    ```
-    {
-        method: '', // GET, POST, DELETE, etc
-        options: {}, // AWS key and secret are handled automatically
-        url: '', // API route path, this cleans it with URLUtils.qualifyUrl()
-    }
-    ```
+`const [status, setUrl] = useFetch(setNextHook, onFooBar);`
+ - `status` will provide the current reducer state `{ loading, error, data }`
+ - `setUrl` will be your hook to call as a submit handler within a subfunction, it needs the API route as a string:
 
 EXAMPLES:
  - See uses in `src/web/aws-cloudwatch/StepAuthorize.jsx`
 */
 
-const useFetch = (setHook, callback = () => {}) => {
+const useFetch = (setHook, method = 'GET', options = {}, callback = () => {}) => {
   const { formData } = useContext(FormDataContext);
-  const [fetchOptions, setFetchOptions] = useState({
-    method: '',
-    options: {},
-    url: '',
-  });
-  const [status, dispatch] = useReducer(fetchReducer, {
-    isLoading: false,
-    isError: false,
-    data: [],
-  });
+  const [fetchUrl, setFetchUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [data, setData] = useState(false);
 
-  const qualifiedURL = fetchOptions.url ? URLUtils.qualifyUrl(fetchOptions.url) : fetchOptions.url;
+  const qualifiedURL = fetchUrl ? URLUtils.qualifyUrl(fetchUrl) : fetchUrl;
 
   useEffect(() => {
     let didCancel = !qualifiedURL;
@@ -55,26 +42,28 @@ const useFetch = (setHook, callback = () => {}) => {
     const fetchData = async () => {
       try {
         if (qualifiedURL && !didCancel) {
-          dispatch({ type: 'FETCH_LOADING' });
+          setLoading(true);
 
-          if (fetchOptions.method === 'GET') {
-            result = await fetch(fetchOptions.method, qualifiedURL);
+          if (method === 'GET') {
+            result = await fetch(method, qualifiedURL);
           } else {
             const { key, secret } = awsAuth(formData);
-            result = await fetch(fetchOptions.method, qualifiedURL, {
+            result = await fetch(method, qualifiedURL, {
               aws_access_key_id: key,
               aws_secret_access_key: secret,
-              ...fetchOptions.options,
+              ...options,
             });
           }
 
-          dispatch({ type: 'FETCH_SUCCESS', payload: result });
+          setLoading(false);
+          setData(result);
           setHook(result);
           callback();
         }
-      } catch (error) {
+      } catch (err) {
         if (!didCancel) {
-          dispatch({ type: 'FETCH_FAILURE' });
+          setLoading(false);
+          setError(err);
         }
       }
     };
@@ -86,7 +75,7 @@ const useFetch = (setHook, callback = () => {}) => {
     };
   }, [qualifiedURL]);
 
-  return [status, setFetchOptions];
+  return [{ loading, error, data }, setFetchUrl];
 };
 
 export default useFetch;

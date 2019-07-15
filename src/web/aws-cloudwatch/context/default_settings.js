@@ -13,25 +13,6 @@ const DEFAULT_SETTINGS = {
   awsCloudWatchThrottleWait: {
     defaultValue: '1000',
   },
-
-  /* Test Settings */
-  // TODO: Remove these before any official launch, but I'm tired of copy/paste during dev
-  awsCloudWatchName: {
-    value: 'Name',
-  },
-  awsCloudWatchDescription: {
-    value: 'Description',
-  },
-  awsCloudWatchAwsKey: {
-    value: 'ABC',
-  },
-  awsCloudWatchAwsSecret: {
-    value: '123',
-  },
-  awsCloudWatchAwsRegion: {
-    value: 'eu-west-1',
-  },
-  /* End Test Settings */
 };
 
 export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {
