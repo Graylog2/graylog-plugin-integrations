@@ -10,6 +10,7 @@ import useFetch from './hooks/fetch';
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
+import { ApiRoutes } from '../common/Routes';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -25,7 +26,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   const handleSubmit = () => {
     setStreamsFetchOptions({
       method: 'POST',
-      url: '/plugins/org.graylog.integrations/aws/kinesis/streams',
+      url: ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS,
       options: { region: formData.awsCloudWatchAwsRegion.value },
     });
   };

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
+import { ApiRoutes } from '../common/Routes';
+
 
 export const ApiContext = createContext();
 
@@ -12,7 +14,7 @@ export const ApiProvider = ({ children }) => {
   const [logSample, setLogSampleState] = useState('');
 
   const setRegions = () => {
-    const url = URLUtils.qualifyUrl('/plugins/org.graylog.integrations/aws/regions');
+    const url = URLUtils.qualifyUrl(ApiRoutes.INTEGRATIONS.AWS.REGIONS);
 
     return fetch('GET', url).then(response => setRegionsState(response.regions));
   };

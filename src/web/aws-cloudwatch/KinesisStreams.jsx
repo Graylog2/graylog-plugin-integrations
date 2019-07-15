@@ -9,7 +9,7 @@ import useFetch from './hooks/fetch';
 
 import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';
-import Routes from '../common/Routes';
+import Routes, { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
@@ -21,7 +21,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   const handleSubmit = () => {
     setFetchOptions({
       method: 'POST',
-      url: '/plugins/org.graylog.integrations/aws/kinesis/health_check',
+      url: ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK,
       options: {
         region: formData.awsCloudWatchAwsRegion.value,
         stream_name: formData.awsCloudWatchKinesisStream.value,
