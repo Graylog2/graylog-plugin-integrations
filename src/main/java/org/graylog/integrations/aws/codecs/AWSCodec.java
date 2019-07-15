@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class AWSCodec extends AbstractCodec {
 
-    public static final String NAME = "AWSMetaCodec";
+    public static final String NAME = "AWSCodec";
     private static final Logger LOG = LoggerFactory.getLogger(AWSCodec.class);
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;

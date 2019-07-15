@@ -14,6 +14,10 @@
     "graylog"
   ],
   "author": "Graylog, Inc. <hello@graylog.com>",
+  "dependencies": {
+    "@emotion/core": "^10.0.10",
+    "@emotion/styled": "^10.0.12"
+  },
   "private": true,
   "devDependencies": {
     "eslint-config-graylog": "file:../graylog2-server/graylog2-web-interface/packages/eslint-config-graylog",

@@ -1,9 +1,9 @@
 package org.graylog.integrations.aws.service;
 
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.graylog.integrations.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -72,7 +72,7 @@ public class KinesisServiceTest {
 
         kinesisService = new KinesisService(kinesisClientBuilder,
                                             new ObjectMapperProvider().get(),
-                                            AWSTestingUtils.buildTestCodecs());
+                                            AWSTestingUtils.buildAWSCodecs());
     }
 
     @Test

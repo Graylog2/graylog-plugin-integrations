@@ -37,6 +37,12 @@ public class AWSLogMessage {
      * @return true if message is a flow log.
      */
     private boolean isFlowLog() {
+
+        // Though unlikely, the message could be null.
+        if (logMessage == null) {
+            return false;
+        }
+
         boolean hasAction = logMessage.contains("ACCEPT") || logMessage.contains("REJECT");
         long spaceCount = logMessage.chars().filter(Character::isSpaceChar).count();
 
