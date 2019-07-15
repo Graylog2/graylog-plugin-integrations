@@ -1,7 +1,7 @@
 package org.graylog.integrations.aws.service;
 
 import org.assertj.core.api.AssertionsForClassTypes;
-import org.graylog.integrations.AWSTestingUtils;
+import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;

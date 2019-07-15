@@ -1,4 +1,4 @@
-package org.graylog.integrations;
+package org.graylog.integrations.aws;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
