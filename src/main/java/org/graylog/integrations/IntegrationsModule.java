@@ -17,7 +17,7 @@
 package org.graylog.integrations;
 
 import org.graylog.integrations.aws.AWSPermissions;
-import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
@@ -81,7 +81,7 @@ public class IntegrationsModule extends PluginModule {
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         // AWS
-        addCodec(AWSMetaCodec.NAME, AWSMetaCodec.class);
+        addCodec(AWSCodec.NAME, AWSCodec.class);
         addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
         addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
         addMessageInput(AWSInput.class);
