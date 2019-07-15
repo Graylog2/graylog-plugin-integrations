@@ -33,7 +33,7 @@ public class AWSCodecTest {
         final HashMap<String, Object> configMap = new HashMap<>();
         configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
         final Configuration configuration = new Configuration(configMap);
-        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildAWSCodecs());
+        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
         final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
@@ -68,7 +68,7 @@ public class AWSCodecTest {
         final HashMap<String, Object> configMap = new HashMap<>();
         configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
         final Configuration configuration = new Configuration(configMap);
-        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildAWSCodecs());
+        final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
         final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,

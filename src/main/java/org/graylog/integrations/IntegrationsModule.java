@@ -22,6 +22,7 @@ import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.AWSResource;
+import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
@@ -87,6 +88,7 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(AWSInput.class);
         addPermissions(AWSPermissions.class);
         addRestResource(AWSResource.class);
+        addTransport(AWSTransport.NAME, AWSTransport .class);
         addTransport(KinesisTransport.NAME, KinesisTransport.class);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);

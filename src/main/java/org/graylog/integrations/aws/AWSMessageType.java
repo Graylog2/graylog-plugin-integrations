@@ -19,11 +19,11 @@ public enum AWSMessageType {
      * A raw string stored in CloudWatch or Kinesis.
      */
     KINESIS_RAW(Source.KINESIS, "Raw", KinesisRawLogCodec.NAME,
-                AbstractCodec.Factory.class, KinesisTransport.Factory.class),
+                AbstractCodec.Factory.class, KinesisTransport.NAME, KinesisTransport.Factory.class),
 
     // Flow Logs delivered to Kinesis via CloudWatch subscriptions.
     KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", KinesisCloudWatchFlowLogCodec.NAME,
-                      KinesisCloudWatchFlowLogCodec.Factory.class, KinesisTransport.Factory.class),
+                      KinesisCloudWatchFlowLogCodec.Factory.class, KinesisTransport.NAME, KinesisTransport.Factory.class),
 
     UNKNOWN();
 
@@ -31,16 +31,18 @@ public enum AWSMessageType {
     private String label;
     private String codecName;
     private Class<? extends Codec.Factory> codecFactory;
+    private String transportName;
     private Class<? extends Transport.Factory> transportFactory;
 
     AWSMessageType() {
     }
 
-    AWSMessageType(Source source, String label, String codecName, Class<? extends Codec.Factory> codecFactory, Class<? extends Transport.Factory> transportFactory) {
+    AWSMessageType(Source source, String label, String codecName, Class<? extends Codec.Factory> codecFactory, String transportName, Class<? extends Transport.Factory> transportFactory) {
         this.source = source;
         this.label = label;
         this.codecName = codecName;
         this.codecFactory = codecFactory;
+        this.transportName = transportName;
         this.transportFactory = transportFactory;
     }
 
@@ -58,6 +60,10 @@ public enum AWSMessageType {
 
     public String getCodecName() {
         return codecName;
+    }
+
+    public String getTransportName() {
+        return transportName;
     }
 
     /**
