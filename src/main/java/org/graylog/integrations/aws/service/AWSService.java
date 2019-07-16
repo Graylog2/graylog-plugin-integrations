@@ -35,6 +35,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +57,7 @@ public class AWSService {
      * @see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_version.html">IAM JSON Policy Elements: Version</a>
      */
     private static final String AWS_POLICY_VERSION = "2012-10-17";
+    public static final String POLICY_ENCODING_ERROR = "An error occurred encoding the policy JSON";
 
     private final InputService inputService;
     private final MessageInputFactory messageInputFactory;
@@ -132,7 +134,7 @@ public class AWSService {
     /**
      * @return A list of available AWS services supported by the AWS Graylog AWS integration.
      */
-    public AvailableServiceResponse getAvailableServices() throws JsonProcessingException {
+    public AvailableServiceResponse getAvailableServices() {
 
         // Create an AWSPolicy object that can be serialized into JSON.
         // The user will use this as a guide to create a policy in their AWS account.
@@ -169,7 +171,14 @@ public class AWSService {
         ArrayList<AvailableService> services = new ArrayList<>();
 
         // Deliberately provide the policy JSON as a string. The UI will format and display this to the user.
-        String policy = objectMapper.writeValueAsString(awsPolicy);
+        String policy;
+        try {
+            policy = objectMapper.writeValueAsString(awsPolicy);
+        } catch (JsonProcessingException e) {
+            // Return a more general internal server error if JSON encoding fails.
+            LOG.error(POLICY_ENCODING_ERROR, e);
+            throw new InternalServerErrorException(POLICY_ENCODING_ERROR, e);
+        }
         AvailableService cloudWatchService =
                 AvailableService.create("CloudWatch",
                                         "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +

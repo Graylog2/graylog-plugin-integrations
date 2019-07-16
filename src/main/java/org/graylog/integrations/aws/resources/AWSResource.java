@@ -79,11 +79,11 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @Timed
     @Path("/available_services")
     @ApiResponses(value = {
-            @ApiResponse(code = 400, message = "Cannot process JSON policy"),
+            @ApiResponse(code = 500, message = AWSService.POLICY_ENCODING_ERROR),
     })
     @ApiOperation(value = "Get all available AWS services")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public AvailableServiceResponse getAvailableServices() throws JsonProcessingException {
+    public AvailableServiceResponse getAvailableServices() {
         return awsService.getAvailableServices();
     }
 
