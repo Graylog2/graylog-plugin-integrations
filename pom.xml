@@ -33,7 +33,7 @@
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.1.0-beta.2-SNAPSHOT</graylog.version>
         <aws-java-sdk-2.version>2.5.33</aws-java-sdk-2.version>
-        <aws-kinesis-client.version>1.10.0</aws-kinesis-client.version>
+        <aws-kinesis-client.version>2.2.0</aws-kinesis-client.version>
     </properties>
 
     <dependencyManagement>
@@ -56,7 +56,7 @@
         </dependency>
         <!-- AWS maintains a separate client for Kinesis. -->
         <dependency>
-            <groupId>com.amazonaws</groupId>
+            <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client</artifactId>
             <version>${aws-kinesis-client.version}</version>
             <exclusions>
