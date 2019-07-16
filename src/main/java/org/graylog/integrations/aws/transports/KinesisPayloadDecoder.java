@@ -57,10 +57,11 @@ public class KinesisPayloadDecoder {
      */
     List<KinesisLogEntry> processMessages(final byte[] payloadBytes, Instant approximateArrivalTimestamp) throws IOException {
 
-        // Rely on the AWSMessageType detected in the setup healthCheck.
+        // This method will be called from a codec, and therefore will not perform any detection. It will rely
+        // exclusively on the AWSMessageType detected in the setup HealthCheck.
+        // If a user needs to change the type of data stored in a stream, they will need to set the integration up again.
         if (awsMessageType == AWSMessageType.KINESIS_FLOW_LOGS) {
-            CloudWatchLogSubscriptionData logSubscriptionData = decompressCloudWatchMessages(payloadBytes, kinesisStream);
-
+            CloudWatchLogSubscriptionData logSubscriptionData = decompressCloudWatchMessages(payloadBytes);
             return logSubscriptionData.logEvents().stream()
                                       .map(le -> {
                                           DateTime timestamp = new DateTime(le.timestamp(), DateTimeZone.UTC);
@@ -73,8 +74,6 @@ public class KinesisPayloadDecoder {
         } else if (awsMessageType == AWSMessageType.KINESIS_RAW) {
             // The best timestamp available is the approximate arrival time of the message to the Kinesis stream.
             DateTime timestamp = new DateTime(approximateArrivalTimestamp.toEpochMilli(), DateTimeZone.UTC);
-
-            // Parse the Flow Log message
             KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create(kinesisStream,
                                                                      null, null,
                                                                      timestamp, new String(payloadBytes));
@@ -86,13 +85,13 @@ public class KinesisPayloadDecoder {
     }
 
     /**
-     * Extract CloudWatch log messages from Kinesis
-     * @param payloadBytes
-     * @param streamName
-     * @return
+     * Extract CloudWatch log messages from the Kinesis payload. These messages are encoded in JSON.
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">AWS Subscription Filters</a>
+     * @param payloadBytes A Kinesis payload in byte array form.
+     * @return A {@link CloudWatchLogSubscriptionData} instance representing a CloudWatch subscription payload with messages.
      * @throws IOException
      */
-    private CloudWatchLogSubscriptionData decompressCloudWatchMessages(byte[] payloadBytes, String streamName) throws IOException {
+    private CloudWatchLogSubscriptionData decompressCloudWatchMessages(byte[] payloadBytes) throws IOException {
 
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress and parse as a CloudWatch log message.");
 

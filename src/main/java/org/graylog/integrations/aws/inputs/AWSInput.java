@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
-import java.util.stream.Collectors;
 
 /**
  * General AWS input for all types of supported AWS logs.
@@ -49,8 +48,6 @@ public class AWSInput extends MessageInput {
 
     public static final String NAME = "AWS";
     public static final String TYPE = "org.graylog.integrations.aws.inputs.AWSInput";
-
-    private static final Logger LOG = LoggerFactory.getLogger(AWSInput.class);
 
     public static final String CK_TITLE = "title";
     public static final String CK_DESCRIPTION = "description";
