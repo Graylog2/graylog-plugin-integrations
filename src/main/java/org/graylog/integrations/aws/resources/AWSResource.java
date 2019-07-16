@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
@@ -76,6 +78,9 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @GET
     @Timed
     @Path("/available_services")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Cannot process JSON policy"),
+    })
     @ApiOperation(value = "Get all available AWS services")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public AvailableServiceResponse getAvailableServices() throws JsonProcessingException {
