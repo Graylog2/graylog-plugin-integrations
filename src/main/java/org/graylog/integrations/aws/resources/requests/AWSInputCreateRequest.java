@@ -34,8 +34,6 @@ public abstract class AWSInputCreateRequest {
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String AWS_MESSAGE_TYPE = "aws_input_type";
-    private static final String AWS_ACCESS_KEY = "aws_access_key";
-    private static final String AWS_SECRET_KEY = "aws_secret_key";
     private static final String STREAM_NAME = "stream_name";
     private static final String REGION = "region";
     private static final String BATCH_SIZE = "batch_size";
@@ -53,10 +51,10 @@ public abstract class AWSInputCreateRequest {
     @JsonProperty(AWS_MESSAGE_TYPE)
     public abstract String awsMessageType();
 
-    @JsonProperty(AWS_ACCESS_KEY)
+    @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID)
     public abstract String awsAccessKey();
 
-    @JsonProperty(AWS_SECRET_KEY)
+    @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretKey();
 
     @JsonProperty(STREAM_NAME)
@@ -84,8 +82,8 @@ public abstract class AWSInputCreateRequest {
     public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
                                                @JsonProperty(DESCRIPTION) String description,
                                                @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
-                                               @JsonProperty(AWS_ACCESS_KEY) String awsAccessKey,
-                                               @JsonProperty(AWS_SECRET_KEY) String awsSecretKey,
+                                               @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID) String awsAccessKey,
+                                               @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY) String awsSecretKey,
                                                @JsonProperty(STREAM_NAME) String streamName,
                                                @JsonProperty(REGION) String region,
                                                @JsonProperty(BATCH_SIZE) int batchSize,
