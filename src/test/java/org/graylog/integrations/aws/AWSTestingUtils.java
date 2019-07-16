@@ -7,8 +7,11 @@ import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 public class AWSTestingUtils {
 
@@ -57,4 +60,79 @@ public class AWSTestingUtils {
 
         return availableCodecs;
     }
-}
+
+    /**
+     * Build a data payload for a Flow Log CloudWatch Kinesis subscription record.
+     *
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
+     */
+    public static byte[] buildCloudWatchFlowLogPayload() throws IOException {
+
+        final String messageData = "{\n" +
+                                   "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                                   "  \"owner\": \"459220251735\",\n" +
+                                   "  \"logGroup\": \"test-flowlogs\",\n" +
+                                   "  \"logStream\": \"eni-3423-all\",\n" +
+                                   "  \"subscriptionFilters\": [\n" +
+                                   "    \"filter\"\n" +
+                                   "  ],\n" +
+                                   "  \"logEvents\": [\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    },\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
+                                   "    }\n" +
+                                   "  ]\n" +
+                                   "}";
+
+        // Compress the test record, as CloudWatch subscriptions are compressed.
+        return compressPayload(messageData);
+    }
+
+    /**
+     * Build a data payload for a raw CloudWatch Kinesis subscription record.
+     *
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
+     */
+    public static byte[] buildCloudWatchRawPayload() throws IOException {
+
+        final String messageData = "{\n" +
+                                   "  \"messageType\": \"DATA_MESSAGE\",\n" +
+                                   "  \"owner\": \"459220251735\",\n" +
+                                   "  \"logGroup\": \"test-flowlogs\",\n" +
+                                   "  \"logStream\": \"eni-3423-all\",\n" +
+                                   "  \"subscriptionFilters\": [\n" +
+                                   "    \"filter\"\n" +
+                                   "  ],\n" +
+                                   "  \"logEvents\": [\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
+                                   "      \"message\": \"Just a raw message\"\n" +
+                                   "    },\n" +
+                                   "    {\n" +
+                                   "      \"id\": \"3423\",\n" +
+                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
+                                   "      \"message\": \"Just another raw message\"\n" +
+                                   "    }\n" +
+                                   "  ]\n" +
+                                   "}";
+
+        // Compress the test record, as CloudWatch subscriptions are compressed.
+        return compressPayload(messageData);
+    }
+
+    private static byte[] compressPayload(String messageData) throws IOException {
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream(messageData.getBytes().length);
+        final GZIPOutputStream gzip = new GZIPOutputStream(bos);
+        gzip.write(messageData.getBytes());
+        gzip.close();
+        final byte[] compressed = bos.toByteArray();
+        bos.close();
+        return compressed;
+    }}

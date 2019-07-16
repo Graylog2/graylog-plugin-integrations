@@ -61,7 +61,7 @@ public class KinesisPayloadDecoder {
         // exclusively on the AWSMessageType detected in the setup HealthCheck.
         // If a user needs to change the type of data stored in a stream, they will need to set the integration up again.
         if (awsMessageType == AWSMessageType.KINESIS_FLOW_LOGS) {
-            CloudWatchLogSubscriptionData logSubscriptionData = decompressCloudWatchMessages(payloadBytes);
+            final CloudWatchLogSubscriptionData logSubscriptionData = decompressCloudWatchMessages(payloadBytes);
             return logSubscriptionData.logEvents().stream()
                                       .map(le -> {
                                           DateTime timestamp = new DateTime(le.timestamp(), DateTimeZone.UTC);
@@ -73,9 +73,9 @@ public class KinesisPayloadDecoder {
                                       .collect(Collectors.toList());
         } else if (awsMessageType == AWSMessageType.KINESIS_RAW) {
             // The best timestamp available is the approximate arrival time of the message to the Kinesis stream.
-            DateTime timestamp = new DateTime(approximateArrivalTimestamp.toEpochMilli(), DateTimeZone.UTC);
-            KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create(kinesisStream,
-                                                                     null, null,
+            final DateTime timestamp = new DateTime(approximateArrivalTimestamp.toEpochMilli(), DateTimeZone.UTC);
+            final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create(kinesisStream,
+                                                                     "", "",
                                                                      timestamp, new String(payloadBytes));
             return Collections.singletonList(kinesisLogEntry);
         } else {
