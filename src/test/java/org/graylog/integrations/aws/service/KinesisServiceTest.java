@@ -72,7 +72,7 @@ public class KinesisServiceTest {
 
         kinesisService = new KinesisService(kinesisClientBuilder,
                                             new ObjectMapperProvider().get(),
-                                            AWSTestingUtils.buildAWSCodecs());
+                                            AWSTestingUtils.buildTestCodecs());
     }
 
     @Test

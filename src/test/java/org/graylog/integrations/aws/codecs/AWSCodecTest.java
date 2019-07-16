@@ -2,8 +2,8 @@ package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.graylog.integrations.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
@@ -72,7 +72,7 @@ public class AWSCodecTest {
 
         final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
-                                                                 "This a raw message");
+                                                                       "This a raw message");
 
         Message message = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(kinesisLogEntry)));
         Assert.assertEquals("log-group", message.getField(AbstractKinesisCodec.FIELD_LOG_GROUP));
