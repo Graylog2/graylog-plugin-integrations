@@ -36,21 +36,28 @@ public class KinesisPayloadDecoderTest {
     public void testCloudWatchFlowLogDecoding() throws IOException {
 
         final List<KinesisLogEntry> logEntries =
-                flowLogDecoder.processMessages(AWSTestingUtils.buildCloudWatchFlowLogPayload(), Instant.now());
+                flowLogDecoder.processMessages(AWSTestingUtils.cloudWatchFlowLogPayload(),
+                                               Instant.ofEpochMilli(AWSTestingUtils.CLOUD_WATCH_TIMESTAMP.getMillis()));
 
         Assert.assertEquals(2, logEntries.size());
-        // Verify that there are two flow logs present in the parsed result.
+
+        // Verify that there are two flowlogs present in the parsed result.
         Assert.assertEquals(2, logEntries.stream().filter(logEntry -> {
             final AWSLogMessage logMessage = new AWSLogMessage(logEntry.message());
             return logMessage.isFlowLog();
         }).count());
+
+        // Verify that both messages have to correct timestamp.
+        Assert.assertEquals(2, logEntries.stream()
+                                         .filter(logEntry -> logEntry.timestamp().equals(AWSTestingUtils.CLOUD_WATCH_TIMESTAMP))
+                                         .count());
     }
 
     @Test
     public void testCloudWatchRawDecoding() throws IOException {
 
         final List<KinesisLogEntry> logEntries =
-                flowLogDecoder.processMessages(AWSTestingUtils.buildCloudWatchRawPayload(), Instant.now());
+                flowLogDecoder.processMessages(AWSTestingUtils.cloudWatchRawPayload(), Instant.now());
 
         Assert.assertEquals(2, logEntries.size());
         // Verify that there are two flow logs present in the parsed result.
@@ -58,6 +65,11 @@ public class KinesisPayloadDecoderTest {
             final AWSLogMessage logMessage = new AWSLogMessage(logEntry.message());
             return logMessage.detectLogMessageType() == AWSMessageType.KINESIS_RAW;
         }).count());
+
+        // Verify that both messages have to correct timestamp.
+        Assert.assertEquals(2, logEntries.stream()
+                                         .filter(logEntry -> logEntry.timestamp().equals(AWSTestingUtils.CLOUD_WATCH_TIMESTAMP))
+                                         .count());
     }
 
     @Test
@@ -71,10 +83,10 @@ public class KinesisPayloadDecoderTest {
         Assert.assertEquals(1, logEntries.size());
         // Verify that there are two flow logs present in the parsed result.
         Assert.assertEquals(1, logEntries.stream().filter(logEntry -> logEntry.message().equals(textLogMessage)).count());
-        final KinesisLogEntry resultLogEntry = logEntries.stream()
-                                                         .filter(logEntry -> logEntry.message().equals(textLogMessage))
-                                                         .findAny().get();
-        // Verify that the timestamp matches.
+
+        // Verify timestamp and message contents.
+        final KinesisLogEntry resultLogEntry = logEntries.stream().findAny().get();
+        Assert.assertEquals(textLogMessage, resultLogEntry.message());
         Assert.assertEquals(new DateTime(now.toEpochMilli(), DateTimeZone.UTC), resultLogEntry.timestamp());
     }
 }

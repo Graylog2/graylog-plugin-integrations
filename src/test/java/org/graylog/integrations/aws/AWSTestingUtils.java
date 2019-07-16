@@ -6,6 +6,8 @@ import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,6 +16,8 @@ import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 public class AWSTestingUtils {
+
+    public static DateTime CLOUD_WATCH_TIMESTAMP = new DateTime("2019-06-05T12:35:44.000Z", DateTimeZone.UTC);
 
     // Non-instantiable utils class.
     private AWSTestingUtils() {
@@ -66,7 +70,7 @@ public class AWSTestingUtils {
      *
      * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
      */
-    public static byte[] buildCloudWatchFlowLogPayload() throws IOException {
+    public static byte[] cloudWatchFlowLogPayload() throws IOException {
 
         final String messageData = "{\n" +
                                    "  \"messageType\": \"DATA_MESSAGE\",\n" +
@@ -79,12 +83,12 @@ public class AWSTestingUtils {
                                    "  \"logEvents\": [\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"timestamp\": " + CLOUD_WATCH_TIMESTAMP.getMillis() + ",\n" +
                                    "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
                                    "    },\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" +
+                                   "      \"timestamp\": " + CLOUD_WATCH_TIMESTAMP.getMillis() + ",\n" +
                                    "      \"message\": \"2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK\"\n" +
                                    "    }\n" +
                                    "  ]\n" +
@@ -99,7 +103,7 @@ public class AWSTestingUtils {
      *
      * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subcription Filters</a>
      */
-    public static byte[] buildCloudWatchRawPayload() throws IOException {
+    public static byte[] cloudWatchRawPayload() throws IOException {
 
         final String messageData = "{\n" +
                                    "  \"messageType\": \"DATA_MESSAGE\",\n" +
@@ -112,12 +116,12 @@ public class AWSTestingUtils {
                                    "  \"logEvents\": [\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
+                                   "      \"timestamp\": " + CLOUD_WATCH_TIMESTAMP.getMillis() + ",\n" +
                                    "      \"message\": \"Just a raw message\"\n" +
                                    "    },\n" +
                                    "    {\n" +
                                    "      \"id\": \"3423\",\n" +
-                                   "      \"timestamp\": 1559738144000,\n" + // Equal to 2019-06-05T12:35:44.000Z
+                                   "      \"timestamp\": " + CLOUD_WATCH_TIMESTAMP.getMillis() + ",\n" +
                                    "      \"message\": \"Just another raw message\"\n" +
                                    "    }\n" +
                                    "  ]\n" +
@@ -135,4 +139,5 @@ public class AWSTestingUtils {
         final byte[] compressed = bos.toByteArray();
         bos.close();
         return compressed;
-    }}
+    }
+}
