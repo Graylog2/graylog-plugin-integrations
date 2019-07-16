@@ -84,10 +84,10 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID) String awsAccessKey,
                                                @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY) String awsSecretKey,
                                                @JsonProperty(STREAM_NAME) String streamName,
-                                               @JsonProperty(REGION) String region,
+                                               @JsonProperty(AWSRequest.REGION) String region,
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                               @JsonProperty(AWSRequest.REGION) boolean global,
+                                               @JsonProperty(GLOBAL) boolean global,
                                                @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
                                                @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
