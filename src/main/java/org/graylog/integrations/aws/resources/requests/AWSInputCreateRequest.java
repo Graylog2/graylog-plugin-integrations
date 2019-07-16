@@ -29,13 +29,12 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-public abstract class AWSInputCreateRequest {
+public abstract class AWSInputCreateRequest implements AWSRequest {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
     private static final String AWS_MESSAGE_TYPE = "aws_input_type";
     private static final String STREAM_NAME = "stream_name";
-    private static final String REGION = "region";
     private static final String BATCH_SIZE = "batch_size";
     private static final String ASSUME_ROLE_ARN = "assume_role_arn";
     private static final String GLOBAL = "global";
@@ -63,7 +62,7 @@ public abstract class AWSInputCreateRequest {
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleARN();
 
-    @JsonProperty(REGION)
+    @JsonProperty(AWSRequest.REGION)
     public abstract String region();
 
     @JsonProperty(BATCH_SIZE)
@@ -88,7 +87,7 @@ public abstract class AWSInputCreateRequest {
                                                @JsonProperty(REGION) String region,
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                               @JsonProperty(GLOBAL) boolean global,
+                                               @JsonProperty(AWSRequest.REGION) boolean global,
                                                @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
                                                @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
