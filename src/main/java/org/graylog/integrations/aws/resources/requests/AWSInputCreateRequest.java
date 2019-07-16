@@ -51,10 +51,10 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     public abstract String awsMessageType();
 
     @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID)
-    public abstract String awsAccessKey();
+    public abstract String awsAccessKeyId();
 
     @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY)
-    public abstract String awsSecretKey();
+    public abstract String awsSecretAccessKey();
 
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
@@ -90,6 +90,8 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(GLOBAL) boolean global,
                                                @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
                                                @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
-        return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey, streamName, assumeRoleArn, region, batchSize, global, enableThrottling, kinesisMaxThrottledWaitMs);
+        return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey,
+                                                   streamName, assumeRoleArn, region, batchSize, global,
+                                                   enableThrottling, kinesisMaxThrottledWaitMs);
     }
 }
