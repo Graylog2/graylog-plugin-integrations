@@ -176,8 +176,8 @@ public class AWSService {
         configuration.put(AWSInput.CK_GLOBAL, request.global());
         configuration.put(ThrottleableTransport.CK_THROTTLING_ALLOWED, request.throttlingAllowed());
         configuration.put(AWSInput.CK_AWS_REGION, request.region());
-        configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKey());
-        configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretKey());
+        configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKeyId());
+        configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretAccessKey());
         configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleARN());
 
         AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());
