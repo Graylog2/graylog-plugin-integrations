@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class is responsible for decoding the raw Kinesis byte array payload.
+ * Responsible for decoding the raw Kinesis byte array payload.
  */
 public class KinesisPayloadDecoder {
 
@@ -44,23 +44,23 @@ public class KinesisPayloadDecoder {
      *
      * <p>
      * <strong>{@code AWSMessageType.KINESIS_RAW}</strong>: Raw Kinesis log messages that are converted directly to a string.
-     * <strong>{@code AWSMessageType.KINESIS_FLOW_LOGS}</strong>: CloudWatch flow log messages. These messages are
-     * delivered to Kinesis from CloudWatch in batches within a JSON document.
+     * <strong>{@code AWSMessageType.KINESIS_FLOW_LOGS}</strong>: CloudWatch Flowlog messages. These messages are
+     * delivered to Kinesis from CloudWatch in batches within a JSON document via
+     * <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subscription Filters</a>.
      * </p>
      *
      * @param payloadBytes A Kinesis payload in byte array form.
-     * @param approximateArrivalTimestamp The approximate instant that the message was written to Kinesis. This is used
+     * @param approximateArrivalTimestamp The approximate instant that the message was written to Kinesis. This is used only
      *                                    for the {@code AWSMessageType.KINESIS_RAW} message timestamp.
      * @return A list of {@link KinesisLogEntry} messages, which are fully ready to be written to the Graylog Journal.
      * @throws IOException
      */
     List<KinesisLogEntry> processMessages(final byte[] payloadBytes, Instant approximateArrivalTimestamp) throws IOException {
 
-        // Rely on the AWSMessageType identified in the setup healthCheck.
+        // Rely on the AWSMessageType detected in the setup healthCheck.
         if (awsMessageType == AWSMessageType.KINESIS_FLOW_LOGS) {
             CloudWatchLogSubscriptionData logSubscriptionData = decompressCloudWatchMessages(payloadBytes, kinesisStream);
 
-            // convert to list of raw messages
             return logSubscriptionData.logEvents().stream()
                                       .map(le -> {
                                           DateTime timestamp = new DateTime(le.timestamp(), DateTimeZone.UTC);
@@ -85,6 +85,13 @@ public class KinesisPayloadDecoder {
         }
     }
 
+    /**
+     * Extract CloudWatch log messages from Kinesis
+     * @param payloadBytes
+     * @param streamName
+     * @return
+     * @throws IOException
+     */
     private CloudWatchLogSubscriptionData decompressCloudWatchMessages(byte[] payloadBytes, String streamName) throws IOException {
 
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress and parse as a CloudWatch log message.");
@@ -92,12 +99,10 @@ public class KinesisPayloadDecoder {
         final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
         LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
 
-        // Assume that the payload is from CloudWatch.
-        // Extract messages, so that they can be committed to journal one by one.
         final CloudWatchLogSubscriptionData logSubscriptionData = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
 
+        // The CloudWatch payload often contains many messages. We might need to check how many when debugging throttling issues.
         if (LOG.isTraceEnabled()) {
-            // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
             LOG.trace("[{}] messages obtained from CloudWatch", logSubscriptionData.logEvents().size());
         }
 
