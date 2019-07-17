@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from 'styled-components';
@@ -16,6 +16,7 @@ import formValidation from '../utils/formValidation';
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
+  const [triggerEffect, toggleTriggerEffect] = useState(false);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
     null,
@@ -27,7 +28,15 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
   );
 
+  useEffect(() => {
+    return () => {
+      // reset streams fetch, or context re-renders causes weirdness
+      setStreamsFetch(null);
+    };
+  }, [triggerEffect]);
+
   const handleSubmit = () => {
+    toggleTriggerEffect(!triggerEffect);
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 

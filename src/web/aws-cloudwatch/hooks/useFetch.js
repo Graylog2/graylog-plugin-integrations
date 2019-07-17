@@ -76,7 +76,7 @@ const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
           });
         }
 
-        return fetcher.then((result) => {
+        fetcher.then((result) => {
           setError(null);
           setData(result);
           setHook(result);

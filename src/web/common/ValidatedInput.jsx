@@ -34,6 +34,8 @@ const ValidatedInput = ({ help, onChange, id, label, fieldData, ...restProps }) 
     }
   };
 
+  console.log('ValidatedInput value', value);
+
   return (
     <Input {...restProps}
            id={id}
