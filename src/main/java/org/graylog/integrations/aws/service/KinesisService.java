@@ -32,7 +32,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
-import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -44,6 +43,7 @@ import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +66,7 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int RECORDS_SAMPLE_SIZE = 10;
+    private static final int SHARD_COUNT = 1;
 
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
@@ -394,7 +395,6 @@ public class KinesisService {
      * @return the status response
      */
     public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest kinesisNewStreamRequest) {
-        // TODO add error handling and logging
         LOG.debug("Creating Kinesis client with the provided credentials.");
         KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
                                                    kinesisNewStreamRequest.awsAccessKeyId(),
@@ -403,26 +403,26 @@ public class KinesisService {
         LOG.debug("Creating new Kinesis stream request [{}].", kinesisNewStreamRequest.streamName());
         CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
                                                                      .streamName(kinesisNewStreamRequest.streamName())
-                                                                     .shardCount(kinesisNewStreamRequest.shardCount())
+                                                                     .shardCount(SHARD_COUNT)
                                                                      .build();
         LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
-                  kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
+                  kinesisNewStreamRequest.streamName(), SHARD_COUNT);
 
         String responseMessage;
         try {
-            CreateStreamResponse streamResponse = kinesisClient.createStream(createStreamRequest);
+            kinesisClient.createStream(createStreamRequest);
             responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
-                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount());
+                                            kinesisNewStreamRequest.streamName(), SHARD_COUNT);
             return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
         } catch (Exception e) {
 
             String specificError = ExceptionUtils.formatMessageCause(e);
-            responseMessage = String.format("Attempt to create new Kinesis stream [%s] " +
-                                            "with [%d] failed due to the following exception: [%s]",
-                                            kinesisNewStreamRequest.streamName(), kinesisNewStreamRequest.shardCount(),
+            responseMessage = String.format("Attempt to create [%s] new Kinesis stream" +
+                                            "with [%d] shards failed due to the following exception: [%s]",
+                                            kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                             specificError);
             LOG.debug(responseMessage);
-            return KinesisNewStreamResponse.create(false, responseMessage, new HashMap<>());
+            throw new InternalServerErrorException(responseMessage, e);
         }
     }
 }
