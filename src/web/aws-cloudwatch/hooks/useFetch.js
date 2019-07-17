@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-// import UserNotification from 'util/UserNotification';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
