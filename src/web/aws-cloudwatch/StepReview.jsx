@@ -8,7 +8,7 @@ import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
-import { LogOutputContext } from './context/LogOutput';
+import { ApiContext } from './context/Api';
 
 import FormWrap from '../common/FormWrap';
 
@@ -26,7 +26,7 @@ Default.propTypes = {
 
 const StepReview = ({ onSubmit, onEditClick }) => {
   const { formData } = useContext(FormDataContext);
-  const { logOutput } = useContext(LogOutputContext);
+  const { logSample } = useContext(ApiContext);
 
   return (
     <Row>
@@ -106,7 +106,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={logOutput}
+                   value={logSample}
                    rows={10}
                    disabled />
           </Container>

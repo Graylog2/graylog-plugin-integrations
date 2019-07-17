@@ -1,9 +1,12 @@
 package org.graylog.integrations.aws.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
@@ -75,6 +78,9 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @GET
     @Timed
     @Path("/available_services")
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = AWSService.POLICY_ENCODING_ERROR),
+    })
     @ApiOperation(value = "Get all available AWS services")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public AvailableServiceResponse getAvailableServices() {
@@ -83,18 +89,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Get all available AWS CloudWatch log groups names for the specified region.
-     *
-     * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/log_groups' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret"
-     * }'
      */
     @POST
     @Timed
@@ -107,18 +101,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Get all available Kinesis streams for the specified region.
-     *
-     * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/streams' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret"
-     * }'
      */
     @POST
     @Timed
@@ -130,22 +112,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     }
 
     /**
-     * Performs an AWS HealthCheck
-     *
-     * Sample CURL command for executing this method. Use this to model the UI request.
-     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
-     *
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/health_check' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret",
-     * "stream_name": "a-stream"
-     * }'
+     * Perform an AWS HealthCheck
      */
     @POST
     @Timed
@@ -162,27 +129,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Create a new AWS input.
-     *
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
-     * -v \
-     * -X POST \
-     * -H 'X-Requested-By: just-a-test' \
-     * -H 'Content-Type: application/json' \
-     * -H 'Accept: application/json' \
-     * --compressed \
-     * --data-binary '{
-     * "aws_access_key": "",
-     * "aws_secret_key": "",
-     * "region": "us-east-1",
-     * "name": "New Flow Logs",
-     * "description": "Some flow logs.",
-     * "aws_input_type": "KINESIS_FLOW_LOGS",
-     * "stream_name": "flow-logs",
-     * "batch_size": 10000,
-     * "assume_role_arn": "",
-     * "global": false,
-     * "enable_throttling": false
-     * }'
      */
     @POST
     @Timed
