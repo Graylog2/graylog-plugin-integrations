@@ -400,13 +400,24 @@ public class KinesisServiceTest {
     @Test
     public void testCreateNewKinesisStream() {
 
+        // These three lines mock the KinesisClient. Must be repeated for every test.
         when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+
+        // Mock out specific KinesisNewStreamRequest to return a response.
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
+
         KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
                                                                                          "accessKey", "secretKey",
-                                                                                         TEST_STREAM_1, SHARD_COUNT);
+                                                                                         TEST_STREAM_1);
         kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
+
+        // Check the values are whats expected.
+        assertEquals(kinesisNewStreamRequest.region(), TEST_REGION);
+        assertEquals(kinesisNewStreamRequest.awsAccessKeyId(), "accessKey");
+        assertEquals(kinesisNewStreamRequest.awsSecretAccessKey(), "secretKey");
+        assertEquals(kinesisNewStreamRequest.streamName(), TEST_STREAM_1);
+        assertEquals(SHARD_COUNT, 1);
     }
 }
