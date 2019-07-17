@@ -16,8 +16,7 @@ public class AWSTestingUtils {
     private AWSTestingUtils() {
     }
 
-    public static Map<String, Codec.Factory<? extends Codec>> buildAWSCodecs() {
-
+    public static Map<String, Codec.Factory<? extends Codec>> buildTestCodecs() {
         // Prepare test codecs. These have to be manually instantiated for the test context.
         Map<String, Codec.Factory<? extends Codec>> availableCodecs = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapperProvider().get();
