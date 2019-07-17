@@ -3,7 +3,6 @@ package org.graylog.integrations.aws.transports;
 import com.google.common.eventbus.EventBus;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.MessageInput;

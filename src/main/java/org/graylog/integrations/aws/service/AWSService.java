@@ -1,10 +1,14 @@
 package org.graylog.integrations.aws.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.AWSPolicy;
+import org.graylog.integrations.aws.AWSPolicyStatement;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
@@ -32,7 +36,10 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -46,16 +53,27 @@ public class AWSService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
 
+    /**
+     * The only version supported is 2012-10-17
+     *
+     * @see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_version.html">IAM JSON Policy Elements: Version</a>
+     */
+    private static final String AWS_POLICY_VERSION = "2012-10-17";
+    public static final String POLICY_ENCODING_ERROR = "An error occurred encoding the policy JSON";
+
     private final InputService inputService;
     private final MessageInputFactory messageInputFactory;
     private final NodeId nodeId;
+    private final ObjectMapper objectMapper;
 
     @Inject
-    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId) {
+    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId,
+                      ObjectMapper objectMapper) {
 
         this.inputService = inputService;
         this.messageInputFactory = messageInputFactory;
         this.nodeId = nodeId;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -120,43 +138,58 @@ public class AWSService {
      */
     public AvailableServiceResponse getAvailableServices() {
 
+        // Create an AWSPolicy object that can be serialized into JSON.
+        // The user will use this as a guide to create a policy in their AWS account.
+        List<String> actions = Arrays.asList("cloudwatch:PutMetricData",
+                                             "dynamodb:CreateTable",
+                                             "dynamodb:DescribeTable",
+                                             "dynamodb:GetItem",
+                                             "dynamodb:PutItem",
+                                             "dynamodb:Scan",
+                                             "dynamodb:UpdateItem",
+                                             "ec2:DescribeInstances",
+                                             "ec2:DescribeNetworkInterfaceAttribute",
+                                             "ec2:DescribeNetworkInterfaces",
+                                             "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                                             "elasticloadbalancing:DescribeLoadBalancers",
+                                             "iam:CreateRole",
+                                             "iam:GetRole",
+                                             "iam:PutRolePolicy",
+                                             "kinesis:CreateStream",
+                                             "kinesis:DescribeStream",
+                                             "kinesis:GetRecords",
+                                             "kinesis:GetShardIterator",
+                                             "kinesis:ListShards",
+                                             "kinesis:ListStreams",
+                                             "logs:DescribeLogGroups",
+                                             "logs:PutSubscriptionFilter");
+
+        AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogCloudWatchPolicy",
+                                                                 "Allow",
+                                                                 actions,
+                                                                 "*");
+        AWSPolicy awsPolicy = AWSPolicy.create(AWS_POLICY_VERSION, Collections.singletonList(statement));
+
         ArrayList<AvailableService> services = new ArrayList<>();
+
+        // Deliberately provide the policy JSON as a string. The UI will format and display this to the user.
+        String policy;
+        try {
+            policy = objectMapper.writeValueAsString(awsPolicy);
+        } catch (JsonProcessingException e) {
+            // Return a more general internal server error if JSON encoding fails.
+            LOG.error(POLICY_ENCODING_ERROR, e);
+            throw new InternalServerErrorException(POLICY_ENCODING_ERROR, e);
+        }
         AvailableService cloudWatchService =
                 AvailableService.create("CloudWatch",
                                         "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
                                         "in real time. AWS CloudWatch is a monitoring and management service built " +
                                         "for developers, system operators, site reliability engineers (SRE), " +
                                         "and IT managers.",
-                                        "{\n" +
-                                        "  \"Version\": \"2019-06-19\",\n" +
-                                        "  \"Statement\": [\n" +
-                                        "    {\n" +
-                                        "      \"Sid\": \"GraylogCloudWatchPolicy\",\n" +
-                                        "      \"Effect\": \"Allow\",\n" +
-                                        "      \"Action\": [\n" +
-                                        "        \"cloudwatch:PutMetricData\",\n" +
-                                        "        \"dynamodb:CreateTable\",\n" +
-                                        "        \"dynamodb:DescribeTable\",\n" +
-                                        "        \"dynamodb:GetItem\",\n" +
-                                        "        \"dynamodb:PutItem\",\n" +
-                                        "        \"dynamodb:Scan\",\n" +
-                                        "        \"dynamodb:UpdateItem\",\n" +
-                                        "        \"ec2:DescribeInstances\",\n" +
-                                        "        \"ec2:DescribeNetworkInterfaceAttribute\",\n" +
-                                        "        \"ec2:DescribeNetworkInterfaces\",\n" +
-                                        "        \"elasticloadbalancing:DescribeLoadBalancerAttributes\",\n" +
-                                        "        \"elasticloadbalancing:DescribeLoadBalancers\",\n" +
-                                        "        \"kinesis:GetRecords\",\n" +
-                                        "        \"kinesis:GetShardIterator\",\n" +
-                                        "        \"kinesis:ListShards\"\n" +
-                                        "      ],\n" +
-                                        "      \"Resource\": \"*\"\n" +
-                                        "    }\n" +
-                                        "  ]\n" +
-                                        "}",
+                                        policy,
                                         "Requires Kinesis",
-                                        "https://aws.amazon.com/cloudwatch/"
-                );
+                                        "https://aws.amazon.com/cloudwatch/");
         services.add(cloudWatchService);
         return AvailableServiceResponse.create(services, services.size());
     }
@@ -177,8 +210,8 @@ public class AWSService {
         configuration.put(AWSInput.CK_GLOBAL, request.global());
         configuration.put(ThrottleableTransport.CK_THROTTLING_ALLOWED, request.throttlingAllowed());
         configuration.put(AWSInput.CK_AWS_REGION, request.region());
-        configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKey());
-        configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretKey());
+        configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKeyId());
+        configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretAccessKey());
         configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleARN());
 
         AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());

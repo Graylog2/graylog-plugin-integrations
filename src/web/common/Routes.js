@@ -10,4 +10,19 @@ const Routes = {
   },
 };
 
+const ApiRoutes = {
+  INTEGRATIONS: {
+    AWS: {
+      REGIONS: '/plugins/org.graylog.integrations/aws/regions',
+      KINESIS: {
+        HEALTH_CHECK: '/plugins/org.graylog.integrations/aws/kinesis/health_check',
+        STREAMS: '/plugins/org.graylog.integrations/aws/kinesis/streams',
+        SAVE: '/plugins/org.graylog.integrations/aws/inputs',
+      },
+    },
+  },
+};
+
 export default Routes;
+
+export { ApiRoutes };

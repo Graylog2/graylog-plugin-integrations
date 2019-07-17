@@ -8,9 +8,11 @@ import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
-import { LogOutputContext } from './context/LogOutput';
+import { ApiContext } from './context/Api';
+import useFetch from './hooks/useFetch';
 
 import FormWrap from '../common/FormWrap';
+import { ApiRoutes } from '../common/Routes';
 
 const Default = ({ value }) => {
   return (
@@ -26,12 +28,51 @@ Default.propTypes = {
 
 const StepReview = ({ onSubmit, onEditClick }) => {
   const { formData } = useContext(FormDataContext);
-  const { logOutput } = useContext(LogOutputContext);
+  const { logSample } = useContext(ApiContext);
+  const {
+    awsCloudWatchName,
+    awsCloudWatchDescription,
+    awsCloudWatchAwsKey,
+    awsCloudWatchAwsRegion,
+    awsCloudWatchKinesisStream,
+    awsCloudWatchGlobalInput,
+    awsCloudWatchAssumeARN,
+    awsCloudWatchBatchSize,
+    awsCloudWatchThrottleEnabled,
+    awsCloudWatchThrottleWait,
+  } = formData;
+
+  const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value && awsCloudWatchThrottleWait;
+  const throttleValue = throttleEnabled ? awsCloudWatchThrottleWait.value : awsCloudWatchThrottleWait.defaultValue;
+
+  const [fetchSubmitStatus, setSubmitFetch] = useFetch(
+    null,
+    () => {
+      onSubmit();
+    },
+    'POST',
+    {
+      name: awsCloudWatchName.value,
+      description: awsCloudWatchDescription.value,
+      region: awsCloudWatchAwsRegion.value,
+      aws_input_type: 'KINESIS_FLOW_LOGS',
+      stream_name: awsCloudWatchKinesisStream.value,
+      batch_size: Number(awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue),
+      assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
+      global: (awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value),
+      enable_throttling: throttleEnabled,
+      kinesis_max_throttled_wait_ms: Number(throttleValue),
+    },
+  );
+
+  const handleSubmit = () => {
+    setSubmitFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.SAVE);
+  };
 
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit} buttonContent="Complete CloudWatch Setup">
+        <FormWrap onSubmit={handleSubmit} buttonContent="Complete CloudWatch Setup" loading={fetchSubmitStatus.loading}>
           <h2>Final Review</h2>
 
           <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
@@ -41,24 +82,24 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <ReviewItems>
               <li>
                 <strong>Name</strong>
-                <span>{formData.awsCloudWatchName.value}</span>
+                <span>{awsCloudWatchName.value}</span>
               </li>
               {
-                formData.awsCloudWatchDescription
+                awsCloudWatchDescription
                 && (
                   <li>
                     <strong>Description</strong>
-                    <span>{formData.awsCloudWatchDescription.value || ''}</span>
+                    <span>{awsCloudWatchDescription.value || ''}</span>
                   </li>
                 )
               }
               <li>
                 <strong>AWS Key</strong>
-                <span>{formData.awsCloudWatchAwsKey.value}</span>
+                <span>{awsCloudWatchAwsKey.value}</span>
               </li>
               <li>
                 <strong>AWS Region</strong>
-                <span>{formData.awsCloudWatchAwsRegion.value}</span>
+                <span>{awsCloudWatchAwsRegion.value}</span>
               </li>
             </ReviewItems>
 
@@ -66,23 +107,23 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <ReviewItems>
               <li>
                 <strong>Stream</strong>
-                <span>{formData.awsCloudWatchKinesisStream.value}</span>
+                <span>{awsCloudWatchKinesisStream.value}</span>
               </li>
               <li>
                 <strong>Global Input</strong>
-                <span>{(formData.awsCloudWatchGlobalInput && formData.awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
+                <span>{(awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
               </li>
               <li>
                 <strong>AWS Assumed ARN Role</strong>
-                <span>{formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : 'None'}</span>
+                <span>{awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : 'None'}</span>
               </li>
               <li>
                 <strong>Record Batch Size</strong>
                 <span>
                   {
-                    formData.awsCloudWatchBatchSize.value
-                      ? formData.awsCloudWatchBatchSize.value
-                      : <Default value={formData.awsCloudWatchBatchSize.defaultValue} />
+                    awsCloudWatchBatchSize.value
+                      ? awsCloudWatchBatchSize.value
+                      : <Default value={awsCloudWatchBatchSize.defaultValue} />
                   }
                 </span>
               </li>
@@ -90,11 +131,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                 <strong>Throttled Wait (ms)</strong>
                 <span>
                   {
-                    (formData.awsCloudWatchThrottleEnabled
-                      && formData.awsCloudWatchThrottleEnabled.value
-                      && formData.awsCloudWatchThrottleWait)
-                      ? formData.awsCloudWatchThrottleWait.value
-                      : <Default value={formData.awsCloudWatchThrottleWait.defaultValue} />
+                    throttleEnabled ? awsCloudWatchThrottleWait.value : <Default value={awsCloudWatchThrottleWait.defaultValue} />
                   }
                 </span>
               </li>
@@ -106,7 +143,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={logOutput}
+                   value={logSample}
                    rows={10}
                    disabled />
           </Container>

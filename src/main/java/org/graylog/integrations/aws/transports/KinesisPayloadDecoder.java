@@ -49,7 +49,7 @@ public class KinesisPayloadDecoder {
      * <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subscription Filters</a>.
      * </p>
      *
-     * @param payloadBytes A Kinesis payload in byte array form.
+     * @param payloadBytes                A Kinesis payload in byte array form.
      * @param approximateArrivalTimestamp The approximate instant that the message was written to Kinesis. This is used only
      *                                    for the {@code AWSMessageType.KINESIS_RAW} message timestamp.
      * @return A list of {@link KinesisLogEntry} messages, which are fully ready to be written to the Graylog Journal.
@@ -75,8 +75,8 @@ public class KinesisPayloadDecoder {
             // The best timestamp available is the approximate arrival time of the message to the Kinesis stream.
             final DateTime timestamp = new DateTime(approximateArrivalTimestamp.toEpochMilli(), DateTimeZone.UTC);
             final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create(kinesisStream,
-                                                                     "", "",
-                                                                     timestamp, new String(payloadBytes));
+                                                                           "", "",
+                                                                           timestamp, new String(payloadBytes));
             return Collections.singletonList(kinesisLogEntry);
         } else {
             LOG.error("The AWSMessageType [{}] is not supported by the KinesisTransport", awsMessageType);
@@ -86,10 +86,11 @@ public class KinesisPayloadDecoder {
 
     /**
      * Extract CloudWatch log messages from the Kinesis payload. These messages are encoded in JSON.
-     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">AWS Subscription Filters</a>
+     *
      * @param payloadBytes A Kinesis payload in byte array form.
      * @return A {@link CloudWatchLogSubscriptionData} instance representing a CloudWatch subscription payload with messages.
      * @throws IOException
+     * @see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">AWS Subscription Filters</a>
      */
     private CloudWatchLogSubscriptionData decompressCloudWatchMessages(byte[] payloadBytes) throws IOException {
 

@@ -2,10 +2,9 @@ package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.journal.RawMessage;
@@ -35,8 +34,8 @@ public class AWSCodecTest {
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
-        final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
-        final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
+        DateTime timestamp = DateTime.now(DateTimeZone.UTC);
+        KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
                                                                  "2 423432432432 eni-3244234 172.1.1.2 172.1.1.2 80 2264 6 1 52 1559738144 1559738204 ACCEPT OK");
 
         Message message = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(kinesisLogEntry)));
@@ -72,7 +71,7 @@ public class AWSCodecTest {
 
         final DateTime timestamp = DateTime.now(DateTimeZone.UTC);
         final KinesisLogEntry kinesisLogEntry = KinesisLogEntry.create("a-stream", "log-group", "log-stream", timestamp,
-                                                                 "This a raw message");
+                                                                       "This a raw message");
 
         Message message = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(kinesisLogEntry)));
         Assert.assertEquals("log-group", message.getField(AbstractKinesisCodec.FIELD_LOG_GROUP));

@@ -4,18 +4,38 @@ import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
 
 import { FormDataContext } from './context/FormData';
+import { ApiContext } from './context/Api';
+import useFetch from './hooks/useFetch';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
+import { renderOptions } from '../common/Options';
+import { ApiRoutes } from '../common/Routes';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
+  const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
+  const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
+  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
+    null,
+    (response) => {
+      setStreams(response);
+      onSubmit();
+    },
+    'POST',
+    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+  );
+
+  const handleSubmit = () => {
+    setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
+  };
 
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit}
-                  buttonContent="Authorize &amp; Choose Stream">
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Authorize &amp; Choose Stream"
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
@@ -69,12 +89,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="Region"
                           help="Provide the region your CloudWatch instance is deployed."
+                          disabled={fetchRegionsStatus.loading}
                           required>
-            <option value="">Choose Region</option>
-            <option value="us-east-2">US East (Ohio)</option>
-            <option value="us-east-1">US East (N. Virginia)</option>
-            <option value="us-west-1">US West (N. California)</option>
-            <option value="us-west-2">US West (Oregon)</option>
+            {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
           </ValidatedInput>
         </FormWrap>
       </Col>
