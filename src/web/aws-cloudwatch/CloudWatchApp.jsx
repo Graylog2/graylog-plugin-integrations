@@ -6,14 +6,14 @@ import PageHeader from 'components/common/PageHeader';
 
 import { FormDataProvider } from './context/FormData';
 import { StepsProvider } from './context/Steps';
-import { LogOutputProvider } from './context/LogOutput';
+import { ApiProvider } from './context/Api';
 import CloudWatch from './CloudWatch';
 
 const CloudWatchApp = ({ params: { step } }) => {
   return (
-    <StepsProvider>
-      <FormDataProvider>
-        <LogOutputProvider>
+    <ApiProvider>
+      <StepsProvider>
+        <FormDataProvider>
           <Row>
             <Col md={12}>
               <PageHeader title="AWS Integration">
@@ -25,9 +25,9 @@ const CloudWatchApp = ({ params: { step } }) => {
               <CloudWatch wizardStep={step} />
             </Col>
           </Row>
-        </LogOutputProvider>
-      </FormDataProvider>
-    </StepsProvider>
+        </FormDataProvider>
+      </StepsProvider>
+    </ApiProvider>
   );
 };
 
