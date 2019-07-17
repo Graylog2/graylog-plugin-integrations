@@ -9,7 +9,7 @@ import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/fetch';
+import useFetch from './hooks/useFetch';
 
 import FormWrap from '../common/FormWrap';
 import { ApiRoutes } from '../common/Routes';
@@ -46,7 +46,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   const throttleValue = throttleEnabled ? awsCloudWatchThrottleWait.value : awsCloudWatchThrottleWait.defaultValue;
 
   const [fetchSubmitStatus, setSubmitFetch] = useFetch(
-    () => {},
+    null,
+    () => {
+      onSubmit();
+    },
     'POST',
     {
       name: awsCloudWatchName.value,
@@ -60,7 +63,6 @@ const StepReview = ({ onSubmit, onEditClick }) => {
       enable_throttling: throttleEnabled,
       kinesis_max_throttled_wait_ms: Number(throttleValue),
     },
-    onSubmit,
   );
 
   const handleSubmit = () => {
