@@ -2,6 +2,8 @@ import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
+import history from 'util/History';
+import Routes from 'routing/Routes';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
@@ -45,9 +47,9 @@ const CloudWatch = () => {
 
       setCurrentStep(key);
       setEnabledStep(key);
+    } else {
+      history.push(Routes.SYSTEM.INPUTS);
     }
-
-    return false;
   };
 
   const wizardSteps = [
