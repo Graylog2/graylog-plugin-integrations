@@ -10,10 +10,9 @@ public class Proxy {
 
     public static ClientConfiguration forAWS(@NotNull HttpUrl proxyUrl) {
         return new ClientConfigurationFactory().getConfig()
-                .withProxyHost(proxyUrl.host())
-                .withProxyPort(proxyUrl.port())
-                .withProxyUsername(proxyUrl.username())
-                .withProxyPassword(proxyUrl.password());
+                                               .withProxyHost(proxyUrl.host())
+                                               .withProxyPort(proxyUrl.port())
+                                               .withProxyUsername(proxyUrl.username())
+                                               .withProxyPassword(proxyUrl.password());
     }
-
 }

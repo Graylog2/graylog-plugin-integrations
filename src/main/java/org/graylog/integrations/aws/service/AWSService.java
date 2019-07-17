@@ -7,10 +7,10 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.codecs.AWSCodec;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.AWSPolicy;
 import org.graylog.integrations.aws.AWSPolicyStatement;
+import org.graylog.integrations.aws.codecs.AWSCodec;
+import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableService;
@@ -55,6 +55,7 @@ public class AWSService {
 
     /**
      * The only version supported is 2012-10-17
+     *
      * @see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_version.html">IAM JSON Policy Elements: Version</a>
      */
     private static final String AWS_POLICY_VERSION = "2012-10-17";
