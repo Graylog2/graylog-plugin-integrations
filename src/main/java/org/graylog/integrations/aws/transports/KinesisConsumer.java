@@ -34,6 +34,8 @@ import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -171,6 +173,13 @@ public class KinesisConsumer implements Runnable {
                                                                       record.getApproximateArrivalTimestamp().toInstant());
 
                         for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
+                            // TODO: Remove.
+                            // Rate limit message processing roughly to 10/second for the AWS demo.
+                            // This prevents excessively high CPU utilization.
+                            int maxDelay = 500;
+                            int minDelay = 50;
+                            final int delay = new Random().nextInt((maxDelay - minDelay) + 1) + minDelay;
+                            new CountDownLatch(1).await((long) delay, TimeUnit.MILLISECONDS);
                             dataHandler.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                         }
 
