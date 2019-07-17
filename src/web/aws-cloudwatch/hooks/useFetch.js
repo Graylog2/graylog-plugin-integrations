@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
+// import UserNotification from 'util/UserNotification';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
@@ -75,7 +76,7 @@ const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
           });
         }
 
-        fetcher.then((result) => {
+        return fetcher.then((result) => {
           setError(null);
           setData(result);
           setHook(result);
