@@ -15,7 +15,7 @@ import { renderOptions } from '../common/Options';
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableStreams, setLogSample } = useContext(ApiContext);
-  const [fetchStatus, setFetchOptions] = useFetch(
+  const [logSampleStatus, setLogSampleUrl] = useFetch(
     setLogSample,
     'POST',
     {
@@ -26,7 +26,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   );
 
   const handleSubmit = () => {
-    setFetchOptions(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
+    setLogSampleUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
   };
 
   return (
@@ -34,7 +34,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Verify Stream &amp; Format"
-                  loading={fetchStatus.loading}>
+                  loading={logSampleStatus.loading}>
           <h2>Choose Kinesis Stream</h2>
           <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
 
