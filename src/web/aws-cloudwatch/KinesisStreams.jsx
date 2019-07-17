@@ -16,13 +16,16 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableStreams, setLogSample } = useContext(ApiContext);
   const [logSampleStatus, setLogSampleUrl] = useFetch(
-    setLogSample,
+    null,
+    (response) => {
+      setLogSample(response);
+      onSubmit();
+    },
     'POST',
     {
       region: formData.awsCloudWatchAwsRegion.value,
       stream_name: formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : '',
     },
-    onSubmit,
   );
 
   const handleSubmit = () => {

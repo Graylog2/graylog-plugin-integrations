@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 import styled from '@emotion/styled';
@@ -15,17 +15,16 @@ import { ApiRoutes } from '../common/Routes';
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
-  const [fetchRegionsStatus, setRegionsUrl] = useFetch(setRegions, 'GET');
+  const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
-    setStreams,
+    null,
+    (response) => {
+      setStreams(response);
+      onSubmit();
+    },
     'POST',
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
-    onSubmit,
   );
-
-  useEffect(() => {
-    setRegionsUrl(ApiRoutes.INTEGRATIONS.AWS.REGIONS);
-  }, []);
 
   const handleSubmit = () => {
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);

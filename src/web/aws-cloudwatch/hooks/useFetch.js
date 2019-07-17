@@ -12,9 +12,10 @@ Because of [Rules of Hooks](https://reactjs.org/docs/hooks-rules.html) we have t
 in order to use fetch Promises and hooks.
 
 PARAMETERS:
- - `setHook` that you want to call after fetch [required]
- - `method`: '', [`'GET'` optional]
- - `options`: '', [`{}` optional]
+ - `url`: The url that will be fetched, can be set later with `setUrl` [required, but accepts `null`]
+ - `setHook`: that you want to call after fetch [required]
+ - `method`: RESTful HTTP method, [`'GET'` optional]
+ - `options`: Object of data you'll send with fetch, [`{}` optional]
  - `callback` that will fire any part of your code you need after fetch [`() => {}` optional]
 
 USE:
@@ -23,12 +24,27 @@ USE:
  - `setUrl` will be your hook to call as a submit handler within a subfunction, it needs the API route as a string:
 
 EXAMPLES:
- - See uses in `src/web/aws-cloudwatch/StepAuthorize.jsx`
+```
+  const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
+  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
+    null,
+    (response) => {
+      setStreams(response);
+      onSubmit();
+    },
+    'POST',
+    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+  );
+
+  const handleSubmit = () => {
+    setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
+  };
+```
 */
 
-const useFetch = (setHook, method = 'GET', options = {}, callback = () => {}) => {
+const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
   const { formData } = useContext(FormDataContext);
-  const [fetchUrl, setFetchUrl] = useState(null);
+  const [fetchUrl, setFetchUrl] = useState(url);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [data, setData] = useState(false);
@@ -58,7 +74,6 @@ const useFetch = (setHook, method = 'GET', options = {}, callback = () => {}) =>
           setLoading(false);
           setData(result);
           setHook(result);
-          callback();
         }
       } catch (err) {
         if (!didCancel) {
