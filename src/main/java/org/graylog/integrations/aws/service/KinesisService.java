@@ -413,7 +413,7 @@ public class KinesisService {
             kinesisClient.createStream(createStreamRequest);
             responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
                                             kinesisNewStreamRequest.streamName(), SHARD_COUNT);
-            return KinesisNewStreamResponse.create(true, responseMessage, new HashMap<>());
+            return KinesisNewStreamResponse.create(responseMessage, new HashMap<>());
         } catch (Exception e) {
 
             String specificError = ExceptionUtils.formatMessageCause(e);

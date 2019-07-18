@@ -14,13 +14,8 @@ import java.util.Map;
 @WithBeanGetter
 public abstract class KinesisNewStreamResponse {
 
-    private static final String SUCCESS = "success";
     private static final String EXPLANATION = "explanation";
     private static final String MESSAGE_FIELDS = "message_fields";
-
-    @JsonProperty(SUCCESS)
-    public abstract boolean success();
-
 
     // Some specific success or error message from AWS SDK.
     @JsonProperty(EXPLANATION)
@@ -32,10 +27,9 @@ public abstract class KinesisNewStreamResponse {
     @JsonProperty(MESSAGE_FIELDS)
     public abstract Map<String, Object> messageFields();
 
-    public static KinesisNewStreamResponse create(@JsonProperty(SUCCESS) boolean success,
-                                                  @JsonProperty(EXPLANATION) String explanation,
+    public static KinesisNewStreamResponse create(@JsonProperty(EXPLANATION) String explanation,
                                                   @JsonProperty(MESSAGE_FIELDS) Map<String, Object> messageFields) {
-        return new AutoValue_KinesisNewStreamResponse(success, explanation, messageFields);
+        return new AutoValue_KinesisNewStreamResponse(explanation, messageFields);
     }
 
     /**
@@ -44,6 +38,6 @@ public abstract class KinesisNewStreamResponse {
      * @return a {@link KinesisNewStreamResponse} instance
      */
     public static KinesisNewStreamResponse createFailed(@JsonProperty(EXPLANATION) String explanation) {
-        return new AutoValue_KinesisNewStreamResponse(false, explanation, new HashMap<>());
+        return new AutoValue_KinesisNewStreamResponse(explanation, new HashMap<>());
     }
 }
