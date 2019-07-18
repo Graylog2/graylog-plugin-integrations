@@ -46,7 +46,6 @@ import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -396,32 +395,31 @@ public class KinesisService {
      */
     public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest kinesisNewStreamRequest) {
         LOG.debug("Creating Kinesis client with the provided credentials.");
-        KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
-                                                   kinesisNewStreamRequest.awsAccessKeyId(),
-                                                   kinesisNewStreamRequest.awsSecretAccessKey());
+        final KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
+                                                         kinesisNewStreamRequest.awsAccessKeyId(),
+                                                         kinesisNewStreamRequest.awsSecretAccessKey());
 
         LOG.debug("Creating new Kinesis stream request [{}].", kinesisNewStreamRequest.streamName());
-        CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
-                                                                     .streamName(kinesisNewStreamRequest.streamName())
-                                                                     .shardCount(SHARD_COUNT)
-                                                                     .build();
+        final CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
+                                                                           .streamName(kinesisNewStreamRequest.streamName())
+                                                                           .shardCount(SHARD_COUNT)
+                                                                           .build();
         LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
                   kinesisNewStreamRequest.streamName(), SHARD_COUNT);
 
-        String responseMessage;
         try {
             kinesisClient.createStream(createStreamRequest);
-            responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
-                                            kinesisNewStreamRequest.streamName(), SHARD_COUNT);
-            return KinesisNewStreamResponse.create(responseMessage, new HashMap<>());
+            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
+                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT);
+            return KinesisNewStreamResponse.create(responseMessage);
         } catch (Exception e) {
 
-            String specificError = ExceptionUtils.formatMessageCause(e);
-            responseMessage = String.format("Attempt to create [%s] new Kinesis stream" +
-                                            "with [%d] shards failed due to the following exception: [%s]",
-                                            kinesisNewStreamRequest.streamName(), SHARD_COUNT,
-                                            specificError);
-            LOG.debug(responseMessage);
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("Attempt to create [%s] new Kinesis stream " +
+                                                         "with [%d] shards failed due to the following exception: [%s]",
+                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT,
+                                                         specificError);
+            LOG.error(responseMessage);
             throw new InternalServerErrorException(responseMessage, e);
         }
     }
