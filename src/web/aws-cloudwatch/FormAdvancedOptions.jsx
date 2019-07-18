@@ -16,8 +16,8 @@ const FormAdvancedOptions = ({ onChange }) => {
 
   return (
     <div>
-      <ToggleAdvancedOptions onClick={handleToggle} type="button">
-          Advanced Options <i className="fa fa-angle-right fa-sm" />
+      <ToggleAdvancedOptions onClick={handleToggle} type="button" visible={isAdvancedOptionsVisible}>
+        {isAdvancedOptionsVisible ? 'Close' : 'Open'} Advanced Options <i className="fa fa-angle-right fa-sm" />
       </ToggleAdvancedOptions>
 
       <AdvancedOptionsContent visible={isAdvancedOptionsVisible}>
@@ -63,12 +63,27 @@ FormAdvancedOptions.propTypes = {
 
 const AdvancedOptionsContent = styled.div`
   display: ${props => (props.visible ? 'block' : 'none')};
+  background-color: #DCE1E5;
+  padding: 15px;
+  border: 1px solid #A6AFBD;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  margin-bottom: 15px;
 `;
 
 const ToggleAdvancedOptions = styled.button`
-  border: 0;
-  color: #16ace3;
+  color: #0063BE;
   font-size: 14px;
+  border-radius: 4px 4px 0 0;
+  border-bottom-right-radius: ${props => (props.visible ? '0' : '4px')};
+  border-bottom-left-radius: ${props => (props.visible ? '0' : '4px')};
+  border: 1px solid #A6AFBD;
+  border-bottom-width: ${props => (props.visible ? '0' : '1px')};
+  padding: 6px 15px;
+  background-color: #DCE1E5;
+  display: block;
+  width: 100%;
+  margin-bottom: ${props => (props.visible ? '0' : '15px')};
 
   :hover {
     color: #5e123b;
