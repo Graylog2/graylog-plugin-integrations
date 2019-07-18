@@ -21,12 +21,6 @@ const manifest = new PluginManifest(packageJson, {
       component: InputConfiguration,
     },
   ],
-  inputConfiguration: [
-    {
-      matches: type => /^org.graylog.integrations.aws/.test(type),
-      path: Routes.INTEGRATIONS.AWS.CLOUDWATCH.index,
-    },
-  ],
 });
 
 PluginStore.register(manifest);
