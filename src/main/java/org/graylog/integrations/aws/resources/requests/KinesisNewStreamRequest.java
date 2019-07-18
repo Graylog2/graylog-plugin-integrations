@@ -14,7 +14,6 @@ public abstract class KinesisNewStreamRequest implements AWSRequest {
     private static final String STREAM_NAME = "stream_name";
 
     @JsonProperty(REGION)
-
     public abstract String region();
 
     @JsonProperty(AWS_ACCESS_KEY_ID)

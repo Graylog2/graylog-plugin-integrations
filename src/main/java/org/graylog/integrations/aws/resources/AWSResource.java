@@ -1,7 +1,6 @@
 package org.graylog.integrations.aws.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -134,7 +133,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @Path("/kinesis/create_stream")
     @ApiOperation(
             value = "Attempt to create a new kinesis stream."
-
     )
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisNewStreamRequest kinesisNewStreamRequest) {
