@@ -12,6 +12,7 @@ import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.AbstractCodec;
 import org.graylog2.plugin.inputs.codecs.Codec;
+import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 
 import javax.annotation.Nonnull;
@@ -59,7 +60,9 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
             final Message result = new Message(
                     buildSummary(flowLogMessage),
                     source,
-                    flowLogMessage.getTimestamp() );
+                    // TODO: Remove. Hardcode timestamp for demo. Allows messages to show up "now" vs yesterday.
+                    //  This helps out with the presentation
+                    DateTime.now());
             result.addFields(buildFields(flowLogMessage));
             result.addField(FIELD_KINESIS_STREAM, logEvent.kinesisStream());
             result.addField(FIELD_LOG_GROUP, logEvent.logGroup());
