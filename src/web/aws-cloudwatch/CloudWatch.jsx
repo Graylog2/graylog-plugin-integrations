@@ -97,7 +97,7 @@ const CloudWatch = ({ route }) => {
 
   return (
     <>
-      {dirty && <ConfirmLeaveDialog route={route} />}
+      {dirty && <ConfirmLeaveDialog route={route} question="Are you sure? Your new Input will not be created." />}
       <Wizard steps={wizardSteps}
               activeStep={currentStep}
               onStepChange={handleStepChange}
