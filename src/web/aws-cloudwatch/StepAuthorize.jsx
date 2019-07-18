@@ -8,12 +8,21 @@ import { ApiContext } from './context/Api';
 import useFetch from './hooks/useFetch';
 
 import ValidatedInput from '../common/ValidatedInput';
+import ValidatedSelect from '../common/ValidatedSelect';
 import FormWrap from '../common/FormWrap';
-import { renderOptions } from '../common/Options';
+// import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
-  const { formData } = useContext(FormDataContext);
+  const {
+    formData: {
+      awsCloudWatchName,
+      awsCloudWatchDescription,
+      awsCloudWatchAwsKey,
+      awsCloudWatchAwsSecret,
+      awsCloudWatchAwsRegion,
+    },
+  } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
@@ -23,7 +32,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       onSubmit();
     },
     'POST',
-    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+    { region: awsCloudWatchAwsRegion ? awsCloudWatchAwsRegion.value : '' },
   );
 
   const handleSubmit = () => {
@@ -46,7 +55,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
           <ValidatedInput id="awsCloudWatchName"
                           type="text"
-                          fieldData={formData.awsCloudWatchName}
+                          fieldData={awsCloudWatchName}
                           onChange={onChange}
                           placeholder="CloudWatch Integration Name"
                           label="Name of integration"
@@ -58,7 +67,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           label="Integration description"
                           placeholder="CloudWatch Integration Description"
                           onChange={onChange}
-                          fieldData={formData.awsCloudWatchDescription}
+                          fieldData={awsCloudWatchDescription}
                           rows={4} />
 
           <ValidatedInput id="awsCloudWatchAwsKey"
@@ -66,7 +75,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           label="AWS Key"
                           placeholder="CloudWatch Integration AWS Key"
                           onChange={onChange}
-                          fieldData={formData.awsCloudWatchAwsKey}
+                          fieldData={awsCloudWatchAwsKey}
                           autoComplete="off"
                           maxLength="512"
                           help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
@@ -77,22 +86,19 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           label="AWS Secret"
                           placeholder="CloudWatch Integration AWS Secret"
                           onChange={onChange}
-                          fieldData={formData.awsCloudWatchAwsSecret}
+                          fieldData={awsCloudWatchAwsSecret}
                           autoComplete="off"
                           maxLength="512"
                           help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
                           required />
 
-          <ValidatedInput id="awsCloudWatchAwsRegion"
-                          type="select"
-                          fieldData={formData.awsCloudWatchAwsRegion}
-                          onChange={onChange}
-                          label="Region"
-                          help="Provide the region your CloudWatch instance is deployed."
-                          disabled={fetchRegionsStatus.loading}
-                          required>
-            {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
-          </ValidatedInput>
+          <ValidatedSelect id="awsCloudWatchAwsRegion"
+                           label="AWS Region"
+                           placeHolder="Choose a Region..."
+                           options={availableRegions}
+                           onChange={onChange}
+                           value={awsCloudWatchAwsRegion && awsCloudWatchAwsRegion.value}
+                           required />
         </FormWrap>
       </Col>
     </Row>
