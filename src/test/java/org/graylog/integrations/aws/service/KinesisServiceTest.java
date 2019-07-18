@@ -7,6 +7,7 @@ import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
@@ -366,16 +367,15 @@ public class KinesisServiceTest {
         // Mock out specific KinesisNewStreamRequest to return a response.
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
 
-        KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
-                                                                                         "accessKey", "secretKey",
-                                                                                         TEST_STREAM_1);
-        kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
+        final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
+                                                                                               "accessKey", "secretKey",
+                                                                                               TEST_STREAM_1);
+        final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
 
         // Check the values are whats expected.
-        assertEquals(kinesisNewStreamRequest.region(), TEST_REGION);
-        assertEquals(kinesisNewStreamRequest.awsAccessKeyId(), "accessKey");
-        assertEquals(kinesisNewStreamRequest.awsSecretAccessKey(), "secretKey");
-        assertEquals(kinesisNewStreamRequest.streamName(), TEST_STREAM_1);
+        final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "] was created with ["
+                                        + SHARD_COUNT + "] shards.";
+        assertEquals(response.explanation(), expectedResponse);
         assertEquals(SHARD_COUNT, 1);
     }
 }
