@@ -9,7 +9,7 @@ import { StepsProvider } from './context/Steps';
 import { ApiProvider } from './context/Api';
 import CloudWatch from './CloudWatch';
 
-const CloudWatchApp = ({ params: { step } }) => {
+const CloudWatchApp = ({ params: { step }, route, router }) => {
   return (
     <ApiProvider>
       <StepsProvider>
@@ -22,7 +22,7 @@ const CloudWatchApp = ({ params: { step } }) => {
             </Col>
 
             <Col md={12}>
-              <CloudWatch wizardStep={step} />
+              <CloudWatch wizardStep={step} route={route} router={router} />
             </Col>
           </Row>
         </FormDataProvider>
@@ -35,6 +35,8 @@ CloudWatchApp.propTypes = {
   params: PropTypes.shape({
     step: PropTypes.string,
   }).isRequired,
+  route: PropTypes.any.isRequired,
+  router: PropTypes.any.isRequired,
 };
 
 export default CloudWatchApp;

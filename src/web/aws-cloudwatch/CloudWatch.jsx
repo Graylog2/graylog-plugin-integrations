@@ -1,4 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
+
+import WindowLeaveMessage from 'views/components/common/WindowLeaveMessage.jsx';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
@@ -12,7 +16,7 @@ import StepReview from './StepReview';
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
 
-const CloudWatch = () => {
+const CloudWatch = ({ route, router }) => {
   const {
     availableSteps,
     currentStep,
@@ -21,7 +25,8 @@ const CloudWatch = () => {
     setCurrentStep,
     setEnabledStep,
   } = useContext(StepsContext);
-  const { setFormData } = useContext(FormDataContext);
+  const { formData, setFormData } = useContext(FormDataContext);
+  const [dirtyForm, setDirtyForm] = useState(false);
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -34,6 +39,10 @@ const CloudWatch = () => {
   const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
     const value = FormUtils.getValueFromInput(target);
+
+    if (!dirtyForm) {
+      setDirtyForm(true);
+    }
 
     setFormData(id, { ...fieldData, value });
   };
@@ -86,14 +95,41 @@ const CloudWatch = () => {
     setAvailableStep(wizardSteps.map(step => step.key));
   }
 
+  // const routerWillLeave = () => 'Your work is not saved! Are you sure you want to leave?';
+
+  // useEffect(() => {
+  //   if (dirtyForm) {
+  //     console.log('dirtyForm');
+  //     router.setRouteLeaveHook(route, routerWillLeave);
+  //     window.addEventListener('beforeunload', () => {
+  //       console.log('beforeunload');
+  //       return 'Your work is not saved! Are you sure you want to leave?';
+  //     });
+  //   }
+
+  //   // return () => {
+  //   //   confirm('Are you sure');
+  //   // };
+  // }, [formData]);
+
   return (
-    <Wizard steps={wizardSteps}
-            activeStep={currentStep}
-            onStepChange={handleStepChange}
-            horizontal
-            justified
-            hidePreviousNextButtons />
+    <>
+      <WindowLeaveMessage route={route} dirty={dirtyForm} />
+      <Wizard steps={wizardSteps}
+              activeStep={currentStep}
+              onStepChange={handleStepChange}
+              horizontal
+              justified
+              hidePreviousNextButtons />
+    </>
   );
 };
 
-export default CloudWatch;
+CloudWatch.propTypes = {
+  router: PropTypes.shape({
+    setRouteLeaveHook: PropTypes.func.isRequired,
+  }).isRequired,
+  route: PropTypes.any.isRequired,
+};
+
+export default withRouter(CloudWatch);
