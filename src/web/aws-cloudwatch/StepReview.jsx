@@ -7,10 +7,12 @@ import { Link } from 'react-router';
 import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
+
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import useFetch from './hooks/useFetch';
 
+import LogSampleIcon from '../common/LogSampleIcon';
 import FormWrap from '../common/FormWrap';
 import { ApiRoutes } from '../common/Routes';
 
@@ -137,7 +139,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               </li>
             </ReviewItems>
 
-            <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
+            <Subheader>Formatting <LogIcon success /></Subheader>
             <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
             <Input id="awsCloudWatchLog"
@@ -191,11 +193,6 @@ const ReviewItems = styled.ul`
   }
 `;
 
-const FormatIcon = styled.span`
-  color: ${props => (props.success ? '#00AE42' : '#AD0707')};
-  margin-left: 10px;
-`;
-
 const EditAnchor = styled.a`
   font-size: 12px;
   margin-left: 5px;
@@ -209,6 +206,10 @@ const EditAnchor = styled.a`
   ::after {
     content: ")";
   }
+`;
+
+const LogIcon = styled(LogSampleIcon)`
+  margin-left: 10px;
 `;
 
 export default StepReview;
