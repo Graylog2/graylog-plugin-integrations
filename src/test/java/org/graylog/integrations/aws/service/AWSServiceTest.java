@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
@@ -12,6 +14,7 @@ import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.inputs.MessageInputFactory;
 import org.junit.Before;
 import org.junit.Rule;
@@ -59,7 +62,7 @@ public class AWSServiceTest {
     @Before
     public void setUp() {
 
-        awsService = new AWSService(inputService, messageInputFactory, nodeId);
+        awsService = new AWSService(inputService, messageInputFactory, nodeId, new ObjectMapperProvider().get());
     }
 
     @Test
@@ -97,7 +100,7 @@ public class AWSServiceTest {
         assertEquals(AWSInput.TYPE, input.type());
         assertFalse(input.global());
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
-        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_INPUT_TYPE));
+        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_MESSAGE_TYPE));
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
         assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
         assertEquals("An AWS Input", input.configuration().get(AWSInput.CK_DESCRIPTION));
@@ -124,13 +127,13 @@ public class AWSServiceTest {
         }
         assertTrue(foundEuWestRegion);
 
-        // Use one liner presence checks.
+        // Use none liner presence checks.
         assertTrue(regions.stream().anyMatch(r -> r.displayValue().equals("EU (Stockholm): eu-north-1")));
         assertEquals("There should be 20 total regions. This will change in future versions of the AWS SDK", 20, regions.size());
     }
 
     @Test
-    public void testAvailableServices() {
+    public void testAvailableServices() throws JsonProcessingException {
 
         AvailableServiceResponse services = awsService.getAvailableServices();
 
@@ -140,5 +143,13 @@ public class AWSServiceTest {
 
         // CloudWatch should be in the list of available services.
         assertTrue(services.services().stream().anyMatch(s -> s.name().equals("CloudWatch")));
+
+        // Verify that some of the needed actions are present.
+        String policy = services.services().get(0).policy();
+        assertTrue(policy.contains("cloudwatch"));
+        assertTrue(policy.contains("dynamodb"));
+        assertTrue(policy.contains("ec2"));
+        assertTrue(policy.contains("elasticloadbalancing"));
+        assertTrue(policy.contains("kinesis"));
     }
 }

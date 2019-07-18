@@ -17,11 +17,12 @@
 package org.graylog.integrations;
 
 import org.graylog.integrations.aws.AWSPermissions;
-import org.graylog.integrations.aws.codecs.AWSMetaCodec;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
 import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.AWSResource;
+import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
@@ -81,12 +82,13 @@ public class IntegrationsModule extends PluginModule {
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
         // AWS
-        addCodec(AWSMetaCodec.NAME, AWSMetaCodec.class);
+        addCodec(AWSCodec.NAME, AWSCodec.class);
         addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
         addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
         addMessageInput(AWSInput.class);
         addPermissions(AWSPermissions.class);
         addRestResource(AWSResource.class);
+        addTransport(AWSTransport.NAME, AWSTransport .class);
         addTransport(KinesisTransport.NAME, KinesisTransport.class);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);

@@ -2,16 +2,15 @@ import React, { useContext } from 'react';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
+import history from 'util/History';
+import Routes from 'routing/Routes';
 
 import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
-
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
-import { LogOutputContext } from './context/LogOutput';
-import TEMPORARY_LOG from './context/temporary_log';
 
 const CloudWatch = () => {
   const {
@@ -23,7 +22,6 @@ const CloudWatch = () => {
     setEnabledStep,
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
-  const { setLogOutput } = useContext(LogOutputContext);
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -33,25 +31,24 @@ const CloudWatch = () => {
     setCurrentStep(nextStep);
   };
 
-  const handleFieldUpdate = ({ target }) => {
+  const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
     const value = FormUtils.getValueFromInput(target);
 
-    setFormData(id, { value });
+    setFormData(id, { ...fieldData, value });
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
+  const handleSubmit = () => {
+    // TODO: add String.trim() to inputs
     const nextStep = availableSteps.indexOf(currentStep) + 1;
 
     if (availableSteps[nextStep]) {
       const key = availableSteps[nextStep];
 
-      setLogOutput(TEMPORARY_LOG); // TODO: Move to step specific setting
-
       setCurrentStep(key);
       setEnabledStep(key);
+    } else {
+      history.push(Routes.SYSTEM.INPUTS);
     }
   };
 

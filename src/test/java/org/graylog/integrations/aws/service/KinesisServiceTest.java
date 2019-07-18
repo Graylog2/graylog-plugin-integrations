@@ -1,16 +1,13 @@
 package org.graylog.integrations.aws.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.codecs.KinesisCloudWatchFlowLogCodec;
-import org.graylog.integrations.aws.codecs.KinesisRawLogCodec;
+import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
-import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
@@ -43,7 +40,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -78,47 +74,9 @@ public class KinesisServiceTest {
     @Before
     public void setUp() {
 
-        ObjectMapper objectMapper = new ObjectMapperProvider().get();
-
-        // Create an AWS client with a mock KinesisClientBuilder
-        availableCodecs = new HashMap<>();
-
-        // Prepare test codecs. These have to be manually instantiated for the test context.
-        availableCodecs.put(KinesisRawLogCodec.NAME, new KinesisRawLogCodec.Factory() {
-            @Override
-            public KinesisRawLogCodec create(Configuration configuration) {
-                return new KinesisRawLogCodec(configuration, objectMapper);
-            }
-
-            @Override
-            public KinesisRawLogCodec.Config getConfig() {
-                return null;
-            }
-
-            @Override
-            public Codec.Descriptor getDescriptor() {
-                return null;
-            }
-        });
-
-        availableCodecs.put(KinesisCloudWatchFlowLogCodec.NAME, new KinesisCloudWatchFlowLogCodec.Factory() {
-            @Override
-            public KinesisCloudWatchFlowLogCodec create(Configuration configuration) {
-                return new KinesisCloudWatchFlowLogCodec(configuration, objectMapper);
-            }
-
-            @Override
-            public KinesisCloudWatchFlowLogCodec.Config getConfig() {
-                return null;
-            }
-
-            @Override
-            public Codec.Descriptor getDescriptor() {
-                return null;
-            }
-        });
-
-        kinesisService = new KinesisService(kinesisClientBuilder, objectMapper, availableCodecs);
+        kinesisService = new KinesisService(kinesisClientBuilder,
+                                            new ObjectMapperProvider().get(),
+                                            AWSTestingUtils.buildTestCodecs());
     }
 
     @Test

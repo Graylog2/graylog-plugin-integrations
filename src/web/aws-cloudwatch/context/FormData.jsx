@@ -9,11 +9,11 @@ export const FormDataProvider = ({ children }) => {
   const initialState = { ...DEFAULT_SETTINGS };
   const [formData, updateState] = useState(initialState);
 
-  const setFormData = (id, { value }) => updateState({
+  const setFormData = (id, fieldData) => updateState({
     ...formData,
     [id]: {
       ...formData[id],
-      value,
+      ...fieldData,
     },
   });
 
