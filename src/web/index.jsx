@@ -14,6 +14,12 @@ const manifest = new PluginManifest(packageJson, {
     { path: Routes.INTEGRATIONS.AWS.CLOUDWATCH.index, component: AWSCloudWatchApp },
     { path: Routes.INTEGRATIONS.AWS.CLOUDWATCH.step(':step'), component: AWSCloudWatchApp },
   ],
+  inputConfiguration: [
+    {
+      matches: type => /^org.graylog.integrations.aws/.test(type),
+      path: Routes.INTEGRATIONS.AWS.CLOUDWATCH.index,
+    },
+  ],
 });
 
 PluginStore.register(manifest);
