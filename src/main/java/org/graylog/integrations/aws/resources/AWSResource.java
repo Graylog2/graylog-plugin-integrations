@@ -85,18 +85,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Get all available AWS CloudWatch log groups names for the specified region.
-     *
-     * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/cloudWatch/logGroups' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret"
-     * }'
      */
     @POST
     @Timed
@@ -109,18 +97,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Get all available Kinesis streams for the specified region.
-     *
-     * Example request:
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/streams' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret"
-     * }'
      */
     @POST
     @Timed
@@ -132,23 +108,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     }
 
     /**
-     * Performs an AWS HealthCheck
-     *
-     * Sample CURL command for executing this method. Use this to model the UI request.
-     * Note the --data-binary param that includes the put body JSON with region and AWS credentials.
-     *
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/healthCheck' \
-     * -X POST \
-     * -H 'X-Requested-By: XMLHttpRequest' \
-     * -H 'Content-Type: application/json'   \
-     * -H 'Accept: application/json' \
-     * --data-binary '{
-     * "region": "us-east-1",
-     * "aws_access_key_id": "some-key",
-     * "aws_secret_access_key": "some-secret",
-     * "stream_name": "a-stream",
-     * "log_group_name": "a-log-group"
-     * }'
+     * Perform an AWS HealthCheck
      */
     @POST
     @Timed
@@ -177,27 +137,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
     /**
      * Create a new AWS input.
-     * <p>
-     * curl 'http://user:pass@localhost:9000/api/plugins/org.graylog.integrations/aws/kinesis/save' \
-     * -v \
-     * -X POST \
-     * -H 'X-Requested-By: just-a-test' \
-     * -H 'Content-Type: application/json' \
-     * -H 'Accept: application/json' \
-     * --compressed \
-     * --data-binary '{
-     * "aws_access_key": "",
-     * "aws_secret_key": "",
-     * "region": "us-east-1",
-     * "name": "New Flow Logs",
-     * "description": "Some flow logs.",
-     * "aws_input_type": "KINESIS_FLOW_LOGS",
-     * "stream_name": "flow-logs",
-     * "batch_size": 10000,
-     * "assume_role_arn": "",
-     * "global": false,
-     * "enable_throttling": false
-     * }'
      */
     @POST
     @Timed
