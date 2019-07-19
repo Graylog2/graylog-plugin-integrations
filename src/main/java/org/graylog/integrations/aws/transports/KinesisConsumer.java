@@ -12,14 +12,17 @@ import com.github.rholder.retry.WaitStrategies;
 import okhttp3.HttpUrl;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
+import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.system.NodeId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
+import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.kinesis.common.ConfigsBuilder;
 import software.amazon.kinesis.common.KinesisClientUtil;
 import software.amazon.kinesis.coordinator.Scheduler;
@@ -40,7 +43,6 @@ import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -64,7 +66,7 @@ public class KinesisConsumer implements Runnable {
     private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
     private final KinesisPayloadDecoder kinesisPayloadDecoder;
-    private final KinesisAsyncClient kinesisAsyncClient;
+    private final StaticCredentialsProvider credentialsProvider;
 
     private Scheduler scheduler;
     private KinesisTransport transport;
@@ -76,22 +78,21 @@ public class KinesisConsumer implements Runnable {
      */
     private String lastSuccessfulRecordSequence = null;
 
-    public KinesisConsumer(String kinesisStream,
-                           Region region,
-                           Consumer<byte[]> dataHandler,
-                           AWSPluginConfiguration awsConfig,
-                           String awsKey, String awsSecret, NodeId nodeId,
-                           @Nullable HttpUrl proxyUrl,
-                           KinesisTransport transport,
-                           ObjectMapper objectMapper,
-                           Integer maxThrottledWaitMillis,
-                           Integer recordBatchSize,
-                           AWSMessageType awsMessageType) {
+    KinesisConsumer(String kinesisStream,
+                    Region region,
+                    Consumer<byte[]> dataHandler,
+                    AWSPluginConfiguration awsConfig,
+                    String awsKey, String awsSecret, NodeId nodeId,
+                    @Nullable HttpUrl proxyUrl,
+                    KinesisTransport transport,
+                    ObjectMapper objectMapper,
+                    Integer maxThrottledWaitMillis,
+                    Integer recordBatchSize,
+                    AWSMessageType awsMessageType) {
         this.kinesisStreamName = requireNonNull(kinesisStream, "kinesisStream");
         this.region = requireNonNull(region, "region");
         this.dataHandler = requireNonNull(dataHandler, "dataHandler");
         this.awsConfig = requireNonNull(awsConfig, "awsConfig");
-        this.authProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsKey, awsSecret));
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.proxyUrl = proxyUrl;
         this.transport = transport;
@@ -99,7 +100,7 @@ public class KinesisConsumer implements Runnable {
         this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.recordBatchSize = recordBatchSize;
         this.kinesisPayloadDecoder = new KinesisPayloadDecoder(objectMapper, awsMessageType, kinesisStream);
-        this.kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(KinesisAsyncClient.builder().region(this.region));
+        this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
     }
 
     // TODO metrics
@@ -110,24 +111,15 @@ public class KinesisConsumer implements Runnable {
         LOG.debug("Max wait millis [{}]", maxThrottledWaitMillis);
         LOG.debug("Record batch size [{}]", recordBatchSize);
 
-        final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());
-
-        // The application name needs to be unique per input. Using the same name for two different Kinesis
-        // streams will cause trouble with state handling in DynamoDB. (used by the Kinesis client under the
-        // hood to keep state)
-        final String applicationName = String.format(Locale.ENGLISH, "graylog-aws-plugin-%s", kinesisStreamName);
-        KinesisClientLibConfiguration config = new KinesisClientLibConfiguration(applicationName, kinesisStreamName,
-                                                                                 authProvider, workerId);
-
         // Default max records is 10k. This can be overridden from UI.
-        if (recordBatchSize != null) {
-            config.withMaxRecords(recordBatchSize);
-        }
+        // if (recordBatchSize != null) {
+        //    config.withMaxRecords(recordBatchSize);
+        //}
 
-        // Optional HTTP proxy
-        if (awsConfig.proxyEnabled() && proxyUrl != null) {
-            config.withCommonClientConfig(Proxy.forAWS(proxyUrl));
-        }
+        // TODO: add Optional HTTP proxy
+        //if (awsConfig.proxyEnabled() && proxyUrl != null) {
+        //    config.withCommonClientConfig(Proxy.forAWS(proxyUrl));
+        //}
 
         final ShardRecordProcessorFactory recordProcessorFactory = () -> new ShardRecordProcessor() {
             private DateTime lastCheckpoint = DateTime.now();
@@ -254,13 +246,31 @@ public class KinesisConsumer implements Runnable {
             }
         };
 
-        DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder().region(region).build();
-        CloudWatchAsyncClient cloudWatchClient = CloudWatchAsyncClient.builder().region(region).build();
-        ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, kinesisStreamName,
-                                                           kinesisAsyncClient, dynamoClient, cloudWatchClient,
-                                                           UUID.randomUUID().toString(),
-                                                           recordProcessorFactory);
+        // Create the clients needed for the Kinesis consumer.
+        final DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder()
+                                                                    .region(region)
+                                                                    .credentialsProvider(credentialsProvider)
+                                                                    .build();
+        final CloudWatchAsyncClient cloudWatchClient = CloudWatchAsyncClient.builder()
+                                                                            .region(region)
+                                                                            .credentialsProvider(credentialsProvider)
+                                                                            .build();
+        final KinesisAsyncClientBuilder kinesisAsyncClientBuilder = KinesisAsyncClient.builder()
+                                                                                      .region(this.region)
+                                                                                      .credentialsProvider(credentialsProvider);
+        final KinesisAsyncClient kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(kinesisAsyncClientBuilder);
 
+        final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());
+
+        // The application name needs to be unique per input. Using the same name for two different Kinesis
+        // streams will cause trouble with state handling in DynamoDB. (used by the Kinesis client under the
+        // hood to keep state)
+        final String applicationName = String.format(Locale.ENGLISH, "graylog-aws-plugin-%s", kinesisStreamName);
+
+        ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
+                                                           kinesisAsyncClient, dynamoClient, cloudWatchClient,
+                                                           workerId,
+                                                           recordProcessorFactory);
 
         /*
          * The Scheduler (also called Worker in earlier versions of the KCL) is the entry point to the KCL. This

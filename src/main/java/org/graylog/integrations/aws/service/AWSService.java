@@ -126,7 +126,7 @@ public class AWSService {
      *
      * @return A credential provider
      */
-    static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
+    public static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
         Preconditions.checkArgument(StringUtils.isNotBlank(accessKeyId), "An AWS access key is required.");
         Preconditions.checkArgument(StringUtils.isNotBlank(secretAccessKey), "An AWS secret key is required.");
 
