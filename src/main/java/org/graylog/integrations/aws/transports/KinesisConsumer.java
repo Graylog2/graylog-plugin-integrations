@@ -1,6 +1,8 @@
 package org.graylog.integrations.aws.transports;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
@@ -14,7 +16,6 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.kinesis.common.ConfigsBuilder;
 import software.amazon.kinesis.common.KinesisClientUtil;
 import software.amazon.kinesis.coordinator.Scheduler;
-import software.amazon.kinesis.processor.ShardRecordProcessorFactory;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.util.Locale;
@@ -22,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -36,25 +38,34 @@ public class KinesisConsumer implements Runnable {
     private final NodeId nodeId;
     private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
+    private ObjectMapper objectMapper;
+    private AWSMessageType awsMessageType;
 
     private final StaticCredentialsProvider credentialsProvider;
 
     private Scheduler scheduler;
-    private KinesisTransport transport;
-    private ShardRecordProcessorFactory recordProcessorFactory;
+    private final KinesisTransport transport;
+    private final Consumer<byte[]> dataHandler;
 
     KinesisConsumer(String kinesisStream,
                     Region region,
-                    String awsKey, String awsSecret, NodeId nodeId,
+                    String awsKey,
+                    String awsSecret,
+                    NodeId nodeId,
                     KinesisTransport transport,
                     Integer maxThrottledWaitMillis,
-                    Integer recordBatchSize) {
+                    Integer recordBatchSize,
+                    ObjectMapper objectMapper,
+                    AWSMessageType awsMessageType, Consumer<byte[]> dataHandler) {
         this.kinesisStreamName = requireNonNull(kinesisStream, "kinesisStream");
         this.region = requireNonNull(region, "region");
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.transport = transport;
         this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.recordBatchSize = recordBatchSize;
+        this.objectMapper = objectMapper;
+        this.awsMessageType = awsMessageType;
+        this.dataHandler = dataHandler;
         this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
     }
 
@@ -97,10 +108,18 @@ public class KinesisConsumer implements Runnable {
         // hood to keep state)
         final String applicationName = String.format(Locale.ENGLISH, "graylog-aws-plugin-%s", kinesisStreamName);
 
+        final KinesisShardProcessorFactory kinesisShardProcessorFactory = new KinesisShardProcessorFactory(awsMessageType,
+                                                 objectMapper,
+                                                 transport,
+                                                 kinesisStreamName,
+                                                 maxThrottledWaitMillis,
+                                                 dataHandler);
+
+
         ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
                                                            kinesisAsyncClient, dynamoClient, cloudWatchClient,
                                                            workerId,
-                                                           recordProcessorFactory);
+                                                           kinesisShardProcessorFactory);
 
         /*
          * The Scheduler (also called Worker in earlier versions of the KCL) is the entry point to the KCL. This

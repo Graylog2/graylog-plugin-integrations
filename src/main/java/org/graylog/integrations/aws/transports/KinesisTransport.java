@@ -149,14 +149,6 @@ public class KinesisTransport extends ThrottleableTransport {
         final AWSPluginConfiguration awsConfig = clusterConfigService.getOrDefault(AWSPluginConfiguration.class,
                                                                                    AWSPluginConfiguration.createDefault());
 
-        new KinesisShardProcessor(awsConfig,
-                                  AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
-                                  objectMapper,
-                                  this,
-                                  configuration.getString(CK_KINESIS_STREAM_NAME),
-                                  configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
-                                  kinesisCallback(input));
-
         this.reader = new KinesisConsumer(
                 configuration.getString(CK_KINESIS_STREAM_NAME),
                 Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
@@ -165,7 +157,11 @@ public class KinesisTransport extends ThrottleableTransport {
                 nodeId,
                 this,
                 configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
-                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE));
+                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
+                objectMapper,
+                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
+                kinesisCallback(input)
+        );
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         kinesisTaskFuture = executor.submit(this.reader);
