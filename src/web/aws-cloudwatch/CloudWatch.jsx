@@ -109,7 +109,7 @@ const CloudWatch = ({ route }) => {
 };
 
 CloudWatch.propTypes = {
-  route: PropTypes.any.isRequired,
+  route: PropTypes.object.isRequired,
 };
 
 export default withRouter(CloudWatch);
