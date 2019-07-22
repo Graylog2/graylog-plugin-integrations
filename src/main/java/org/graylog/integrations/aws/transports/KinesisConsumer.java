@@ -77,11 +77,6 @@ public class KinesisConsumer implements Runnable {
         LOG.debug("Max wait millis [{}]", maxThrottledWaitMillis);
         LOG.debug("Record batch size [{}]", recordBatchSize);
 
-        // Default max records is 10k. This can be overridden from UI.
-        // if (recordBatchSize != null) {
-        //    config.withMaxRecords(recordBatchSize);
-        //}
-
         // TODO: add Optional HTTP proxy
         //if (awsConfig.proxyEnabled() && proxyUrl != null) {
         //    config.withCommonClientConfig(Proxy.forAWS(proxyUrl));
@@ -109,11 +104,11 @@ public class KinesisConsumer implements Runnable {
         final String applicationName = String.format(Locale.ENGLISH, "graylog-aws-plugin-%s", kinesisStreamName);
 
         final KinesisShardProcessorFactory kinesisShardProcessorFactory = new KinesisShardProcessorFactory(awsMessageType,
-                                                 objectMapper,
-                                                 transport,
-                                                 kinesisStreamName,
-                                                 maxThrottledWaitMillis,
-                                                 dataHandler);
+                                                                                                           objectMapper,
+                                                                                                           transport,
+                                                                                                           kinesisStreamName,
+                                                                                                           maxThrottledWaitMillis,
+                                                                                                           dataHandler);
 
 
         ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
@@ -125,6 +120,12 @@ public class KinesisConsumer implements Runnable {
          * The Scheduler (also called Worker in earlier versions of the KCL) is the entry point to the KCL. This
          * instance is configured with defaults provided by the ConfigsBuilder.
          */
+        final PollingConfig pollingConfig = new PollingConfig(kinesisStreamName, kinesisAsyncClient);
+
+        // Default max records is 10k. This can be overridden from UI.
+        if (recordBatchSize != null) {
+            pollingConfig.maxRecords(recordBatchSize);
+        }
         this.scheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),
                 configsBuilder.coordinatorConfig(),
@@ -132,8 +133,7 @@ public class KinesisConsumer implements Runnable {
                 configsBuilder.lifecycleConfig(),
                 configsBuilder.metricsConfig(),
                 configsBuilder.processorConfig(),
-                configsBuilder.retrievalConfig().retrievalSpecificConfig(new PollingConfig(kinesisStreamName,
-                                                                                           kinesisAsyncClient)));
+                configsBuilder.retrievalConfig().retrievalSpecificConfig(pollingConfig));
 
         LOG.debug("Starting Kinesis scheduler.");
         scheduler.run();
