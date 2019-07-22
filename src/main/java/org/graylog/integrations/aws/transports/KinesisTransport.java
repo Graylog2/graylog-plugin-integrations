@@ -1,13 +1,10 @@
 package org.graylog.integrations.aws.transports;
 
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
 import com.codahale.metrics.MetricSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
-import okhttp3.HttpUrl;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
@@ -30,8 +27,10 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -150,20 +149,23 @@ public class KinesisTransport extends ThrottleableTransport {
         final AWSPluginConfiguration awsConfig = clusterConfigService.getOrDefault(AWSPluginConfiguration.class,
                                                                                    AWSPluginConfiguration.createDefault());
 
+        new KinesisShardProcessor(awsConfig,
+                                  AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
+                                  objectMapper,
+                                  this,
+                                  configuration.getString(CK_KINESIS_STREAM_NAME),
+                                  configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
+                                  kinesisCallback(input));
+
         this.reader = new KinesisConsumer(
                 configuration.getString(CK_KINESIS_STREAM_NAME),
-                Region.getRegion(Regions.fromName(configuration.getString(CK_AWS_REGION))),
-                kinesisCallback(input),
-                awsConfig,
+                Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
                 configuration.getString(CK_ACCESS_KEY),
-                configuration.getString(CK_SECRET_KEY), nodeId,
-                graylogConfiguration.getHttpProxyUri() == null ? null : HttpUrl.get(graylogConfiguration.getHttpProxyUri()),
+                configuration.getString(CK_SECRET_KEY),
+                nodeId,
                 this,
-                objectMapper,
                 configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
-                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
-                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE))
-        );
+                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE));
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         kinesisTaskFuture = executor.submit(this.reader);
@@ -218,7 +220,7 @@ public class KinesisTransport extends ThrottleableTransport {
             r.addField(new DropdownField(
                     CK_AWS_REGION,
                     "AWS Region",
-                    Regions.US_EAST_1.getName(),
+                    Region.US_EAST_1.id(),
                     AWSService.buildRegionChoices(),
                     "The AWS region the Kinesis stream is running in.",
                     ConfigurationField.Optional.NOT_OPTIONAL
