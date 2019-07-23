@@ -27,6 +27,8 @@ import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -40,11 +42,11 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisShardProcessor.class);
 
+    private final String kinesisStreamName;
     private final ObjectMapper objectMapper;
     private final KinesisTransport transport;
-    private final String kinesisStreamName;
     private final Integer maxThrottledWaitMillis;
-    private final Consumer<byte[]> dataHandler;
+    private final Consumer<byte[]> handleMessageCallback;
     private final KinesisPayloadDecoder kinesisPayloadDecoder;
 
     public KinesisShardProcessorFactory(
@@ -53,11 +55,11 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
             KinesisTransport transport,
             String kinesisStreamName,
             Integer maxThrottledWaitMillis,
-            Consumer<byte[]> dataHandler) {
-        this.transport = transport;
+            Consumer<byte[]> handleMessageCallback) {
         this.kinesisStreamName = kinesisStreamName;
+        this.transport = transport;
         this.maxThrottledWaitMillis = maxThrottledWaitMillis;
-        this.dataHandler = requireNonNull(dataHandler, "dataHandler");
+        this.handleMessageCallback = requireNonNull(handleMessageCallback, "dataHandler");
         this.objectMapper = objectMapper;
         this.kinesisPayloadDecoder = new KinesisPayloadDecoder(objectMapper, awsMessageType, kinesisStreamName);
     }
@@ -89,7 +91,20 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
         @Override
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
-            LOG.debug("processRecords called. Received {} Kinesis events", processRecordsInput.records().size());
+            LOG.info("processRecords called. Received {} Kinesis events", processRecordsInput.records().size());
+
+            // TODO: Remove throttle test
+            try {
+                int min = 1;
+                int max = 60;
+                Random r = new Random();
+                int randomInt = r.nextInt((max - min) + 1) + min;
+                LOG.info("Before throttle for [{}] mins", randomInt);
+                new CountDownLatch(1).await(randomInt, TimeUnit.MINUTES);
+                LOG.info("After throttle for [{}] mins", randomInt);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             if (transport.isThrottled()) {
                 LOG.info("[throttled] Waiting up to [{}ms] for throttling to clear.", maxThrottledWaitMillis);
@@ -133,7 +148,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
                                                                   record.approximateArrivalTimestamp());
 
                     for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
-                        dataHandler.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
+                        handleMessageCallback.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                     }
 
                     lastSuccessfulRecordSequence = record.sequenceNumber();

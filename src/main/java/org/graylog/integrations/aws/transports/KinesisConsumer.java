@@ -2,6 +2,8 @@ package org.graylog.integrations.aws.transports;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.system.NodeId;
@@ -33,21 +35,19 @@ public class KinesisConsumer implements Runnable {
     private static final int GRACEFUL_SHUTDOWN_TIMEOUT = 20;
     private static final TimeUnit GRACEFUL_SHUTDOWN_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
-    private final Region region;
     private final String kinesisStreamName;
+    private final Region region;
     private final NodeId nodeId;
+    private final KinesisTransport transport;
     private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
-    private ObjectMapper objectMapper;
-    private AWSMessageType awsMessageType;
-
+    private final ObjectMapper objectMapper;
+    private final AWSMessageType awsMessageType;
     private final StaticCredentialsProvider credentialsProvider;
+    private final Consumer<byte[]> handleMessageCallback;
+    private Scheduler kinesisScheduler;
 
-    private Scheduler scheduler;
-    private final KinesisTransport transport;
-    private final Consumer<byte[]> dataHandler;
-
-    KinesisConsumer(String kinesisStream,
+    KinesisConsumer(String kinesisStreamName,
                     Region region,
                     String awsKey,
                     String awsSecret,
@@ -56,8 +56,13 @@ public class KinesisConsumer implements Runnable {
                     Integer maxThrottledWaitMillis,
                     Integer recordBatchSize,
                     ObjectMapper objectMapper,
-                    AWSMessageType awsMessageType, Consumer<byte[]> dataHandler) {
-        this.kinesisStreamName = requireNonNull(kinesisStream, "kinesisStream");
+                    AWSMessageType awsMessageType, Consumer<byte[]> handleMessageCallback) {
+
+        Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
+        Preconditions.checkNotNull(region, "A Region is required.");
+        Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
+
+        this.kinesisStreamName = requireNonNull(kinesisStreamName, "kinesisStream");
         this.region = requireNonNull(region, "region");
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.transport = transport;
@@ -65,8 +70,8 @@ public class KinesisConsumer implements Runnable {
         this.recordBatchSize = recordBatchSize;
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
-        this.dataHandler = dataHandler;
         this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
+        this.handleMessageCallback = handleMessageCallback;
     }
 
     // TODO metrics
@@ -108,7 +113,7 @@ public class KinesisConsumer implements Runnable {
                                                                                                            transport,
                                                                                                            kinesisStreamName,
                                                                                                            maxThrottledWaitMillis,
-                                                                                                           dataHandler);
+                                                                                                           handleMessageCallback);
 
 
         ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
@@ -125,8 +130,9 @@ public class KinesisConsumer implements Runnable {
         // Default max records is 10k. This can be overridden from UI.
         if (recordBatchSize != null) {
             pollingConfig.maxRecords(recordBatchSize);
+            pollingConfig.idleTimeBetweenReadsInMillis(recordBatchSize);
         }
-        this.scheduler = new Scheduler(
+        this.kinesisScheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),
                 configsBuilder.coordinatorConfig(),
                 configsBuilder.leaseManagementConfig(),
@@ -136,7 +142,7 @@ public class KinesisConsumer implements Runnable {
                 configsBuilder.retrievalConfig().retrievalSpecificConfig(pollingConfig));
 
         LOG.debug("Starting Kinesis scheduler.");
-        scheduler.run();
+        kinesisScheduler.run();
         transport.consumerState.set(KinesisTransportState.STOPPED);
         LOG.debug("After Kinesis scheduler stopped.");
     }
@@ -146,8 +152,8 @@ public class KinesisConsumer implements Runnable {
      * before shutting down.
      */
     public void stop() {
-        if (scheduler != null) {
-            Future<Boolean> gracefulShutdownFuture = scheduler.startGracefulShutdown();
+        if (kinesisScheduler != null) {
+            Future<Boolean> gracefulShutdownFuture = kinesisScheduler.startGracefulShutdown();
             LOG.info("Waiting up to 20 seconds for shutdown to complete.");
             try {
                 gracefulShutdownFuture.get(GRACEFUL_SHUTDOWN_TIMEOUT, GRACEFUL_SHUTDOWN_TIMEOUT_UNIT);
