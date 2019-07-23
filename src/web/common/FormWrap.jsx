@@ -1,26 +1,32 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
-const FormWrap = ({ children, disabled, buttonContent, loading, onSubmit }) => {
-  const currentForm = useRef();
-  const isDisabled = loading || disabled || (currentForm.current && !currentForm.current.checkValidity());
+const FormWrap = ({ children, disabled, buttonContent, loading, onSubmit, required, context }) => {
+  const formRef = useRef();
+  const [disabledButton, setDisabledButton] = useState(true);
   const prevent = (event) => {
     event.preventDefault();
     return false;
   };
 
+  useEffect(() => {
+    const missingValue = required.find(field => !context[field] || !context[field].value);
+    setDisabledButton(loading || disabled || !!missingValue);
+  }, [loading, disabled, context]);
+
   return (
     <form onSubmit={prevent}
           autoComplete="off"
           noValidate
-          ref={currentForm}>
+          ref={formRef}>
+
       {children}
 
       <Button type="button"
               onClick={onSubmit}
               bsStyle="primary"
-              disabled={isDisabled}>
+              disabled={disabledButton}>
         {loading ? 'Loading...' : buttonContent}
       </Button>
     </form>
@@ -36,6 +42,8 @@ FormWrap.propTypes = {
     PropTypes.string,
     PropTypes.node,
   ]),
+  required: PropTypes.arrayOf(PropTypes.string),
+  context: PropTypes.object,
 };
 
 FormWrap.defaultProps = {
@@ -43,6 +51,8 @@ FormWrap.defaultProps = {
   buttonContent: 'Submit',
   loading: false,
   disabled: false,
+  required: [],
+  context: {},
 };
 
 export default FormWrap;

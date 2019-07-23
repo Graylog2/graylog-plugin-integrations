@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
@@ -10,19 +10,17 @@ import useFetch from './hooks/useFetch';
 import ValidatedInput from '../common/ValidatedInput';
 import ValidatedSelect from '../common/ValidatedSelect';
 import FormWrap from '../common/FormWrap';
-// import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
+  const { formData } = useContext(FormDataContext);
   const {
-    formData: {
-      awsCloudWatchName,
-      awsCloudWatchDescription,
-      awsCloudWatchAwsKey,
-      awsCloudWatchAwsSecret,
-      awsCloudWatchAwsRegion,
-    },
-  } = useContext(FormDataContext);
+    awsCloudWatchName,
+    awsCloudWatchDescription,
+    awsCloudWatchAwsKey,
+    awsCloudWatchAwsSecret,
+    awsCloudWatchAwsRegion,
+  } = formData;
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
@@ -44,7 +42,14 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+                  required={[
+                    'awsCloudWatchName',
+                    'awsCloudWatchAwsKey',
+                    'awsCloudWatchAwsSecret',
+                    'awsCloudWatchAwsRegion',
+                  ]}
+                  context={formData}>
           <h2>Create Integration &amp; Authorize AWS</h2>
           <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
 
@@ -64,7 +69,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
           <ValidatedInput id="awsCloudWatchDescription"
                           type="textarea"
-                          label="Integration description"
+                          label={<>Integration description <small>(optional)</small></>}
                           placeholder="CloudWatch Integration Description"
                           onChange={onChange}
                           fieldData={awsCloudWatchDescription}
@@ -98,7 +103,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                            options={availableRegions}
                            onChange={onChange}
                            value={awsCloudWatchAwsRegion && awsCloudWatchAwsRegion.value}
-                           required />
+                           menuPlacement="top" />
         </FormWrap>
       </Col>
     </Row>
