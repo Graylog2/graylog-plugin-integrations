@@ -143,7 +143,7 @@ public class KinesisConsumer implements Runnable {
     public void stop() {
         if (kinesisScheduler != null) {
             Future<Boolean> gracefulShutdownFuture = kinesisScheduler.startGracefulShutdown();
-            LOG.info("Waiting up to 20 seconds for shutdown to complete.");
+            LOG.info("Waiting up to 20 seconds for Kinesis Consumer shutdown to complete.");
             try {
                 gracefulShutdownFuture.get(GRACEFUL_SHUTDOWN_TIMEOUT, GRACEFUL_SHUTDOWN_TIMEOUT_UNIT);
             } catch (InterruptedException e) {
@@ -153,7 +153,6 @@ public class KinesisConsumer implements Runnable {
             } catch (TimeoutException e) {
                 LOG.error("Timeout while waiting for shutdown.  Scheduler may not have exited.");
             }
-            LOG.info("Shutting down consumer");
         }
     }
 }

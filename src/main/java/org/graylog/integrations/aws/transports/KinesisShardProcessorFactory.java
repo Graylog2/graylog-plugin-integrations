@@ -76,7 +76,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
         @Override
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
-            LOG.info("Received [{}] Kinesis events.", processRecordsInput.records().size());
+            LOG.debug("Received [{}] Kinesis events.", processRecordsInput.records().size());
 
             // Check if the transport is throttled before processing more messages.
             // Blocking here is the only way to temporarily pause message processing.
@@ -84,7 +84,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
             if (transport.isThrottled()) {
                 LOG.info("[throttled] The Kinesis consumer will pause message processing until the throttle state clears.");
                 transport.blockUntilUnthrottled();
-                LOG.debug("[unthrottled] Kinesis consumer will now resume processing records.");
+                LOG.info("[unthrottled] Kinesis consumer will now resume processing records.");
             }
 
             for (KinesisClientRecord record : processRecordsInput.records()) {
@@ -125,7 +125,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
         @Override
         public void shutdownRequested(ShutdownRequestedInput shutdownRequestedInput) {
-            LOG.info("Shutting down Kinesis worker for stream [{}].", kinesisStreamName);
+            LOG.debug("Beginning shutdown Kinesis worker for stream [{}].", kinesisStreamName);
         }
 
         private void checkpoint(ProcessRecordsInput processRecordsInput, String lastSequence) {

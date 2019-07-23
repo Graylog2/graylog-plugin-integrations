@@ -75,6 +75,7 @@ public class KinesisTransport extends ThrottleableTransport {
     @Override
     public void handleChangedThrottledState(boolean isThrottled) {
 
+        // Deliberately info level, so it is obvious when throttling occurs.
         if (!isThrottled) {
             LOG.info("Kinesis consumer unthrottled");
         } else {
@@ -93,7 +94,7 @@ public class KinesisTransport extends ThrottleableTransport {
                 configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE)
         );
 
-        LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
+        LOG.debug("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         executor.submit(this.kinesisConsumer);
     }
 
