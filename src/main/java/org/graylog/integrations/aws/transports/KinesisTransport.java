@@ -31,12 +31,9 @@ import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
 import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -57,35 +54,22 @@ public class KinesisTransport extends ThrottleableTransport {
     public static final int KINESIS_CONSUMER_STOP_WAIT_MS = 15000;
 
     private final Configuration configuration;
-    private final org.graylog2.Configuration graylogConfiguration;
     private final NodeId nodeId;
     private final LocalMetricRegistry localRegistry;
-    private final ClusterConfigService clusterConfigService;
     private final ObjectMapper objectMapper;
 
-    private KinesisConsumer reader;
+    private KinesisConsumer kinesisConsumer;
     private final ExecutorService executor;
     private Future<?> kinesisTaskFuture = null;
-
-    /**
-     * Indicates if the Kinesis consumer has been stopped due to throttling. Allows the consumer to be restarted
-     * once throttling is cleared.
-     */
-    public AtomicBoolean stoppedDueToThrottling;
-    public final AtomicReference<KinesisTransportState> consumerState;
 
     @Inject
     public KinesisTransport(@Assisted final Configuration configuration,
                             EventBus serverEventBus,
-                            org.graylog2.Configuration graylogConfiguration,
-                            final ClusterConfigService clusterConfigService,
                             final NodeId nodeId,
                             LocalMetricRegistry localRegistry,
                             ObjectMapper objectMapper) {
         super(serverEventBus, configuration);
-        this.clusterConfigService = clusterConfigService;
         this.configuration = configuration;
-        this.graylogConfiguration = graylogConfiguration;
         this.nodeId = nodeId;
         this.localRegistry = localRegistry;
         this.objectMapper = objectMapper;
@@ -94,62 +78,22 @@ public class KinesisTransport extends ThrottleableTransport {
                                                                   .setNameFormat("aws-kinesis-reader-%d")
                                                                   .setUncaughtExceptionHandler((t, e) -> LOG.error("Uncaught exception in AWS Kinesis reader.", e))
                                                                   .build());
-        this.stoppedDueToThrottling = new AtomicBoolean(false);
-        this.consumerState = new AtomicReference<>(KinesisTransportState.STOPPED);
     }
 
     @Override
     public void handleChangedThrottledState(boolean isThrottled) {
 
         if (!isThrottled) {
-            LOG.info("Unthrottled");
+            LOG.info("Kinesis consumer unthrottled");
         } else {
-            LOG.info("Throttled");
+            LOG.info("Kinesis consumer throttled");
         }
-
-        if (!isThrottled && stoppedDueToThrottling.get()) {
-
-            stoppedDueToThrottling.set(false);
-
-            LOG.debug("Transport state [{}]", consumerState.get());
-
-            switch (consumerState.get()) {
-                case STOPPED:
-                    LOG.info("[unthrottled] Throttle state ended restarting consumer");
-                    restartConsumer();
-                    break;
-                case STOPPING: {
-
-                    LOG.info("Kinesis consumer is still stopping. Waiting [{}ms] for the consumer to finish " +
-                             "stopping before restarting.", KINESIS_CONSUMER_STOP_WAIT_MS);
-                    new Timer().schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            if (consumerState.get() == KinesisTransportState.STOPPED) {
-                                restartConsumer();
-                            } else {
-                                // TODO: Do we need to do something special in this case? Wait longer? Probably.
-                                LOG.error("Could not restart Kinesis consumer, because the previously running " +
-                                          "consumer did not reach a STOPPED state within [{}ms].", KINESIS_CONSUMER_STOP_WAIT_MS);
-                            }
-                        }
-                    }, KINESIS_CONSUMER_STOP_WAIT_MS);
-                }
-            }
-        }
-    }
-
-    private void restartConsumer() {
-        kinesisTaskFuture = executor.submit(KinesisTransport.this.reader);
     }
 
     @Override
     public void doLaunch(MessageInput input) throws MisfireException {
 
-        final AWSPluginConfiguration awsConfig = clusterConfigService.getOrDefault(AWSPluginConfiguration.class,
-                                                                                   AWSPluginConfiguration.createDefault());
-
-        this.reader = new KinesisConsumer(
+        this.kinesisConsumer = new KinesisConsumer(
                 configuration.getString(CK_KINESIS_STREAM_NAME),
                 Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
                 configuration.getString(CK_ACCESS_KEY),
@@ -164,7 +108,7 @@ public class KinesisTransport extends ThrottleableTransport {
         );
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
-        kinesisTaskFuture = executor.submit(this.reader);
+        kinesisTaskFuture = executor.submit(this.kinesisConsumer);
     }
 
     private Consumer<byte[]> kinesisCallback(final MessageInput input) {
@@ -173,9 +117,8 @@ public class KinesisTransport extends ThrottleableTransport {
 
     @Override
     public void doStop() {
-        this.stoppedDueToThrottling.set(false); // Prevent restart of consumer when input is shutting down.
-        if (this.reader != null) {
-            this.reader.stop();
+        if (this.kinesisConsumer != null) {
+            this.kinesisConsumer.stop();
         }
     }
 

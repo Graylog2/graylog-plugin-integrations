@@ -80,12 +80,12 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
         // TODO: Should this really be declared to now?
         private DateTime lastCheckpoint = DateTime.now();
+        private CountDownLatch testThrottleLatch;
 
 
         @Override
         public void initialize(InitializationInput initializationInput) {
             LOG.debug("Initializing Kinesis worker for stream <{}>", kinesisStreamName);
-            transport.consumerState.set(KinesisTransportState.RUNNING);
         }
 
         @Override
@@ -93,44 +93,24 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
             LOG.info("processRecords called. Received {} Kinesis events", processRecordsInput.records().size());
 
-            // TODO: Remove throttle test
+            // Configurable throttle for testing purposes.
+            // TODO: Remove
             try {
                 int min = 1;
-                int max = 60;
+                int max = 30;
                 Random r = new Random();
                 int randomInt = r.nextInt((max - min) + 1) + min;
-                LOG.info("Before throttle for [{}] mins", randomInt);
-                new CountDownLatch(1).await(randomInt, TimeUnit.MINUTES);
-                LOG.info("After throttle for [{}] mins", randomInt);
+                LOG.info("Before throttle for [{}] seconds", randomInt);
+                testThrottleLatch = new CountDownLatch(1);
+                testThrottleLatch.await(randomInt, TimeUnit.SECONDS);
+                LOG.info("After throttle for [{}] seconds", randomInt);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.error("Test throttling exception",e);
             }
 
             if (transport.isThrottled()) {
-                LOG.info("[throttled] Waiting up to [{}ms] for throttling to clear.", maxThrottledWaitMillis);
-                if (!transport.blockUntilUnthrottled(maxThrottledWaitMillis, TimeUnit.MILLISECONDS)) {
-
-                    /* Stop the Kinesis consumer when throttling does not clear quickly. The AWS Kinesis client
-                     * requires that the worker thread stays healthy and does not take too long to respond.
-                     * So, if we need to wait a long time for throttling to clear (eg. more than 1 minute), then the
-                     * consumer needs to be shutdown and restarted later once throttling clears. */
-                    LOG.info("[throttled] Throttling did not clear in [{}]ms. Stopping the Kinesis worker to let " +
-                             "the throttle clear.️ It will start again automatically once throttling clears.", maxThrottledWaitMillis);
-
-                    // Checkpoint last processed record before shutting down.
-                    if (lastSuccessfulRecordSequence != null) {
-                        checkpoint(processRecordsInput, lastSuccessfulRecordSequence);
-                    }
-
-                    transport.consumerState.set(KinesisTransportState.STOPPING);
-                    // TODO: Need to correctly shut down the thread scheduler.
-                    // I don't think leaking a reference is appropriate. Perhaps calling a method on the consumer/transport
-                    // is better?
-                    // scheduler.shutdown();
-                    transport.stoppedDueToThrottling.set(true);
-                    return;
-                }
-
+                LOG.info("[throttled] The Kinesis consumer will pause message processing until the throttle state clears,");
+                transport.blockUntilUnthrottled();
                 LOG.debug("[unthrottled] Kinesis consumer will now resume processing records.");
             }
 

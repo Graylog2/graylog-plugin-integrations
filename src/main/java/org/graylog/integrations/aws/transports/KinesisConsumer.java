@@ -77,8 +77,6 @@ public class KinesisConsumer implements Runnable {
     // TODO metrics
     public void run() {
 
-        transport.consumerState.set(KinesisTransportState.STARTING);
-
         LOG.debug("Max wait millis [{}]", maxThrottledWaitMillis);
         LOG.debug("Record batch size [{}]", recordBatchSize);
 
@@ -143,7 +141,6 @@ public class KinesisConsumer implements Runnable {
 
         LOG.debug("Starting Kinesis scheduler.");
         kinesisScheduler.run();
-        transport.consumerState.set(KinesisTransportState.STOPPED);
         LOG.debug("After Kinesis scheduler stopped.");
     }
 
