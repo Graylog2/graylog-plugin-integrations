@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormGroup, HelpBlock } from 'react-bootstrap';
-import { components } from 'react-select';
+// import { components } from 'react-select';
 
 import { Select } from 'components/common';
 
-const Placeholder = (props) => {
-  return <components.Placeholder {...props} />;
-};
+// const Placeholder = (props) => {
+//   return <components.Placeholder {...props} />;
+// };
 
 const ValidatedSelect = ({ id, onChange, label, help, ...rest }) => {
   const handleChange = (newValue) => {
@@ -21,7 +21,7 @@ const ValidatedSelect = ({ id, onChange, label, help, ...rest }) => {
               id={id}
               matchProp="label"
               onChange={handleChange}
-              components={{ Placeholder }}
+              // components={{ Placeholder }}
               styles={{
                 placeholder: base => ({
                   ...base,
