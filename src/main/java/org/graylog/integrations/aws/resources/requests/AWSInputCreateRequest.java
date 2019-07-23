@@ -39,7 +39,6 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     private static final String ASSUME_ROLE_ARN = "assume_role_arn";
     private static final String GLOBAL = "global";
     private static final String THROTTLING_ALLOWED = "enable_throttling";
-    private static final String KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait_ms";
 
     @JsonProperty(NAME)
     public abstract String name();
@@ -74,9 +73,6 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(THROTTLING_ALLOWED)
     public abstract boolean throttlingAllowed();
 
-    @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS)
-    public abstract int kinesisMaxThrottledWaitMs();
-
     @JsonCreator
     public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
                                                @JsonProperty(DESCRIPTION) String description,
@@ -88,10 +84,9 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
-                                               @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
+                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling ) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey,
                                                    streamName, assumeRoleArn, region, batchSize, global,
-                                                   enableThrottling, kinesisMaxThrottledWaitMs);
+                                                   enableThrottling);
     }
 }

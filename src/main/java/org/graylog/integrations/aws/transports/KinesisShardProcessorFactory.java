@@ -45,7 +45,6 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
     private final String kinesisStreamName;
     private final ObjectMapper objectMapper;
     private final KinesisTransport transport;
-    private final Integer maxThrottledWaitMillis;
     private final Consumer<byte[]> handleMessageCallback;
     private final KinesisPayloadDecoder kinesisPayloadDecoder;
 
@@ -54,11 +53,9 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
             ObjectMapper objectMapper,
             KinesisTransport transport,
             String kinesisStreamName,
-            Integer maxThrottledWaitMillis,
             Consumer<byte[]> handleMessageCallback) {
         this.kinesisStreamName = kinesisStreamName;
         this.transport = transport;
-        this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.handleMessageCallback = requireNonNull(handleMessageCallback, "dataHandler");
         this.objectMapper = objectMapper;
         this.kinesisPayloadDecoder = new KinesisPayloadDecoder(objectMapper, awsMessageType, kinesisStreamName);
@@ -71,14 +68,6 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
     public class KinesisShardProcessor implements ShardRecordProcessor {
 
-        /**
-         * Checkpointing must be performed when the KinesisConsumer needs to be shuts down due to sustained throttling.
-         * At the time when shutdown occurs, checkpointing might not have happened for a while, so we keep track of the
-         * last sequence to checkpoint to.
-         */
-        private String lastSuccessfulRecordSequence = null;
-
-        // TODO: Should this really be declared to now?
         private DateTime lastCheckpoint = DateTime.now();
         private CountDownLatch testThrottleLatch;
 
@@ -131,18 +120,14 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
                         handleMessageCallback.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                     }
 
-                    lastSuccessfulRecordSequence = record.sequenceNumber();
                 } catch (Exception e) {
                     LOG.error("Couldn't read Kinesis record from stream <{}>", kinesisStreamName, e);
                 }
             }
 
-            // According to the Kinesis client documentation, we should not checkpoint for every record but
-            // rather periodically.
-            // TODO: Make interval configurable (global)
+            // Periodically checkpoint the stream.
             if (lastCheckpoint.plusMinutes(1).isBeforeNow()) {
                 lastCheckpoint = DateTime.now();
-                LOG.debug("Checkpointing stream <{}>", kinesisStreamName);
                 checkpoint(processRecordsInput, null);
             }
         }
@@ -163,6 +148,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
         }
 
         private void checkpoint(ProcessRecordsInput processRecordsInput, String lastSequence) {
+            LOG.debug("Checkpointing stream <{}>", kinesisStreamName);
             final Retryer<Void> retryer = RetryerBuilder.<Void>newBuilder()
                     .retryIfExceptionOfType(ThrottlingException.class)
                     .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))

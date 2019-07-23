@@ -84,8 +84,7 @@ public class AWSServiceTest {
                                              10000,
                                              "",
                                              false,
-                                             true,
-                                             60);
+                                             true);
         awsService.saveInput(request, user);
 
         // Verify that inputService received a valid input to save.
@@ -107,7 +106,6 @@ public class AWSServiceTest {
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
         assertEquals("AWS Input", input.configuration().get(MessageInput.FIELD_TITLE));
         assertEquals("a-stream", input.configuration().get(KinesisTransport.CK_KINESIS_STREAM_NAME));
-        assertEquals(60, input.configuration().get(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS));
         assertEquals(10000, input.configuration().get(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE));
     }
 

@@ -9,7 +9,6 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.LocalMetricRegistry;
-import org.graylog2.plugin.cluster.ClusterConfigService;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
@@ -33,8 +32,6 @@ import javax.inject.Inject;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class KinesisTransport extends ThrottleableTransport {
@@ -47,11 +44,8 @@ public class KinesisTransport extends ThrottleableTransport {
     public static final String CK_ASSUME_ROLE_ARN = "aws_assume_role_arn";
     public static final String CK_KINESIS_STREAM_NAME = "kinesis_stream_name";
     public static final String CK_KINESIS_RECORD_BATCH_SIZE = "kinesis_record_batch_size";
-    public static final String CK_KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait";
 
     public static final int DEFAULT_BATCH_SIZE = 10000;
-    public static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
-    public static final int KINESIS_CONSUMER_STOP_WAIT_MS = 15000;
 
     private final Configuration configuration;
     private final NodeId nodeId;
@@ -60,7 +54,6 @@ public class KinesisTransport extends ThrottleableTransport {
 
     private KinesisConsumer kinesisConsumer;
     private final ExecutorService executor;
-    private Future<?> kinesisTaskFuture = null;
 
     @Inject
     public KinesisTransport(@Assisted final Configuration configuration,
@@ -100,7 +93,6 @@ public class KinesisTransport extends ThrottleableTransport {
                 configuration.getString(CK_SECRET_KEY),
                 nodeId,
                 this,
-                configuration.intIsSet(CK_KINESIS_MAX_THROTTLED_WAIT_MS) ? configuration.getInt(CK_KINESIS_MAX_THROTTLED_WAIT_MS) : null,
                 configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
                 objectMapper,
                 AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
@@ -108,7 +100,7 @@ public class KinesisTransport extends ThrottleableTransport {
         );
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
-        kinesisTaskFuture = executor.submit(this.kinesisConsumer);
+        executor.submit(this.kinesisConsumer);
     }
 
     private Consumer<byte[]> kinesisCallback(final MessageInput input) {
@@ -147,14 +139,6 @@ public class KinesisTransport extends ThrottleableTransport {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest r = super.getRequestedConfiguration();
-
-            r.addField(new NumberField(
-                    CK_KINESIS_MAX_THROTTLED_WAIT_MS,
-                    "Throttled wait milliseconds",
-                    DEFAULT_THROTTLED_WAIT_MS,
-                    "The maximum time that the Kinesis input will pause for when in a throttled state. If this time is exceeded, then the Kinesis consumer will shut down until the throttled state is cleared. Recommended default: 60,000 ms",
-                    ConfigurationField.Optional.OPTIONAL,
-                    NumberField.Attribute.ONLY_POSITIVE));
 
             r.addField(new DropdownField(
                     CK_AWS_REGION,

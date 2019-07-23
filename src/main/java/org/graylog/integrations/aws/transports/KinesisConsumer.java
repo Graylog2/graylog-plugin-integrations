@@ -39,7 +39,6 @@ public class KinesisConsumer implements Runnable {
     private final Region region;
     private final NodeId nodeId;
     private final KinesisTransport transport;
-    private final Integer maxThrottledWaitMillis;
     private final Integer recordBatchSize;
     private final ObjectMapper objectMapper;
     private final AWSMessageType awsMessageType;
@@ -53,7 +52,6 @@ public class KinesisConsumer implements Runnable {
                     String awsSecret,
                     NodeId nodeId,
                     KinesisTransport transport,
-                    Integer maxThrottledWaitMillis,
                     Integer recordBatchSize,
                     ObjectMapper objectMapper,
                     AWSMessageType awsMessageType, Consumer<byte[]> handleMessageCallback) {
@@ -66,7 +64,6 @@ public class KinesisConsumer implements Runnable {
         this.region = requireNonNull(region, "region");
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.transport = transport;
-        this.maxThrottledWaitMillis = maxThrottledWaitMillis;
         this.recordBatchSize = recordBatchSize;
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
@@ -77,7 +74,6 @@ public class KinesisConsumer implements Runnable {
     // TODO metrics
     public void run() {
 
-        LOG.debug("Max wait millis [{}]", maxThrottledWaitMillis);
         LOG.debug("Record batch size [{}]", recordBatchSize);
 
         // TODO: add Optional HTTP proxy
@@ -110,7 +106,6 @@ public class KinesisConsumer implements Runnable {
                                                                                                            objectMapper,
                                                                                                            transport,
                                                                                                            kinesisStreamName,
-                                                                                                           maxThrottledWaitMillis,
                                                                                                            handleMessageCallback);
 
 
