@@ -27,6 +27,7 @@ const CloudWatch = ({ route }) => {
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
   const [dirty, setDirty] = useState(false);
+  const [lastStep, setLastStep] = useState(false);
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -57,6 +58,7 @@ const CloudWatch = ({ route }) => {
       setCurrentStep(key);
       setEnabledStep(key);
     } else {
+      setLastStep(true);
       history.push(Routes.SYSTEM.INPUTS);
     }
   };
@@ -97,7 +99,7 @@ const CloudWatch = ({ route }) => {
 
   return (
     <>
-      {dirty && <ConfirmLeaveDialog route={route} question="Are you sure? Your new Input will not be created." />}
+      {dirty && !lastStep && <ConfirmLeaveDialog route={route} question="Are you sure? Your new Input will not be created." />}
       <Wizard steps={wizardSteps}
               activeStep={currentStep}
               onStepChange={handleStepChange}
