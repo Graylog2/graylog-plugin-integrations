@@ -29,6 +29,10 @@ import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A runnable task that starts the Kinesis Consumer.
+ * Utilizes the {@see <a href="https://github.com/awslabs/amazon-kinesis-client">Kinesis Client Library</a>}.
+ */
 public class KinesisConsumer implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisConsumer.class);
@@ -46,41 +50,36 @@ public class KinesisConsumer implements Runnable {
     private final Consumer<byte[]> handleMessageCallback;
     private Scheduler kinesisScheduler;
 
-    KinesisConsumer(String kinesisStreamName,
+    KinesisConsumer(NodeId nodeId,
+                    KinesisTransport transport,
+                    ObjectMapper objectMapper,
+                    Consumer<byte[]> handleMessageCallback,
+                    String kinesisStreamName,
+                    AWSMessageType awsMessageType,
                     Region region,
                     String awsKey,
                     String awsSecret,
-                    NodeId nodeId,
-                    KinesisTransport transport,
-                    Integer recordBatchSize,
-                    ObjectMapper objectMapper,
-                    AWSMessageType awsMessageType, Consumer<byte[]> handleMessageCallback) {
-
+                    int recordBatchSize) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
+        Preconditions.checkArgument(StringUtils.isNotBlank(awsKey), "An AWS key is required.");
+        Preconditions.checkArgument(StringUtils.isNotBlank(awsSecret), "An AWS secret is required.");
         Preconditions.checkNotNull(region, "A Region is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
-        this.kinesisStreamName = requireNonNull(kinesisStreamName, "kinesisStream");
-        this.region = requireNonNull(region, "region");
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.transport = transport;
-        this.recordBatchSize = recordBatchSize;
+        this.handleMessageCallback = handleMessageCallback;
+        this.kinesisStreamName = requireNonNull(kinesisStreamName, "kinesisStream");
+        this.region = requireNonNull(region, "region");
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
         this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
-        this.handleMessageCallback = handleMessageCallback;
+        this.recordBatchSize = recordBatchSize;
     }
 
-    // TODO metrics
     public void run() {
 
-        LOG.debug("Record batch size [{}]", recordBatchSize);
-
-        // TODO: add Optional HTTP proxy
-        //if (awsConfig.proxyEnabled() && proxyUrl != null) {
-        //    config.withCommonClientConfig(Proxy.forAWS(proxyUrl));
-        //}
-
+        LOG.debug("Starting the Kinesis Consumer.");
         // Create the clients needed for the Kinesis consumer.
         final DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder()
                                                                     .region(region)
@@ -96,34 +95,32 @@ public class KinesisConsumer implements Runnable {
         final KinesisAsyncClient kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(kinesisAsyncClientBuilder);
 
         final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());
+        LOG.debug("Using workerId [{}].", workerId);
 
-        // The application name needs to be unique per input. Using the same name for two different Kinesis
-        // streams will cause trouble with state handling in DynamoDB. (used by the Kinesis client under the
-        // hood to keep state)
+        // The application name needs to be unique per input/consumer. Using the same name for two different Kinesis
+        // streams will cause trouble with state handling in DynamoDB.
         final String applicationName = String.format(Locale.ENGLISH, "graylog-aws-plugin-%s", kinesisStreamName);
+        LOG.debug("Using Kinesis applicationName [{}].", applicationName);
 
-        final KinesisShardProcessorFactory kinesisShardProcessorFactory = new KinesisShardProcessorFactory(awsMessageType,
-                                                                                                           objectMapper,
-                                                                                                           transport,
-                                                                                                           kinesisStreamName,
-                                                                                                           handleMessageCallback);
-
+        // The KinesisShardProcessorFactory contains the message processing logic.
+        final KinesisShardProcessorFactory kinesisShardProcessorFactory = new KinesisShardProcessorFactory(objectMapper, transport, handleMessageCallback, kinesisStreamName, awsMessageType
+        );
 
         ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
                                                            kinesisAsyncClient, dynamoClient, cloudWatchClient,
                                                            workerId,
                                                            kinesisShardProcessorFactory);
 
-        /*
-         * The Scheduler (also called Worker in earlier versions of the KCL) is the entry point to the KCL. This
-         * instance is configured with defaults provided by the ConfigsBuilder.
-         */
         final PollingConfig pollingConfig = new PollingConfig(kinesisStreamName, kinesisAsyncClient);
 
-        // Default max records is 10k. This can be overridden from UI.
+        // Default max records per request is 10k.
+        // CloudWatch Kinesis subscription records may each contain a large number of log messages.
+        // The batch size (max number of messages retrieved in each requests) can be reduced to limit large
+        // bursts of messages being dropped onto the Graylog journal. Reducing this value too much can
+        // significantly limit throughput.
         if (recordBatchSize != null) {
+            LOG.debug("Using explicit batch size [{}]", recordBatchSize);
             pollingConfig.maxRecords(recordBatchSize);
-            pollingConfig.idleTimeBetweenReadsInMillis(recordBatchSize);
         }
         this.kinesisScheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),

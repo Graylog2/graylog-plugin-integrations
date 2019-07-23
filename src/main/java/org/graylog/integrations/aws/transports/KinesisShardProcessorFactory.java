@@ -27,8 +27,6 @@ import software.amazon.kinesis.retrieval.KinesisClientRecord;
 
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -37,6 +35,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * Runtime Kinesis consumer processor.
+ * All Kinesis stream/shard consumption logic is contained within this class.
  */
 public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory {
 
@@ -48,16 +47,15 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
     private final Consumer<byte[]> handleMessageCallback;
     private final KinesisPayloadDecoder kinesisPayloadDecoder;
 
-    public KinesisShardProcessorFactory(
-            AWSMessageType awsMessageType,
-            ObjectMapper objectMapper,
-            KinesisTransport transport,
-            String kinesisStreamName,
-            Consumer<byte[]> handleMessageCallback) {
-        this.kinesisStreamName = kinesisStreamName;
+    KinesisShardProcessorFactory(ObjectMapper objectMapper,
+                                 KinesisTransport transport,
+                                 Consumer<byte[]> handleMessageCallback,
+                                 String kinesisStreamName,
+                                 AWSMessageType awsMessageType) {
+        this.objectMapper = objectMapper;
         this.transport = transport;
         this.handleMessageCallback = requireNonNull(handleMessageCallback, "dataHandler");
-        this.objectMapper = objectMapper;
+        this.kinesisStreamName = kinesisStreamName;
         this.kinesisPayloadDecoder = new KinesisPayloadDecoder(objectMapper, awsMessageType, kinesisStreamName);
     }
 
@@ -69,59 +67,42 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
     public class KinesisShardProcessor implements ShardRecordProcessor {
 
         private DateTime lastCheckpoint = DateTime.now();
-        private CountDownLatch testThrottleLatch;
-
 
         @Override
         public void initialize(InitializationInput initializationInput) {
-            LOG.debug("Initializing Kinesis worker for stream <{}>", kinesisStreamName);
+            LOG.debug("Initializing Kinesis worker for stream [{}].", kinesisStreamName);
         }
 
         @Override
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
-            LOG.info("processRecords called. Received {} Kinesis events", processRecordsInput.records().size());
+            LOG.info("Received [{}] Kinesis events.", processRecordsInput.records().size());
 
-            // Configurable throttle for testing purposes.
-            // TODO: Remove
-            try {
-                int min = 1;
-                int max = 30;
-                Random r = new Random();
-                int randomInt = r.nextInt((max - min) + 1) + min;
-                LOG.info("Before throttle for [{}] seconds", randomInt);
-                testThrottleLatch = new CountDownLatch(1);
-                testThrottleLatch.await(randomInt, TimeUnit.SECONDS);
-                LOG.info("After throttle for [{}] seconds", randomInt);
-            } catch (InterruptedException e) {
-                LOG.error("Test throttling exception",e);
-            }
-
+            // Check if the transport is throttled before processing more messages.
+            // Blocking here is the only way to temporarily pause message processing.
+            // No more requests for Kinesis messages will be sent until this method exits.
             if (transport.isThrottled()) {
-                LOG.info("[throttled] The Kinesis consumer will pause message processing until the throttle state clears,");
+                LOG.info("[throttled] The Kinesis consumer will pause message processing until the throttle state clears.");
                 transport.blockUntilUnthrottled();
                 LOG.debug("[unthrottled] Kinesis consumer will now resume processing records.");
             }
 
             for (KinesisClientRecord record : processRecordsInput.records()) {
-                LOG.info("Processing Kinesis records.");
                 try {
                     // Create a read-only view of the data and use a safe method to convert it to a byte array
-                    // as documented in Record#getData(). (using ByteBuffer#array() can fail)
+                    // as documented in KinesisClientRecord#getData(). (using ByteBuffer#array() can fail)
                     final ByteBuffer dataBuffer = record.data().asReadOnlyBuffer();
                     final byte[] dataBytes = new byte[dataBuffer.remaining()];
                     dataBuffer.get(dataBytes);
 
                     List<KinesisLogEntry> kinesisLogEntries =
-                            kinesisPayloadDecoder.processMessages(dataBytes,
-                                                                  record.approximateArrivalTimestamp());
+                            kinesisPayloadDecoder.processMessages(dataBytes, record.approximateArrivalTimestamp());
 
                     for (KinesisLogEntry kinesisLogEntry : kinesisLogEntries) {
                         handleMessageCallback.accept(objectMapper.writeValueAsBytes(kinesisLogEntry));
                     }
-
                 } catch (Exception e) {
-                    LOG.error("Couldn't read Kinesis record from stream <{}>", kinesisStreamName, e);
+                    LOG.error("Could not read Kinesis record from stream [{}]", kinesisStreamName, e);
                 }
             }
 
@@ -144,11 +125,11 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
 
         @Override
         public void shutdownRequested(ShutdownRequestedInput shutdownRequestedInput) {
-            LOG.info("Shutting down Kinesis worker for stream <{}>", kinesisStreamName);
+            LOG.info("Shutting down Kinesis worker for stream [{}].", kinesisStreamName);
         }
 
         private void checkpoint(ProcessRecordsInput processRecordsInput, String lastSequence) {
-            LOG.debug("Checkpointing stream <{}>", kinesisStreamName);
+            LOG.debug("Checkpointing stream [{}]", kinesisStreamName);
             final Retryer<Void> retryer = RetryerBuilder.<Void>newBuilder()
                     .retryIfExceptionOfType(ThrottlingException.class)
                     .withWaitStrategy(WaitStrategies.fixedWait(1, TimeUnit.SECONDS))
@@ -157,7 +138,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
                         @Override
                         public <V> void onRetry(Attempt<V> attempt) {
                             if (attempt.hasException()) {
-                                LOG.warn("Checkpointing stream <{}> failed, retrying. (attempt {})", kinesisStreamName, attempt.getAttemptNumber());
+                                LOG.warn("Checkpointing stream [{}] failed, retrying. (attempt {})", kinesisStreamName, attempt.getAttemptNumber());
                             }
                         }
                     })
@@ -179,9 +160,9 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
                     return null;
                 });
             } catch (ExecutionException e) {
-                LOG.error("Couldn't checkpoint stream <{}>", kinesisStreamName, e);
+                LOG.error("Couldn't checkpoint stream [{}]", kinesisStreamName, e);
             } catch (RetryException e) {
-                LOG.error("Checkpoint retry for stream <{}> finally failed", kinesisStreamName, e);
+                LOG.error("Checkpoint retry for stream [{}] finally failed", kinesisStreamName, e);
             }
         }
     }

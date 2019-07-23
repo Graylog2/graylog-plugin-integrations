@@ -38,10 +38,9 @@ public class KinesisTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(KinesisTransport.class);
     public static final String NAME = "aws-kinesis-transport";
 
-    public static final String CK_AWS_REGION = "aws_region";
-    public static final String CK_ACCESS_KEY = "aws_access_key";
-    public static final String CK_SECRET_KEY = "aws_secret_key";
-    public static final String CK_ASSUME_ROLE_ARN = "aws_assume_role_arn";
+    private static final String CK_AWS_REGION = "aws_region";
+    private static final String CK_ACCESS_KEY = "aws_access_key";
+    private static final String CK_SECRET_KEY = "aws_secret_key";
     public static final String CK_KINESIS_STREAM_NAME = "kinesis_stream_name";
     public static final String CK_KINESIS_RECORD_BATCH_SIZE = "kinesis_record_batch_size";
 
@@ -87,16 +86,11 @@ public class KinesisTransport extends ThrottleableTransport {
     public void doLaunch(MessageInput input) throws MisfireException {
 
         this.kinesisConsumer = new KinesisConsumer(
-                configuration.getString(CK_KINESIS_STREAM_NAME),
-                Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
+                nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
+                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)), Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
                 configuration.getString(CK_ACCESS_KEY),
                 configuration.getString(CK_SECRET_KEY),
-                nodeId,
-                this,
-                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
-                objectMapper,
-                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
-                kinesisCallback(input)
+                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE)
         );
 
         LOG.info("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
@@ -164,14 +158,6 @@ public class KinesisTransport extends ThrottleableTransport {
                     "Secret key of an AWS user with sufficient permissions. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL,
                     TextField.Attribute.IS_PASSWORD
-            ));
-
-            r.addField(new TextField(
-                    CK_ASSUME_ROLE_ARN,
-                    "AWS assume role ARN",
-                    "",
-                    "Role ARN with required permissions (cross account access)",
-                    ConfigurationField.Optional.OPTIONAL
             ));
 
             r.addField(new TextField(
