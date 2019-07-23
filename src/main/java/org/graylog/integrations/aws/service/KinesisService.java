@@ -14,13 +14,16 @@ import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.plugin.journal.RawMessage;
+import org.graylog2.shared.utilities.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -28,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -39,6 +43,7 @@ import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +65,7 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_MAX_ATTEMPTS = 1000;
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int RECORDS_SAMPLE_SIZE = 10;
+    private static final int SHARD_COUNT = 1;
 
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
@@ -379,5 +385,42 @@ public class KinesisService {
 
         LOG.debug("Selecting a random Record from the sample list.");
         return recordsList.get(new Random().nextInt(recordsList.size()));
+    }
+
+    /**
+     * Creates a new Kinesis stream.
+     *
+     * @param kinesisNewStreamRequest request which contains region, access, secret, region, streamName and shardCount
+     * @return the status response
+     */
+    public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest kinesisNewStreamRequest) {
+        LOG.debug("Creating Kinesis client with the provided credentials.");
+        final KinesisClient kinesisClient = createClient(kinesisNewStreamRequest.region(),
+                                                         kinesisNewStreamRequest.awsAccessKeyId(),
+                                                         kinesisNewStreamRequest.awsSecretAccessKey());
+
+        LOG.debug("Creating new Kinesis stream request [{}].", kinesisNewStreamRequest.streamName());
+        final CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
+                                                                           .streamName(kinesisNewStreamRequest.streamName())
+                                                                           .shardCount(SHARD_COUNT)
+                                                                           .build();
+        LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
+                  kinesisNewStreamRequest.streamName(), SHARD_COUNT);
+
+        try {
+            kinesisClient.createStream(createStreamRequest);
+            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
+                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT);
+            return KinesisNewStreamResponse.create(responseMessage);
+        } catch (Exception e) {
+
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("Attempt to create [%s] new Kinesis stream " +
+                                                         "with [%d] shards failed due to the following exception: [%s]",
+                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT,
+                                                         specificError);
+            LOG.error(responseMessage);
+            throw new InternalServerErrorException(responseMessage, e);
+        }
     }
 }
