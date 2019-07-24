@@ -1,6 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { Button, Panel } from 'react-bootstrap';
+
+export const ErrorMessage = ({ fullMessage, niceMessage }) => {
+  if (!niceMessage) {
+    return <Panel header={fullMessage} bsStyle="danger" />;
+  }
+
+  return (
+    <Panel header={niceMessage} bsStyle="danger" collapsible defaultExpanded={false}>
+      <strong>Additional Information: </strong>{fullMessage}
+    </Panel>
+  );
+};
+
+ErrorMessage.propTypes = {
+  fullMessage: PropTypes.string.isRequired,
+  niceMessage: PropTypes.string,
+};
+
+ErrorMessage.defaultProps = {
+  niceMessage: null,
+};
 
 const FormWrap = ({
   buttonContent,
@@ -31,6 +52,12 @@ const FormWrap = ({
       {title && ((typeof (title) === 'string') ? <h2>{title}</h2> : title)}
       {description && ((typeof (description) === 'string') ? <p>{description}</p> : description)}
 
+      {error && error.full_message && (
+        <ErrorMessage ref={errorRef}
+                      fullMessage={error.full_message}
+                      niceMessage={error.nice_message} />
+      )}
+
       {children}
 
       <Button type="button"
@@ -50,6 +77,10 @@ FormWrap.propTypes = {
   ]),
   children: PropTypes.any.isRequired,
   disabled: PropTypes.bool,
+  error: PropTypes.shape({
+    full_message: PropTypes.string.isRequired,
+    nice_message: PropTypes.string,
+  }),
   description: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node,
@@ -65,6 +96,7 @@ FormWrap.propTypes = {
 FormWrap.defaultProps = {
   buttonContent: 'Submit',
   disabled: true,
+  error: null,
   description: null,
   loading: false,
   onSubmit: () => {},

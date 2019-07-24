@@ -5,18 +5,20 @@ import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/useFetch';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
+import useFetch from '../common/hooks/useFetch';
+
 import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
   const [triggerEffect, toggleTriggerEffect] = useState(false);
+  const [formError, setFormError] = useState(null);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
     null,
@@ -35,6 +37,22 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     };
   }, [triggerEffect]);
 
+  useEffect(() => {
+    if (fetchRegionsStatus.error) {
+      setFormError({ full_message: fetchRegionsStatus.error });
+    } else if (fetchStreamsStatus.error) {
+      const badKey = /security token/g;
+      const badSecret = /signing method/g;
+      if (fetchStreamsStatus.error.match(badKey)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Key, check out your AWS account for the 20-character long, alphanumeric string that usually starts with the letters "AK"' });
+      } else if (fetchStreamsStatus.error.match(badSecret)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
+      } else {
+        setFormError({ full_message: fetchStreamsStatus.error });
+      }
+    }
+  }, [fetchRegionsStatus.error, fetchStreamsStatus.error]);
+
   const handleSubmit = () => {
     toggleTriggerEffect(!triggerEffect);
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
@@ -52,6 +70,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                     'awsCloudWatchAwsSecret',
                     'awsCloudWatchAwsRegion',
                   ], formData)}
+                  error={formError}
                   title="Create Integration &amp; Authorize AWS"
                   description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
 
