@@ -10,7 +10,6 @@ import useFetch from './hooks/useFetch';
 import FormWrap from '../common/FormWrap';
 import ValidatedSelect from '../common/ValidatedSelect';
 import Routes, { ApiRoutes } from '../common/Routes';
-import { renderOptions } from '../common/Options';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -42,7 +41,6 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
                   context={formData}>
           <h2>Choose Kinesis Stream</h2>
           <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>
-
 
           <ValidatedSelect id="awsCloudWatchKinesisStream"
                            label="Choose Stream"
