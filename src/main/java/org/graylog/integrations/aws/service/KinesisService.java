@@ -29,6 +29,7 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
@@ -41,6 +42,8 @@ import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
+import software.amazon.awssdk.services.kinesis.model.StreamDescription;
+import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
@@ -53,6 +56,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Service for all AWS Kinesis business logic and SDK usages.
@@ -423,4 +428,44 @@ public class KinesisService {
             throw new InternalServerErrorException(responseMessage, e);
         }
     }
+
+    public StreamDescription checkKinesisStreamStatus(KinesisClient kinesisClient, String stream) throws InterruptedException {
+        System.out.println("check Kinesis Stream Status");
+        StreamDescription streamDescription;
+        do {
+            sleep(20_000);
+            streamDescription = kinesisClient.describeStream(r -> r.streamName(stream)).streamDescription();
+            System.out.println("streamDescription: " + streamDescription.toString() + "\n");
+        } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
+        return streamDescription;
+    }
+
+    public void setRolePermissions(IamClient iam, String roleName, String streamArn, String region) {
+        System.out.println("Create a role that will allow CloudWatch to talk to Kinesis");
+        String rolePolicyName = "claudia-write-to-kinesis";
+        String assumeRolePolicy =
+                "{\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Principal\": { \"Service\": \"logs." + region + ".amazonaws.com\" },\n" +
+                "      \"Action\": \"sts:AssumeRole\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        String rolePolicy =
+                "{\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Action\": \"kinesis:PutRecord\",\n" +
+                "      \"Resource\": \"" + streamArn + "\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
+        iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
+    }
+
 }
