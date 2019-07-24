@@ -429,18 +429,17 @@ public class KinesisService {
         }
     }
 
-    public StreamDescription checkKinesisStreamStatus(KinesisClient kinesisClient, String stream) throws InterruptedException {
-        System.out.println("check Kinesis Stream Status");
+    private StreamDescription checkKinesisStreamStatus(KinesisClient kinesisClient, String streamName) throws InterruptedException {
+        LOG.debug("Check Kinesis stream [{}] is active.", streamName);
         StreamDescription streamDescription;
         do {
             sleep(20_000);
-            streamDescription = kinesisClient.describeStream(r -> r.streamName(stream)).streamDescription();
-            System.out.println("streamDescription: " + streamDescription.toString() + "\n");
+            streamDescription = kinesisClient.describeStream(r -> r.streamName(streamName)).streamDescription();
         } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
         return streamDescription;
     }
 
-    public void setRolePermissions(IamClient iam, String roleName, String streamArn, String region) {
+    private void setRolePermissions(IamClient iam, String roleName, String streamArn, String region) {
         System.out.println("Create a role that will allow CloudWatch to talk to Kinesis");
         String rolePolicyName = "claudia-write-to-kinesis";
         String assumeRolePolicy =
@@ -466,6 +465,41 @@ public class KinesisService {
                 "}";
         iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
         iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
+    }
+
+    private static String getNewRolePermissions(IamClient iam, String roleName) throws InterruptedException {
+        sleep(10_000);
+        return iam.getRole(r -> r.roleName(roleName)).role().arn();
+    }
+
+    public void autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
+                                               String kinesisStream, String roleName) {
+
+        final IamClient iam = IamClient.builder()
+                                       .region(Region.of(regionName))
+                                       .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                                       .build();
+        final KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
+
+        try {
+            StreamDescription streamDescription = checkKinesisStreamStatus(kinesisClient, kinesisStream);
+            String streamArn = streamDescription.streamARN();
+            setRolePermissions(iam, roleName, streamArn, regionName);
+
+            // TODO check if roleName can be pulled up for user, otherwise name needs to be provided
+            // Create a role that will allow CloudWatch to talk to Kinesis
+            // Assume roles have been set up
+            setRolePermissions(iam, roleName, streamArn, regionName);
+            String roleArn = getNewRolePermissions(iam, roleName);
+
+        } catch (InterruptedException e) {
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("Unable to automatically setup Kinesis due to the following " +
+                                                         "error [%s]", specificError);
+            LOG.error(responseMessage);
+            throw new InternalServerErrorException(responseMessage, e);
+        }
+
     }
 
 }
