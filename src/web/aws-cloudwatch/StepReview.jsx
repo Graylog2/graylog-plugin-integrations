@@ -53,7 +53,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     'POST',
     {
       name: awsCloudWatchName.value,
-      description: awsCloudWatchDescription.value,
+      description: awsCloudWatchDescription ? awsCloudWatchDescription.value : '',
       region: awsCloudWatchAwsRegion.value,
       aws_input_type: 'KINESIS_FLOW_LOGS',
       stream_name: awsCloudWatchKinesisStream.value,
