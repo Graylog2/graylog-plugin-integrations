@@ -29,9 +29,6 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
-import software.amazon.awssdk.services.cloudwatchlogs.model.Distribution;
-import software.amazon.awssdk.services.cloudwatchlogs.model.PutSubscriptionFilterRequest;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
@@ -56,8 +53,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
-
-import static java.lang.Thread.sleep;
 
 /**
  * Service for all AWS Kinesis business logic and SDK usages.
@@ -424,32 +419,6 @@ public class KinesisService {
                                                          "with [%d] shards failed due to the following exception: [%s]",
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                                          specificError);
-            LOG.error(responseMessage);
-            throw new InternalServerErrorException(responseMessage, e);
-        }
-    }
-
-    public String addSubscriptionFilter(CloudWatchLogsClient cloudWatch, String logGroup, String streamArn, String roleArn, String filterName, String filterPattern) throws InterruptedException {
-        PutSubscriptionFilterRequest putSubscriptionFilterRequest =
-                PutSubscriptionFilterRequest.builder()
-                                            .logGroupName(logGroup)
-                                            .filterName(filterName)
-                                            .filterPattern(filterPattern)
-                                            .destinationArn(streamArn)
-                                            .roleArn(roleArn)
-                                            .distribution(Distribution.BY_LOG_STREAM)
-                                            .build();
-        sleep(2_000);
-        try {
-            cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
-            final String responseMessage = String.format("Success. The subscription filter [%s] was added to [%s].",
-                                                         filterName, logGroup);
-            return responseMessage;
-        } catch (Exception e) {
-            final String specificError = ExceptionUtils.formatMessageCause(e);
-            final String responseMessage = String.format("Attempt to add subscription [%s] to Cloudwatch log group " +
-                                                         "[%s] failed due to the following exception: [%s]",
-                                                         filterName, logGroup, specificError);
             LOG.error(responseMessage);
             throw new InternalServerErrorException(responseMessage, e);
         }
