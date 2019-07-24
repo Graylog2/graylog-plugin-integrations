@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 
-const FormWrap = ({ children, disabled, buttonContent, loading, onSubmit, required, context }) => {
+const FormWrap = ({ children, buttonContent, loading, onSubmit, required, context }) => {
   const formRef = useRef();
   const [disabledButton, setDisabledButton] = useState(true);
   const prevent = (event) => {
@@ -12,8 +12,10 @@ const FormWrap = ({ children, disabled, buttonContent, loading, onSubmit, requir
 
   useEffect(() => {
     const missingValue = required.find(field => !context[field] || !context[field].value);
-    setDisabledButton(loading || disabled || !!missingValue);
-  }, [loading, disabled, context]);
+    const invalidForm = formRef.current && !formRef.current.checkValidity();
+
+    setDisabledButton(loading || !!missingValue || invalidForm);
+  }, [loading, context]);
 
   return (
     <form onSubmit={prevent}
@@ -37,7 +39,6 @@ FormWrap.propTypes = {
   children: PropTypes.any.isRequired,
   onSubmit: PropTypes.func,
   loading: PropTypes.bool,
-  disabled: PropTypes.bool,
   buttonContent: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node,
@@ -50,7 +51,6 @@ FormWrap.defaultProps = {
   onSubmit: () => {},
   buttonContent: 'Submit',
   loading: false,
-  disabled: false,
   required: [],
   context: {},
 };
