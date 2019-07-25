@@ -75,6 +75,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Complete CloudWatch Setup"
                   loading={fetchSubmitStatus.loading}
+                  disabled={false}
                   title="Final Review"
                   description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
