@@ -17,6 +17,7 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
         <FormWrap onSubmit={onSubmit}
                   buttonContent="Verify &amp; Format"
                   title="Create Kinesis Stream"
+                  disabled={false}
                   description="We&apos;re going to get started setting up your Kinesis Stream, just give us a name and choose the related CloudWatch Group. We&apos;ll handle the hard stuff!">
 
           <ValidatedInput id="awsCloudWatchKinesisStream"

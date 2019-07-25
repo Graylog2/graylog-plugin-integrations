@@ -7,11 +7,11 @@ import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import useFetch from './hooks/useFetch';
 
-
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
+import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -37,7 +37,12 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
                   loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
-                  disabled={false}
+                  disabled={formValidation.isFormValid([
+                    'awsCloudWatchName',
+                    'awsCloudWatchAwsKey',
+                    'awsCloudWatchAwsSecret',
+                    'awsCloudWatchAwsRegion',
+                  ], formData)}
                   title="Create Integration &amp; Authorize AWS"
                   description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
 

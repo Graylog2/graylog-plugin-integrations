@@ -11,6 +11,7 @@ import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';
 import Routes, { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
+import formValidation from '../utils/formValidation';
 
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -38,7 +39,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Verify Stream &amp; Format"
                   loading={logSampleStatus.loading}
-                  disabled={false}
+                  disabled={formValidation.isFormValid(['awsCloudWatchKinesisStream'], formData)}
                   title="Choose Kinesis Stream"
                   description={<p>Below is a list of all Kinesis Streams found within the specified AWS account. Please choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.</p>}>
 
