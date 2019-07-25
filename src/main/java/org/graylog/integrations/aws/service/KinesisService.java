@@ -191,7 +191,7 @@ public class KinesisService {
         LOG.debug("Kinesis streams queried: [{}]", streamNames);
 
         if (streamNames.isEmpty()) {
-            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s]", regionName));
+            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s] region.", regionName));
         }
 
         return StreamsResponse.create(streamNames, streamNames.size());
