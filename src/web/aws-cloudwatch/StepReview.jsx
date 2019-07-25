@@ -9,7 +9,7 @@ import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/useFetch';
+import useFetch from '../common/hooks/useFetch';
 
 import FormWrap from '../common/FormWrap';
 import { ApiRoutes } from '../common/Routes';

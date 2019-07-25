@@ -51,6 +51,10 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
         setFormError({ full_message: fetchStreamsStatus.error });
       }
     }
+
+    return () => {
+      setFormError(null);
+    };
   }, [fetchRegionsStatus.error, fetchStreamsStatus.error]);
 
   const handleSubmit = () => {

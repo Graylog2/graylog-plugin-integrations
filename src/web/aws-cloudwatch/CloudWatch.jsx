@@ -15,6 +15,7 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
+import { ApiContext } from './context/Api';
 
 const CloudWatch = ({ route }) => {
   const {
@@ -26,6 +27,7 @@ const CloudWatch = ({ route }) => {
     setEnabledStep,
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
+  const { availableStreams } = useContext(ApiContext);
   const [dirty, setDirty] = useState(false);
   const [lastStep, setLastStep] = useState(false);
 
@@ -75,7 +77,7 @@ const CloudWatch = ({ route }) => {
       title: 'AWS CloudWatch Kinesis Setup',
       component: (<StepKinesis onSubmit={handleSubmit}
                                onChange={handleFieldUpdate}
-                               hasStreams />),
+                               hasStreams={availableStreams.length > 0} />),
       disabled: isDisabledStep('kinesis-setup'),
     },
     {

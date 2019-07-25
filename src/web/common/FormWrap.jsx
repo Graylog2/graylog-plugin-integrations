@@ -3,12 +3,26 @@ import PropTypes from 'prop-types';
 import { Button, Panel } from 'react-bootstrap';
 
 export const ErrorMessage = ({ fullMessage, niceMessage }) => {
+  const [expanded, toggleExpanded] = useState(false);
   if (!niceMessage) {
     return <Panel header={fullMessage} bsStyle="danger" />;
   }
 
+  const Header = (
+    <p>
+      <span>{niceMessage}</span>
+      <Button bsStyle="link"
+              bsSize="xsmall"
+              onClick={() => toggleExpanded(!expanded)}>More Info
+      </Button>
+    </p>
+  );
+
   return (
-    <Panel header={niceMessage} bsStyle="danger" collapsible defaultExpanded={false}>
+    <Panel header={Header}
+           bsStyle="danger"
+           collapsible
+           expanded={expanded}>
       <strong>Additional Information: </strong>{fullMessage}
     </Panel>
   );
@@ -79,7 +93,10 @@ FormWrap.propTypes = {
   disabled: PropTypes.bool,
   error: PropTypes.shape({
     full_message: PropTypes.string.isRequired,
-    nice_message: PropTypes.string,
+    nice_message: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.node,
+    ]),
   }),
   description: PropTypes.oneOfType([
     PropTypes.string,

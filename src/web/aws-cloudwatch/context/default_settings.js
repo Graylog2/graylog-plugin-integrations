@@ -7,12 +7,12 @@ const DEFAULT_SETTINGS = {
   */
 
   /* Default Advanced Settings */
-  awsCloudWatchBatchSize: {
-    defaultValue: '10000',
-  },
-  awsCloudWatchThrottleWait: {
-    defaultValue: '1000',
-  },
+  awsCloudWatchBatchSize: { defaultValue: '10000' },
+  awsCloudWatchThrottleWait: { defaultValue: '1000' },
+
+  awsCloudWatchName: { value: 'Name' },
+  awsCloudWatchAwsKey: { value: '123' },
+  awsCloudWatchAwsSecret: { value: '123' },
 };
 
 export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {
