@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Panel } from 'react-bootstrap';
+import styled, { createGlobalStyle } from 'styled-components';
 
 export const ErrorMessage = ({ fullMessage, niceMessage }) => {
   const [expanded, toggleExpanded] = useState(false);
@@ -9,13 +10,13 @@ export const ErrorMessage = ({ fullMessage, niceMessage }) => {
   }
 
   const Header = (
-    <p>
-      <span>{niceMessage}</span>
-      <Button bsStyle="link"
-              bsSize="xsmall"
-              onClick={() => toggleExpanded(!expanded)}>More Info
-      </Button>
-    </p>
+    <>
+      <ErrorOutputStyle />
+      <ErrorOutput>{niceMessage}</ErrorOutput>
+      <ErrorToggleInfo onClick={() => toggleExpanded(!expanded)} expanded={expanded}>
+        More Info <i className="fa fa-chevron-right" />
+      </ErrorToggleInfo>
+    </>
   );
 
   return (
@@ -122,5 +123,41 @@ FormWrap.defaultProps = {
   onSubmit: () => {},
   title: null,
 };
+
+const ErrorOutputStyle = createGlobalStyle`
+  /* NOTE: This is to remove Bootstrap styles from the anchor element I can't override in Panel.Header */
+  form {
+    .panel.panel-danger {
+      .panel-heading > a {
+        font-size: 14px;
+        text-decoration: none;
+        color: #AD0707;
+
+        :hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+`;
+
+const ErrorOutput = styled.span`
+  display: block;
+`;
+
+const ErrorToggleInfo = styled.button`
+  border: 0;
+  background: none;
+  color: #1F1F1F;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin: 12px 0 0;
+  padding: 0;
+
+  .fa {
+    transform: rotate(${props => (props.expanded ? '90deg' : '0deg')});
+    transition: 150ms transform ease-in-out;
+  }
+`;
 
 export default FormWrap;
