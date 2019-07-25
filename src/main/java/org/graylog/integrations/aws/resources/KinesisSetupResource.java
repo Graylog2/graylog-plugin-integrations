@@ -37,8 +37,8 @@ import java.util.ArrayList;
 /**
  * Web endpoints for the Kinesis auto-setup.
  */
-@Api(value = "AWSKinesis", description = "AWS Kinesis auto-setup")
-@Path("/kinesis")
+@Api(value = "AWSKinesisAuto", description = "AWS Kinesis auto-setup")
+@Path("/kinesis/auto_setup")
 @RequiresAuthentication
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -64,8 +64,8 @@ public class KinesisSetupResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/kinesis/create_stream")
-    @ApiOperation(value = "Attempt to create a new kinesis stream and wait for it to be ready.")
+    @Path("/create_stream")
+    @ApiOperation(value = "Step 1: Attempt to create a new kinesis stream and wait for it to be ready.")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                    KinesisNewStreamRequest request) {
@@ -89,7 +89,7 @@ public class KinesisSetupResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/create_subscription_policy")
-    @ApiOperation(value = "Create AWS IAM policy needed for CloudWatch to write logs to Kinesis.")
+    @ApiOperation(value = "Step 2: Create AWS IAM policy needed for CloudWatch to write logs to Kinesis")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionPolicyResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                       CreateLogSubscriptionPolicyRequest request) {
@@ -114,7 +114,7 @@ public class KinesisSetupResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/add_subscription")
-    @ApiOperation(value = "Subscribe a Kinesis stream to a CloudWatch log group. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html")
+    @ApiOperation(value = "Step 3: Subscribe a Kinesis stream to a CloudWatch log group")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                     CreateLogSubscriptionRequest request) {
@@ -136,7 +136,7 @@ public class KinesisSetupResource implements PluginRestResource {
     @POST
     @Timed
     @Path("/full_setup")
-    @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region.")
+    @ApiOperation(value = "Full setup: Get all available AWS CloudWatch log groups names for the specified region")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisFullSetupResponse addSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                             KinesisFullSetupRequest request) {
@@ -145,8 +145,8 @@ public class KinesisSetupResource implements PluginRestResource {
 
         // Mock response.
         final ArrayList<KinesisFullSetupResponseStep> setupSteps = new ArrayList<>();
-        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Stream", ""));
-        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy", ""));
+        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Stream", "The stream [this-stream-rocks] was successfully created."));
+        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy", "The policy [this-policy-rocks] was successfully created."));
         setupSteps.add(KinesisFullSetupResponseStep.create(false, "Subscribe stream to group", "Failed to create the subscription [Some specific AWS error]"));
         return KinesisFullSetupResponse.create(false, "Auto-setup was not fully successful!", setupSteps);
     }
