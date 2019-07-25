@@ -124,7 +124,12 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     )
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public Response kinesisHealthCheck(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisHealthCheckRequest heathCheckRequest) throws ExecutionException, IOException {
+
         KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
+        if (!response.success()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        }
+
         return Response.accepted().entity(response).build();
     }
 
