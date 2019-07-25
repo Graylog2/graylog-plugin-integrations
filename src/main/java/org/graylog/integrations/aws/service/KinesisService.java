@@ -29,6 +29,7 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.efs.model.BadRequestException;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
@@ -439,9 +440,8 @@ public class KinesisService {
         return streamDescription;
     }
 
-    private void setRolePermissions(IamClient iam, String roleName, String streamArn, String region) {
-        System.out.println("Create a role that will allow CloudWatch to talk to Kinesis");
-        String rolePolicyName = "claudia-write-to-kinesis";
+    private void setRolePermissionsForAutoKinesisSetup(IamClient iam, String roleName, String streamArn, String region, String rolePolicyName) {
+        LOG.debug("Attaching [{}] policy to [{}] role",rolePolicyName, roleName);
         String assumeRolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -467,14 +467,15 @@ public class KinesisService {
         iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
     }
 
-    private static String getNewRolePermissions(IamClient iam, String roleName) throws InterruptedException {
-        sleep(10_000);
+    private static String getNewRolePermissionsArn(IamClient iam, String roleName) {
+        LOG.debug("Acquiring the role ARN associated to the role [{}]", roleName);
         return iam.getRole(r -> r.roleName(roleName)).role().arn();
     }
 
-    public void autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
-                                               String kinesisStream, String roleName) {
+    public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
+                                               String kinesisStream, String roleName, String rolePolicyName) {
 
+        LOG.debug("Create the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
         final IamClient iam = IamClient.builder()
                                        .region(Region.of(regionName))
                                        .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
@@ -482,24 +483,20 @@ public class KinesisService {
         final KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
 
         try {
-            StreamDescription streamDescription = checkKinesisStreamStatus(kinesisClient, kinesisStream);
+            StreamDescription streamDescription;
+            streamDescription = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription();
             String streamArn = streamDescription.streamARN();
-            setRolePermissions(iam, roleName, streamArn, regionName);
+            //TODO check if the role exist first
+            setRolePermissionsForAutoKinesisSetup(iam, roleName, streamArn, regionName, rolePolicyName);
+            return getNewRolePermissionsArn(iam, roleName);
 
-            // TODO check if roleName can be pulled up for user, otherwise name needs to be provided
-            // Create a role that will allow CloudWatch to talk to Kinesis
-            // Assume roles have been set up
-            setRolePermissions(iam, roleName, streamArn, regionName);
-            String roleArn = getNewRolePermissions(iam, roleName);
-
-        } catch (InterruptedException e) {
+        } catch (BadRequestException e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
-            final String responseMessage = String.format("Unable to automatically setup Kinesis due to the following " +
-                                                         "error [%s]", specificError);
+            final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
+                                                         "following error [%s]", roleName, specificError);
             LOG.error(responseMessage);
-            throw new InternalServerErrorException(responseMessage, e);
+            return responseMessage;
         }
-
     }
 
 }
