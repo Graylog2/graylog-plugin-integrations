@@ -14,9 +14,10 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit} buttonContent="Verify &amp; Format">
-          <h2>Create Kinesis Stream</h2>
-          <p>We&apos;re going to get started setting up your Kinesis Stream, just give us a name and choose the related CloudWatch Group. We&apos;ll handle the hard stuff!</p>
+        <FormWrap onSubmit={onSubmit}
+                  buttonContent="Verify &amp; Format"
+                  title="Create Kinesis Stream"
+                  description="We&apos;re going to get started setting up your Kinesis Stream, just give us a name and choose the related CloudWatch Group. We&apos;ll handle the hard stuff!">
 
           <ValidatedInput id="awsCloudWatchKinesisStream"
                           type="text"

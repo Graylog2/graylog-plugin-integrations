@@ -36,9 +36,10 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
-          <h2>Create Integration &amp; Authorize AWS</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+                  disabled={false}
+                  title="Create Integration &amp; Authorize AWS"
+                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
 
           {/* Fighting AutoComplete Forms */}
           <DisappearingInput id="name" type="text" />
