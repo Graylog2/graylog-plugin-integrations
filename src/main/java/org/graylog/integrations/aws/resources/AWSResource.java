@@ -128,17 +128,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return Response.accepted().entity(response).build();
     }
 
-    @POST
-    @Timed
-    @Path("/kinesis/create_stream")
-    @ApiOperation(
-            value = "Attempt to create a new kinesis stream."
-    )
-    @RequiresPermissions(AWSPermissions.AWS_READ)
-    public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisNewStreamRequest kinesisNewStreamRequest) {
-        return kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
-    }
-
     /**
      * Create a new AWS input.
      */
