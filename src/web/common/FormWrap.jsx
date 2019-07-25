@@ -30,7 +30,10 @@ export const ErrorMessage = ({ fullMessage, niceMessage }) => {
 
 ErrorMessage.propTypes = {
   fullMessage: PropTypes.string.isRequired,
-  niceMessage: PropTypes.string,
+  niceMessage: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
 };
 
 ErrorMessage.defaultProps = {
@@ -42,6 +45,7 @@ const FormWrap = ({
   children,
   disabled,
   description,
+  error,
   loading,
   onSubmit,
   title,
@@ -67,8 +71,7 @@ const FormWrap = ({
       {description && ((typeof (description) === 'string') ? <p>{description}</p> : description)}
 
       {error && error.full_message && (
-        <ErrorMessage ref={errorRef}
-                      fullMessage={error.full_message}
+        <ErrorMessage fullMessage={error.full_message}
                       niceMessage={error.nice_message} />
       )}
 

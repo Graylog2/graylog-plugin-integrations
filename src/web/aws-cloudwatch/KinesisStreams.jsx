@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Col, Row } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
@@ -20,15 +20,10 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   const [logSampleStatus, setLogSampleUrl] = useFetch(
     null,
     (response) => {
-      console.log('setLogSampleUrl response', response);
       if (response.success) {
+        // TODO: capture if this is a valid flow log response or not before proceeding
         setLogSample(response);
         onSubmit();
-      } else {
-        setFormError({
-          full_message: response.explanation,
-          nice_message: <>We were unable to find any logs in this Kinesis Stream. Please choose a different stream or you can <a href="/aws">setup a new Stream</a>.</>,
-        });
       }
     },
     'POST',
@@ -40,7 +35,10 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
 
   useEffect(() => {
     if (logSampleStatus.error) {
-      setFormError({ full_message: logSampleStatus.error });
+      setFormError({
+        full_message: logSampleStatus.error,
+        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please choose a different stream or you can <Button bsStyle="link">setup a new Stream</Button>.</span>,
+      });
     }
   }, [logSampleStatus.error]);
 

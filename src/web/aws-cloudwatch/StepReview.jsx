@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Col, Row } from 'react-bootstrap';
@@ -27,6 +27,7 @@ Default.propTypes = {
 };
 
 const StepReview = ({ onSubmit, onEditClick }) => {
+  const [formError, setFormError] = useState(null);
   const { formData } = useContext(FormDataContext);
   const { logSample } = useContext(ApiContext);
   const {
@@ -65,6 +66,15 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     },
   );
 
+  useEffect(() => {
+    if (fetchSubmitStatus.error) {
+      setFormError({
+        full_message: fetchSubmitStatus.error,
+        nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
+      });
+    }
+  }, [fetchSubmitStatus.error]);
+
   const handleSubmit = () => {
     setSubmitFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.SAVE);
   };
@@ -75,7 +85,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Complete CloudWatch Setup"
                   loading={fetchSubmitStatus.loading}
-                  disabled={false}
+                  error={formError}
                   title="Final Review"
                   description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
