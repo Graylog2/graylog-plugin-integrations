@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
