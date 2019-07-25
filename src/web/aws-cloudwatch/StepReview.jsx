@@ -29,7 +29,7 @@ Default.propTypes = {
 const StepReview = ({ onSubmit, onEditClick }) => {
   const [formError, setFormError] = useState(null);
   const { formData } = useContext(FormDataContext);
-  const { logSample } = useContext(ApiContext);
+  const { logData } = useContext(ApiContext);
   const {
     awsCloudWatchName,
     awsCloudWatchDescription,
@@ -155,7 +155,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={logSample}
+                   value={logData.message}
                    rows={10}
                    disabled />
           </Container>

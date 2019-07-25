@@ -17,7 +17,6 @@ import formValidation from '../utils/formValidation';
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
-  const [triggerEffect, toggleTriggerEffect] = useState(false);
   const [formError, setFormError] = useState(null);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
@@ -30,23 +29,21 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
   );
 
-  useEffect(() => {
-    return () => {
-      // reset streams fetch, or context re-renders causes weirdness
-      setStreamsFetch(null);
-    };
-  }, [triggerEffect]);
 
   useEffect(() => {
+    setStreamsFetch(null);
     if (fetchRegionsStatus.error) {
       setFormError({ full_message: fetchRegionsStatus.error });
     } else if (fetchStreamsStatus.error) {
       const badKey = /security token/g;
       const badSecret = /signing method/g;
+      const noStreams = /No Kinesis streams/g;
       if (fetchStreamsStatus.error.match(badKey)) {
         setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Key, check out your AWS account for the 20-character long, alphanumeric string that usually starts with the letters "AK"' });
       } else if (fetchStreamsStatus.error.match(badSecret)) {
         setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
+      } else if (fetchStreamsStatus.error.match(noStreams)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: "We're unable to find any Kinesis Streams in the chosen region, please try choosing a different region." });
       } else {
         setFormError({ full_message: fetchStreamsStatus.error });
       }
@@ -58,7 +55,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   }, [fetchRegionsStatus.error, fetchStreamsStatus.error]);
 
   const handleSubmit = () => {
-    toggleTriggerEffect(!triggerEffect);
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 

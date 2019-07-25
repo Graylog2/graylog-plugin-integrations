@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Col, Row } from 'react-bootstrap';
+import { Col, Row } from 'react-bootstrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
@@ -16,15 +16,13 @@ import formValidation from '../utils/formValidation';
 const KinesisStreams = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
-  const { availableStreams, setLogSample } = useContext(ApiContext);
-  const [logSampleStatus, setLogSampleUrl] = useFetch(
+  const { availableStreams, setLogData } = useContext(ApiContext);
+  const [logDataStatus, setLogDataUrl] = useFetch(
     null,
     (response) => {
-      if (response.success) {
-        // TODO: capture if this is a valid flow log response or not before proceeding
-        setLogSample(response);
-        onSubmit();
-      }
+      // TODO: capture if this is a valid flow log response or not before proceeding
+      setLogData(response);
+      onSubmit();
     },
     'POST',
     {
@@ -34,16 +32,17 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   );
 
   useEffect(() => {
-    if (logSampleStatus.error) {
+    if (logDataStatus.error) {
+      setLogDataUrl(null);
       setFormError({
-        full_message: logSampleStatus.error,
-        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please choose a different stream or you can <Button bsStyle="link">setup a new Stream</Button>.</span>,
+        full_message: logDataStatus.error,
+        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please choose a different stream.</span>,
       });
     }
-  }, [logSampleStatus.error]);
+  }, [logDataStatus.error]);
 
   const handleSubmit = () => {
-    setLogSampleUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
+    setLogDataUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
   };
 
   return (
@@ -51,7 +50,7 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Verify Stream &amp; Format"
-                  loading={logSampleStatus.loading}
+                  loading={logDataStatus.loading}
                   error={formError}
                   disabled={formValidation.isFormValid(['awsCloudWatchKinesisStream'], formData)}
                   title="Choose Kinesis Stream"

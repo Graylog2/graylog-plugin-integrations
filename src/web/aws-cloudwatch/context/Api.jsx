@@ -6,7 +6,7 @@ export const ApiContext = createContext();
 export const ApiProvider = ({ children }) => {
   const [availableRegions, setRegionsState] = useState([]);
   const [availableStreams, setStreamsState] = useState([]);
-  const [logSample, setLogSampleState] = useState('');
+  const [logData, setLogDataState] = useState(null);
 
   const setRegions = results => setRegionsState(results.regions);
 
@@ -15,8 +15,12 @@ export const ApiProvider = ({ children }) => {
     setStreamsState(streams);
   };
 
-  const setLogSample = (response) => {
-    setLogSampleState(JSON.stringify(response.message_fields, null, 2));
+  const setLogData = (response) => {
+    setLogDataState({
+      message: JSON.stringify(response.message_fields, null, 2),
+      type: response.input_type,
+      additional: response.explanation,
+    });
   };
 
   return (
@@ -25,8 +29,8 @@ export const ApiProvider = ({ children }) => {
       setStreams,
       availableRegions,
       setRegions,
-      logSample,
-      setLogSample,
+      logData,
+      setLogData,
     }}>
       {children}
     </ApiContext.Provider>
