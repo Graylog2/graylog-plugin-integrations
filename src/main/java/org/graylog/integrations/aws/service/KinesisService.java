@@ -441,7 +441,8 @@ public class KinesisService {
     }
 
     private void setRolePermissionsForAutoKinesisSetup(IamClient iam, String roleName, String streamArn, String region, String rolePolicyName) {
-        LOG.debug("Attaching [{}] policy to [{}] role",rolePolicyName, roleName);
+        LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
+
         String assumeRolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -473,7 +474,7 @@ public class KinesisService {
     }
 
     public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
-                                               String kinesisStream, String roleName, String rolePolicyName) {
+                                                 String kinesisStream, String roleName, String rolePolicyName) {
 
         LOG.debug("Create the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
         final IamClient iam = IamClient.builder()
