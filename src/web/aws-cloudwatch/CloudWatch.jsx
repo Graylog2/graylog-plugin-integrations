@@ -41,7 +41,7 @@ const CloudWatch = ({ route }) => {
 
   const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
-    const value = FormUtils.getValueFromInput(target);
+    const value = FormUtils.getValueFromInput(target).trim();
 
     if (!dirty) {
       setDirty(true);
@@ -51,7 +51,6 @@ const CloudWatch = ({ route }) => {
   };
 
   const handleSubmit = () => {
-    // TODO: add String.trim() to inputs
     const nextStep = availableSteps.indexOf(currentStep) + 1;
 
     if (availableSteps[nextStep]) {

@@ -20,7 +20,6 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
   const [logDataStatus, setLogDataUrl] = useFetch(
     null,
     (response) => {
-      // TODO: capture if this is a valid flow log response or not before proceeding
       setLogData(response);
       onSubmit();
     },
