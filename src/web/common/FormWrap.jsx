@@ -5,19 +5,24 @@ import styled, { createGlobalStyle } from 'styled-components';
 
 export const ErrorMessage = ({ fullMessage, niceMessage }) => {
   const [expanded, toggleExpanded] = useState(false);
-  if (!niceMessage) {
-    return <Panel header={fullMessage} bsStyle="danger" />;
-  }
 
   const Header = (
     <>
       <ErrorOutputStyle />
-      <ErrorOutput>{niceMessage}</ErrorOutput>
-      <ErrorToggleInfo onClick={() => toggleExpanded(!expanded)} expanded={expanded}>
-        More Info <i className="fa fa-chevron-right" />
-      </ErrorToggleInfo>
+      <ErrorOutput>{niceMessage || fullMessage}</ErrorOutput>
+      {niceMessage
+        && (
+          <ErrorToggleInfo onClick={() => toggleExpanded(!expanded)} expanded={expanded}>
+            More Info <i className="fa fa-chevron-right" />
+          </ErrorToggleInfo>
+        )
+      }
     </>
   );
+
+  if (!niceMessage) {
+    return <Panel header={Header} bsStyle="danger" />;
+  }
 
   return (
     <Panel header={Header}
