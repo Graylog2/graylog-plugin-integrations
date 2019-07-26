@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
 
@@ -9,10 +9,10 @@ import formValidation from '../utils/formValidation';
 const Label = ({ label, error }) => {
   if (error) {
     return (
-      <React.Fragment>
+      <ErrorContainer>
         {label}
         <Error><i className="fa fa-exclamation-triangle" /> {error}</Error>
-      </React.Fragment>
+      </ErrorContainer>
     );
   }
 
@@ -73,6 +73,13 @@ ValidatedInput.defaultProps = {
 const Error = styled.span`
   display: block;
   font-weight: normal;
+  padding-left: 15px;
+  font-size: 0.85em;
+`;
+
+const ErrorContainer = styled.span`
+  display: flex;
+  align-items: center;
 `;
 
 export default ValidatedInput;
