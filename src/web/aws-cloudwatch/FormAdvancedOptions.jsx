@@ -66,10 +66,9 @@ const FormAdvancedOptions = ({ onChange }) => {
                          value={throttlingEnabled ? awsCloudWatchThrottleWait.value || awsCloudWatchThrottleWait.defaultValue : awsCloudWatchThrottleWait.defaultValue}
                          onChange={onChange}
                          disabled={!throttlingEnabled} />
-            <InputGroup.Addon>msgs per second</InputGroup.Addon>
+            <InputGroup.Addon>messages/ms</InputGroup.Addon>
           </InputGroup>
         </FormGroup>
-
       </AdvancedOptionsContent>
     </>
   );
