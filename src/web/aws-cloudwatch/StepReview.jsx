@@ -72,10 +72,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={handleSubmit} buttonContent="Complete CloudWatch Setup" loading={fetchSubmitStatus.loading}>
-          <h2>Final Review</h2>
-
-          <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Complete CloudWatch Setup"
+                  loading={fetchSubmitStatus.loading}
+                  disabled={false}
+                  title="Final Review"
+                  description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>

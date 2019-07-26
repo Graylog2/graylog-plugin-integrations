@@ -22,7 +22,9 @@ export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {
     This file is already set in .gitignore so it won't be commited
   */
 
-  const auth = { key: awsCloudWatchAwsKey.value, secret: awsCloudWatchAwsSecret.value };
+  const key = awsCloudWatchAwsKey ? awsCloudWatchAwsKey.value : '';
+  const secret = awsCloudWatchAwsSecret ? awsCloudWatchAwsSecret.value : '';
+  const auth = { key, secret };
 
   try {
     // eslint-disable-next-line global-require
