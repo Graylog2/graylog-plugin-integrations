@@ -8,6 +8,7 @@ import { ApiContext } from './context/Api';
 import useFetch from './hooks/useFetch';
 
 import ValidatedInput from '../common/ValidatedInput';
+import MaskedInput from '../common/MaskedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
@@ -79,16 +80,15 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
                           required />
 
-          <ValidatedInput id="awsCloudWatchAwsSecret"
-                          type="password"
-                          label="AWS Secret"
-                          placeholder="CloudWatch Integration AWS Secret"
-                          onChange={onChange}
-                          fieldData={formData.awsCloudWatchAwsSecret}
-                          autoComplete="off"
-                          maxLength="512"
-                          help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
-                          required />
+          <MaskedInput id="awsCloudWatchAwsSecret"
+                       label="AWS Secret"
+                       placeholder="CloudWatch Integration AWS Secret"
+                       onChange={onChange}
+                       fieldData={formData.awsCloudWatchAwsSecret}
+                       autoComplete="off"
+                       maxLength="512"
+                       help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
+                       required />
 
           <ValidatedInput id="awsCloudWatchAwsRegion"
                           type="select"
