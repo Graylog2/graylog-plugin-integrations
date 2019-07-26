@@ -440,20 +440,8 @@ public class KinesisService {
         return streamDescription;
     }
 
-    private void setRolePermissionsForAutoKinesisSetup(IamClient iam, String roleName, String streamArn, String region, String rolePolicyName) {
+    private void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String region, String rolePolicyName) {
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
-
-        String assumeRolePolicy =
-                "{\n" +
-                "  \"Statement\": [\n" +
-                "    {\n" +
-                "      \"Effect\": \"Allow\",\n" +
-                "      \"Principal\": { \"Service\": \"logs." + region + ".amazonaws.com\" },\n" +
-                "      \"Action\": \"sts:AssumeRole\"\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-
         String rolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -464,8 +452,22 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
         iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
+    }
+    private void createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region){
+        LOG.debug("Create Kinesis Auto Setup Role [{}] to region [{}]", roleName, region);
+        String assumeRolePolicy =
+                "{\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Principal\": { \"Service\": \"logs." + region + ".amazonaws.com\" },\n" +
+                "      \"Action\": \"sts:AssumeRole\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
+
     }
 
     private static String getNewRolePermissionsArn(IamClient iam, String roleName) {
@@ -487,8 +489,19 @@ public class KinesisService {
             StreamDescription streamDescription;
             streamDescription = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription();
             String streamArn = streamDescription.streamARN();
-            //TODO check if the role exist first
-            setRolePermissionsForAutoKinesisSetup(iam, roleName, streamArn, regionName, rolePolicyName);
+
+            String roleCheck = iam.getRole(r -> r.roleName(roleName)).toString();
+            // If the role doesnt exists, then create a new one with needed permissions
+            if (roleName.equals(roleCheck)){
+                // TODO check if the rolePolicyName exists, if it doesnt, then create it
+                String roleArn = getNewRolePermissionsArn(iam,roleName);
+            }
+            else {
+                createRoleForKinesisAutoSetup(iam, roleName, regionName);
+                setPermissionsForKinesisAutoSetupRole(iam, roleName,streamArn,regionName,rolePolicyName);
+                String roleArn = getNewRolePermissionsArn(iam, roleName);
+            }
+            setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, regionName, rolePolicyName);
             return getNewRolePermissionsArn(iam, roleName);
 
         } catch (BadRequestException e) {
