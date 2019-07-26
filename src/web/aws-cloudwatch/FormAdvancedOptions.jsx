@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
+import { ControlLabel, FormGroup, InputGroup, FormControl } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
@@ -10,12 +11,22 @@ const FormAdvancedOptions = ({ onChange }) => {
   const { formData } = useContext(FormDataContext);
   const { isAdvancedOptionsVisible, setAdvancedOptionsVisibility } = useContext(AdvancedOptionsContext);
 
+  const {
+    awsCloudWatchGlobalInput,
+    awsCloudWatchAssumeARN,
+    awsCloudWatchBatchSize,
+    awsCloudWatchThrottleEnabled,
+    awsCloudWatchThrottleWait,
+  } = formData;
+
   const handleToggle = () => {
     setAdvancedOptionsVisibility(!isAdvancedOptionsVisible);
   };
 
+  const throttlingEnabled = !!awsCloudWatchThrottleEnabled.value;
+
   return (
-    <div>
+    <>
       <ToggleAdvancedOptions onClick={handleToggle} type="button">
           Advanced Options <i className="fa fa-angle-right fa-sm" />
       </ToggleAdvancedOptions>
@@ -24,36 +35,43 @@ const FormAdvancedOptions = ({ onChange }) => {
         <Input id="awsCloudWatchGlobalInput"
                type="checkbox"
                value="global-input"
-               defaultChecked={formData.awsCloudWatchGlobalInput ? formData.awsCloudWatchGlobalInput.value : ''}
+               defaultChecked={awsCloudWatchGlobalInput ? awsCloudWatchGlobalInput.value : ''}
                onChange={onChange}
                label="Global Input" />
 
         <Input id="awsCloudWatchAssumeARN"
                type="text"
-               value={formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : ''}
+               value={awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : ''}
                onChange={onChange}
                label="AWS assume role ARN" />
 
         <Input id="awsCloudWatchBatchSize"
                type="number"
-               value={formData.awsCloudWatchBatchSize.value || formData.awsCloudWatchBatchSize.defaultValue}
+               value={awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue}
                onChange={onChange}
                label="Kinesis Record batch size" />
 
-        <Input id="awsCloudWatchThrottleEnabled"
-               type="checkbox"
-               value="throttle-enabled"
-               defaultChecked={formData.awsCloudWatchThrottleEnabled ? formData.awsCloudWatchThrottleEnabled.value : ''}
-               onChange={onChange}
-               label="Enable Throttle" />
+        <FormGroup>
+          <ControlLabel>Enable Throttling</ControlLabel>
+          <InputGroup>
+            <InputGroup.Addon>
+              <input id="awsCloudWatchThrottleEnabled"
+                     type="checkbox"
+                     value="throttle-enabled"
+                     checked={throttlingEnabled}
+                     onChange={onChange} />
+            </InputGroup.Addon>
+            <FormControl id="awsCloudWatchThrottleWait"
+                         type="number"
+                         value={throttlingEnabled ? awsCloudWatchThrottleWait.value || awsCloudWatchThrottleWait.defaultValue : awsCloudWatchThrottleWait.defaultValue}
+                         onChange={onChange}
+                         disabled={!throttlingEnabled} />
+            <InputGroup.Addon>msgs per second</InputGroup.Addon>
+          </InputGroup>
+        </FormGroup>
 
-        <Input id="awsCloudWatchThrottleWait"
-               type="number"
-               value={formData.awsCloudWatchThrottleWait.value || formData.awsCloudWatchThrottleWait.defaultValue}
-               onChange={onChange}
-               label="Throttled wait milliseconds" />
       </AdvancedOptionsContent>
-    </div>
+    </>
   );
 };
 
@@ -69,6 +87,8 @@ const ToggleAdvancedOptions = styled.button`
   border: 0;
   color: #16ace3;
   font-size: 14px;
+  display: block;
+  margin: 0 0 35px;
 
   :hover {
     color: #5e123b;
