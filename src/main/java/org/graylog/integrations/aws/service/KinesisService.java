@@ -434,13 +434,12 @@ public class KinesisService {
         LOG.debug("Check Kinesis stream [{}] is active.", streamName);
         StreamDescription streamDescription;
         do {
-            sleep(20_000);
             streamDescription = kinesisClient.describeStream(r -> r.streamName(streamName)).streamDescription();
         } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
         return streamDescription;
     }
 
-    private void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String region, String rolePolicyName) {
+    private void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         String rolePolicy =
                 "{\n" +
@@ -466,8 +465,13 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
-
+        // Check if the role exists first
+        LOG.debug("Create the role [{}] only if it does not exist.", roleName);
+        String roleCheck = iam.getRole(r -> r.roleName(roleName)).toString();
+        if (!roleName.equals(roleCheck)){
+            LOG.debug("Role [{}] was created.", roleName);
+            iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
+        }
     }
 
     private static String getNewRolePermissionsArn(IamClient iam, String roleName) {
