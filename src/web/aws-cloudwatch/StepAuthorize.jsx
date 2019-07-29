@@ -43,7 +43,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       } else if (fetchStreamsStatus.error.match(badSecret)) {
         setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
       } else if (fetchStreamsStatus.error.match(noStreams)) {
-        setFormError({ full_message: fetchStreamsStatus.error, nice_message: "We're unable to find any Kinesis Streams in the chosen region, please try choosing a different region." });
+        // NOTE: If no streams are present we want to move to the KinesisSetup screen
+        setStreams({ streams: [] });
+        onSubmit();
       } else {
         setFormError({ full_message: fetchStreamsStatus.error });
       }

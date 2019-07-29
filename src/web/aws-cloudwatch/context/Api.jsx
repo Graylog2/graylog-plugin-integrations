@@ -6,9 +6,12 @@ export const ApiContext = createContext();
 export const ApiProvider = ({ children }) => {
   const [availableRegions, setRegionsState] = useState([]);
   const [availableStreams, setStreamsState] = useState([]);
+  const [availableGroups, setGroupsState] = useState([]);
   const [logData, setLogDataState] = useState(null);
 
   const setRegions = results => setRegionsState(results.regions);
+
+  const setGroups = results => setGroupsState(results.groups);
 
   const setStreams = (results) => {
     const streams = results.streams.map(stream => ({ value: stream, label: stream }));
@@ -31,6 +34,8 @@ export const ApiProvider = ({ children }) => {
       setRegions,
       logData,
       setLogData,
+      availableGroups,
+      setGroups,
     }}>
       {children}
     </ApiContext.Provider>
