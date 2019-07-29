@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Col, Row } from 'react-bootstrap';
@@ -9,7 +9,7 @@ import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/useFetch';
+import useFetch from '../common/hooks/useFetch';
 
 import FormWrap from '../common/FormWrap';
 import { ApiRoutes } from '../common/Routes';
@@ -27,8 +27,9 @@ Default.propTypes = {
 };
 
 const StepReview = ({ onSubmit, onEditClick }) => {
+  const [formError, setFormError] = useState(null);
   const { formData } = useContext(FormDataContext);
-  const { logSample } = useContext(ApiContext);
+  const { logData } = useContext(ApiContext);
   const {
     awsCloudWatchName,
     awsCloudWatchDescription,
@@ -65,6 +66,15 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     },
   );
 
+  useEffect(() => {
+    if (fetchSubmitStatus.error) {
+      setFormError({
+        full_message: fetchSubmitStatus.error,
+        nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
+      });
+    }
+  }, [fetchSubmitStatus.error]);
+
   const handleSubmit = () => {
     setSubmitFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.SAVE);
   };
@@ -72,10 +82,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={handleSubmit} buttonContent="Complete CloudWatch Setup" loading={fetchSubmitStatus.loading}>
-          <h2>Final Review</h2>
-
-          <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Complete CloudWatch Setup"
+                  loading={fetchSubmitStatus.loading}
+                  error={formError}
+                  title="Final Review"
+                  description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
@@ -143,7 +155,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={logSample}
+                   value={logData.message}
                    rows={10}
                    disabled />
           </Container>

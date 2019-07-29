@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
-import { FormDataContext } from '../context/FormData';
-import { awsAuth } from '../context/default_settings';
+import { FormDataContext } from '../../aws-cloudwatch/context/FormData';
+import { awsAuth } from '../../aws-cloudwatch/context/default_settings';
 
 /* useFetch Custom Hook
 
@@ -42,51 +42,58 @@ EXAMPLES:
 ```
 */
 
+const parseError = (error) => {
+  const fullError = error.additional && error.additional.body && error.additional.body.message;
+  return fullError || error.message;
+};
+
 const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
   const { formData } = useContext(FormDataContext);
   const [fetchUrl, setFetchUrl] = useState(url);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [data, setData] = useState(false);
-
-  const qualifiedURL = fetchUrl ? URLUtils.qualifyUrl(fetchUrl) : fetchUrl;
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+  const { key, secret } = awsAuth(formData);
+  const qualifiedURL = fetchUrl ? URLUtils.qualifyUrl(fetchUrl) : null;
 
   useEffect(() => {
-    let didCancel = !qualifiedURL;
-    let result;
+    let isFetchable = !!qualifiedURL;
 
     const fetchData = async () => {
-      try {
-        if (qualifiedURL && !didCancel) {
-          setLoading(true);
+      let fetcher = Promise.resolve();
 
-          if (method === 'GET') {
-            result = await fetch(method, qualifiedURL);
-          } else {
-            const { key, secret } = awsAuth(formData);
-            result = await fetch(method, qualifiedURL, {
-              aws_access_key_id: key,
-              aws_secret_access_key: secret,
-              ...options,
-            });
-          }
+      if (isFetchable && !data) {
+        setLoading(true);
 
-          setLoading(false);
+        if (method === 'GET') {
+          fetcher = fetch(method, qualifiedURL);
+        } else {
+          fetcher = fetch(method, qualifiedURL, {
+            aws_access_key_id: key,
+            aws_secret_access_key: secret,
+            ...options,
+          });
+        }
+
+        fetcher.then((result) => {
+          setError(null);
           setData(result);
           setHook(result);
-        }
-      } catch (err) {
-        if (!didCancel) {
+        }).catch((err) => {
+          setData(null);
+          setError(parseError(err));
+        }).finally(() => {
           setLoading(false);
-          setError(err);
-        }
+        });
       }
+
+      return fetcher;
     };
 
     fetchData();
 
     return () => {
-      didCancel = true;
+      isFetchable = false;
     };
   }, [qualifiedURL]);
 
