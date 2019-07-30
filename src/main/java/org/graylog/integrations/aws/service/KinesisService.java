@@ -58,8 +58,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
-import static java.lang.Thread.sleep;
-
 /**
  * Service for all AWS Kinesis business logic and SDK usages.
  */
@@ -426,12 +424,12 @@ public class KinesisService {
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                                          specificError);
             LOG.error(responseMessage);
+            //TODO change exception error when refactoring createKinesisStream method
             throw new InternalServerErrorException(responseMessage, e);
         }
     }
 
-    private void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
-        LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
+    private static void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
         String rolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -442,9 +440,11 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
+        LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
     }
-    private void createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region){
+
+    private static void createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region) {
         LOG.debug("Create Kinesis Auto Setup Role [{}] to region [{}]", roleName, region);
         String assumeRolePolicy =
                 "{\n" +
@@ -457,9 +457,9 @@ public class KinesisService {
                 "  ]\n" +
                 "}";
         // Check if the role exists first
-        LOG.debug("Create the role [{}] only if it does not exist.", roleName);
+        LOG.debug("Checking if [{}] role exist.", roleName);
         String roleCheck = iam.getRole(r -> r.roleName(roleName)).toString();
-        if (!roleName.equals(roleCheck)){
+        if (!roleName.equals(roleCheck)) {
             LOG.debug("Role [{}] was created.", roleName);
             iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
         }
@@ -472,23 +472,25 @@ public class KinesisService {
 
     /**
      * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
-     * @param regionName        The region where the kinesis stream exists
-     * @param accessKeyId       The AWS access key
-     * @param secretAccessKey   The AWS secret key
-     * @param kinesisStream     The AWS kinesis stream
-     * @param roleName          The name of the role that will be created
-     * @param rolePolicyName    The name of the policy that will be created
+     *
+     * @param regionName      The region where the kinesis stream exists
+     * @param accessKeyId     The AWS access key
+     * @param secretAccessKey The AWS secret key
+     * @param kinesisStream   The AWS kinesis stream
+     * @param roleName        The name of the role that will be created
+     * @param rolePolicyName  The name of the policy that will be created
      * @return role Arn associated with the associated kinesis stream
      */
     public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
                                                  String kinesisStream, String roleName, String rolePolicyName) {
 
-        LOG.debug("Create the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
+        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
         final IamClient iam = IamClient.builder()
                                        .region(Region.of(regionName))
                                        .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
                                        .build();
-        final KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
+        // TODO change these back to non static
+        KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
 
         try {
             LOG.debug("Check Kinesis stream [{}] is active.", kinesisStream);
@@ -497,10 +499,12 @@ public class KinesisService {
                 streamDescription = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription();
             } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
 
+            LOG.debug("Acquiring the stream ARN for [{}].", kinesisStream);
             String streamArn = streamDescription.streamARN();
-            createRoleForKinesisAutoSetup(iam, roleName,regionName);
-            setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn,rolePolicyName);
+            createRoleForKinesisAutoSetup(iam, roleName, regionName);
+            setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
             return getRolePermissionsArn(iam, roleName);
+
         } catch (BadRequestException e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
