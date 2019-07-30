@@ -430,15 +430,6 @@ public class KinesisService {
         }
     }
 
-    private StreamDescription checkKinesisStreamStatus(KinesisClient kinesisClient, String streamName) {
-        LOG.debug("Check Kinesis stream [{}] is active.", streamName);
-        StreamDescription streamDescription;
-        do {
-            streamDescription = kinesisClient.describeStream(r -> r.streamName(streamName)).streamDescription();
-        } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
-        return streamDescription;
-    }
-
     private void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         String rolePolicy =
@@ -500,8 +491,12 @@ public class KinesisService {
         final KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
 
         try {
+            LOG.debug("Check Kinesis stream [{}] is active.", kinesisStream);
             StreamDescription streamDescription;
-            streamDescription = checkKinesisStreamStatus(kinesisClient,kinesisStream);
+            do {
+                streamDescription = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription();
+            } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
+
             String streamArn = streamDescription.streamARN();
             createRoleForKinesisAutoSetup(iam, roleName,regionName);
             setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn,rolePolicyName);
