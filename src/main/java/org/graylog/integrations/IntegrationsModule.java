@@ -90,7 +90,7 @@ public class IntegrationsModule extends PluginModule {
         addPermissions(AWSPermissions.class);
         addRestResource(AWSResource.class);
         addRestResource(KinesisSetupResource.class);
-        addTransport(AWSTransport.NAME, AWSTransport .class);
+        addTransport(AWSTransport.NAME, AWSTransport.class);
         addTransport(KinesisTransport.NAME, KinesisTransport.class);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);

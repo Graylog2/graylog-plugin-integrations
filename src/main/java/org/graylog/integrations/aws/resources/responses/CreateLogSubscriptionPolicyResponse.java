@@ -1,7 +1,6 @@
 package org.graylog.integrations.aws.resources.responses;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
@@ -22,6 +21,6 @@ public abstract class CreateLogSubscriptionPolicyResponse {
 
     public static CreateLogSubscriptionPolicyResponse create(@JsonProperty(POLICY_NAME) String policyName,
                                                              @JsonProperty(POLICY_ARN) String policyArn) {
-        return new AutoValue_CreateLogSubscriptionPolicyResponse( policyName, policyArn);
+        return new AutoValue_CreateLogSubscriptionPolicyResponse(policyName, policyArn);
     }
 }

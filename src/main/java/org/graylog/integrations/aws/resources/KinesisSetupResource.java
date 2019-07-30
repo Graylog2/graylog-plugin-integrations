@@ -1,14 +1,12 @@
 package org.graylog.integrations.aws.resources;
 
 import com.codahale.metrics.annotation.Timed;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
-import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionPolicyRequest;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisFullSetupRequest;
@@ -18,7 +16,6 @@ import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionRes
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponseStep;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
-import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.slf4j.Logger;

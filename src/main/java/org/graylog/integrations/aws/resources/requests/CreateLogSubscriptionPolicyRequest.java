@@ -11,9 +11,9 @@ import org.graylog.autovalue.WithBeanGetter;
 @WithBeanGetter
 public abstract class CreateLogSubscriptionPolicyRequest implements AWSRequest {
 
+    private static final String ROLE_NAME = "role_name";
     private static final String STREAM_NAME = "stream_name";
     private static final String STREAM_ARN = "stream_arn";
-    private static final String ROLE_NAME = "role_name";
 
     @JsonProperty(REGION)
     public abstract String region();
