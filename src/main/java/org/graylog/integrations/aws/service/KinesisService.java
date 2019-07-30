@@ -127,7 +127,7 @@ public class KinesisService {
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
         if (records.size() == 0) {
-            throw new BadRequestException("The Kinesis stream does not contain any messages.");
+            throw new BadRequestException(String.format("The Kinesis stream [%s] does not contain any messages.", request.streamName()));
         }
 
         // Select random record from list, and check if the payload is compressed
