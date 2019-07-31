@@ -18,6 +18,7 @@ package org.graylog.integrations.aws.resources.requests;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
@@ -29,6 +30,8 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
+// TODO: Remove this ignore annotation once https://github.com/Graylog2/graylog-plugin-integrations/issues/156 is fixed.
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AWSInputCreateRequest implements AWSRequest {
 
     private static final String NAME = "name";
