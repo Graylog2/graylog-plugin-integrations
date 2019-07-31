@@ -126,7 +126,7 @@ public class AWSService {
      *
      * @return A credential provider
      */
-    static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
+    public static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
         Preconditions.checkArgument(StringUtils.isNotBlank(accessKeyId), "An AWS access key is required.");
         Preconditions.checkArgument(StringUtils.isNotBlank(secretAccessKey), "An AWS secret key is required.");
 
@@ -218,7 +218,6 @@ public class AWSService {
         if (inputType.isKinesis()) {
             configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
             configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
-            configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.kinesisMaxThrottledWaitMs());
         } else {
             throw new Exception("The specified input type is not supported.");
         }

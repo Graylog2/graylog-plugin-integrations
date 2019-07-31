@@ -18,6 +18,7 @@ package org.graylog.integrations.aws.resources.requests;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
@@ -29,6 +30,8 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
+// TODO: Remove this ignore annotation once https://github.com/Graylog2/graylog-plugin-integrations/issues/156 is fixed.
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AWSInputCreateRequest implements AWSRequest {
 
     private static final String NAME = "name";
@@ -39,7 +42,6 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     private static final String ASSUME_ROLE_ARN = "assume_role_arn";
     private static final String GLOBAL = "global";
     private static final String THROTTLING_ALLOWED = "enable_throttling";
-    private static final String KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait_ms";
 
     @JsonProperty(NAME)
     public abstract String name();
@@ -74,9 +76,6 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(THROTTLING_ALLOWED)
     public abstract boolean throttlingAllowed();
 
-    @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS)
-    public abstract int kinesisMaxThrottledWaitMs();
-
     @JsonCreator
     public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
                                                @JsonProperty(DESCRIPTION) String description,
@@ -88,10 +87,9 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
-                                               @JsonProperty(KINESIS_MAX_THROTTLED_WAIT_MS) int kinesisMaxThrottledWaitMs) {
+                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling ) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey,
                                                    streamName, assumeRoleArn, region, batchSize, global,
-                                                   enableThrottling, kinesisMaxThrottledWaitMs);
+                                                   enableThrottling);
     }
 }

@@ -139,14 +139,6 @@ public class AWSInput extends MessageInput {
                     ConfigurationField.Optional.OPTIONAL,
                     TextField.Attribute.IS_PASSWORD));
 
-            request.addField(new NumberField(
-                    KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS,
-                    "Throttled wait milliseconds",
-                    KinesisTransport.DEFAULT_THROTTLED_WAIT_MS,
-                    "The maximum time that the Kinesis input will pause for when in a throttled state. If this time is exceeded, then the Kinesis consumer will shut down until the throttled state is cleared. Recommended default: 60,000 ms",
-                    ConfigurationField.Optional.OPTIONAL,
-                    NumberField.Attribute.ONLY_POSITIVE));
-
             request.addField(new TextField(
                     KinesisTransport.CK_KINESIS_STREAM_NAME,
                     "Kinesis Stream name",

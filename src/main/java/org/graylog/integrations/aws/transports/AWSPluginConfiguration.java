@@ -1,6 +1,5 @@
 package org.graylog.integrations.aws.transports;
 
-import com.amazonaws.regions.Regions;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -9,6 +8,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,17 +63,17 @@ public abstract class AWSPluginConfiguration {
     }
 
     @JsonIgnore
-    public List<Regions> getLookupRegions() {
+    public List<Region> getLookupRegions() {
         if (lookupRegions() == null || lookupRegions().isEmpty()) {
             return Collections.emptyList();
         }
 
-        ImmutableList.Builder<Regions> builder = ImmutableList.<Regions>builder();
+        ImmutableList.Builder<Region> builder = ImmutableList.<Region>builder();
 
         String[] regions = lookupRegions().split(",");
         for (String regionName : regions) {
             try {
-                builder.add(Regions.fromName(regionName.trim()));
+                builder.add(Region.of(regionName.trim()));
             } catch (IllegalArgumentException e) {
                 LOG.info("Cannot translate [{}] into AWS region. Make sure it is a correct region code like for example 'us-west-1'.", regionName);
             }
