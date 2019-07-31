@@ -13,10 +13,11 @@ import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 
-const KinesisSetup = ({ onChange, onSubmit }) => {
+const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
+  const [disabledGroups, setDisabledGroups] = useState(false);
   const [groupNamesStatus, setGroupNamesUrl] = useFetch(
     ApiRoutes.INTEGRATIONS.AWS.CLOUDWATCH.GROUPS,
     (response) => {
@@ -36,12 +37,17 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
           full_message: groupNamesStatus.error,
           nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try choosing a different region, or follow this <a href="/">CloudWatch documentation</a> to begin setting up your AWS CloudWatch account.</span>,
         });
+        setDisabledGroups(true);
       } else {
         setFormError({
           full_message: groupNamesStatus.error,
         });
       }
     }
+
+    return () => {
+      setGroups({ log_groups: [] });
+    };
   }, [groupNamesStatus.error]);
 
   return (
@@ -72,12 +78,15 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
                           onChange={onChange}
                           label="CloudWatch Group Name"
                           required
-                          disabled={groupNamesStatus.loading}>
+                          disabled={groupNamesStatus.loading || disabledGroups}>
 
             {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
           </ValidatedInput>
 
           <FormAdvancedOptions onChange={onChange} />
+
+          {toggleSetup
+          && <button onClick={toggleSetup} type="button">Choose Existing Kinesis Stream</button>}
         </FormWrap>
       </Col>
     </Row>
@@ -87,6 +96,11 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
 KinesisSetup.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  toggleSetup: PropTypes.func,
+};
+
+KinesisSetup.defaultProps = {
+  toggleSetup: null,
 };
 
 export default KinesisSetup;
