@@ -688,6 +688,23 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@emotion/is-prop-valid@^0.8.1":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@emotion/is-prop-valid/-/is-prop-valid-0.8.2.tgz#b9692080da79041683021fcc32f96b40c54c59dc"
+  integrity sha512-ZQIMAA2kLUWiUeMZNJDTeCwYRx1l8SQL0kHktze4COT22occKpDML1GDUXP5/sxhOMrZO8vZw773ni4H5Snrsg==
+  dependencies:
+    "@emotion/memoize" "0.7.2"
+
+"@emotion/memoize@0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.2.tgz#7f4c71b7654068dfcccad29553520f984cc66b30"
+  integrity sha512-hnHhwQzvPCW1QjBWFyBtsETdllOM92BfrKWbUTmh9aeOlcVOiXvlPsK4104xH8NsaKfg86PTFsWkueQeUfMA/w==
+
+"@emotion/unitless@^0.7.0":
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/@emotion/unitless/-/unitless-0.7.4.tgz#a87b4b04e5ae14a88d48ebef15015f6b7d1f5677"
+  integrity sha512-kBa+cDHOR9jpRJ+kcGMsysrls0leukrm68DmFQoMIWQcXdr2cZvyvypWuGYT7U+9kAExUE7+T7r6G3C3A6L8MQ==
+
 "@webassemblyjs/ast@1.7.11":
   version "1.7.11"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.7.11.tgz#b988582cafbb2b095e8b556526f30c90d057cace"
@@ -2553,11 +2570,11 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2:
   integrity sha512-6uHUhOPEBgQ24HM+r6b/QwWfZq+yiFcipKFrOFiBEnWdy5sdzYoi+pJeQaPI5qOLRFqWmAXUPQNsielzdLoecA==
 
 "graylog-web-plugin@file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin":
-  version "3.1.0-beta.3-SNAPSHOT"
+  version "3.1.0-beta.4-SNAPSHOT"
   dependencies:
     "@babel/preset-env" "7.4.5"
     babel-eslint "9.0.0"
-    eslint-config-graylog "file:../graylog2-server/graylog2-web-interface/packages/eslint-config-graylog"
+    eslint-config-graylog "file:../../../../../Library/Caches/Yarn/v4/npm-graylog-web-plugin-3.1.0-beta.4-SNAPSHOT-f5d55d48-5e86-42f5-ae8d-66e511a8fd88-1564583440083/node_modules/eslint-config-graylog"
     html-webpack-plugin "3.2.0"
     javascript-natural-sort "0.7.1"
     jquery "3.4.1"
