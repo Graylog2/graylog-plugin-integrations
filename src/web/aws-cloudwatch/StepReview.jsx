@@ -128,7 +128,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                 </span>
               </li>
               <li>
-                <strong>Throttled Wait (ms)</strong>
+                <strong>Enable Throttling</strong>
                 <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
               </li>
             </ReviewItems>
