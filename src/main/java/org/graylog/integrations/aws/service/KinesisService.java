@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.efs.model.BadRequestException;
 import software.amazon.awssdk.services.iam.IamClient;
-import software.amazon.awssdk.services.iam.model.EntityAlreadyExistsException;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
@@ -44,8 +43,6 @@ import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
-import software.amazon.awssdk.services.kinesis.model.StreamDescription;
-import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
@@ -445,7 +442,7 @@ public class KinesisService {
         try {
             iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
             return String.format("Success! The role policy [%s] was assigned.", rolePolicyName);
-        } catch (BadRequestException e) {
+        } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to create role [%s] due to the " +
                                                          "following error [%s]", roleName, specificError);
@@ -466,19 +463,18 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
-        // TODO find a better way to check if the role exists first
+        // TODO optimize checking if the role exists first
         LOG.debug("Role [{}] was created.", roleName);
         try {
             iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
             return String.format("Success! The role [%s] was created.", roleName);
-        } catch (EntityAlreadyExistsException e) {
+        } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("The role [%s] was not created due to the " +
                                                          "following reason [%s]", roleName, specificError);
             LOG.error(responseMessage);
             return responseMessage;
         }
-
     }
 
     private static String getRolePermissionsArn(IamClient iam, String roleName) {
@@ -497,34 +493,31 @@ public class KinesisService {
      * @param rolePolicyName  The name of the policy that will be created
      * @return role Arn associated with the associated kinesis stream
      */
-    public static String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
-                                                        String kinesisStream, String roleName, String rolePolicyName) {
+    private static String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
+                                                         String kinesisStream, String roleName, String rolePolicyName) {
 
         LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
-        final IamClient iam = IamClient.builder()
-                                       .region(Region.AWS_GLOBAL)
-                                       .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
-                                       .build();
-        // TODO change these back to non static
         //KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
-        KinesisClient kinesisClient = KinesisClient.builder().region(Region.of(regionName)).credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey)).build();
-
+        // TODO use this one, for testing
+        KinesisClient kinesisClient = KinesisClient.builder()
+                                                   .region(Region.of(regionName))
+                                                   .credentialsProvider(
+                                                           AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                                                   .build();
         try {
-            LOG.debug("Check Kinesis stream [{}] is active.", kinesisStream);
-            StreamDescription streamDescription;
-            do {
-                streamDescription = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription();
-            } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
+            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", kinesisStream);
+            String streamArn = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription().streamARN();
 
-            LOG.debug("Acquiring the stream ARN for [{}].", kinesisStream);
-            String streamArn = streamDescription.streamARN();
+            final IamClient iam = IamClient.builder()
+                                           .region(Region.AWS_GLOBAL)
+                                           .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                                           .build();
 
             String createRoleResponse = createRoleForKinesisAutoSetup(iam, roleName, regionName);
             LOG.debug(createRoleResponse);
 
-            // TODO check if the policy permissions already exist
-            String setPermissionsRoleReponse = setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
-            LOG.debug(setPermissionsRoleReponse);
+            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
+            LOG.debug(setPermissionsRoleResponse);
 
             return getRolePermissionsArn(iam, roleName);
 
