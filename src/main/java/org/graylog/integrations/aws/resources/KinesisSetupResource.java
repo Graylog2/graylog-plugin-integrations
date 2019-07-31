@@ -110,7 +110,7 @@ public class KinesisSetupResource implements PluginRestResource {
      */
     @POST
     @Timed
-    @Path("/add_subscription")
+    @Path("/create_subscription")
     @ApiOperation(value = "Step 3: Subscribe a Kinesis stream to a CloudWatch log group")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
