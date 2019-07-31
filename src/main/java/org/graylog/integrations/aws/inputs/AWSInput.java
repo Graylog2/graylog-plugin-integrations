@@ -21,6 +21,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog.integrations.aws.transports.AWSTransport;
+import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
 import org.graylog2.plugin.buffers.InputBuffer;
@@ -28,13 +29,12 @@ import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
 import org.graylog2.plugin.configuration.fields.DropdownField;
+import org.graylog2.plugin.configuration.fields.NumberField;
 import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
@@ -47,13 +47,6 @@ public class AWSInput extends MessageInput {
     public static final String NAME = "AWS";
     public static final String TYPE = "org.graylog.integrations.aws.inputs.AWSInput";
 
-    private static final Logger LOG = LoggerFactory.getLogger(AWSInput.class);
-
-    /**
-     * Specifies one of the {@code AWSInputType} choices, which indicates which codec and transport
-     * should be used.
-     */
-    public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
     public static final String CK_TITLE = "title";
     public static final String CK_DESCRIPTION = "description";
     public static final String CK_GLOBAL = "global";
@@ -122,22 +115,21 @@ public class AWSInput extends MessageInput {
             ConfigurationRequest request = super.combinedRequestedConfiguration();
 
             // These config values will be shared amongst many AWS codecs and transports.
+
             request.addField(new DropdownField(
                     CK_AWS_REGION,
                     "AWS Region",
                     Region.US_EAST_1.id(),
                     AWSService.buildRegionChoices(),
                     "The AWS region the Kinesis stream is running in.",
-                    ConfigurationField.Optional.NOT_OPTIONAL
-            ));
+                    ConfigurationField.Optional.NOT_OPTIONAL));
 
             request.addField(new TextField(
                     CK_ACCESS_KEY,
                     "AWS access key",
                     "",
                     "Access key of an AWS user with sufficient permissions. (See documentation)",
-                    ConfigurationField.Optional.OPTIONAL
-            ));
+                    ConfigurationField.Optional.OPTIONAL));
 
             request.addField(new TextField(
                     CK_SECRET_KEY,
@@ -145,16 +137,30 @@ public class AWSInput extends MessageInput {
                     "",
                     "Secret key of an AWS user with sufficient permissions. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL,
-                    TextField.Attribute.IS_PASSWORD
-            ));
+                    TextField.Attribute.IS_PASSWORD));
+
+            request.addField(new NumberField(
+                    KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS,
+                    "Throttled wait milliseconds",
+                    KinesisTransport.DEFAULT_THROTTLED_WAIT_MS,
+                    "The maximum time that the Kinesis input will pause for when in a throttled state. If this time is exceeded, then the Kinesis consumer will shut down until the throttled state is cleared. Recommended default: 60,000 ms",
+                    ConfigurationField.Optional.OPTIONAL,
+                    NumberField.Attribute.ONLY_POSITIVE));
 
             request.addField(new TextField(
-                    CK_ASSUME_ROLE_ARN,
-                    "AWS assume role ARN",
+                    KinesisTransport.CK_KINESIS_STREAM_NAME,
+                    "Kinesis Stream name",
                     "",
-                    "Role ARN with required permissions (cross account access)",
-                    ConfigurationField.Optional.OPTIONAL
-            ));
+                    "The name of the Kinesis stream that receives your messages. See README for instructions on how to connect messages to a Kinesis Stream.",
+                    ConfigurationField.Optional.NOT_OPTIONAL));
+
+            request.addField(new NumberField(
+                    KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE,
+                    "Kinesis Record batch size.",
+                    KinesisTransport.DEFAULT_BATCH_SIZE,
+                    "The number of Kinesis records to fetch at a time. Each record may be up to 1MB in size. The AWS default is 10,000. Enter a smaller value to process smaller chunks at a time.",
+                    ConfigurationField.Optional.OPTIONAL,
+                    NumberField.Attribute.ONLY_POSITIVE));
 
             return request;
         }

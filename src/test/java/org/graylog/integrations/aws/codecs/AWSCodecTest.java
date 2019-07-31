@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.journal.RawMessage;
@@ -31,7 +30,7 @@ public class AWSCodecTest {
     public void testKinesisFlowLogCodec() throws JsonProcessingException {
 
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
+        configMap.put(AWSCodec.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_FLOW_LOGS.toString());
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
@@ -66,7 +65,7 @@ public class AWSCodecTest {
     public void testKinesisRawCodec() throws JsonProcessingException {
 
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(AWSInput.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
+        configMap.put(AWSCodec.CK_AWS_MESSAGE_TYPE, AWSMessageType.KINESIS_RAW.toString());
         final Configuration configuration = new Configuration(configMap);
         final AWSCodec codec = new AWSCodec(configuration, AWSTestingUtils.buildTestCodecs());
 
