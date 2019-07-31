@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
@@ -11,6 +11,7 @@ import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
+import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -35,9 +36,15 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
-          <h2>Create Integration &amp; Authorize AWS</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+                  disabled={formValidation.isFormValid([
+                    'awsCloudWatchName',
+                    'awsCloudWatchAwsKey',
+                    'awsCloudWatchAwsSecret',
+                    'awsCloudWatchAwsRegion',
+                  ], formData)}
+                  title="Create Integration &amp; Authorize AWS"
+                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
 
           {/* Fighting AutoComplete Forms */}
           <DisappearingInput id="name" type="text" />

@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 const formValidation = {
   checkInputValidity: (input, customErrorMessage) => {
     const { validity } = input;
@@ -25,19 +23,13 @@ const formValidation = {
       { invalid: isInvalidStep, message: 'Unexpected value.' },
     ];
 
-    const errorOutput = _.find(possibleErrors, error => error.invalid);
+    const errorOutput = possibleErrors.find(error => error.invalid);
 
     return customErrorMessage || errorOutput.message;
   },
 
-  isFormValid: (form) => {
-    if (!form.checkValidity()) {
-      form.reportValidity();
-
-      return false;
-    }
-
-    return true;
+  isFormValid: (requiredFields, context) => {
+    return !!requiredFields.find(field => !context[field] || !context[field].value);
   },
 };
 

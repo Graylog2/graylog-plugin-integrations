@@ -5,7 +5,9 @@ import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
+import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
@@ -22,6 +24,8 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -51,6 +55,7 @@ public class KinesisServiceTest {
     private static final String TEST_STREAM_2 = "test-stream-2";
     private static final String[] TWO_TEST_STREAMS = {TEST_STREAM_1, TEST_STREAM_2};
     private static final String TEST_REGION = Region.EU_WEST_1.id();
+    private static final int SHARD_COUNT = 1;
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -272,5 +277,28 @@ public class KinesisServiceTest {
 
         List<Record> fakeRecordsList = kinesisService.retrieveRecords("kinesisStream", kinesisClient);
         assertEquals(fakeRecordsList.size(), 10);
+    }
+
+    @Test
+    public void testCreateNewKinesisStream() {
+
+        // These three lines mock the KinesisClient. Must be repeated for every test.
+        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
+        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+
+        // Mock out specific KinesisNewStreamRequest to return a response.
+        when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
+
+        final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
+                                                                                               "accessKey", "secretKey",
+                                                                                               TEST_STREAM_1);
+        final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
+
+        // Check the values are whats expected.
+        final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "] was created with ["
+                                        + SHARD_COUNT + "] shards.";
+        assertEquals(response.explanation(), expectedResponse);
+        assertEquals(SHARD_COUNT, 1);
     }
 }

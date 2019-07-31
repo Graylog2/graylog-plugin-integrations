@@ -14,9 +14,11 @@ const StepHealthCheck = ({ onSubmit }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit} buttonContent="Review &amp; Finalize">
-          <h2>Create Kinesis Stream</h2>
-          <p>We&apos;re going to attempt to parse a single log to help you out! If we&apos;re unable to, or you would like it parsed differently, head on over to <a href="/system/pipelines">Pipeline Rules</a> to set up your own parser!</p>
+        <FormWrap onSubmit={onSubmit}
+                  buttonContent="Review &amp; Finalize"
+                  disabled={false}
+                  title="Create Kinesis Stream"
+                  description={<p>We&apos;re going to attempt to parse a single log to help you out! If we&apos;re unable to, or you would like it parsed differently, head on over to <a href="/system/pipelines">Pipeline Rules</a> to set up your own parser!</p>}>
 
           <span><i className="fa fa-smile-o fa-2x" /> Great! Looks like a well formatted Flow Log.</span>
 

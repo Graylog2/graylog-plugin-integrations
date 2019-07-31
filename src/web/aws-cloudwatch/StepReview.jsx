@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
@@ -53,7 +53,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     'POST',
     {
       name: awsCloudWatchName.value,
-      description: awsCloudWatchDescription.value,
+      description: awsCloudWatchDescription ? awsCloudWatchDescription.value : '',
       region: awsCloudWatchAwsRegion.value,
       aws_input_type: 'KINESIS_FLOW_LOGS',
       stream_name: awsCloudWatchKinesisStream.value,
@@ -72,10 +72,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={handleSubmit} buttonContent="Complete CloudWatch Setup" loading={fetchSubmitStatus.loading}>
-          <h2>Final Review</h2>
-
-          <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Complete CloudWatch Setup"
+                  loading={fetchSubmitStatus.loading}
+                  disabled={false}
+                  title="Final Review"
+                  description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
