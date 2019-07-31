@@ -66,7 +66,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
 
           <FormAdvancedOptions onChange={onChange} />
 
-          <button onClick={toggleSetup} type="button">Subscribe CloudWatch Group to Stream</button>
+          <h3>Don't see the stream you need?</h3>
+          <button onClick={toggleSetup} type="button">Perform automated Kinesis setup</button>
         </FormWrap>
       </Col>
     </Row>

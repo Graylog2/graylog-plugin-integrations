@@ -26,6 +26,14 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     'POST',
     { region: formData.awsCloudWatchAwsRegion.value },
   );
+  const [createStreamStatus, createStreamFetch] = useFetch(
+    null,
+    (response) => {
+      // setGroups(response);
+    },
+    'POST',
+    { stream_name: 'test-stream' },
+  );
 
   useEffect(() => {
     if (groupNamesStatus.error) {
@@ -50,11 +58,16 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     };
   }, [groupNamesStatus.error]);
 
+  const handleSubmit = () => {
+    console.log('Starting Kinesis auto-setup');
+    createStreamFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM);
+  };
+
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={onSubmit}
-                  buttonContent="Verify &amp; Format"
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Begin Automated Setup"
                   disabled={formValidation.isFormValid([
                     'awsCloudWatchKinesisStream',
                     'awsCloudWatchAwsGroupName',
