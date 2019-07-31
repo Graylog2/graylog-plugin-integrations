@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * Web endpoints for the Kinesis auto-setup.
  */
 @Api(value = "AWSKinesisAuto", description = "AWS Kinesis auto-setup")
-@Path("/kinesis/auto_setup")
+@Path("/aws/kinesis/auto_setup")
 @RequiresAuthentication
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
