@@ -39,11 +39,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
-    awsCloudWatchThrottleWait,
   } = formData;
 
-  const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value && awsCloudWatchThrottleWait;
-  const throttleValue = throttleEnabled ? awsCloudWatchThrottleWait.value : awsCloudWatchThrottleWait.defaultValue;
+  const globalInputEnabled = awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value;
+  const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value;
 
   const [fetchSubmitStatus, setSubmitFetch] = useFetch(
     null,
@@ -59,9 +58,8 @@ const StepReview = ({ onSubmit, onEditClick }) => {
       stream_name: awsCloudWatchKinesisStream.value,
       batch_size: Number(awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue),
       assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
-      global: (awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value),
+      global: globalInputEnabled,
       enable_throttling: throttleEnabled,
-      kinesis_max_throttled_wait_ms: Number(throttleValue),
     },
   );
 
@@ -113,7 +111,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               </li>
               <li>
                 <strong>Global Input</strong>
-                <span>{(awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
+                <span>{<i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} />}</span>
               </li>
               <li>
                 <strong>AWS Assumed ARN Role</strong>
@@ -131,11 +129,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               </li>
               <li>
                 <strong>Throttled Wait (ms)</strong>
-                <span>
-                  {
-                    throttleEnabled ? awsCloudWatchThrottleWait.value : <Default value={awsCloudWatchThrottleWait.defaultValue} />
-                  }
-                </span>
+                <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
               </li>
             </ReviewItems>
 

@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { ControlLabel, FormGroup, InputGroup, FormControl } from 'react-bootstrap';
 import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
@@ -16,14 +15,11 @@ const FormAdvancedOptions = ({ onChange }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
-    awsCloudWatchThrottleWait,
   } = formData;
 
   const handleToggle = () => {
     setAdvancedOptionsVisibility(!isAdvancedOptionsVisible);
   };
-
-  const throttlingEnabled = !!awsCloudWatchThrottleEnabled.value;
 
   return (
     <>
@@ -39,6 +35,13 @@ const FormAdvancedOptions = ({ onChange }) => {
                onChange={onChange}
                label="Global Input" />
 
+        <Input id="awsCloudWatchThrottleEnabled"
+               type="checkbox"
+               value="enable-throttling"
+               defaultChecked={awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value}
+               onChange={onChange}
+               label="Enable Throttling" />
+
         <Input id="awsCloudWatchAssumeARN"
                type="text"
                value={awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : ''}
@@ -50,25 +53,6 @@ const FormAdvancedOptions = ({ onChange }) => {
                value={awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue}
                onChange={onChange}
                label="Kinesis Record batch size" />
-
-        <FormGroup>
-          <ControlLabel>Enable Throttling</ControlLabel>
-          <InputGroup>
-            <InputGroup.Addon>
-              <input id="awsCloudWatchThrottleEnabled"
-                     type="checkbox"
-                     value="throttle-enabled"
-                     checked={throttlingEnabled}
-                     onChange={onChange} />
-            </InputGroup.Addon>
-            <FormControl id="awsCloudWatchThrottleWait"
-                         type="number"
-                         value={throttlingEnabled ? awsCloudWatchThrottleWait.value || awsCloudWatchThrottleWait.defaultValue : awsCloudWatchThrottleWait.defaultValue}
-                         onChange={onChange}
-                         disabled={!throttlingEnabled} />
-            <InputGroup.Addon>messages/ms</InputGroup.Addon>
-          </InputGroup>
-        </FormGroup>
       </AdvancedOptionsContent>
     </>
   );
