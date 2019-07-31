@@ -11,7 +11,10 @@ export const ApiProvider = ({ children }) => {
 
   const setRegions = results => setRegionsState(results.regions);
 
-  const setGroups = results => setGroupsState(results.groups);
+  const setGroups = (results) => {
+    const groups = results.log_groups.map(group => ({ value: group, label: group }));
+    setGroupsState(groups);
+  };
 
   const setStreams = (results) => {
     const streams = results.streams.map(stream => ({ value: stream, label: stream }));

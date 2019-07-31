@@ -11,16 +11,16 @@ import formValidation from '../utils/formValidation';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
+import { ApiContext } from './context/Api';
 
 const KinesisSetup = ({ onChange, onSubmit }) => {
-  const { formData, setGroups } = useContext(FormDataContext);
+  const { availableGroups, setGroups } = useContext(ApiContext);
+  const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
   const [groupNamesStatus, setGroupNamesUrl] = useFetch(
     ApiRoutes.INTEGRATIONS.AWS.CLOUDWATCH.GROUPS,
     (response) => {
-      console.log('setGroups', response);
-      // setGroups(response);
-      // onSubmit();
+      setGroups(response);
     },
     'POST',
     { region: formData.awsCloudWatchAwsRegion.value },
@@ -43,8 +43,6 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
       }
     }
   }, [groupNamesStatus.error]);
-
-  console.log('groupNamesStatus', groupNamesStatus);
 
   return (
     <Row>
@@ -76,7 +74,7 @@ const KinesisSetup = ({ onChange, onSubmit }) => {
                           required
                           disabled={groupNamesStatus.loading}>
 
-            {renderOptions(groupNamesStatus.data || [], 'Choose CloudWatch Group', groupNamesStatus.loading)}
+            {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
           </ValidatedInput>
 
           <FormAdvancedOptions onChange={onChange} />

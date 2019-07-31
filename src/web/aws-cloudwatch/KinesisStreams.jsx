@@ -13,7 +13,7 @@ import Routes, { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
 
-const KinesisStreams = ({ onChange, onSubmit }) => {
+const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
   const { availableStreams, setLogData } = useContext(ApiContext);
@@ -65,6 +65,8 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
           </ValidatedInput>
 
           <FormAdvancedOptions onChange={onChange} />
+
+          <button onClick={toggleSetup} type="button">Subscribe CloudWatch Group to Stream</button>
         </FormWrap>
       </Col>
     </Row>
@@ -74,6 +76,11 @@ const KinesisStreams = ({ onChange, onSubmit }) => {
 KinesisStreams.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  toggleSetup: PropTypes.func,
+};
+
+KinesisStreams.defaultProps = {
+  toggleSetup: () => {},
 };
 
 export default KinesisStreams;

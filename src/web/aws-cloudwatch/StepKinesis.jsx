@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import KinesisStreams from './KinesisStreams';
@@ -6,14 +6,16 @@ import KinesisSetup from './KinesisSetup';
 import { AdvancedOptionsProvider } from './context/AdvancedOptions';
 
 const StepKinesis = ({ hasStreams, ...restProps }) => {
+  const [renderStreams, toggleRenderStreams] = useState(hasStreams);
+
   return (
     <AdvancedOptionsProvider>
-      <React.Fragment>
-        { hasStreams
-          ? <KinesisStreams {...restProps} />
+      <>
+        { renderStreams
+          ? <KinesisStreams {...restProps} toggleSetup={() => toggleRenderStreams(false)} />
           : <KinesisSetup {...restProps} />
         }
-      </React.Fragment>
+      </>
     </AdvancedOptionsProvider>
   );
 };
