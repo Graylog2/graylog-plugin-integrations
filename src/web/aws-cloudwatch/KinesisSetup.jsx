@@ -29,10 +29,30 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const [createStreamStatus, createStreamFetch] = useFetch(
     null,
     (response) => {
-      // setGroups(response);
+
     },
     'POST',
     { stream_name: 'test-stream' },
+  );
+  const [createPolicyStatus, createPolicyFetch] = useFetch(
+    null,
+    (response) => {
+
+    },
+    'POST',
+    { stream_arn: 'test-stream-arn' },
+  );
+  const [createSubscriptionStatus, createSubscriptionFetch] = useFetch(
+    null,
+    (response) => {
+
+    },
+    'POST',
+    { 'log_group_name':'log-group',
+      'filter_name':'filter-name',
+      'filter_pattern':'pattern',
+      'destination-stream-arn':'stream-arn',
+      'role-arn':'role-arn', },
   );
 
   useEffect(() => {
