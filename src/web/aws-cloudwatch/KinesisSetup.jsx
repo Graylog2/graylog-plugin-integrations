@@ -29,13 +29,13 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const [ createStreamStatus, createStreamFetch ] = useFetch(
     null,
     (response) => {
-      console.log("Stream creation complete: []", response);
+      console.log("Stream creation complete: []", response, formData);
       createPolicyFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
     },
     'POST',
     {
-      region: 'us-east-1',
-      stream_name: 'test-stream',
+      region: formData.awsCloudWatchAwsRegion.value,
+      stream_name: formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : '',
     },
   );
   const [ createPolicyStatus, createPolicyFetch ] = useFetch(
@@ -46,7 +46,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     },
     'POST',
     {
-      region: 'us-east-1',
+      region: formData.awsCloudWatchAwsRegion.value,
       role_name: 'role-name',
       stream_name: 'test-stream',
       stream_arn: 'test-stream-arn',
@@ -59,7 +59,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     },
     'POST',
     {
-      region: 'us-east-1',
+      region: formData.awsCloudWatchAwsRegion.value,
       log_group_name: 'log-group',
       filter_name: 'filter-name',
       filter_pattern: 'pattern',
