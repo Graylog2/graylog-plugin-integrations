@@ -30,30 +30,41 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     null,
     (response) => {
       console.log("Stream creation complete: []", response);
+      createPolicyFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
     },
     'POST',
-    { region: 'us-east-1', stream_name: 'test-stream', },
+    {
+      region: 'us-east-1',
+      stream_name: 'test-stream',
+    },
   );
   const [ createPolicyStatus, createPolicyFetch ] = useFetch(
     null,
     (response) => {
-
+      console.log("Policy creation complete: []", response);
+      createSubscriptionFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION);
     },
     'POST',
-    { stream_arn: 'test-stream-arn' },
+    {
+      region: 'us-east-1',
+      role_name: 'role-name',
+      stream_name: 'test-stream',
+      stream_arn: 'test-stream-arn',
+    },
   );
   const [ createSubscriptionStatus, createSubscriptionFetch ] = useFetch(
     null,
     (response) => {
-
+      console.log("Subscription creation complete: []", response);
     },
     'POST',
     {
-      'log_group_name': 'log-group',
-      'filter_name': 'filter-name',
-      'filter_pattern': 'pattern',
-      'destination-stream-arn': 'stream-arn',
-      'role-arn': 'role-arn',
+      region: 'us-east-1',
+      log_group_name: 'log-group',
+      filter_name: 'filter-name',
+      filter_pattern: 'pattern',
+      destination_stream_arn: 'stream-arn',
+      role_arn: 'role-arn',
     },
   );
 
