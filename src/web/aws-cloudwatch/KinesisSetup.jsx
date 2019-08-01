@@ -133,7 +133,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
           <FormAdvancedOptions onChange={onChange}/>
 
           {toggleSetup
-          && <button onClick={toggleSetup} type="button">Choose Existing Kinesis Stream</button>}
+          && <button onClick={toggleSetup} type="button" className="btn btn-primary">Choose Existing Kinesis Stream</button>}
+          &nbsp;&nbsp;
         </FormWrap>
       </Col>
     </Row>
