@@ -16,9 +16,9 @@ import { ApiContext } from './context/Api';
 const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
   const { formData } = useContext(FormDataContext);
-  const [formError, setFormError] = useState(null);
-  const [disabledGroups, setDisabledGroups] = useState(false);
-  const [groupNamesStatus, setGroupNamesUrl] = useFetch(
+  const [ formError, setFormError ] = useState(null);
+  const [ disabledGroups, setDisabledGroups ] = useState(false);
+  const [ groupNamesStatus, setGroupNamesUrl ] = useFetch(
     ApiRoutes.INTEGRATIONS.AWS.CLOUDWATCH.GROUPS,
     (response) => {
       setGroups(response);
@@ -26,15 +26,15 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     'POST',
     { region: formData.awsCloudWatchAwsRegion.value },
   );
-  const [createStreamStatus, createStreamFetch] = useFetch(
+  const [ createStreamStatus, createStreamFetch ] = useFetch(
     null,
     (response) => {
-
+      console.log("Stream creation complete: []", response);
     },
     'POST',
-    { stream_name: 'test-stream' },
+    { region: 'us-east-1', stream_name: 'test-stream', },
   );
-  const [createPolicyStatus, createPolicyFetch] = useFetch(
+  const [ createPolicyStatus, createPolicyFetch ] = useFetch(
     null,
     (response) => {
 
@@ -42,17 +42,19 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     'POST',
     { stream_arn: 'test-stream-arn' },
   );
-  const [createSubscriptionStatus, createSubscriptionFetch] = useFetch(
+  const [ createSubscriptionStatus, createSubscriptionFetch ] = useFetch(
     null,
     (response) => {
 
     },
     'POST',
-    { 'log_group_name':'log-group',
-      'filter_name':'filter-name',
-      'filter_pattern':'pattern',
-      'destination-stream-arn':'stream-arn',
-      'role-arn':'role-arn', },
+    {
+      'log_group_name': 'log-group',
+      'filter_name': 'filter-name',
+      'filter_pattern': 'pattern',
+      'destination-stream-arn': 'stream-arn',
+      'role-arn': 'role-arn',
+    },
   );
 
   useEffect(() => {
@@ -63,7 +65,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
       if (groupNamesStatus.error.match(noGroups)) {
         setFormError({
           full_message: groupNamesStatus.error,
-          nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try choosing a different region, or follow this <a href="/">CloudWatch documentation</a> to begin setting up your AWS CloudWatch account.</span>,
+          nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try choosing a different region, or follow this <a
+            href="/">CloudWatch documentation</a> to begin setting up your AWS CloudWatch account.</span>,
         });
         setDisabledGroups(true);
       } else {
@@ -76,7 +79,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     return () => {
       setGroups({ log_groups: [] });
     };
-  }, [groupNamesStatus.error]);
+  }, [ groupNamesStatus.error ]);
 
   const handleSubmit = () => {
     console.log('Starting Kinesis auto-setup');
@@ -103,7 +106,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
                           placeholder="Create Stream Name"
                           onChange={onChange}
                           fieldData={formData.awsCloudWatchKinesisStream}
-                          required />
+                          required/>
 
           <ValidatedInput id="awsCloudWatchAwsGroupName"
                           type="select"
@@ -116,7 +119,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
             {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
           </ValidatedInput>
 
-          <FormAdvancedOptions onChange={onChange} />
+          <FormAdvancedOptions onChange={onChange}/>
 
           {toggleSetup
           && <button onClick={toggleSetup} type="button">Choose Existing Kinesis Stream</button>}
