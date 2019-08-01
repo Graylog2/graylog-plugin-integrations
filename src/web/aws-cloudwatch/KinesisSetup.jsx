@@ -8,8 +8,6 @@ import useFetch from '../common/hooks/useFetch';
 import { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
-
-import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 
@@ -108,8 +106,18 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
                   ], formData)}
                   loading={groupNamesStatus.loading}
                   error={formError}
-                  title="Create Kinesis Stream"
-                  description="We were unable to find any Kinesis Streams, but we could find some Groups. Complete the fields below and we will setup your Stream for you!">
+                  title="Automated Kinesis Setup"
+                  description="">
+
+          <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
+            following operations within your AWS account.
+            See <a target={"_blank"} href={"https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"}>Using CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.</p>
+
+          <ol>
+            <li>Create a new Kinesis Stream with the specified name.</li>
+            <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
+            <li>Subscribe the new Kinesis Stream to the Log Group.</li>
+          </ol>
 
           <ValidatedInput id="awsCloudWatchKinesisStream"
                           type="text"
@@ -130,10 +138,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
             {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
           </ValidatedInput>
 
-          <FormAdvancedOptions onChange={onChange}/>
-
           {toggleSetup
-          && <button onClick={toggleSetup} type="button" className="btn btn-primary">Choose Existing Kinesis Stream</button>}
+          && <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>}
           &nbsp;&nbsp;
         </FormWrap>
       </Col>
