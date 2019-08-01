@@ -32,6 +32,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -411,7 +412,10 @@ public class KinesisService {
             kinesisClient.createStream(createStreamRequest);
             final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT);
-            return KinesisNewStreamResponse.create(responseMessage);
+
+            return KinesisNewStreamResponse.create(createStreamRequest.streamName(),
+                                                   "", // TODO: Supply ARN to the response.
+                                                   responseMessage);
         } catch (Exception e) {
 
             final String specificError = ExceptionUtils.formatMessageCause(e);
