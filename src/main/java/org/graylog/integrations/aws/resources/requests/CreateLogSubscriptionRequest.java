@@ -14,8 +14,8 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     private static final String LOG_GROUP_NAME = "log_group_name";
     private static final String FILTER_NAME = "filter_name";
     private static final String FILTER_PATTERN = "filter_pattern";
-    private static final String DESTINATION_STREAM_ARN = "destination-stream-arn";
-    private static final String ROLE_ARN = "role-arn";
+    private static final String DESTINATION_STREAM_ARN = "destination_stream_arn";
+    private static final String ROLE_ARN = "role_arn";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -28,6 +28,7 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
 
     /**
      * {@see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">Cloud Watch Subscription Filter</a>},
+     *
      * @return
      */
     @JsonProperty(LOG_GROUP_NAME)

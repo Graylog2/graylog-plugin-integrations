@@ -36,7 +36,7 @@ public class AWSLogMessage {
      *
      * @return true if message is a flow log.
      */
-    private boolean isFlowLog() {
+    public boolean isFlowLog() {
 
         // Though unlikely, the message could be null.
         if (logMessage == null) {

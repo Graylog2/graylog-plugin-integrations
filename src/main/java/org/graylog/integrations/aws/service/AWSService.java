@@ -9,6 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.AWSPolicy;
 import org.graylog.integrations.aws.AWSPolicyStatement;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
@@ -54,6 +55,7 @@ public class AWSService {
 
     /**
      * The only version supported is 2012-10-17
+     *
      * @see <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_version.html">IAM JSON Policy Elements: Version</a>
      */
     private static final String AWS_POLICY_VERSION = "2012-10-17";
@@ -124,7 +126,7 @@ public class AWSService {
      *
      * @return A credential provider
      */
-    static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
+    public static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
         Preconditions.checkArgument(StringUtils.isNotBlank(accessKeyId), "An AWS access key is required.");
         Preconditions.checkArgument(StringUtils.isNotBlank(secretAccessKey), "An AWS secret key is required.");
 
@@ -202,7 +204,7 @@ public class AWSService {
 
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         final HashMap<String, Object> configuration = new HashMap<>();
-        configuration.put(AWSInput.CK_AWS_MESSAGE_TYPE, request.awsMessageType());
+        configuration.put(AWSCodec.CK_AWS_MESSAGE_TYPE, request.awsMessageType());
         configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
         configuration.put(AWSInput.CK_GLOBAL, request.global());
@@ -216,7 +218,6 @@ public class AWSService {
         if (inputType.isKinesis()) {
             configuration.put(KinesisTransport.CK_KINESIS_STREAM_NAME, request.streamName());
             configuration.put(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE, request.batchSize());
-            configuration.put(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS, request.kinesisMaxThrottledWaitMs());
         } else {
             throw new Exception("The specified input type is not supported.");
         }

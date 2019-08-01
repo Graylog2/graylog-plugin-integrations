@@ -199,25 +199,6 @@ public class KinesisService {
     }
 
     /**
-     * Checks if the supplied stream is GZip compressed.
-     *
-     * @param bytes a byte array.
-     * @return true if the byte array is GZip compressed and false if not.
-     */
-    public boolean isCompressed(byte[] bytes) {
-        if ((bytes == null) || (bytes.length < 2)) {
-            return false;
-        } else {
-
-            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
-            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
-            // The >> operator shifts the GZIP magic number to the second byte.
-            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
-            return firstByteIsMagicNumber && secondByteIsMagicNumber;
-        }
-    }
-
-    /**
      * CloudWatch Kinesis subscription payloads are always compressed. Detecting a compressed payload is currently
      * how the Health Check identifies that the payload has been sent from CloudWatch.
      *
@@ -377,6 +358,25 @@ public class KinesisService {
 
         LOG.debug("Selecting a random Record from the sample list.");
         return recordsList.get(new Random().nextInt(recordsList.size()));
+    }
+
+    /**
+     * Checks if the supplied stream is GZip compressed.
+     *
+     * @param bytes a byte array.
+     * @return true if the byte array is GZip compressed and false if not.
+     */
+    public static boolean isCompressed(byte[] bytes) {
+        if ((bytes == null) || (bytes.length < 2)) {
+            return false;
+        } else {
+
+            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
+            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
+            // The >> operator shifts the GZIP magic number to the second byte.
+            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
+            return firstByteIsMagicNumber && secondByteIsMagicNumber;
+        }
     }
 
     /**

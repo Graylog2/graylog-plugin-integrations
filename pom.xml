@@ -33,7 +33,7 @@
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.1.0-beta.4-SNAPSHOT</graylog.version>
         <aws-java-sdk-2.version>2.5.33</aws-java-sdk-2.version>
-        <aws-kinesis-client.version>2.2.0</aws-kinesis-client.version>
+        <aws-kinesis-client.version>2.2.1</aws-kinesis-client.version>
     </properties>
 
     <dependencyManagement>
@@ -59,6 +59,13 @@
             <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client</artifactId>
             <version>${aws-kinesis-client.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.kinesis</groupId>
+            <artifactId>amazon-kinesis-client</artifactId>
+            <version>2.2.1</version>
         </dependency>
         <!-- Include the latest version of the Apache Http Client as required by the AWS SDK v2 -->
         <!-- See https://github.com/aws/aws-sdk-java-v2/issues/652 -->
