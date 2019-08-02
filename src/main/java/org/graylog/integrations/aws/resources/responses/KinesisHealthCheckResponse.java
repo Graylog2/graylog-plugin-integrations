@@ -7,7 +7,6 @@ import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 import org.graylog.integrations.aws.AWSMessageType;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @JsonAutoDetect
@@ -15,13 +14,9 @@ import java.util.Map;
 @WithBeanGetter
 public abstract class KinesisHealthCheckResponse {
 
-    private static final String SUCCESS = "success";
     private static final String INPUT_TYPE = "input_type";
     private static final String EXPLANATION = "explanation";
     private static final String MESSAGE_FIELDS = "message_fields";
-
-    @JsonProperty(SUCCESS)
-    public abstract boolean success();
 
     // Eg. CloudWatch, other.
     @JsonProperty(INPUT_TYPE)
@@ -35,20 +30,11 @@ public abstract class KinesisHealthCheckResponse {
     // that we have identified the message type. The user can then verify that the parsed
     // message looks correct.
     @JsonProperty(MESSAGE_FIELDS)
-    public abstract Map<String,Object> messageFields();
+    public abstract Map<String, Object> messageFields();
 
-    public static KinesisHealthCheckResponse create(@JsonProperty(SUCCESS) boolean success,
-                                                    @JsonProperty(INPUT_TYPE) AWSMessageType inputType,
+    public static KinesisHealthCheckResponse create(@JsonProperty(INPUT_TYPE) AWSMessageType inputType,
                                                     @JsonProperty(EXPLANATION) String explanation,
                                                     @JsonProperty(MESSAGE_FIELDS) Map<String, Object> messageFields) {
-        return new AutoValue_KinesisHealthCheckResponse(success, inputType, explanation, messageFields);
-    }
-
-    /**
-     * Create failed/unknown message type response.
-     * @return a {@link KinesisHealthCheckResponse} instance
-     */
-    public static KinesisHealthCheckResponse createFailed(@JsonProperty(EXPLANATION) String explanation) {
-        return new AutoValue_KinesisHealthCheckResponse(false, AWSMessageType.UNKNOWN, explanation, new HashMap<>());
+        return new AutoValue_KinesisHealthCheckResponse(inputType, explanation, messageFields);
     }
 }

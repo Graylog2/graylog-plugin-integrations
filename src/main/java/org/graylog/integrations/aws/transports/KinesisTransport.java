@@ -3,12 +3,16 @@ package org.graylog.integrations.aws.transports;
 import com.codahale.metrics.MetricSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.EventBus;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
+import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.codecs.AWSCodec;
+import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.LocalMetricRegistry;
-import org.graylog2.plugin.cluster.ClusterConfigService;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.configuration.fields.NumberField;
 import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
@@ -22,38 +26,76 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class KinesisTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(KinesisTransport.class);
-    public static final String NAME = "kinesis-transport";
+    public static final String NAME = "aws-kinesis-transport";
 
+    private static final String CK_AWS_REGION = "aws_region";
+    private static final String CK_ACCESS_KEY = "aws_access_key";
+    private static final String CK_SECRET_KEY = "aws_secret_key";
     public static final String CK_KINESIS_STREAM_NAME = "kinesis_stream_name";
     public static final String CK_KINESIS_RECORD_BATCH_SIZE = "kinesis_record_batch_size";
-    public static final String CK_KINESIS_MAX_THROTTLED_WAIT_MS = "kinesis_max_throttled_wait";
 
-    private static final int DEFAULT_BATCH_SIZE = 10000;
-    private static final int DEFAULT_THROTTLED_WAIT_MS = 60000;
+    public static final int DEFAULT_BATCH_SIZE = 10000;
 
+    private final Configuration configuration;
+    private final NodeId nodeId;
     private final LocalMetricRegistry localRegistry;
+    private final ObjectMapper objectMapper;
+
+    private KinesisConsumer kinesisConsumer;
+    private final ExecutorService executor;
 
     @Inject
     public KinesisTransport(@Assisted final Configuration configuration,
                             EventBus serverEventBus,
-                            org.graylog2.Configuration graylogConfiguration,
-                            final ClusterConfigService clusterConfigService,
                             final NodeId nodeId,
                             LocalMetricRegistry localRegistry,
                             ObjectMapper objectMapper) {
         super(serverEventBus, configuration);
+        this.configuration = configuration;
+        this.nodeId = nodeId;
         this.localRegistry = localRegistry;
+        this.objectMapper = objectMapper;
+        this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
+                                                                  .setDaemon(true)
+                                                                  .setNameFormat("aws-kinesis-reader-%d")
+                                                                  .setUncaughtExceptionHandler((t, e) -> LOG.error("Uncaught exception in AWS Kinesis reader.", e))
+                                                                  .build());
+    }
+
+    @Override
+    public void handleChangedThrottledState(boolean isThrottled) {
+
+        // Deliberately info level, so it is obvious when throttling occurs.
+        if (!isThrottled) {
+            LOG.info("Kinesis consumer unthrottled");
+        } else {
+            LOG.info("Kinesis consumer throttled");
+        }
     }
 
     @Override
     public void doLaunch(MessageInput input) throws MisfireException {
-        LOG.debug("Starting KinesisTransport");
+
+        this.kinesisConsumer = new KinesisConsumer(
+                nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
+                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)), Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION))),
+                configuration.getString(CK_ACCESS_KEY),
+                configuration.getString(CK_SECRET_KEY),
+                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE)
+        );
+
+        LOG.debug("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
+        executor.submit(this.kinesisConsumer);
     }
 
     private Consumer<byte[]> kinesisCallback(final MessageInput input) {
@@ -62,7 +104,9 @@ public class KinesisTransport extends ThrottleableTransport {
 
     @Override
     public void doStop() {
-        LOG.debug("Stopping KinesisTransport");
+        if (this.kinesisConsumer != null) {
+            this.kinesisConsumer.stop();
+        }
     }
 
     @Override
@@ -91,13 +135,31 @@ public class KinesisTransport extends ThrottleableTransport {
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest r = super.getRequestedConfiguration();
 
-            r.addField(new NumberField(
-                    CK_KINESIS_MAX_THROTTLED_WAIT_MS,
-                    "Throttled wait milliseconds",
-                    DEFAULT_THROTTLED_WAIT_MS,
-                    "The maximum time that the Kinesis input will pause for when in a throttled state. If this time is exceeded, then the Kinesis consumer will shut down until the throttled state is cleared. Recommended default: 60,000 ms",
+            r.addField(new DropdownField(
+                    CK_AWS_REGION,
+                    "AWS Region",
+                    Region.US_EAST_1.id(),
+                    AWSService.buildRegionChoices(),
+                    "The AWS region the Kinesis stream is running in.",
+                    ConfigurationField.Optional.NOT_OPTIONAL
+            ));
+
+            r.addField(new TextField(
+                    CK_ACCESS_KEY,
+                    "AWS access key",
+                    "",
+                    "Access key of an AWS user with sufficient permissions. (See documentation)",
+                    ConfigurationField.Optional.OPTIONAL
+            ));
+
+            r.addField(new TextField(
+                    CK_SECRET_KEY,
+                    "AWS secret key",
+                    "",
+                    "Secret key of an AWS user with sufficient permissions. (See documentation)",
                     ConfigurationField.Optional.OPTIONAL,
-                    NumberField.Attribute.ONLY_POSITIVE));
+                    TextField.Attribute.IS_PASSWORD
+            ));
 
             r.addField(new TextField(
                     CK_KINESIS_STREAM_NAME,

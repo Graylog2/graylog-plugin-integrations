@@ -15,8 +15,7 @@
   ],
   "author": "Graylog, Inc. <hello@graylog.com>",
   "dependencies": {
-    "@emotion/core": "^10.0.10",
-    "@emotion/styled": "^10.0.12"
+    "styled-components": "^4.3.2"
   },
   "private": true,
   "devDependencies": {

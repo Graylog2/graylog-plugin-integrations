@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
@@ -9,7 +9,7 @@ import { Input } from 'components/bootstrap';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/useFetch';
+import useFetch from '../common/hooks/useFetch';
 
 import FormWrap from '../common/FormWrap';
 import { ApiRoutes } from '../common/Routes';
@@ -27,8 +27,9 @@ Default.propTypes = {
 };
 
 const StepReview = ({ onSubmit, onEditClick }) => {
+  const [formError, setFormError] = useState(null);
   const { formData } = useContext(FormDataContext);
-  const { logSample } = useContext(ApiContext);
+  const { logData } = useContext(ApiContext);
   const {
     awsCloudWatchName,
     awsCloudWatchDescription,
@@ -39,11 +40,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
-    awsCloudWatchThrottleWait,
   } = formData;
 
-  const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value && awsCloudWatchThrottleWait;
-  const throttleValue = throttleEnabled ? awsCloudWatchThrottleWait.value : awsCloudWatchThrottleWait.defaultValue;
+  const globalInputEnabled = awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value;
+  const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value;
 
   const [fetchSubmitStatus, setSubmitFetch] = useFetch(
     null,
@@ -53,17 +53,25 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     'POST',
     {
       name: awsCloudWatchName.value,
-      description: awsCloudWatchDescription.value,
+      description: awsCloudWatchDescription ? awsCloudWatchDescription.value : '',
       region: awsCloudWatchAwsRegion.value,
       aws_input_type: 'KINESIS_FLOW_LOGS',
       stream_name: awsCloudWatchKinesisStream.value,
       batch_size: Number(awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue),
       assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
-      global: (awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value),
+      global: globalInputEnabled,
       enable_throttling: throttleEnabled,
-      kinesis_max_throttled_wait_ms: Number(throttleValue),
     },
   );
+
+  useEffect(() => {
+    if (fetchSubmitStatus.error) {
+      setFormError({
+        full_message: fetchSubmitStatus.error,
+        nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
+      });
+    }
+  }, [fetchSubmitStatus.error]);
 
   const handleSubmit = () => {
     setSubmitFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.SAVE);
@@ -72,10 +80,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   return (
     <Row>
       <Col md={8}>
-        <FormWrap onSubmit={handleSubmit} buttonContent="Complete CloudWatch Setup" loading={fetchSubmitStatus.loading}>
-          <h2>Final Review</h2>
-
-          <p>Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!</p>
+        <FormWrap onSubmit={handleSubmit}
+                  buttonContent="Complete CloudWatch Setup"
+                  loading={fetchSubmitStatus.loading}
+                  error={formError}
+                  title="Final Review"
+                  description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
           <Container>
             <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
@@ -111,7 +121,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               </li>
               <li>
                 <strong>Global Input</strong>
-                <span>{(awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value) ? <i className="fa fa-check" /> : <i className="fa fa-times" />}</span>
+                <span>{<i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} />}</span>
               </li>
               <li>
                 <strong>AWS Assumed ARN Role</strong>
@@ -128,12 +138,8 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                 </span>
               </li>
               <li>
-                <strong>Throttled Wait (ms)</strong>
-                <span>
-                  {
-                    throttleEnabled ? awsCloudWatchThrottleWait.value : <Default value={awsCloudWatchThrottleWait.defaultValue} />
-                  }
-                </span>
+                <strong>Enable Throttling</strong>
+                <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
               </li>
             </ReviewItems>
 
@@ -143,7 +149,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <Input id="awsCloudWatchLog"
                    type="textarea"
                    label=""
-                   value={logSample}
+                   value={logData.message}
                    rows={10}
                    disabled />
           </Container>

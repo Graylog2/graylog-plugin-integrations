@@ -1,20 +1,24 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import useFetch from './hooks/useFetch';
 
 import ValidatedInput from '../common/ValidatedInput';
+import MaskedInput from '../common/MaskedInput';
 import FormWrap from '../common/FormWrap';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
+import useFetch from '../common/hooks/useFetch';
+
+import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
+  const [formError, setFormError] = useState(null);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
   const [fetchStreamsStatus, setStreamsFetch] = useFetch(
     null,
@@ -26,6 +30,31 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
   );
 
+
+  useEffect(() => {
+    setStreamsFetch(null);
+    if (fetchRegionsStatus.error) {
+      setFormError({ full_message: fetchRegionsStatus.error });
+    } else if (fetchStreamsStatus.error) {
+      const badKey = /security token/g;
+      const badSecret = /signing method/g;
+      const noStreams = /No Kinesis streams/g;
+      if (fetchStreamsStatus.error.match(badKey)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Key, check out your AWS account for the 20-character long, alphanumeric string that usually starts with the letters "AK"' });
+      } else if (fetchStreamsStatus.error.match(badSecret)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
+      } else if (fetchStreamsStatus.error.match(noStreams)) {
+        setFormError({ full_message: fetchStreamsStatus.error, nice_message: "We're unable to find any Kinesis Streams in the chosen region, please try choosing a different region." });
+      } else {
+        setFormError({ full_message: fetchStreamsStatus.error });
+      }
+    }
+
+    return () => {
+      setFormError(null);
+    };
+  }, [fetchRegionsStatus.error, fetchStreamsStatus.error]);
+
   const handleSubmit = () => {
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
@@ -35,9 +64,16 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       <Col md={8}>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}>
-          <h2>Create Integration &amp; Authorize AWS</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?</p>
+                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+                  disabled={formValidation.isFormValid([
+                    'awsCloudWatchName',
+                    'awsCloudWatchAwsKey',
+                    'awsCloudWatchAwsSecret',
+                    'awsCloudWatchAwsRegion',
+                  ], formData)}
+                  error={formError}
+                  title="Create Integration &amp; Authorize AWS"
+                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
 
           {/* Fighting AutoComplete Forms */}
           <DisappearingInput id="name" type="text" />
@@ -72,16 +108,15 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                           help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
                           required />
 
-          <ValidatedInput id="awsCloudWatchAwsSecret"
-                          type="password"
-                          label="AWS Secret"
-                          placeholder="CloudWatch Integration AWS Secret"
-                          onChange={onChange}
-                          fieldData={formData.awsCloudWatchAwsSecret}
-                          autoComplete="off"
-                          maxLength="512"
-                          help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
-                          required />
+          <MaskedInput id="awsCloudWatchAwsSecret"
+                       label="AWS Secret"
+                       placeholder="CloudWatch Integration AWS Secret"
+                       onChange={onChange}
+                       fieldData={formData.awsCloudWatchAwsSecret}
+                       autoComplete="off"
+                       maxLength="512"
+                       help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
+                       required />
 
           <ValidatedInput id="awsCloudWatchAwsRegion"
                           type="select"

@@ -1,4 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
+import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
+
+import ConfirmLeaveDialog from 'components/common/ConfirmLeaveDialog';
 
 import Wizard from 'components/common/Wizard';
 import FormUtils from 'util/FormsUtils.js';
@@ -11,8 +15,9 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
+import { ApiContext } from './context/Api';
 
-const CloudWatch = () => {
+const CloudWatch = ({ route }) => {
   const {
     availableSteps,
     currentStep,
@@ -22,6 +27,9 @@ const CloudWatch = () => {
     setEnabledStep,
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
+  const { availableStreams } = useContext(ApiContext);
+  const [dirty, setDirty] = useState(false);
+  const [lastStep, setLastStep] = useState(false);
 
   const handleStepChange = (nextStep) => {
     setCurrentStep(nextStep);
@@ -33,13 +41,16 @@ const CloudWatch = () => {
 
   const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
-    const value = FormUtils.getValueFromInput(target);
+    const value = FormUtils.getValueFromInput(target).trim();
+
+    if (!dirty) {
+      setDirty(true);
+    }
 
     setFormData(id, { ...fieldData, value });
   };
 
   const handleSubmit = () => {
-    // TODO: add String.trim() to inputs
     const nextStep = availableSteps.indexOf(currentStep) + 1;
 
     if (availableSteps[nextStep]) {
@@ -48,6 +59,7 @@ const CloudWatch = () => {
       setCurrentStep(key);
       setEnabledStep(key);
     } else {
+      setLastStep(true);
       history.push(Routes.SYSTEM.INPUTS);
     }
   };
@@ -64,7 +76,7 @@ const CloudWatch = () => {
       title: 'AWS CloudWatch Kinesis Setup',
       component: (<StepKinesis onSubmit={handleSubmit}
                                onChange={handleFieldUpdate}
-                               hasStreams />),
+                               hasStreams={availableStreams.length > 0} />),
       disabled: isDisabledStep('kinesis-setup'),
     },
     {
@@ -87,13 +99,20 @@ const CloudWatch = () => {
   }
 
   return (
-    <Wizard steps={wizardSteps}
-            activeStep={currentStep}
-            onStepChange={handleStepChange}
-            horizontal
-            justified
-            hidePreviousNextButtons />
+    <>
+      {dirty && !lastStep && <ConfirmLeaveDialog route={route} question="Are you sure? Your new Input will not be created." />}
+      <Wizard steps={wizardSteps}
+              activeStep={currentStep}
+              onStepChange={handleStepChange}
+              horizontal
+              justified
+              hidePreviousNextButtons />
+    </>
   );
 };
 
-export default CloudWatch;
+CloudWatch.propTypes = {
+  route: PropTypes.object.isRequired,
+};
+
+export default withRouter(CloudWatch);

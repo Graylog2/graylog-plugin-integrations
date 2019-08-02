@@ -29,9 +29,11 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -43,6 +45,7 @@ import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -115,9 +118,7 @@ public class KinesisService {
         final boolean streamExists = kinesisStreamNames.streams().stream()
                                                        .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
-            String explanation = String.format("The requested stream [%s] was not found.", request.streamName());
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("The requested stream [%s] was not found.", request.streamName()));
         }
 
         LOG.debug("The stream [{}] exists", request.streamName());
@@ -128,9 +129,7 @@ public class KinesisService {
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
         if (records.size() == 0) {
-            String explanation = "The Kinesis stream does not contain any messages.";
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("The Kinesis stream [%s] does not contain any messages.", request.streamName()));
         }
 
         // Select random record from list, and check if the payload is compressed
@@ -192,26 +191,12 @@ public class KinesisService {
             }
         }
         LOG.debug("Kinesis streams queried: [{}]", streamNames);
-        return StreamsResponse.create(streamNames, streamNames.size());
-    }
 
-    /**
-     * Checks if the supplied stream is GZip compressed.
-     *
-     * @param bytes a byte array.
-     * @return true if the byte array is GZip compressed and false if not.
-     */
-    public boolean isCompressed(byte[] bytes) {
-        if ((bytes == null) || (bytes.length < 2)) {
-            return false;
-        } else {
-
-            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
-            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
-            // The >> operator shifts the GZIP magic number to the second byte.
-            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
-            return firstByteIsMagicNumber && secondByteIsMagicNumber;
+        if (streamNames.isEmpty()) {
+            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s] region.", regionName));
         }
+
+        return StreamsResponse.create(streamNames, streamNames.size());
     }
 
     /**
@@ -243,10 +228,8 @@ public class KinesisService {
         Optional<CloudWatchLogEvent> logEntryOptional = data.logEvents().stream().findAny();
 
         if (!logEntryOptional.isPresent()) {
-            String message = "The CloudWatch payload did not contain any messages. This should not happen. " +
-                             "See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html";
-            LOG.debug(message);
-            return KinesisHealthCheckResponse.createFailed(message);
+            throw new BadRequestException("The CloudWatch payload did not contain any messages. This should not happen. " +
+                                          "See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html");
         }
 
         CloudWatchLogEvent logEntry = logEntryOptional.get();
@@ -343,9 +326,7 @@ public class KinesisService {
         // All messages will resolve to a particular codec. Event Unknown messages will resolve to the raw logs codec.
         final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(awsMessageType.getCodecName());
         if (codecFactory == null) {
-            final String explanation = String.format("A codec with name [%s] could not be found.", awsMessageType.getCodecName());
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("A codec with name [%s] could not be found.", awsMessageType.getCodecName()));
         }
 
         // Parse the message with the selected codec.
@@ -353,30 +334,23 @@ public class KinesisService {
         final Codec codec = codecFactory.create(Configuration.EMPTY_CONFIGURATION);
 
         // Load up appropriate codec and parse the message.
-        final Message fullyParsedMessage;
+        final byte[] payload;
         try {
-            fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
+            payload = objectMapper.writeValueAsBytes(logEvent);
         } catch (JsonProcessingException e) {
-            LOG.error("An error occurred decoding Flow Log message.", e);
-            final String explanation = String.format("Message decoding failed. More information might be " +
-                                                     "available by enabling Debug logging. message [%s]", logMessage);
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            // If this fails, there is probably a coding error somewhere.
+            throw new BadRequestException( "Encoding the message to bytes failed.", e);
         }
 
-        // Check if parsing message returns null.
+        final Message fullyParsedMessage = codec.decode(new RawMessage(payload));
         if (fullyParsedMessage == null) {
-            final String explanation = String.format("Message decoding failed. More information might be " +
-                                                     "available by enabling Debug logging. message [%s]", logMessage);
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("Message decoding failed. More information might be " +
+                                                        "available by enabling Debug logging. message [%s]", logMessage));
         }
 
         LOG.debug("Successfully parsed message type [{}] with codec [{}].", awsMessageType, awsMessageType.getCodecName());
 
-        return KinesisHealthCheckResponse.create(true, awsMessageType,
-                                                 responseMessage,
-                                                 fullyParsedMessage.getFields());
+        return KinesisHealthCheckResponse.create(awsMessageType, responseMessage, fullyParsedMessage.getFields());
     }
 
     Record selectRandomRecord(List<Record> recordsList) {
@@ -385,6 +359,25 @@ public class KinesisService {
 
         LOG.debug("Selecting a random Record from the sample list.");
         return recordsList.get(new Random().nextInt(recordsList.size()));
+    }
+
+    /**
+     * Checks if the supplied stream is GZip compressed.
+     *
+     * @param bytes a byte array.
+     * @return true if the byte array is GZip compressed and false if not.
+     */
+    public static boolean isCompressed(byte[] bytes) {
+        if ((bytes == null) || (bytes.length < 2)) {
+            return false;
+        } else {
+
+            // If the byte array is GZipped, then the first or second byte will be the GZip magic number.
+            final boolean firstByteIsMagicNumber = bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC);
+            // The >> operator shifts the GZIP magic number to the second byte.
+            final boolean secondByteIsMagicNumber = bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> EIGHT_BITS);
+            return firstByteIsMagicNumber && secondByteIsMagicNumber;
+        }
     }
 
     /**
@@ -411,7 +404,10 @@ public class KinesisService {
             kinesisClient.createStream(createStreamRequest);
             final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT);
-            return KinesisNewStreamResponse.create(responseMessage);
+
+            return KinesisNewStreamResponse.create(createStreamRequest.streamName(),
+                                                   "", // TODO: Supply ARN to the response.
+                                                   responseMessage);
         } catch (Exception e) {
 
             final String specificError = ExceptionUtils.formatMessageCause(e);
@@ -420,8 +416,104 @@ public class KinesisService {
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                                          specificError);
             LOG.error(responseMessage);
+            //TODO change exception error when refactoring createKinesisStream method
             throw new InternalServerErrorException(responseMessage, e);
         }
+    }
+
+    /**
+     * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
+     *
+     * @param regionName      The region where the kinesis stream exists
+     * @param accessKeyId     The AWS access key
+     * @param secretAccessKey The AWS secret key
+     * @param kinesisStream   The AWS kinesis stream
+     * @param roleName        The name of the role that will be created
+     * @param rolePolicyName  The name of the policy that will be created
+     * @return role Arn associated with the associated kinesis stream
+     */
+    public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
+                                                 String kinesisStream, String roleName, String rolePolicyName) {
+
+        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
+        KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
+
+        try {
+            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", kinesisStream);
+            String streamArn = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription().streamARN();
+
+            final IamClient iam = IamClient.builder()
+                                           .region(Region.AWS_GLOBAL)
+                                           .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                                           .build();
+
+            String createRoleResponse = createRoleForKinesisAutoSetup(iam, roleName, regionName);
+            LOG.debug(createRoleResponse);
+
+            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
+            LOG.debug(setPermissionsRoleResponse);
+
+            return getRolePermissionsArn(iam, roleName);
+
+        } catch (Exception e) {
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
+                                                         "following error [%s]", roleName, specificError);
+            throw new BadRequestException(responseMessage);
+        }
+    }
+
+    private static String setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
+        String rolePolicy =
+                "{\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Action\": \"kinesis:PutRecord\",\n" +
+                "      \"Resource\": \"" + streamArn + "\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
+        try {
+            iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
+            return String.format("Success! The role policy [%s] was assigned.", rolePolicyName);
+        } catch (Exception e) {
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("Unable to create role [%s] due to the " +
+                                                         "following error [%s]", roleName, specificError);
+            throw new BadRequestException(responseMessage);
+        }
+    }
+
+    private static String createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region) {
+        LOG.debug("Create Kinesis Auto Setup Role [{}] to region [{}]", roleName, region);
+        String assumeRolePolicy =
+                "{\n" +
+                "  \"Statement\": [\n" +
+                "    {\n" +
+                "      \"Effect\": \"Allow\",\n" +
+                "      \"Principal\": { \"Service\": \"logs." + region + ".amazonaws.com\" },\n" +
+                "      \"Action\": \"sts:AssumeRole\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        // TODO optimize checking if the role exists first
+        LOG.debug("Role [{}] was created.", roleName);
+        try {
+            iam.createRole(r -> r.roleName(roleName).assumeRolePolicyDocument(assumeRolePolicy));
+            return String.format("Success! The role [%s] was created.", roleName);
+        } catch (Exception e) {
+            final String specificError = ExceptionUtils.formatMessageCause(e);
+            final String responseMessage = String.format("The role [%s] was not created due to the " +
+                                                         "following reason [%s]", roleName, specificError);
+            throw new BadRequestException(responseMessage);
+        }
+    }
+
+    private static String getRolePermissionsArn(IamClient iam, String roleName) {
+        LOG.debug("Acquiring the role ARN associated to the role [{}]", roleName);
+        return iam.getRole(r -> r.roleName(roleName)).role().arn();
     }
 
 }

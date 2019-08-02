@@ -2,10 +2,11 @@ package org.graylog.integrations.aws.codecs;
 
 import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.AbstractCodec;
@@ -13,16 +14,24 @@ import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.plugin.journal.RawMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.regions.Region;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AWSCodec extends AbstractCodec {
 
     public static final String NAME = "AWSCodec";
     private static final Logger LOG = LoggerFactory.getLogger(AWSCodec.class);
+
+    /**
+     * Specifies one of the {@code AWSInputType} choices, which indicates which codec and transport
+     * should be used.
+     */
+    public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
@@ -38,7 +47,7 @@ public class AWSCodec extends AbstractCodec {
     public Message decode(@Nonnull RawMessage rawMessage) {
 
         // Load the codec by message type.
-        final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE));
+        final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(CK_AWS_MESSAGE_TYPE));
         final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(awsMessageType.getCodecName());
         if (codecFactory == null) {
             LOG.error("A codec with name [{}] could not be found.", awsMessageType.getCodecName());
@@ -57,6 +66,11 @@ public class AWSCodec extends AbstractCodec {
         return message;
     }
 
+    @Override
+    public String getName() {
+        return NAME;
+    }
+
     @FactoryClass
     public interface Factory extends Codec.Factory<AWSCodec> {
         @Override
@@ -70,7 +84,18 @@ public class AWSCodec extends AbstractCodec {
     public static class Config extends AbstractCodec.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            return new ConfigurationRequest();
+            ConfigurationRequest request = new ConfigurationRequest();
+
+            request.addField(new DropdownField(
+                    CK_AWS_MESSAGE_TYPE,
+                    "AWS Message Type",
+                    Region.US_EAST_1.id(),
+                    AWSMessageType.getMessageTypes().stream()
+                                  .collect(Collectors.toMap(AWSMessageType::toString, AWSMessageType::getLabel)),
+                    "The AWS region the Kinesis stream is running in.",
+                    ConfigurationField.Optional.NOT_OPTIONAL));
+
+            return request;
         }
 
         @Override
