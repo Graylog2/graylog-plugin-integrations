@@ -33,7 +33,6 @@ import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
-import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -339,7 +338,7 @@ public class KinesisService {
             payload = objectMapper.writeValueAsBytes(logEvent);
         } catch (JsonProcessingException e) {
             // If this fails, there is probably a coding error somewhere.
-            throw new BadRequestException( "Encoding the message to bytes failed.", e);
+            throw new BadRequestException("Encoding the message to bytes failed.", e);
         }
 
         final Message fullyParsedMessage = codec.decode(new RawMessage(payload));
