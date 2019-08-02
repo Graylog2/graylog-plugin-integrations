@@ -1,8 +1,8 @@
 package org.graylog.integrations.aws.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
@@ -84,8 +84,7 @@ public class AWSServiceTest {
                                              10000,
                                              "",
                                              false,
-                                             true,
-                                             60);
+                                             true);
         awsService.saveInput(request, user);
 
         // Verify that inputService received a valid input to save.
@@ -100,14 +99,13 @@ public class AWSServiceTest {
         assertEquals(AWSInput.TYPE, input.type());
         assertFalse(input.global());
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
-        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSInput.CK_AWS_MESSAGE_TYPE));
+        assertEquals("KINESIS_FLOW_LOGS", input.configuration().get(AWSCodec.CK_AWS_MESSAGE_TYPE));
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
         assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
         assertEquals("An AWS Input", input.configuration().get(AWSInput.CK_DESCRIPTION));
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
         assertEquals("AWS Input", input.configuration().get(MessageInput.FIELD_TITLE));
         assertEquals("a-stream", input.configuration().get(KinesisTransport.CK_KINESIS_STREAM_NAME));
-        assertEquals(60, input.configuration().get(KinesisTransport.CK_KINESIS_MAX_THROTTLED_WAIT_MS));
         assertEquals(10000, input.configuration().get(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE));
     }
 

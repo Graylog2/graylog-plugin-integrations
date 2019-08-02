@@ -12,10 +12,8 @@ import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
-import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
-import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -127,17 +125,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
 
         KinesisHealthCheckResponse response = kinesisService.healthCheck(heathCheckRequest);
         return Response.accepted().entity(response).build();
-    }
-
-    @POST
-    @Timed
-    @Path("/kinesis/create_stream")
-    @ApiOperation(
-            value = "Attempt to create a new kinesis stream."
-    )
-    @RequiresPermissions(AWSPermissions.AWS_READ)
-    public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull KinesisNewStreamRequest kinesisNewStreamRequest) {
-        return kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
     }
 
     /**

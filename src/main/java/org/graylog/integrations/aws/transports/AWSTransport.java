@@ -4,7 +4,7 @@ import com.codahale.metrics.MetricSet;
 import com.google.common.eventbus.EventBus;
 import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.inputs.AWSInput;
+import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -59,7 +59,7 @@ public class AWSTransport extends ThrottleableTransport {
         LOG.debug("Stop AWS Transport");
         if (resolvedTransport == null) {
             LOG.error("A transport was not found with this [{}] instance.",
-                      configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE));
+                      configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE));
         }
         resolvedTransport.stop();
     }
@@ -68,7 +68,7 @@ public class AWSTransport extends ThrottleableTransport {
      * Looks up the transport for the {@link AWSMessageType} stored in the input configuration.
      */
     private Transport resolveTransport() throws MisfireException {
-        final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSInput.CK_AWS_MESSAGE_TYPE));
+        final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE));
         final Transport.Factory<? extends Transport> transportFactory = this.availableTransports.get(awsMessageType.getTransportName());
         if (transportFactory == null) {
             throw new MisfireException(String.format("A transport with name [%s] could not be found.",
