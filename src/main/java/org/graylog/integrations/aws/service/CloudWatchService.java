@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRes
 import software.amazon.awssdk.services.cloudwatchlogs.paginators.DescribeLogGroupsIterable;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 
 public class CloudWatchService {
@@ -52,6 +53,11 @@ public class CloudWatchService {
             }
         }
         LOG.debug("Log groups queried: [{}]", groupNameList);
+
+        if (groupNameList.isEmpty()) {
+            throw new BadRequestException(String.format("No CloudWatch log groups were found in the [%s] region.", region));
+        }
+
         return LogGroupsResponse.create(groupNameList, groupNameList.size());
     }
 }

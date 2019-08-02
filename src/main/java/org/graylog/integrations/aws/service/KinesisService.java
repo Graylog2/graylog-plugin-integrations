@@ -44,6 +44,7 @@ import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,9 +117,7 @@ public class KinesisService {
         final boolean streamExists = kinesisStreamNames.streams().stream()
                                                        .anyMatch(streamName -> streamName.equals(request.streamName()));
         if (!streamExists) {
-            String explanation = String.format("The requested stream [%s] was not found.", request.streamName());
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("The requested stream [%s] was not found.", request.streamName()));
         }
 
         LOG.debug("The stream [{}] exists", request.streamName());
@@ -129,9 +128,7 @@ public class KinesisService {
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
         if (records.size() == 0) {
-            String explanation = "The Kinesis stream does not contain any messages.";
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("The Kinesis stream [%s] does not contain any messages.", request.streamName()));
         }
 
         // Select random record from list, and check if the payload is compressed
@@ -193,6 +190,11 @@ public class KinesisService {
             }
         }
         LOG.debug("Kinesis streams queried: [{}]", streamNames);
+
+        if (streamNames.isEmpty()) {
+            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s] region.", regionName));
+        }
+
         return StreamsResponse.create(streamNames, streamNames.size());
     }
 
@@ -225,10 +227,8 @@ public class KinesisService {
         Optional<CloudWatchLogEvent> logEntryOptional = data.logEvents().stream().findAny();
 
         if (!logEntryOptional.isPresent()) {
-            String message = "The CloudWatch payload did not contain any messages. This should not happen. " +
-                             "See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html";
-            LOG.debug(message);
-            return KinesisHealthCheckResponse.createFailed(message);
+            throw new BadRequestException("The CloudWatch payload did not contain any messages. This should not happen. " +
+                                          "See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html");
         }
 
         CloudWatchLogEvent logEntry = logEntryOptional.get();
@@ -325,9 +325,7 @@ public class KinesisService {
         // All messages will resolve to a particular codec. Event Unknown messages will resolve to the raw logs codec.
         final Codec.Factory<? extends Codec> codecFactory = this.availableCodecs.get(awsMessageType.getCodecName());
         if (codecFactory == null) {
-            final String explanation = String.format("A codec with name [%s] could not be found.", awsMessageType.getCodecName());
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("A codec with name [%s] could not be found.", awsMessageType.getCodecName()));
         }
 
         // Parse the message with the selected codec.
@@ -335,30 +333,23 @@ public class KinesisService {
         final Codec codec = codecFactory.create(Configuration.EMPTY_CONFIGURATION);
 
         // Load up appropriate codec and parse the message.
-        final Message fullyParsedMessage;
+        final byte[] payload;
         try {
-            fullyParsedMessage = codec.decode(new RawMessage(objectMapper.writeValueAsBytes(logEvent)));
+            payload = objectMapper.writeValueAsBytes(logEvent);
         } catch (JsonProcessingException e) {
-            LOG.error("An error occurred decoding Flow Log message.", e);
-            final String explanation = String.format("Message decoding failed. More information might be " +
-                                                     "available by enabling Debug logging. message [%s]", logMessage);
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            // If this fails, there is probably a coding error somewhere.
+            throw new BadRequestException( "Encoding the message to bytes failed.", e);
         }
 
-        // Check if parsing message returns null.
+        final Message fullyParsedMessage = codec.decode(new RawMessage(payload));
         if (fullyParsedMessage == null) {
-            final String explanation = String.format("Message decoding failed. More information might be " +
-                                                     "available by enabling Debug logging. message [%s]", logMessage);
-            LOG.error(explanation);
-            return KinesisHealthCheckResponse.createFailed(explanation);
+            throw new BadRequestException(String.format("Message decoding failed. More information might be " +
+                                                        "available by enabling Debug logging. message [%s]", logMessage));
         }
 
         LOG.debug("Successfully parsed message type [{}] with codec [{}].", awsMessageType, awsMessageType.getCodecName());
 
-        return KinesisHealthCheckResponse.create(true, awsMessageType,
-                                                 responseMessage,
-                                                 fullyParsedMessage.getFields());
+        return KinesisHealthCheckResponse.create(awsMessageType, responseMessage, fullyParsedMessage.getFields());
     }
 
     Record selectRandomRecord(List<Record> recordsList) {
