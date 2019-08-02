@@ -53,7 +53,10 @@ ValidatedInput.propTypes = {
     value: PropTypes.string,
   }),
   help: PropTypes.string,
-  label: PropTypes.string.isRequired,
+  label: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]).isRequired,
   id: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   required: PropTypes.bool,
