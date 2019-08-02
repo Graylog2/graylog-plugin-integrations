@@ -17,8 +17,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
 
-import static java.lang.Thread.sleep;
-
 public class CloudWatchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudWatchService.class);
@@ -41,8 +39,8 @@ public class CloudWatchService {
      * Returns a list of log groups that exist in CloudWatch.
      *
      * @param region             The AWS region
-     * @param awsAccessKeyId
-     * @param awsSecretAccessKey The AWS region
+     * @param awsAccessKeyId     The AWS accessKey
+     * @param awsSecretAccessKey The AWS secretKey
      * @return A list of log groups in alphabetical order.
      */
     public LogGroupsResponse getLogGroupNames(String region, String awsAccessKeyId, String awsSecretAccessKey) {
@@ -68,8 +66,8 @@ public class CloudWatchService {
 
     public String addSubscriptionFilter(CloudWatchLogsClient cloudWatch, String logGroup, String streamArn,
                                         String roleArn, String filterName,
-                                        String filterPattern) throws InterruptedException {
-        PutSubscriptionFilterRequest putSubscriptionFilterRequest =
+                                        String filterPattern) {
+        final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
                                             .logGroupName(logGroup)
                                             .filterName(filterName)
@@ -78,19 +76,17 @@ public class CloudWatchService {
                                             .roleArn(roleArn)
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
-        sleep(2_000);
         try {
             cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
-            final String responseMessage = String.format("Success. The subscription filter [%s] was added to [%s].",
-                                                         filterName, logGroup);
-            return responseMessage;
+            return String.format("Success. The subscription filter [%s] was added to [%s].",
+                                 filterName, logGroup);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Attempt to add subscription [%s] to Cloudwatch log group " +
                                                          "[%s] failed due to the following exception: [%s]",
                                                          filterName, logGroup, specificError);
             LOG.error(responseMessage);
-            throw new InternalServerErrorException(responseMessage, e);
+            throw new BadRequestException(responseMessage, e);
         }
     }
 }
