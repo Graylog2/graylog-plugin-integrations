@@ -10,6 +10,7 @@ import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
+import KinesisSetupStep from "./KinesisSetupStep";
 
 const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
@@ -118,6 +119,10 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
             <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
             <li>Subscribe the new Kinesis Stream to the Log Group.</li>
           </ol>
+
+          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
+          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
+          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
 
           <ValidatedInput id="awsCloudWatchKinesisStream"
                           type="text"
