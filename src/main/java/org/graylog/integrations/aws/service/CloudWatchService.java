@@ -64,9 +64,9 @@ public class CloudWatchService {
         return LogGroupsResponse.create(groupNameList, groupNameList.size());
     }
 
-    public String addSubscriptionFilter(CloudWatchLogsClient cloudWatch, String logGroup, String streamArn,
-                                        String roleArn, String filterName,
-                                        String filterPattern) {
+    public static String addSubscriptionFilter(CloudWatchLogsClient cloudWatch, String logGroup, String streamArn,
+                                               String roleArn, String filterName,
+                                               String filterPattern) {
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
                                             .logGroupName(logGroup)

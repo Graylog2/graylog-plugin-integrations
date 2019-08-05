@@ -14,6 +14,9 @@ public abstract class KinesisFullSetupRequest implements AWSRequest {
     private static final String ROLE_NAME = "role_name";
     private static final String LOG_GROUP_NAME = "log_group_name";
     private static final String STREAM_NAME = "stream_name";
+    private static final String ROLE_POLICY_NAME = "role_policy_name";
+    private static final String FILTER_NAME = "filter_name";
+    private static final String FILTER_PATTERN = "filter_pattern";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -33,13 +36,25 @@ public abstract class KinesisFullSetupRequest implements AWSRequest {
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
+    @JsonProperty(ROLE_POLICY_NAME)
+    public abstract String rolePolicyName();
+
+    @JsonProperty(FILTER_NAME)
+    public abstract String filterName();
+
+    @JsonProperty(FILTER_PATTERN)
+    public abstract String filterPattern();
+
     @JsonCreator
     public static KinesisFullSetupRequest create(@JsonProperty(REGION) String region,
                                                  @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                  @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
                                                  @JsonProperty(ROLE_NAME) String roleName,
                                                  @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
-                                                 @JsonProperty(STREAM_NAME) String streamName) {
-        return new AutoValue_KinesisFullSetupRequest(region, awsAccessKeyId, awsSecretAccessKey, roleName, getLogGroupName, streamName);
+                                                 @JsonProperty(STREAM_NAME) String streamName,
+                                                 @JsonProperty(ROLE_POLICY_NAME) String rolePolicyName,
+                                                 @JsonProperty(FILTER_NAME) String filterName,
+                                                 @JsonProperty(FILTER_PATTERN) String filterPattern) {
+        return new AutoValue_KinesisFullSetupRequest(region, awsAccessKeyId, awsSecretAccessKey, roleName, getLogGroupName, streamName, rolePolicyName, filterName, filterPattern);
     }
 }
