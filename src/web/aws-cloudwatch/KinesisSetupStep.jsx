@@ -8,6 +8,7 @@ const KinesisSetupStep = ({ label, inProgress, success }) => {
     <Row>
       <Col md={8}>
         <p>{label}</p>
+        <p>{'In progress: ' + inProgress}</p>
       </Col>
     </Row>
   );
