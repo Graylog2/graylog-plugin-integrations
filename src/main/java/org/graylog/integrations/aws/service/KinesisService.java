@@ -47,7 +47,6 @@ import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -429,8 +428,7 @@ public class KinesisService {
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                                          specificError);
             LOG.error(responseMessage);
-            //TODO change exception error when refactoring createKinesisStream method
-            throw new InternalServerErrorException(responseMessage, e);
+            throw new BadRequestException(responseMessage, e);
         }
     }
 
