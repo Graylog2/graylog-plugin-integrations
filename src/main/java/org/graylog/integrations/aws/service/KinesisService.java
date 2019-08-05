@@ -42,6 +42,8 @@ import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
+import software.amazon.awssdk.services.kinesis.model.StreamDescription;
+import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -55,6 +57,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
+
+import static java.lang.Thread.sleep;
 
 /**
  * Service for all AWS Kinesis business logic and SDK usages.
@@ -399,13 +403,23 @@ public class KinesisService {
         LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
                   kinesisNewStreamRequest.streamName(), SHARD_COUNT);
 
+        StreamDescription streamDescription;
         try {
             kinesisClient.createStream(createStreamRequest);
-            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
-                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT);
+            do{
+                sleep(20_000);
+                streamDescription = kinesisClient
+                        .describeStream(r -> r.streamName(kinesisNewStreamRequest.streamName()))
+                        .streamDescription();
+
+            }while(streamDescription.streamStatus() != StreamStatus.ACTIVE);
+            String streamArn = streamDescription.streamARN();
+            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards" +
+                                                         "with the following stream ARN [%s].",
+                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT, streamArn);
 
             return KinesisNewStreamResponse.create(createStreamRequest.streamName(),
-                                                   "", // TODO: Supply ARN to the response.
+                                                   streamArn,
                                                    responseMessage);
         } catch (Exception e) {
 
