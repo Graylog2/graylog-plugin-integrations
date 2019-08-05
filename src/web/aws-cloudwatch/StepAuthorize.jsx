@@ -12,7 +12,8 @@ import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 import useFetch from '../common/hooks/useFetch';
 
-import formValidation from '../utils/formValidation';
+import formValidation from '../utils/formValidation'
+import KinesisSetupSteps from "./KinesisSetupSteps";
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -63,6 +64,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   return (
     <Row>
       <Col md={8}>
+        {/* Temporarily literally include KinesisSetupSteps here for quick testing. */}
+        <KinesisSetupSteps/>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
                   loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}

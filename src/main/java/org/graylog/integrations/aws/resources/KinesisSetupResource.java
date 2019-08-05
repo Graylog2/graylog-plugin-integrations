@@ -65,11 +65,14 @@ public class KinesisSetupResource implements PluginRestResource {
     @ApiOperation(value = "Step 1: Attempt to create a new kinesis stream and wait for it to be ready.")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                   KinesisNewStreamRequest request) {
+                                                                   KinesisNewStreamRequest request) throws InterruptedException {
 
         LOG.info("Request: [{}]", request);
         // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
         // kinesisService.createNewKinesisStream(kinesisNewStreamRequest)
+
+        // Simulate processing delay.
+        Thread.sleep(1000);
 
         // Mock response
         return KinesisNewStreamResponse.create(request.streamName(), "a-fake-arn", "The stream is good-to-go");
@@ -89,8 +92,11 @@ public class KinesisSetupResource implements PluginRestResource {
     @ApiOperation(value = "Step 2: Create AWS IAM policy needed for CloudWatch to write logs to Kinesis")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionPolicyResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                      CreateLogSubscriptionPolicyRequest request) {
+                                                                      CreateLogSubscriptionPolicyRequest request) throws InterruptedException {
         LOG.info("Request: [{}]", request);
+
+        // Simulate processing delay.
+        Thread.sleep(1000);
 
         // Mock response
         return CreateLogSubscriptionPolicyResponse.create("fake-policy-name", "fake-policy-arn");
@@ -114,8 +120,11 @@ public class KinesisSetupResource implements PluginRestResource {
     @ApiOperation(value = "Step 3: Subscribe a Kinesis stream to a CloudWatch log group")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                    CreateLogSubscriptionRequest request) {
+                                                                    CreateLogSubscriptionRequest request) throws InterruptedException {
         LOG.info("Request: [{}]", request);
+
+        // Simulate processing delay.
+        Thread.sleep(1000);
 
         // TODO: We'll need to give some thought to how to effectively build the UI for the filterPattern and filterName
         //   Perhaps we can provide default initialized values (eg. " " for filterPattern [matches all], and some generic pattern name).

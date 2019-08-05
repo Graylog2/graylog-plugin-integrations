@@ -25,47 +25,6 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     'POST',
     { region: formData.awsCloudWatchAwsRegion.value },
   );
-  const [ createStreamStatus, createStreamFetch ] = useFetch(
-    null,
-    (response) => {
-      console.log("Stream creation complete: []", response, formData);
-      createPolicyFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
-    },
-    'POST',
-    {
-      region: formData.awsCloudWatchAwsRegion.value,
-      stream_name: formData.awsCloudWatchKinesisStream ? formData.awsCloudWatchKinesisStream.value : '',
-    },
-  );
-  const [ createPolicyStatus, createPolicyFetch ] = useFetch(
-    null,
-    (response) => {
-      console.log("Policy creation complete: []", response);
-      createSubscriptionFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION);
-    },
-    'POST',
-    {
-      region: formData.awsCloudWatchAwsRegion.value,
-      role_name: 'role-name',
-      stream_name: 'test-stream',
-      stream_arn: 'test-stream-arn',
-    },
-  );
-  const [ createSubscriptionStatus, createSubscriptionFetch ] = useFetch(
-    null,
-    (response) => {
-      console.log("Subscription creation complete: []", response);
-    },
-    'POST',
-    {
-      region: formData.awsCloudWatchAwsRegion.value,
-      log_group_name: 'log-group',
-      filter_name: 'filter-name',
-      filter_pattern: 'pattern',
-      destination_stream_arn: 'stream-arn',
-      role_arn: 'role-arn',
-    },
-  );
 
   useEffect(() => {
     if (groupNamesStatus.error) {

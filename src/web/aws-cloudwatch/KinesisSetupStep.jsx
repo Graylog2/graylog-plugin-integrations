@@ -13,9 +13,4 @@ const KinesisSetupStep = ({ label, inProgress, success }) => {
   );
 };
 
-KinesisSetupStep.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  onEditClick: PropTypes.func.isRequired,
-};
-
 export default KinesisSetupStep;
