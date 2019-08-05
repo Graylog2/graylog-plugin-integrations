@@ -11,39 +11,46 @@ const KinesisSetupSteps = ({}) => {
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);
 
-  const [ steps, setSteps ] = useState([ {
-    label: "Creating stream",
+  const [ stepCreateStream, setStepCreateStream ] = useState({
+    label: "Creating Stream",
     request: createStream,
     inProgress: false,
     success: false
-  }, {
-    label: "Creating policy",
-    request: createPolicy,
+  });
+
+  const [ stepCreatePolicy, setStepCreatePolicy ] = useState({
+    label: "Creating Policy",
+    request: createStream,
     inProgress: false,
     success: false
-  }, {
-    label: "Creating subscription",
-    request: createSubscription,
+  });
+
+  const [ stepCreateSubscription, setStepCreateSubscription ] = useState({
+    label: "Creating Subscription",
+    request: createStream,
     inProgress: false,
     success: false
-  } ]);
+  });
 
   useEffect(() => {
 
-    performAutoSetup()
+    performAutoSetup();
+
   }, []); // [] causes useEffect to only be called once.
 
   async function performAutoSetup() {
 
-    for (const step of this.steps) {
-      console.log(step.label);
-      await step.request(step);
-    }
+    console.log('Creating stream');
+    await createStream();
+    console.log('Creating policy');
+    await createPolicy();
+    console.log('Creating subscription');
+    await createSubscription();
 
     console.log("Done!");
   }
 
-  async function createStream(step) {
+  async function createStream() {
     const url = URLUtils.qualifyUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM);
     let promise = await fetch('POST', url,
       {
@@ -52,12 +59,16 @@ const KinesisSetupSteps = ({}) => {
         region: 'us-east-1',
         stream_name: 'test-stream',
       });
-    step.label = 'hi';
-    step.inProgress = true;
+
+    // Update progress state
+    let updated = { ...stepCreateStream };
+    updated.inProgress = true;
+    setStepCreateStream(updated);
+
     return promise;
   }
 
-  async function createPolicy(step) {
+  async function createPolicy() {
     const url = URLUtils.qualifyUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
     let promise = await fetch('POST', url,
       {
@@ -68,11 +79,16 @@ const KinesisSetupSteps = ({}) => {
         stream_name: 'test-stream',
         stream_arn: 'test-stream-arn',
       });
-    step.inProgress = true;
+
+    // Update progress state
+    let updated = { ...stepCreatePolicy };
+    updated.inProgress = true;
+    setStepCreatePolicy(updated);
+
     return promise;
   }
 
-  async function createSubscription(step) {
+  async function createSubscription() {
     const url = URLUtils.qualifyUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION);
     let promise = await fetch('POST', url,
       {
@@ -85,16 +101,25 @@ const KinesisSetupSteps = ({}) => {
         destination_stream_arn: 'stream-arn',
         role_arn: 'role-arn',
       },);
-    step.inProgress = true;
+
+    // Update progress state
+    let updated = { ...stepCreateSubscription };
+    updated.inProgress = true;
+    setStepCreateSubscription(updated);
+
+    return promise
   }
 
   return (
-
-    steps.map((item, key) => {
-        return <KinesisSetupStep label={item.label} inProgress={item.inProgress} success={item.success}/>
-      }
-    )
-  );
+    <>
+      <KinesisSetupStep label={stepCreateStream.label} inProgress={stepCreateStream.inProgress}
+                        success={stepCreatePolicy.success}/>
+      <KinesisSetupStep label={stepCreatePolicy.label} inProgress={stepCreatePolicy.inProgress}
+                        success={stepCreateStream.success}/>
+      <KinesisSetupStep label={stepCreateSubscription.label} inProgress={stepCreateSubscription.inProgress}
+                        success={stepCreateSubscription.success}/>
+    </>
+  )
 };
 
 export default KinesisSetupSteps;
