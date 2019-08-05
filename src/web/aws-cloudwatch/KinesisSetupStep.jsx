@@ -2,11 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
 
-const KinesisSetupStep = ({ onSubmit, onEditClick }) => {
+const KinesisSetupStep = ({ label, inProgress, success }) => {
+
   return (
     <Row>
       <Col md={8}>
-        <p>Step 1</p>
+        <p>{label}</p>
       </Col>
     </Row>
   );

@@ -10,7 +10,7 @@ import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import KinesisSetupStep from "./KinesisSetupStep";
+import KinesisSetupSteps from "./KinesisSetupSteps";
 
 const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
@@ -107,12 +107,14 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
                   ], formData)}
                   loading={groupNamesStatus.loading}
                   error={formError}
-                  title="Automated Kinesis Setup"
+                  title="Setup Kinesis Automatically"
                   description="">
 
           <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
             following operations within your AWS account.
-            See <a target={"_blank"} href={"https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"}>Using CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.</p>
+            See <a target={"_blank"}
+                   href={"https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"}>Using
+              CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.</p>
 
           <ol>
             <li>Create a new Kinesis Stream with the specified name.</li>
@@ -120,9 +122,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
             <li>Subscribe the new Kinesis Stream to the Log Group.</li>
           </ol>
 
-          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
-          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
-          <KinesisSetupStep onSubmit={""} onEditClick={""}/>
+          <KinesisSetupSteps/>
 
           <ValidatedInput id="awsCloudWatchKinesisStream"
                           type="text"

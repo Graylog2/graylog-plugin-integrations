@@ -83,7 +83,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
         <p>Graylog also supports the ability to create a Kinesis stream for you and subscribe it to a CloudWatch log group
           of your choice. Please be aware that this option will create additional resources in your AWS environment that will incur
           billing charges.</p>
-        <a onClick={toggleSetup}>Perform automated Kinesis setup</a>
+        <br/>
+        <button onClick={toggleSetup} type="button" className="btn btn-primary">Setup Kinesis Automatically</button>
       </Col>
     </Row>
   );
