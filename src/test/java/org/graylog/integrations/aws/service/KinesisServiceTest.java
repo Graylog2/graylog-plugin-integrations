@@ -7,12 +7,14 @@ import org.graylog.integrations.aws.AWSTestingUtils;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.plugin.inputs.codecs.Codec;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -279,6 +281,7 @@ public class KinesisServiceTest {
         assertEquals(fakeRecordsList.size(), 10);
     }
 
+    @Ignore ("Test ignored as this method is still being implemented.")
     @Test
     public void testCreateNewKinesisStream() {
 
@@ -294,12 +297,12 @@ public class KinesisServiceTest {
                                                                                                "accessKey", "secretKey",
                                                                                                TEST_STREAM_1);
         // TODO debug the error
-        //final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
+        final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
 
         // Check the values are whats expected.
         final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "] was created with ["
                                         + SHARD_COUNT + "] shards with the following stream ARN [" + STREAM_ARN + "].";
-        //assertEquals(response.explanation(), expectedResponse);
+        assertEquals(response.explanation(), expectedResponse);
         assertEquals(SHARD_COUNT, 1);
     }
 }

@@ -405,13 +405,19 @@ public class KinesisService {
         StreamDescription streamDescription;
         try {
             kinesisClient.createStream(createStreamRequest);
-            do{
-                sleep(20_000);
+            int seconds = 0;
+            do {
+                sleep(1_000);
                 streamDescription = kinesisClient
                         .describeStream(r -> r.streamName(kinesisNewStreamRequest.streamName()))
                         .streamDescription();
-
-            }while(streamDescription.streamStatus() != StreamStatus.ACTIVE);
+                if (seconds > 60) {
+                    final String responseMessage = String.format("Fail. Stream [%s] has failed to become active " +
+                                                                 "within 60 seconds.", kinesisNewStreamRequest.streamName());
+                    throw new BadRequestException(responseMessage);
+                }
+                seconds++;
+            } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
             String streamArn = streamDescription.streamARN();
             final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards" +
                                                          "with the following stream ARN [%s].",
