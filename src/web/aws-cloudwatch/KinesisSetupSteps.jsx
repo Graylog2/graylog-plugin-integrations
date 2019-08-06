@@ -34,7 +34,9 @@ const KinesisSetupSteps = ({}) => {
 
   useEffect(() => {
 
-    performAutoSetup();
+    // Add initial delay for easier testing of progress.
+    // TODO: Remove
+    setTimeout(performAutoSetup, 2000);
 
   }, []); // [] causes useEffect to only be called once.
 
@@ -62,6 +64,7 @@ const KinesisSetupSteps = ({}) => {
 
     // Update progress state
     let updated = { ...stepCreateStream };
+    updated.success = true;
     updated.inProgress = true;
     setStepCreateStream(updated);
 
@@ -83,6 +86,7 @@ const KinesisSetupSteps = ({}) => {
     // Update progress state
     let updated = { ...stepCreatePolicy };
     updated.inProgress = true;
+    updated.success = true;
     setStepCreatePolicy(updated);
 
     return promise;
@@ -105,6 +109,7 @@ const KinesisSetupSteps = ({}) => {
     // Update progress state
     let updated = { ...stepCreateSubscription };
     updated.inProgress = true;
+    updated.success = true;
     setStepCreateSubscription(updated);
 
     return promise
@@ -112,10 +117,11 @@ const KinesisSetupSteps = ({}) => {
 
   return (
     <>
+      <h2>Auto-setup</h2><br/>
       <KinesisSetupStep label={stepCreateStream.label} inProgress={stepCreateStream.inProgress}
-                        success={stepCreatePolicy.success}/>
-      <KinesisSetupStep label={stepCreatePolicy.label} inProgress={stepCreatePolicy.inProgress}
                         success={stepCreateStream.success}/>
+      <KinesisSetupStep label={stepCreatePolicy.label} inProgress={stepCreatePolicy.inProgress}
+                        success={stepCreatePolicy.success}/>
       <KinesisSetupStep label={stepCreateSubscription.label} inProgress={stepCreateSubscription.inProgress}
                         success={stepCreateSubscription.success}/>
     </>
