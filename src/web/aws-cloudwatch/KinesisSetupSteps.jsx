@@ -12,26 +12,25 @@ const KinesisSetupSteps = ({}) => {
     const { key, secret } = awsAuth(formData);
 
     function pending() {
-      console.log('revert');
       return {
         type: 'pending',
-        additional: 'The set has not begun'
+        additional: 'Waiting...'
       };
     }
 
     function success() {
       return {
         type: 'success',
-        additional: 'The step was successful'
+        additional: 'Successfully created stream [dano-stream/arn-01]'
       };
     }
 
-  function error() {
-    return {
-      type: 'error',
-      additional: 'Something bad happened'
-    };
-  }
+    function error() {
+      return {
+        type: 'error',
+        additional: 'Something bad happened'
+      };
+    }
 
     // State for each step must be maintained separately in order for the UI to be correctly updated.
     let [ streamStep, setStreamStep ] = useState({
