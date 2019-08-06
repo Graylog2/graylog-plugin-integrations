@@ -26,6 +26,13 @@ const KinesisSetupSteps = ({}) => {
       };
     }
 
+  function error() {
+    return {
+      type: 'error',
+      additional: 'Something bad happened'
+    };
+  }
+
     // State for each step must be maintained separately in order for the UI to be correctly updated.
     let [ streamStep, setStreamStep ] = useState({
       label: "Creating stream",
@@ -77,9 +84,8 @@ const KinesisSetupSteps = ({}) => {
             const url = URLUtils.qualifyUrl(step.route);
             await fetch('POST', url, step.request);
 
-            let currentState = Object.assign({}, step);
-            currentState.state = success();
-            setStep(currentState);
+            // Copy step object and set state field.
+            setStep({ ...step, state: success() });
           }
 
           await executeStep(streamStep, setStreamStep);
