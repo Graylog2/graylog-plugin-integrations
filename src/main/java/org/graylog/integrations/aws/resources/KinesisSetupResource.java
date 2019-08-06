@@ -9,10 +9,12 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionPolicyRequest;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
+import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisFullSetupRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionPolicyResponse;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
+import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponseStep;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
@@ -100,7 +102,7 @@ public class KinesisSetupResource implements PluginRestResource {
      * Creates a {@see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">Cloud Watch Subscription Filter</a>},
      * which subscribes a kinesis stream to a CloudWatch log group. This will cause batches of CloudWatch loge messages
      * to be put in the Kinesis stream in a GZipped JSON byte array payload.
-     *
+     * <p>
      * 3.  Add the subscription to the Cloudwatch log group for kinesis
      * INPUT: credentials, logGroup, filterName, filterPattern acquired from user
      * OUTPUT: streamArn acquired from step 3
@@ -128,7 +130,7 @@ public class KinesisSetupResource implements PluginRestResource {
      * Full Kinesis setup.
      *
      * @param request
-     * @return
+     * @return KinesisFullSetupResponse
      */
     @POST
     @Timed
@@ -142,8 +144,20 @@ public class KinesisSetupResource implements PluginRestResource {
 
         // Mock response.
         final ArrayList<KinesisFullSetupResponseStep> setupSteps = new ArrayList<>();
-        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Stream", "The stream [this-stream-rocks] was successfully created."));
-        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy", "The policy [this-policy-rocks] was successfully created."));
+        KinesisNewStreamResponse kinesisNewStreamResponse = kinesisService.createNewKinesisStream(KinesisNewStreamRequest.create(request.region(),
+                                                                                                                                 request.awsAccessKeyId(),
+                                                                                                                                 request.awsSecretAccessKey(),
+                                                                                                                                 request.streamName()));
+        String streamArn = kinesisNewStreamResponse.streamArn();
+        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Stream", kinesisNewStreamResponse.explanation()));
+        CreateRolePermissionResponse response = kinesisService.autoKinesisPermissions(CreateRolePermissionRequest.create(request.region(),
+                                                                                                                         request.awsAccessKeyId(),
+                                                                                                                         request.awsSecretAccessKey(),
+                                                                                                                         request.streamName(),
+                                                                                                                         request.roleName(),
+                                                                                                                         request.rolePolicyName()));
+        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy with role Arn", response.roleArn()));
+
         setupSteps.add(KinesisFullSetupResponseStep.create(false, "Subscribe stream to group", "Failed to create the subscription [Some specific AWS error]"));
         return KinesisFullSetupResponse.create(false, "Auto-setup was not fully successful!", setupSteps);
     }

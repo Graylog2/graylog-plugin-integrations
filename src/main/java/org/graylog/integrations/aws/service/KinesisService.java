@@ -13,9 +13,10 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
-import org.graylog.integrations.aws.resources.requests.KinesisFullSetupRequest;
+import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
+import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -30,7 +31,6 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
@@ -443,41 +443,47 @@ public class KinesisService {
     /**
      * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
      *
-     * @param regionName      The region where the kinesis stream exists
-     * @param accessKeyId     The AWS access key
-     * @param secretAccessKey The AWS secret key
-     * @param kinesisStream   The AWS kinesis stream
-     * @param roleName        The name of the role that will be created
-     * @param rolePolicyName  The name of the policy that will be created
+     * @param rolePermissionRequest
      * @return role Arn associated with the associated kinesis stream
      */
-    public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
-                                                 String kinesisStream, String roleName, String rolePolicyName) {
+    public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest rolePermissionRequest) {
 
-        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
-        KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
+        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", rolePermissionRequest.roleName());
+        KinesisClient kinesisClient = createClient(rolePermissionRequest.region(),
+                                                   rolePermissionRequest.awsAccessKeyId(),
+                                                   rolePermissionRequest.awsSecretAccessKey());
 
         try {
-            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", kinesisStream);
-            String streamArn = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription().streamARN();
+            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", rolePermissionRequest.streamName());
+            String streamArn = kinesisClient.describeStream(r -> r.streamName(rolePermissionRequest.streamName()))
+                                            .streamDescription()
+                                            .streamARN();
 
             final IamClient iam = IamClient.builder()
                                            .region(Region.AWS_GLOBAL)
-                                           .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                                           .credentialsProvider(AWSService
+                                                                        .buildCredentialProvider(rolePermissionRequest.awsAccessKeyId(),
+                                                                                                 rolePermissionRequest.awsSecretAccessKey()))
                                            .build();
 
-            String createRoleResponse = createRoleForKinesisAutoSetup(iam, roleName, regionName);
+            String createRoleResponse = createRoleForKinesisAutoSetup(iam, rolePermissionRequest.roleName(), rolePermissionRequest.region());
             LOG.debug(createRoleResponse);
 
-            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
+            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam,
+                                                                                      rolePermissionRequest.roleName(),
+                                                                                      streamArn,
+                                                                                      rolePermissionRequest.rolePolicyName());
             LOG.debug(setPermissionsRoleResponse);
 
-            return getRolePermissionsArn(iam, roleName);
+            final String roleArn = getRolePermissionsArn(iam, rolePermissionRequest.roleName());
+            final String explanation = String.format("Success! The roleArn [%s] has been returned.", roleArn);
+            return CreateRolePermissionResponse.create(explanation, roleArn);
 
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
-                                                         "following error [%s]", roleName, specificError);
+                                                         "following error [%s]", rolePermissionRequest.roleName(),
+                                                         specificError);
             throw new BadRequestException(responseMessage);
         }
     }
