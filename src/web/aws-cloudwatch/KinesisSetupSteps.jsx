@@ -8,25 +8,26 @@ import KinesisSetupStep from "./KinesisSetupStep";
 
 const KinesisSetupSteps = ({}) => {
 
-  const { formData } = useContext(FormDataContext);
-  const { key, secret } = awsAuth(formData);
+    const { formData } = useContext(FormDataContext);
+    const { key, secret } = awsAuth(formData);
 
-  function pending() {
-    return {
-      type: 'pending',
-      additional: 'The set has not begun'
-    };
-  }
+    function pending() {
+      console.log('revert');
+      return {
+        type: 'pending',
+        additional: 'The set has not begun'
+      };
+    }
 
-  function success() {
-    return {
-      type: 'success',
-      additional: 'The step was successful'
-    };
-  }
+    function success() {
+      return {
+        type: 'success',
+        additional: 'The step was successful'
+      };
+    }
 
-  const [ steps, setSteps ] = useState({
-    Stream: {
+    // State for each step must be maintained separately in order for the UI to be correctly updated.
+    let [ streamStep, setStreamStep ] = useState({
       label: "Creating stream",
       route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
       request: {
@@ -36,8 +37,9 @@ const KinesisSetupSteps = ({}) => {
         stream_name: 'test-stream',
       },
       state: pending()
-    },
-    Policy: {
+    });
+
+    let [ policyStep, setPolicyStep ] = useState({
       label: "Creating policy",
       route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
       request: {
@@ -49,8 +51,9 @@ const KinesisSetupSteps = ({}) => {
         stream_arn: 'test-stream-arn',
       },
       state: pending()
-    },
-    Subscription: {
+    });
+
+    let [ subscriptionStep, setSubscriptionStep ] = useState({
       label: "Creating subscription",
       route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
       request: {
@@ -64,30 +67,41 @@ const KinesisSetupSteps = ({}) => {
         role_arn: 'role-arn',
       },
       state: pending()
-    }
-  });
+    });
 
-  const setStep = (id, newValue) => setSteps({ ...steps, [ id ]: newValue });
-  const setState = (id, newState) => setStep(id, { ...steps[ id ], state: newState });
+    useEffect(() => {
 
-  useEffect(() => {
+        async function autoSetup() {
 
-    async function autoSetup() {
+          async function executeStep(step, setStep) {
+            const url = URLUtils.qualifyUrl(step.route);
+            await fetch('POST', url, step.request);
 
-      for (let [ id, step ] of Object.entries(steps)) {
-        const url = URLUtils.qualifyUrl(step.route);
-        await fetch('POST', url, step.request);
-        setState(id, { ...step, state: success() });
-      }
-    }
+            let currentState = Object.assign({}, step);
+            currentState.state = success();
+            setStep(currentState);
+          }
 
-    autoSetup()
-  }, []); // [] causes useEffect to only be called once.
+          await executeStep(streamStep, setStreamStep);
+          await executeStep(policyStep, setPolicyStep);
+          await executeStep(subscriptionStep, setSubscriptionStep);
 
-  return (
-    Object.values(steps).map((step) => {
-      return <KinesisSetupStep key={step.label} label={step.label} state={step.state}/>
-    }) );
-};
+          let currentState = Object.assign({}, streamStep);
+          currentState.state = success();
+          setStreamStep(currentState);
+        }
+
+        autoSetup()
+      }, []
+    ); // [] causes useEffect to only be called once.
+
+    return (
+      <>
+        <KinesisSetupStep step={streamStep}/>
+        <KinesisSetupStep step={policyStep}/>
+        <KinesisSetupStep step={subscriptionStep}/>
+      </> );
+  }
+;
 
 export default KinesisSetupSteps;
