@@ -384,49 +384,6 @@ public class KinesisService {
         }
     }
 
-    public String KinesisAutoSetup(KinesisFullSetupRequest kinesisFullSetupRequest) {
-        LOG.debug("Setting up Kinesis automatically.");
-        final KinesisClient kinesisClient = createClient(kinesisFullSetupRequest.region(),
-                                                         kinesisFullSetupRequest.awsAccessKeyId(),
-                                                         kinesisFullSetupRequest.streamName());
-        LOG.debug("Creating a new Kinesis stream with the name [{}].", kinesisFullSetupRequest.streamName());
-        KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(kinesisFullSetupRequest.region(),
-                                                                                         kinesisFullSetupRequest.awsAccessKeyId(),
-                                                                                         kinesisFullSetupRequest.awsSecretAccessKey(),
-                                                                                         kinesisFullSetupRequest.streamName());
-        KinesisNewStreamResponse kinesisNewStreamResponse = createNewKinesisStream(kinesisNewStreamRequest);
-        String streamArn = kinesisNewStreamResponse.streamArn();
-        LOG.debug(kinesisNewStreamResponse.explanation());
-
-        LOG.debug("Setting up the proper permissions for the Kinesis role [{}]", kinesisFullSetupRequest.roleName());
-        String roleArn = autoKinesisPermissionsRequired(kinesisFullSetupRequest.region(),
-                                                        kinesisFullSetupRequest.awsAccessKeyId(),
-                                                        kinesisFullSetupRequest.awsSecretAccessKey(),
-                                                        kinesisNewStreamRequest.streamName(),
-                                                        kinesisFullSetupRequest.roleName(),
-                                                        kinesisFullSetupRequest.rolePolicyName());
-        LOG.debug(roleArn);
-
-        LOG.debug("Adding subscription [{}] to log group [{}]", kinesisFullSetupRequest.filterName(), kinesisFullSetupRequest.getLogGroupName());
-        final CloudWatchLogsClient cloudWatchLogsClient = CloudWatchLogsClient
-                .builder()
-                .credentialsProvider(
-                        AWSService.buildCredentialProvider(kinesisFullSetupRequest.awsAccessKeyId(),
-                                                           kinesisFullSetupRequest.awsSecretAccessKey()))
-                .build();
-        String addSubscriptionResponse = CloudWatchService.addSubscriptionFilter(cloudWatchLogsClient,
-                                                                                 kinesisFullSetupRequest.getLogGroupName(),
-                                                                                 streamArn,
-                                                                                 roleArn,
-                                                                                 kinesisFullSetupRequest.filterName(),
-                                                                                 kinesisFullSetupRequest.filterPattern());
-        LOG.debug(addSubscriptionResponse);
-
-        final String responseMessage = String.format("Success!");
-        LOG.debug(responseMessage);
-        return responseMessage;
-    }
-
     /**
      * Creates a new Kinesis stream.
      *
