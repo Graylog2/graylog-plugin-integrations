@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws.service;
 
+import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
+import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog2.shared.utilities.ExceptionUtils;
 import org.slf4j.Logger;
@@ -64,27 +66,30 @@ public class CloudWatchService {
         return LogGroupsResponse.create(groupNameList, groupNameList.size());
     }
 
-    public static String addSubscriptionFilter(CloudWatchLogsClient cloudWatch, String logGroup, String streamArn,
-                                               String roleArn, String filterName,
-                                               String filterPattern) {
+    public CreateLogSubscriptionResponse addSubscriptionFilter(CreateLogSubscriptionRequest logSubscriptionRequest) {
+        CloudWatchLogsClient cloudWatch = createClient(logSubscriptionRequest.region(),
+                                                       logSubscriptionRequest.awsAccessKeyId(),
+                                                       logSubscriptionRequest.awsSecretAccessKey());
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
-                                            .logGroupName(logGroup)
-                                            .filterName(filterName)
-                                            .filterPattern(filterPattern)
-                                            .destinationArn(streamArn)
-                                            .roleArn(roleArn)
+                                            .logGroupName(logSubscriptionRequest.getLogGroupName())
+                                            .filterName(logSubscriptionRequest.filterName())
+                                            .filterPattern(logSubscriptionRequest.filterPattern())
+                                            .destinationArn(logSubscriptionRequest.destinationStreamArn())
+                                            .roleArn(logSubscriptionRequest.getRoleArn())
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
         try {
             cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
-            return String.format("Success. The subscription filter [%s] was added to [%s].",
-                                 filterName, logGroup);
+            String explanation = String.format("Success. The subscription filter [%s] was added to [%s].",
+                                 logSubscriptionRequest.filterName(), logSubscriptionRequest.getLogGroupName());
+            return CreateLogSubscriptionResponse.create(explanation);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Attempt to add subscription [%s] to Cloudwatch log group " +
                                                          "[%s] failed due to the following exception: [%s]",
-                                                         filterName, logGroup, specificError);
+                                                         logSubscriptionRequest.filterName(),
+                                                         logSubscriptionRequest.getLogGroupName(), specificError);
             LOG.error(responseMessage);
             throw new BadRequestException(responseMessage, e);
         }
