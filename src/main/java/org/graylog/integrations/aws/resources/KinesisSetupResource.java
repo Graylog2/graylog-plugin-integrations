@@ -47,10 +47,13 @@ public class KinesisSetupResource implements PluginRestResource {
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
 
     private KinesisService kinesisService;
+    private CloudWatchService cloudWatchService;
 
+    // Guice
     @Inject
-    public KinesisSetupResource(KinesisService kinesisService) {
+    public KinesisSetupResource(KinesisService kinesisService, CloudWatchService cloudWatchService) {
         this.kinesisService = kinesisService;
+        this.cloudWatchService = cloudWatchService;
     }
 
     /**
@@ -75,10 +78,7 @@ public class KinesisSetupResource implements PluginRestResource {
         //return KinesisNewStreamResponse.create(request.streamName(), "a-fake-arn", "The stream is good-to-go");
 
         // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
-        return kinesisService.createNewKinesisStream(KinesisNewStreamRequest.create(request.region(),
-                                                                                    request.awsAccessKeyId(),
-                                                                                    request.awsSecretAccessKey(),
-                                                                                    request.streamName()));
+        return kinesisService.createNewKinesisStream(request);
     }
 
     /**
@@ -100,12 +100,7 @@ public class KinesisSetupResource implements PluginRestResource {
 
         // Mock response
         //return CreateLogSubscriptionPolicyResponse.create("fake-policy-name", "fake-policy-arn");
-        return kinesisService.autoKinesisPermissions(CreateRolePermissionRequest.create(request.region(),
-                                                                                        request.awsAccessKeyId(),
-                                                                                        request.awsSecretAccessKey(),
-                                                                                        request.streamName(),
-                                                                                        request.roleName(),
-                                                                                        request.rolePolicyName()));
+        return kinesisService.autoKinesisPermissions(request);
     }
 
     /**
@@ -133,7 +128,8 @@ public class KinesisSetupResource implements PluginRestResource {
         //   Perhaps we can provide default initialized values (eg. " " for filterPattern [matches all], and some generic pattern name).
 
         // Mock response
-        return CreateLogSubscriptionResponse.create("Subscription created successfully");
+        //return CreateLogSubscriptionResponse.create("Subscription created successfully");
+        return cloudWatchService.addSubscriptionFilter(request);
     }
 
     /**
@@ -180,12 +176,8 @@ public class KinesisSetupResource implements PluginRestResource {
                                                                                                   request.filterPattern(),
                                                                                                   streamArn,
                                                                                                   roleArn);
-        CreateLogSubscriptionResponse logSubscriptionResponse = new CloudWatchService(
-                CloudWatchLogsClient.builder()
-                                    .credentialsProvider(AWSService
-                                                                 .buildCredentialProvider(request.awsAccessKeyId(),
-                                                                                          request.awsSecretAccessKey())))
-                .addSubscriptionFilter(logSubscriptionRequest);
+        CreateLogSubscriptionResponse logSubscriptionResponse = cloudWatchService.addSubscriptionFilter(logSubscriptionRequest);
+
         setupSteps.add(KinesisFullSetupResponseStep.create(false, "Subscribe stream to group", logSubscriptionResponse.explanation()));
         return KinesisFullSetupResponse.create(false, "Auto-setup was not fully successful!", setupSteps);
     }
