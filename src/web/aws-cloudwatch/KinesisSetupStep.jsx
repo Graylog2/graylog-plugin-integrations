@@ -7,13 +7,11 @@ const KinesisSetupStep = ({ step }) => {
   return (
     <Col md={8}>
       <Row>
-        <p>
-          {step.state.type === 'pending' ?
-            <i className={`fa fa-hourglass-start fa-2x`} style={{ color: '#919191' }}/> : ""}
-          {step.state.type === 'success' ? <i className={`fa fa-check fa-2x`} style={{ color: '#00AE42' }}/> : ""}
-          {step.state.type === 'error' ? <i className={`fa fa-times fa-2x`} style={{ color: '#D43F3F' }}/> : ""}
-          <StepHeader><span>{step.label}</span></StepHeader>
-        </p>
+        {step.state.type === 'pending' ?
+          <i className={`fa fa-hourglass-start fa-2x`} style={{ color: '#919191' }}/> : ""}
+        {step.state.type === 'success' ? <i className={`fa fa-check fa-2x`} style={{ color: '#00AE42' }}/> : ""}
+        {step.state.type === 'error' ? <i className={`fa fa-times fa-2x`} style={{ color: '#D43F3F' }}/> : ""}
+        <StepHeader><span>{step.label}</span></StepHeader>
       </Row>
       <Row>
         <p>

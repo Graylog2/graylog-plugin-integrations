@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -66,6 +67,11 @@ public class KinesisSetupResource implements PluginRestResource {
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                    KinesisNewStreamRequest request) throws InterruptedException {
+
+
+        if (true) {
+            throw new BadRequestException("Something bad happened.");
+        }
 
         LOG.info("Request: [{}]", request);
         // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
@@ -129,6 +135,9 @@ public class KinesisSetupResource implements PluginRestResource {
         // TODO: We'll need to give some thought to how to effectively build the UI for the filterPattern and filterName
         //   Perhaps we can provide default initialized values (eg. " " for filterPattern [matches all], and some generic pattern name).
 
+        if (true) {
+            throw new BadRequestException("Something bad happened.");
+        }
         // Mock response
         return CreateLogSubscriptionResponse.create("Subscription created successfully");
     }
