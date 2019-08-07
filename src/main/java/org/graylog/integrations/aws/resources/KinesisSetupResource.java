@@ -39,13 +39,14 @@ import javax.ws.rs.core.MediaType;
 public class KinesisSetupResource implements PluginRestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
+    private static final int REQUEST_DELAY = 1000;
 
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
 
     // Enable mocked responses for UI testing.
     // TODO: Remove later.
-    private boolean enableMockResponses = false;
+    private boolean addTestDelay = false;
 
     @Inject
     public KinesisSetupResource( CloudWatchService cloudWatchService, KinesisService kinesisService) {
@@ -61,11 +62,8 @@ public class KinesisSetupResource implements PluginRestResource {
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                    KinesisNewStreamRequest request) throws InterruptedException {
 
-        LOG.info("Request: [{}]", request);
-        if (enableMockResponses) {
-            Thread.sleep(1000);
-            return KinesisNewStreamResponse.create(request.streamName(), "a-fake-arn", "The stream is good-to-go");
-        }
+        LOG.info("Stream request: [{}]", request);
+        testDelay(1000);
 
         // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
         return kinesisService.createNewKinesisStream(request);
@@ -78,12 +76,8 @@ public class KinesisSetupResource implements PluginRestResource {
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateRolePermissionResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                CreateRolePermissionRequest request) throws InterruptedException {
-        LOG.info("Request: [{}]", request);
-
-        if (enableMockResponses) {
-            Thread.sleep(1000);
-            return CreateRolePermissionResponse.create("Policy created successfykky", "fake-policy-arn");
-        }
+        LOG.info("Policy request: [{}]", request);
+        testDelay(1000);
 
         return kinesisService.autoKinesisPermissions(request);
     }
@@ -95,13 +89,16 @@ public class KinesisSetupResource implements PluginRestResource {
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                     CreateLogSubscriptionRequest request) throws InterruptedException {
-        LOG.info("Request: [{}]", request);
-
-        if (enableMockResponses) {
-            Thread.sleep(1000);
-            return CreateLogSubscriptionResponse.create("Subscription created successfully");
-        }
+        LOG.info("Subscription request: [{}]", request);
+        testDelay(REQUEST_DELAY);
 
         return cloudWatchService.addSubscriptionFilter(request);
+    }
+
+    // TODO: Remove before release.
+    private void testDelay(int requestDelay) throws InterruptedException {
+        if (addTestDelay) {
+            Thread.sleep(requestDelay);
+        }
     }
 }
