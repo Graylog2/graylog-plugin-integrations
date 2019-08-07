@@ -7,8 +7,9 @@ const DEFAULT_SETTINGS = {
   */
 
   /* Default Advanced Settings */
-  awsCloudWatchBatchSize: { defaultValue: '10000' },
-  awsCloudWatchThrottleWait: { defaultValue: '1000' },
+  awsCloudWatchBatchSize: {
+    defaultValue: '10000',
+  },
   awsCloudWatchThrottleEnabled: {
     value: true, // We want to default to true on render, but never compare the default
   },

@@ -13,7 +13,8 @@ import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 import useFetch from '../common/hooks/useFetch';
 
-import formValidation from '../utils/formValidation';
+import formValidation from '../utils/formValidation'
+import KinesisSetupSteps from "./KinesisSetupSteps";
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
@@ -44,7 +45,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       } else if (fetchStreamsStatus.error.match(badSecret)) {
         setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
       } else if (fetchStreamsStatus.error.match(noStreams)) {
-        setFormError({ full_message: fetchStreamsStatus.error, nice_message: "We're unable to find any Kinesis Streams in the chosen region, please try choosing a different region." });
+        // NOTE: If no streams are present we want to move to the KinesisSetup screen
+        setStreams({ streams: [] });
+        onSubmit();
       } else {
         setFormError({ full_message: fetchStreamsStatus.error });
       }
@@ -62,6 +65,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   return (
     <Row>
       <Col md={8}>
+        {/* Temporarily literally include KinesisSetupSteps here for quick testing. */}
+        <KinesisSetupSteps/>
         <FormWrap onSubmit={handleSubmit}
                   buttonContent="Authorize &amp; Choose Stream"
                   loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}

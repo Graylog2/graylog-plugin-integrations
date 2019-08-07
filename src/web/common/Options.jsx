@@ -7,7 +7,7 @@ function Options({ value, label }) {
   );
 }
 
-const renderOptions = (options, label = 'Choose One', loading = false) => {
+const renderOptions = (options = [], label = 'Choose One', loading = false) => {
   if (loading) {
     return Options({ value: '', label: 'Loading...' });
   }
