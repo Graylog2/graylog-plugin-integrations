@@ -23,6 +23,7 @@ import org.mockito.junit.MockitoRule;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
@@ -63,6 +64,9 @@ public class KinesisServiceTest {
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
+    private IamClientBuilder iamClientBuilder;
+
+    @Mock
     private KinesisClientBuilder kinesisClientBuilder;
 
     @Mock
@@ -75,7 +79,7 @@ public class KinesisServiceTest {
     @Before
     public void setUp() {
 
-        kinesisService = new KinesisService(kinesisClientBuilder,
+        kinesisService = new KinesisService(iamClientBuilder, kinesisClientBuilder,
                                             new ObjectMapperProvider().get(),
                                             AWSTestingUtils.buildTestCodecs());
     }

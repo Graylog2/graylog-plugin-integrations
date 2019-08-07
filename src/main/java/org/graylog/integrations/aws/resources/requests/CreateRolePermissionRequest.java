@@ -12,6 +12,7 @@ import org.graylog.autovalue.WithBeanGetter;
 public abstract class CreateRolePermissionRequest implements AWSRequest {
 
     private static final String STREAM_NAME = "stream_name";
+    private static final String STREAM_ARN = "stream_arn";
     private static final String ROLE_NAME = "role_name";
     private static final String ROLE_POLICY_NAME = "role_policy_name";
 
@@ -27,6 +28,9 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
+    @JsonProperty(STREAM_ARN)
+    public abstract String streamArn();
+
     @JsonProperty(ROLE_NAME)
     public abstract String roleName();
 
@@ -38,8 +42,9 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
                                                      @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                      @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
                                                      @JsonProperty(STREAM_NAME) String streamName,
+                                                     @JsonProperty(STREAM_ARN) String streamArn,
                                                      @JsonProperty(ROLE_NAME) String roleName,
                                                      @JsonProperty(ROLE_POLICY_NAME) String rolePolicyName) {
-        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, roleName, rolePolicyName);
+        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, streamArn, roleName, rolePolicyName);
     }
 }

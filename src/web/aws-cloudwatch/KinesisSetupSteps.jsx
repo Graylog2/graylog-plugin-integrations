@@ -47,6 +47,7 @@ const KinesisSetupSteps = ({}) => {
       aws_secret_access_key: secret,
       region: 'us-east-1',
       role_name: 'role-name',
+      role_policy_name: 'role-policy-name',
       stream_name: streamName,
       stream_arn: streamArn,
     };
@@ -89,10 +90,11 @@ const KinesisSetupSteps = ({}) => {
               async function autoSetup() {
 
                 async function executeStep(step, setStep, request) {
+
                   const url = URLUtils.qualifyUrl(step.route);
                   let response;
                   try {
-                    response = await fetch('POST', url, step.request);
+                    response = await fetch('POST', url, request);
                   } catch (e) {
                     console.log('Setup request error:', e);
                     let error = errorState(parseError(e));
@@ -110,16 +112,17 @@ const KinesisSetupSteps = ({}) => {
                                                setStreamStep,
                                                streamRequest('stream-name')); // TODO: Pull from input field.
 
+                let streamArn = response.stream_arn;
                 response = await executeStep(policyStep,
                                   setPolicyStep,
                                   policyRequest(response.stream_name,
-                                                response.stream_arn));
+                                                streamArn));
 
                 await executeStep(subscriptionStep,
                                   setSubscriptionStep,
                                   subscriptionRequest('log-group', // TODO: Pull from input field.
-                                                      response.stream_arn,
-                                                      response.policy_arn));
+                                                      streamArn,
+                                                      response.role_arn));
               }
 
               // TODO: Display success message.

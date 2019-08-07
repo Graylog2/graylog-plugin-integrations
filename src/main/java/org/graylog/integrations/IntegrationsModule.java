@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
+import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
@@ -92,6 +94,7 @@ public class IntegrationsModule extends PluginModule {
         addRestResource(KinesisSetupResource.class);
         addTransport(AWSTransport.NAME, AWSTransport.class);
         addTransport(KinesisTransport.NAME, KinesisTransport.class);
+        bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
     }

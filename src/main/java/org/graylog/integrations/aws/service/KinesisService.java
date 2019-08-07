@@ -32,9 +32,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -74,15 +76,17 @@ public class KinesisService {
     private static final int RECORDS_SAMPLE_SIZE = 10;
     private static final int SHARD_COUNT = 1;
 
+    private final IamClientBuilder iamClientBuilder;
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
     @Inject
-    public KinesisService(KinesisClientBuilder kinesisClientBuilder,
+    public KinesisService(IamClientBuilder iamClientBuilder, KinesisClientBuilder kinesisClientBuilder,
                           ObjectMapper objectMapper,
                           Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
 
+        this.iamClientBuilder = iamClientBuilder;
         this.kinesisClientBuilder = kinesisClientBuilder;
         this.objectMapper = objectMapper;
         this.availableCodecs = availableCodecs;
@@ -93,6 +97,13 @@ public class KinesisService {
         return kinesisClientBuilder.region(Region.of(regionName))
                                    .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
                                    .build();
+    }
+
+    private IamClient createIamClient(String regionName, String accessKeyId, String secretAccessKey) {
+
+        return iamClientBuilder.region(Region.of(regionName))
+                               .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                               .build();
     }
 
     /**
@@ -459,23 +470,19 @@ public class KinesisService {
                                             .streamDescription()
                                             .streamARN();
 
-            final IamClient iam = IamClient.builder()
-                                           .region(Region.AWS_GLOBAL)
-                                           .credentialsProvider(AWSService
-                                                                        .buildCredentialProvider(rolePermissionRequest.awsAccessKeyId(),
-                                                                                                 rolePermissionRequest.awsSecretAccessKey()))
-                                           .build();
-
-            String createRoleResponse = createRoleForKinesisAutoSetup(iam, rolePermissionRequest.roleName(), rolePermissionRequest.region());
+            final IamClient iamClient = createIamClient(rolePermissionRequest.region(),
+                                                        rolePermissionRequest.awsAccessKeyId(),
+                                                        rolePermissionRequest.awsSecretAccessKey());
+            String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, rolePermissionRequest.roleName(), rolePermissionRequest.region());
             LOG.debug(createRoleResponse);
 
-            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam,
+            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iamClient,
                                                                                       rolePermissionRequest.roleName(),
                                                                                       streamArn,
                                                                                       rolePermissionRequest.rolePolicyName());
             LOG.debug(setPermissionsRoleResponse);
 
-            final String roleArn = getRolePermissionsArn(iam, rolePermissionRequest.roleName());
+            final String roleArn = getRolePermissionsArn(iamClient, rolePermissionRequest.roleName());
             final String explanation = String.format("Success! The roleArn [%s] has been returned.", roleArn);
             return CreateRolePermissionResponse.create(explanation, roleArn);
 
@@ -536,8 +543,8 @@ public class KinesisService {
         }
     }
 
-    private static String getRolePermissionsArn(IamClient iam, String roleName) {
+    private static String getRolePermissionsArn(IamClient iamClient, String roleName) {
         LOG.debug("Acquiring the role ARN associated to the role [{}]", roleName);
-        return iam.getRole(r -> r.roleName(roleName)).role().arn();
+        return iamClient.getRole(r -> r.roleName(roleName)).role().arn();
     }
 }

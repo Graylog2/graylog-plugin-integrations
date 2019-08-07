@@ -45,12 +45,12 @@ public class KinesisSetupResource implements PluginRestResource {
 
     // Enable mocked responses for UI testing.
     // TODO: Remove later.
-    private boolean enableMockResponses = true;
+    private boolean enableMockResponses = false;
 
     @Inject
-    public KinesisSetupResource(KinesisService kinesisService, CloudWatchService cloudWatchService) {
-        this.kinesisService = kinesisService;
+    public KinesisSetupResource( CloudWatchService cloudWatchService, KinesisService kinesisService) {
         this.cloudWatchService = cloudWatchService;
+        this.kinesisService = kinesisService;
     }
 
     @POST
