@@ -7,12 +7,10 @@ import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.graylog.integrations.aws.AWSPermissions;
-import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionPolicyRequest;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisFullSetupRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
-import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionPolicyResponse;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
 import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponse;
@@ -73,11 +71,14 @@ public class KinesisSetupResource implements PluginRestResource {
                                                                    KinesisNewStreamRequest request) {
 
         LOG.info("Request: [{}]", request);
-        // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
-        // kinesisService.createNewKinesisStream(kinesisNewStreamRequest)
-
         // Mock response
-        return KinesisNewStreamResponse.create(request.streamName(), "a-fake-arn", "The stream is good-to-go");
+        //return KinesisNewStreamResponse.create(request.streamName(), "a-fake-arn", "The stream is good-to-go");
+
+        // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
+        return kinesisService.createNewKinesisStream(KinesisNewStreamRequest.create(request.region(),
+                                                                                    request.awsAccessKeyId(),
+                                                                                    request.awsSecretAccessKey(),
+                                                                                    request.streamName()));
     }
 
     /**
@@ -93,12 +94,18 @@ public class KinesisSetupResource implements PluginRestResource {
     @Path("/create_subscription_policy")
     @ApiOperation(value = "Step 2: Create AWS IAM policy needed for CloudWatch to write logs to Kinesis")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public CreateLogSubscriptionPolicyResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                      CreateLogSubscriptionPolicyRequest request) {
+    public CreateRolePermissionResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
+                                                               CreateRolePermissionRequest request) {
         LOG.info("Request: [{}]", request);
 
         // Mock response
-        return CreateLogSubscriptionPolicyResponse.create("fake-policy-name", "fake-policy-arn");
+        //return CreateLogSubscriptionPolicyResponse.create("fake-policy-name", "fake-policy-arn");
+        return kinesisService.autoKinesisPermissions(CreateRolePermissionRequest.create(request.region(),
+                                                                                        request.awsAccessKeyId(),
+                                                                                        request.awsSecretAccessKey(),
+                                                                                        request.streamName(),
+                                                                                        request.roleName(),
+                                                                                        request.rolePolicyName()));
     }
 
     /**
@@ -164,7 +171,7 @@ public class KinesisSetupResource implements PluginRestResource {
         setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy with role Arn", response.explanation()));
 
         // Step 3
-        // TODO optimize this call
+        // TODO optimize this call, it needs a cloudwatchLogClient to call addSubscription
         CreateLogSubscriptionRequest logSubscriptionRequest = CreateLogSubscriptionRequest.create(request.region(),
                                                                                                   request.awsAccessKeyId(),
                                                                                                   request.awsSecretAccessKey(),
