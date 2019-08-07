@@ -69,9 +69,9 @@ public class KinesisSetupResource implements PluginRestResource {
                                                                    KinesisNewStreamRequest request) throws InterruptedException {
 
 
-        if (true) {
-            throw new BadRequestException("Something bad happened.");
-        }
+//        if (true) {
+//            throw new BadRequestException("Something bad happened.");
+//        }
 
         LOG.info("Request: [{}]", request);
         // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
@@ -135,9 +135,9 @@ public class KinesisSetupResource implements PluginRestResource {
         // TODO: We'll need to give some thought to how to effectively build the UI for the filterPattern and filterName
         //   Perhaps we can provide default initialized values (eg. " " for filterPattern [matches all], and some generic pattern name).
 
-        if (true) {
-            throw new BadRequestException("Something bad happened.");
-        }
+//        if (true) {
+//            throw new BadRequestException("Something bad happened.");
+//        }
         // Mock response
         return CreateLogSubscriptionResponse.create("Subscription created successfully");
     }

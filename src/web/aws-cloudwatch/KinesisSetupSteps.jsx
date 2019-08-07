@@ -14,7 +14,7 @@ const KinesisSetupSteps = ({}) => {
   function pendingState() {
     return {
       type: 'pending',
-      additional: 'Waiting...'
+      additional: 'Waiting for previous step to complete.'
     };
   }
 
@@ -32,77 +32,102 @@ const KinesisSetupSteps = ({}) => {
     };
   }
 
-  // State for each step must be maintained separately in order for the UI to be correctly updated.
-  let [ streamStep, setStreamStep ] = useState({
-    label: "Creating stream",
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
-    request: {
+  function streamRequest(streamName) {
+    return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
       region: 'us-east-1',
-      stream_name: 'test-stream',
-    },
-    state: pendingState()
-  });
+      stream_name: streamName,
+    };
+  }
 
-  let [ policyStep, setPolicyStep ] = useState({
-    label: "Creating policy",
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
-    request: {
+  function policyRequest(streamName, streamArn) {
+    return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
       region: 'us-east-1',
       role_name: 'role-name',
-      stream_name: 'test-stream',
-      stream_arn: 'test-stream-arn',
-    },
-    state: pendingState()
-  });
+      stream_name: streamName,
+      stream_arn: streamArn,
+    };
+  }
 
-  let [ subscriptionStep, setSubscriptionStep ] = useState({
-    label: "Creating subscription",
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
-    request: {
+  function subscriptionRequest(logGroupName, streamArn, roleArn) {
+    return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
       region: 'us-east-1',
-      log_group_name: 'log-group',
+      log_group_name: logGroupName,
       filter_name: 'filter-name',
       filter_pattern: 'pattern',
-      destination_stream_arn: 'stream-arn',
-      role_arn: 'role-arn',
-    },
-    state: pendingState()
-  });
+      destination_stream_arn: streamArn,
+      role_arn: roleArn,
+    };
+  }
+
+// State for each step must be maintained separately in order for the UI to be correctly updated.
+  let [ streamStep, setStreamStep ] = useState({
+                                                 label: "Create Stream",
+                                                 route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
+                                                 state: pendingState()
+                                               });
+
+  let [ policyStep, setPolicyStep ] = useState({
+                                                 label: "Create Policy",
+                                                 route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
+                                                 state: pendingState()
+                                               });
+
+  let [ subscriptionStep, setSubscriptionStep ] = useState({
+                                                             label: "Create Subscription",
+                                                             route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
+                                                             state: pendingState()
+                                                           });
 
   useEffect(() => {
 
-      async function autoSetup() {
+              async function autoSetup() {
 
-        async function executeStep(step, setStep) {
-          const url = URLUtils.qualifyUrl(step.route);
-          let response;
-          try {
-            response = await fetch('POST', url, step.request);
-          } catch (e) {
-            console.log('Setup request error:', e);
-            let error = errorState(parseError(e));
-            setStep({ ...step, state: error });
-            throw error;
-          }
+                async function executeStep(step, setStep, request) {
+                  const url = URLUtils.qualifyUrl(step.route);
+                  let response;
+                  try {
+                    response = await fetch('POST', url, step.request);
+                  } catch (e) {
+                    console.log('Setup request error:', e);
+                    let error = errorState(parseError(e));
+                    setStep({ ...step, state: error });
+                    throw error;
+                  }
 
-          // Copy step object and set state field.
-          setStep({ ...step, state: successState() });
-          return response;
-        }
+                  // Copy step object and set state field.
+                  setStep({ ...step, state: successState() });
+                  return response;
+                }
 
-        await executeStep(streamStep, setStreamStep);
-        await executeStep(policyStep, setPolicyStep);
-        await executeStep(subscriptionStep, setSubscriptionStep);
-      }
+                // Flow control for auto-setup steps.
+                let response = await executeStep(streamStep,
+                                               setStreamStep,
+                                               streamRequest('stream-name')); // TODO: Pull from input field.
 
-      autoSetup()
-    }, [] // [] causes useEffect to only be called once.
+                response = await executeStep(policyStep,
+                                  setPolicyStep,
+                                  policyRequest(response.stream_name,
+                                                response.stream_arn));
+
+                await executeStep(subscriptionStep,
+                                  setSubscriptionStep,
+                                  subscriptionRequest('log-group', // TODO: Pull from input field.
+                                                      response.stream_arn,
+                                                      response.policy_arn));
+              }
+
+              // TODO: Display success message.
+
+              // TODO: Add navigation and the ability to interrupt?
+
+              autoSetup()
+            }, [] // [] causes useEffect to only be called once.
   );
 
   return (
@@ -113,6 +138,7 @@ const KinesisSetupSteps = ({}) => {
     </> );
 };
 
+// TODO: Code duplicated from useFetch.
 const parseError = (error) => {
   const fullError = error.additional && error.additional.body && error.additional.body.message;
   return fullError || error.message;
