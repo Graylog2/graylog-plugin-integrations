@@ -18,10 +18,13 @@ import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResp
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisFullSetupResponseStep;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
+import org.graylog.integrations.aws.service.AWSService;
+import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -137,28 +140,46 @@ public class KinesisSetupResource implements PluginRestResource {
     @Path("/full_setup")
     @ApiOperation(value = "Full setup: Get all available AWS CloudWatch log groups names for the specified region")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public KinesisFullSetupResponse addSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                            KinesisFullSetupRequest request) {
-
+    public KinesisFullSetupResponse kinesisFullSetup(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
+                                                             KinesisFullSetupRequest request) {
         LOG.info("Request: [{}]", request);
-
-        // Mock response.
         final ArrayList<KinesisFullSetupResponseStep> setupSteps = new ArrayList<>();
+
+        // Step 1
         KinesisNewStreamResponse kinesisNewStreamResponse = kinesisService.createNewKinesisStream(KinesisNewStreamRequest.create(request.region(),
                                                                                                                                  request.awsAccessKeyId(),
                                                                                                                                  request.awsSecretAccessKey(),
                                                                                                                                  request.streamName()));
         String streamArn = kinesisNewStreamResponse.streamArn();
         setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Stream", kinesisNewStreamResponse.explanation()));
+
+        // Step 2
         CreateRolePermissionResponse response = kinesisService.autoKinesisPermissions(CreateRolePermissionRequest.create(request.region(),
                                                                                                                          request.awsAccessKeyId(),
                                                                                                                          request.awsSecretAccessKey(),
                                                                                                                          request.streamName(),
                                                                                                                          request.roleName(),
                                                                                                                          request.rolePolicyName()));
-        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy with role Arn", response.roleArn()));
+        String roleArn = response.roleArn();
+        setupSteps.add(KinesisFullSetupResponseStep.create(true, "Create Policy with role Arn", response.explanation()));
 
-        setupSteps.add(KinesisFullSetupResponseStep.create(false, "Subscribe stream to group", "Failed to create the subscription [Some specific AWS error]"));
+        // Step 3
+        // TODO optimize this call
+        CreateLogSubscriptionRequest logSubscriptionRequest = CreateLogSubscriptionRequest.create(request.region(),
+                                                                                                  request.awsAccessKeyId(),
+                                                                                                  request.awsSecretAccessKey(),
+                                                                                                  request.getLogGroupName(),
+                                                                                                  request.filterName(),
+                                                                                                  request.filterPattern(),
+                                                                                                  streamArn,
+                                                                                                  roleArn);
+        CreateLogSubscriptionResponse logSubscriptionResponse = new CloudWatchService(
+                CloudWatchLogsClient.builder()
+                                    .credentialsProvider(AWSService
+                                                                 .buildCredentialProvider(request.awsAccessKeyId(),
+                                                                                          request.awsSecretAccessKey())))
+                .addSubscriptionFilter(logSubscriptionRequest);
+        setupSteps.add(KinesisFullSetupResponseStep.create(false, "Subscribe stream to group", logSubscriptionResponse.explanation()));
         return KinesisFullSetupResponse.create(false, "Auto-setup was not fully successful!", setupSteps);
     }
 }
