@@ -36,6 +36,7 @@ import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +48,12 @@ public class KinesisSetupResourceTest {
     private static final String REGION = "us-east-1";
     private static final String KEY = "key";
     private static final String SECRET = "secret";
+    private static final String STREAM_NAME = "stream-name";
+    private static final String STREAM_ARN = "stream-arn";
+    private static final String ROLE_ARN = "role-arn";
+    private static final String ROLE_NAME = "role-name";
+    private static final String ROLE_POLICY_NAME = "role-policy-name";
+
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
@@ -103,7 +110,7 @@ public class KinesisSetupResourceTest {
         when(kinesisClient.describeStream(isA(Consumer.class)))
                 .thenReturn(DescribeStreamResponse.builder()
                                                   .streamDescription(StreamDescription.builder()
-                                                                                      .streamARN("stream-arn")
+                                                                                      .streamARN(STREAM_ARN)
                                                                                       .streamStatus(StreamStatus.ACTIVE)
                                                                                       .build()).build());
 
@@ -113,7 +120,7 @@ public class KinesisSetupResourceTest {
         when(iamClient.putRolePolicy(isA(Consumer.class)))
                 .thenReturn(PutRolePolicyResponse.builder().build());
         when(iamClient.getRole(isA(Consumer.class)))
-                .thenReturn(GetRoleResponse.builder().role(Role.builder().arn("role-arn").build()).build());
+                .thenReturn(GetRoleResponse.builder().role(Role.builder().arn(ROLE_ARN).build()).build());
 
         // Subscription AWS request mocks
         when(logsClient.putSubscriptionFilter(isA(PutSubscriptionFilterRequest.class)))
@@ -126,19 +133,25 @@ public class KinesisSetupResourceTest {
 
         // Stream
         final KinesisNewStreamRequest request =
-                KinesisNewStreamRequest.create(REGION, KEY, SECRET, "stream-name");
+                KinesisNewStreamRequest.create(REGION, KEY, SECRET, STREAM_NAME);
         final KinesisNewStreamResponse streamResponse = setupResource.createNewKinesisStream(request);
+        assertEquals(STREAM_NAME, streamResponse.streamName());
+        assertEquals(STREAM_ARN, streamResponse.streamArn());
 
         // Policy
         final CreateRolePermissionRequest policyRequest =
                 CreateRolePermissionRequest.create(REGION, KEY, SECRET, streamResponse.streamName(),
-                                                   streamResponse.streamArn(), "role-name", "role-policy-name");
+                                                   streamResponse.streamArn(), ROLE_NAME, ROLE_POLICY_NAME);
         final CreateRolePermissionResponse policyResponse = setupResource.createPolicies(policyRequest);
+        assertEquals(ROLE_ARN, policyResponse.roleArn());
 
         // Subscription
         final CreateLogSubscriptionRequest subscriptionRequest =
                 CreateLogSubscriptionRequest.create(REGION, KEY, SECRET, "log-group-name", "filter-name",
                                                     "filter-pattern", streamResponse.streamArn(), policyResponse.roleArn());
         final CreateLogSubscriptionResponse subscriptionResponse = setupResource.createSubscription(subscriptionRequest);
+        subscriptionResponse.explanation();
+        assertEquals("Success. The subscription filter [filter-name] was added to [log-group-name].",
+                     subscriptionResponse.explanation());
     }
 }
