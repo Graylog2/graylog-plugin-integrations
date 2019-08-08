@@ -118,6 +118,10 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
       <>
         <Row>
           <Col md={8}>
+            {/* TODO: Add a "Start now" button here. This will allow the user to see the steps and give them a chance
+                 to confirm that this is what they want to do. Add a description of specifically which resources and
+                 will be created and which fees might apply. Caution the user that this operation might remove
+                 any existing log subscription from the group, since it seems that there can be only one. */}
             <h2>Beginning Auto-setup</h2>
             <br/>
             <p>Auto-setup is now executing. Please wait...</p>
