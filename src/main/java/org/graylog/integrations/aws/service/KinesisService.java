@@ -431,7 +431,7 @@ public class KinesisService {
                 streamDescription = kinesisClient
                         .describeStream(r -> r.streamName(kinesisNewStreamRequest.streamName()))
                         .streamDescription();
-                if (seconds > 60) {
+                if (seconds > 300) {
                     final String responseMessage = String.format("Fail. Stream [%s] has failed to become active " +
                                                                  "within 60 seconds.", kinesisNewStreamRequest.streamName());
                     throw new BadRequestException(responseMessage);

@@ -1,5 +1,12 @@
 package org.graylog.integrations.aws.service;
 
+import com.github.rholder.retry.Attempt;
+import com.github.rholder.retry.RetryException;
+import com.github.rholder.retry.RetryListener;
+import com.github.rholder.retry.Retryer;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
+import com.github.rholder.retry.WaitStrategies;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -12,16 +19,21 @@ import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilde
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsResponse;
 import software.amazon.awssdk.services.cloudwatchlogs.model.Distribution;
+import software.amazon.awssdk.services.cloudwatchlogs.model.InvalidParameterException;
 import software.amazon.awssdk.services.cloudwatchlogs.model.PutSubscriptionFilterRequest;
 import software.amazon.awssdk.services.cloudwatchlogs.paginators.DescribeLogGroupsIterable;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class CloudWatchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudWatchService.class);
+    private static final int MAX_ATTEMPTS = 4;
+    private static final int SUBSCRIPTION_RETRY_DELAY = 1000;
+    private static final TimeUnit SUBSCRIPTION_RETRY_DELAY_UNIT = TimeUnit.MILLISECONDS;
 
     private CloudWatchLogsClientBuilder logsClientBuilder;
 
@@ -66,40 +78,64 @@ public class CloudWatchService {
         return LogGroupsResponse.create(groupNameList, groupNameList.size());
     }
 
-    public CreateLogSubscriptionResponse addSubscriptionFilter(CreateLogSubscriptionRequest logSubscriptionRequest) {
-        CloudWatchLogsClient cloudWatch = createClient(logSubscriptionRequest.region(),
-                                                       logSubscriptionRequest.awsAccessKeyId(),
-                                                       logSubscriptionRequest.awsSecretAccessKey());
+    public CreateLogSubscriptionResponse addSubscriptionFilter(CreateLogSubscriptionRequest request) {
+        CloudWatchLogsClient cloudWatch = createClient(request.region(),
+                                                       request.awsAccessKeyId(),
+                                                       request.awsSecretAccessKey());
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
-                                            .logGroupName(logSubscriptionRequest.logGroupName())
-                                            .filterName(logSubscriptionRequest.filterName())
-                                            .filterPattern(logSubscriptionRequest.filterPattern())
-                                            .destinationArn(logSubscriptionRequest.destinationStreamArn())
-                                            .roleArn(logSubscriptionRequest.getRoleArn())
+                                            .logGroupName(request.logGroupName())
+                                            .filterName(request.filterName())
+                                            .filterPattern(request.filterPattern())
+                                            .destinationArn(request.destinationStreamArn())
+                                            .roleArn(request.getRoleArn())
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
         try {
-            // IAM is eventually consistent, so we have to wait a little while.
-            // TODO: Perhaps there is a more deterministic way to handle this?
+            final Retryer<Void> retryer = RetryerBuilder.<Void>newBuilder()
+                    .retryIfExceptionOfType(InvalidParameterException.class)
+                    .withWaitStrategy(WaitStrategies.fixedWait(SUBSCRIPTION_RETRY_DELAY, SUBSCRIPTION_RETRY_DELAY_UNIT))
+                    .withStopStrategy(StopStrategies.stopAfterAttempt(MAX_ATTEMPTS))
+                    .withRetryListener(new RetryListener() {
+                        public <V> void onRetry(Attempt<V> attempt) {
+                            if (attempt.hasException()) {
+                                LOG.info("Failed to create subscription for log group on retry attempt [{}]. " +
+                                         "This is probably normal and indicates that the specified IAM role is not ready yet due to IAM eventual consistency." +
+                                         "Retrying now." +
+                                         " Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause().getMessage());
+                                LOG.debug("Subscription retry error.", attempt.getExceptionCause());
+                            } else if (attempt.hasException() && attempt.getAttemptNumber() == MAX_ATTEMPTS) {
+                                LOG.error("Failed to put subscription in [{}] attempts. Giving up." +
+                                          " Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                            } else if (attempt.getAttemptNumber() > 1) {
+                                LOG.info("Retry of CloudWatch log group [{}] subscription was finally successful on attempt [{}].",
+                                         request.logGroupName(), attempt.getAttemptNumber());
+                            }
+                        }
+                    })
+                    .build();
             try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                LOG.error("Request interrupted while waiting for IAM to become consistent");
-                return null; // Give up on request.
+                retryer.call(() -> {
+                    cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
+                    return null;
+                });
+
+                String explanation = String.format("Success. The subscription filter [%s] was added for the CloudWatch log group [%s].",
+                                                   request.filterName(), request.logGroupName());
+                return CreateLogSubscriptionResponse.create(explanation);
+            } catch (RetryException e) {
+                throw new RuntimeException(String.format("Failed to create the CloudWatch subscription after [%d] attempts",
+                                                         e.getNumberOfFailedAttempts()), e.getCause()); // e.getCause() returns the actual AWS exception to the UI.
             }
-            cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
-            String explanation = String.format("Success. The subscription filter [%s] was added for the CloudWatch log group [%s].",
-                                 logSubscriptionRequest.filterName(), logSubscriptionRequest.logGroupName());
-            return CreateLogSubscriptionResponse.create(explanation);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Attempt to add subscription [%s] to Cloudwatch log group " +
                                                          "[%s] failed due to the following exception: [%s]",
-                                                         logSubscriptionRequest.filterName(),
-                                                         logSubscriptionRequest.logGroupName(), specificError);
+                                                         request.filterName(),
+                                                         request.logGroupName(), specificError);
             LOG.error(responseMessage);
             throw new BadRequestException(responseMessage, e);
         }
+        // software.amazon.awssdk.services.cloudwatchlogs.model.InvalidParameterException: Could not deliver test message to specified Kinesis stream. Check if the given kinesis stream is in ACTIVE state. (Service: CloudWatchLogs, Status Code: 400, Request ID: 1764176b-4a2c-4852-8191-f615b2a02eaa)
     }
 }
