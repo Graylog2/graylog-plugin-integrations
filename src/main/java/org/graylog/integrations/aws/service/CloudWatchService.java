@@ -81,7 +81,7 @@ public class CloudWatchService {
                                             .build();
         try {
             cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
-            String explanation = String.format("Success. The subscription filter [%s] was added to [%s].",
+            String explanation = String.format("Success. The subscription filter [%s] was added for the CloudWatch log group [%s].",
                                  logSubscriptionRequest.filterName(), logSubscriptionRequest.getLogGroupName());
             return CreateLogSubscriptionResponse.create(explanation);
         } catch (Exception e) {

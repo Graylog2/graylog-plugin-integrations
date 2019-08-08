@@ -18,10 +18,10 @@ const KinesisSetupSteps = ({}) => {
     };
   }
 
-  function successState() {
+  function successState(result) {
     return {
       type: 'success',
-      additional: 'Successfully created stream [dano-stream/arn-01]'
+      additional: result
     };
   }
 
@@ -103,26 +103,20 @@ const KinesisSetupSteps = ({}) => {
                   }
 
                   // Copy step object and set state field.
-                  setStep({ ...step, state: successState() });
+                  setStep({ ...step, state: successState(response.result) });
                   return response;
                 }
 
                 // Flow control for auto-setup steps.
-                let response = await executeStep(streamStep,
-                                               setStreamStep,
-                                               streamRequest('stream-name')); // TODO: Pull from input field.
+                let response = await executeStep(streamStep, setStreamStep, streamRequest('stream-name')); // TODO: Pull from input field.
 
                 let streamArn = response.stream_arn;
-                response = await executeStep(policyStep,
-                                  setPolicyStep,
-                                  policyRequest(response.stream_name,
-                                                streamArn));
+                response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
+                                                                                      streamArn));
 
-                await executeStep(subscriptionStep,
-                                  setSubscriptionStep,
-                                  subscriptionRequest('log-group', // TODO: Pull from input field.
-                                                      streamArn,
-                                                      response.role_arn));
+                await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest('log-group', // TODO: Pull from input field.
+                                                                                             streamArn,
+                                                                                             response.role_arn));
               }
 
               // TODO: Display success message.

@@ -46,10 +46,10 @@ public class KinesisSetupResource implements PluginRestResource {
 
     // Enable mocked responses for UI testing.
     // TODO: Remove later.
-    private boolean addTestDelay = false;
+    private boolean mockResponses = true;
 
     @Inject
-    public KinesisSetupResource( CloudWatchService cloudWatchService, KinesisService kinesisService) {
+    public KinesisSetupResource(CloudWatchService cloudWatchService, KinesisService kinesisService) {
         this.cloudWatchService = cloudWatchService;
         this.kinesisService = kinesisService;
     }
@@ -63,9 +63,11 @@ public class KinesisSetupResource implements PluginRestResource {
                                                                    KinesisNewStreamRequest request) throws InterruptedException {
 
         LOG.info("Stream request: [{}]", request);
-        testDelay(1000);
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return KinesisNewStreamResponse.create("stream-name", "stream-arn", String.format("Created stream [%s] successfully.", request.streamName()));
+        }
 
-        // Real method call is already implemented. Commented out for now to allow UI to be mocked out easier.
         return kinesisService.createNewKinesisStream(request);
     }
 
@@ -77,7 +79,10 @@ public class KinesisSetupResource implements PluginRestResource {
     public CreateRolePermissionResponse createPolicies(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                CreateRolePermissionRequest request) throws InterruptedException {
         LOG.info("Policy request: [{}]", request);
-        testDelay(1000);
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return CreateRolePermissionResponse.create(String.format("Created policy [%s] successfully.", "policy-arn"), "policy-arn");
+        }
 
         return kinesisService.autoKinesisPermissions(request);
     }
@@ -90,15 +95,11 @@ public class KinesisSetupResource implements PluginRestResource {
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                     CreateLogSubscriptionRequest request) throws InterruptedException {
         LOG.info("Subscription request: [{}]", request);
-        testDelay(REQUEST_DELAY);
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return CreateLogSubscriptionResponse.create(String.format("Created subscription for log group [%s] successfully.", "log-group"));
+        }
 
         return cloudWatchService.addSubscriptionFilter(request);
-    }
-
-    // TODO: Remove before release.
-    private void testDelay(int requestDelay) throws InterruptedException {
-        if (addTestDelay) {
-            Thread.sleep(requestDelay);
-        }
     }
 }

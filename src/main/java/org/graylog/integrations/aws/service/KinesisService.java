@@ -36,7 +36,6 @@ import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
-import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -432,9 +431,8 @@ public class KinesisService {
                 seconds++;
             } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
             String streamArn = streamDescription.streamARN();
-            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shard" +
-                                                         "with the following stream ARN [%s].",
-                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT, streamArn);
+            final String responseMessage = String.format("Success. The new stream [%s/%s] was created with [%d] shard.",
+                                                         kinesisNewStreamRequest.streamName(), streamArn, SHARD_COUNT);
 
             return KinesisNewStreamResponse.create(createStreamRequest.streamName(),
                                                    streamArn,
