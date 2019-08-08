@@ -11,7 +11,7 @@ const KinesisSetupSteps = ({}) => {
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);
 
-  function pendingState( message ) {
+  function pendingState(message) {
     return {
       type: 'pending',
       additional: message
@@ -106,14 +106,14 @@ const KinesisSetupSteps = ({}) => {
                 }
 
                 // Flow control for auto-setup steps.
-                let response = await executeStep(streamStep, setStreamStep, streamRequest('new-stream13')); // TODO: Pull from input field.
+                let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
 
                 let streamArn = response.stream_arn;
                 // setPolicyStep(pendingState('Creating policy...'));
                 response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
                                                                                       streamArn));
 
-                await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest('integrations-flowlogs', // TODO: Pull from input field.
+                await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
                                                                                              streamArn,
                                                                                              response.role_arn));
               }

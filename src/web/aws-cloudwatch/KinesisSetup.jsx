@@ -33,15 +33,15 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
       const noGroups = /No CloudWatch log groups/g;
       if (groupNamesStatus.error.match(noGroups)) {
         setFormError({
-          full_message: groupNamesStatus.error,
-          nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try choosing a different region, or follow this <a
-            href="/">CloudWatch documentation</a> to begin setting up your AWS CloudWatch account.</span>,
-        });
+                       full_message: groupNamesStatus.error,
+                       nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try choosing a different region, or follow this <a
+                         href="/">CloudWatch documentation</a> to begin setting up your AWS CloudWatch account.</span>,
+                     });
         setDisabledGroups(true);
       } else {
         setFormError({
-          full_message: groupNamesStatus.error,
-        });
+                       full_message: groupNamesStatus.error,
+                     });
       }
     }
 
@@ -55,60 +55,87 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     createStreamFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM);
   };
 
-  return (
-    <Row>
-      <Col md={8}>
-        <FormWrap onSubmit={handleSubmit}
-                  buttonContent="Begin Automated Setup"
-                  disabled={formValidation.isFormValid([
-                    'awsCloudWatchKinesisStream',
-                    'awsCloudWatchAwsGroupName',
-                  ], formData)}
-                  loading={groupNamesStatus.loading}
-                  error={formError}
-                  title="Setup Kinesis Automatically"
-                  description="">
+  let [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
 
-          <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
-            following operations within your AWS account.
-            See <a target={"_blank"}
-                   href={"https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"}>Using
-              CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.</p>
+  if (!displaySetupSteps) {
+    return (
+      <Row>
+        <Col md={8}>
+          <FormWrap onSubmit={() => {
+            setDisplaySetupSteps(true)
+          }}
+                    buttonContent="Begin Automated Setup"
+                    disabled={formValidation.isFormValid([
+                                                           'awsCloudWatchKinesisStream',
+                                                           'awsCloudWatchAwsGroupName',
+                                                         ], formData)}
+                    loading={groupNamesStatus.loading}
+                    error={formError}
+                    title="Setup Kinesis Automatically"
+                    description="">
 
-          <ol>
-            <li>Create a new Kinesis Stream with the specified name.</li>
-            <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
-            <li>Subscribe the new Kinesis Stream to the Log Group.</li>
-          </ol>
 
-          <KinesisSetupSteps/>
+            <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
+              following operations within your AWS account.
+              See <a target={"_blank"}
+                     href={"https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html"}>Using
+                CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.</p>
 
-          <ValidatedInput id="awsCloudWatchKinesisStream"
-                          type="text"
-                          label="Kinesis Stream Name"
-                          placeholder="Create Stream Name"
-                          onChange={onChange}
-                          fieldData={formData.awsCloudWatchKinesisStream}
-                          required/>
+            <ol>
+              <li>Create a new Kinesis Stream with the specified name.</li>
+              <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
+              <li>Subscribe the new Kinesis Stream to the Log Group.</li>
+            </ol>
 
-          <ValidatedInput id="awsCloudWatchAwsGroupName"
-                          type="select"
-                          fieldData={formData.awsCloudWatchAwsGroupName}
-                          onChange={onChange}
-                          label="CloudWatch Group Name"
-                          required
-                          disabled={groupNamesStatus.loading || disabledGroups}>
+            <ValidatedInput id="awsCloudWatchKinesisStream"
+                            type="text"
+                            label="Kinesis Stream Name"
+                            placeholder="Create Stream Name"
+                            onChange={onChange}
+                            fieldData={formData.awsCloudWatchKinesisStream}
+                            required/>
 
-            {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
-          </ValidatedInput>
+            <ValidatedInput id="awsCloudWatchAwsGroupName"
+                            type="select"
+                            fieldData={formData.awsCloudWatchAwsGroupName}
+                            onChange={onChange}
+                            label="CloudWatch Group Name"
+                            required
+                            disabled={groupNamesStatus.loading || disabledGroups}>
 
-          {toggleSetup
-          && <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>}
-          &nbsp;&nbsp;
-        </FormWrap>
-      </Col>
-    </Row>
-  );
+              {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
+            </ValidatedInput>
+
+            {toggleSetup
+            && <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>}
+            &nbsp;&nbsp;
+          </FormWrap>
+        </Col>}
+      </Row>
+    );
+  } else {
+    return (
+      <>
+        <Row>
+          <Col md={8}>
+            <h2>Beginning Auto-setup</h2>
+            <br/>
+            <p>Auto-setup is now executing...</p>
+          </Col>}
+        </Row>
+        <Row>
+          <Col md={8}>
+            <KinesisSetupSteps/>
+          </Col>}
+        </Row>
+        <Row>
+          <Col md={8}>
+            <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>
+          </Col>}
+        </Row>
+      </>
+    );
+  }
 };
 
 KinesisSetup.propTypes = {
