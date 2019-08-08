@@ -60,8 +60,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPInputStream;
 
-import static java.lang.Thread.sleep;
-
 /**
  * Service for all AWS Kinesis business logic and SDK usages.
  */
@@ -101,9 +99,11 @@ public class KinesisService {
                                    .build();
     }
 
-    private IamClient createIamClient(String regionName, String accessKeyId, String secretAccessKey) {
 
-        return iamClientBuilder.region(Region.of(regionName))
+    private IamClient createIamClient(String accessKeyId, String secretAccessKey) {
+
+        // IAM Always uses the Global region.
+        return iamClientBuilder.region(Region.AWS_GLOBAL)
                                .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
                                .build();
     }
@@ -422,7 +422,12 @@ public class KinesisService {
             kinesisClient.createStream(createStreamRequest);
             int seconds = 0;
             do {
-                sleep(1_000);
+                try {
+                    Thread.sleep(1_000);
+                } catch (InterruptedException e) {
+                    LOG.error("Request interrupted while waiting for shard to become available.");
+                    return null; // Give up on request.
+                }
                 streamDescription = kinesisClient
                         .describeStream(r -> r.streamName(kinesisNewStreamRequest.streamName()))
                         .streamDescription();
@@ -468,9 +473,7 @@ public class KinesisService {
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         final String rolePolicyName = String.format(ROLE_POLICY_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
-            final IamClient iamClient = createIamClient(request.region(),
-                                                        request.awsAccessKeyId(),
-                                                        request.awsSecretAccessKey());
+            final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey());
             String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
 

@@ -80,6 +80,14 @@ public class CloudWatchService {
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
         try {
+            // IAM is eventually consistent, so we have to wait a little while.
+            // TODO: Perhaps there is a more deterministic way to handle this?
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException e) {
+                LOG.error("Request interrupted while waiting for IAM to become consistent");
+                return null; // Give up on request.
+            }
             cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
             String explanation = String.format("Success. The subscription filter [%s] was added for the CloudWatch log group [%s].",
                                  logSubscriptionRequest.filterName(), logSubscriptionRequest.logGroupName());
