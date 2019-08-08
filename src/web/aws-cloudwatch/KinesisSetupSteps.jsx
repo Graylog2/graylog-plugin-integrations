@@ -46,8 +46,6 @@ const KinesisSetupSteps = ({}) => {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
       region: 'us-east-1',
-      role_name: 'role-name',
-      role_policy_name: 'role-policy-name',
       stream_name: streamName,
       stream_arn: streamArn,
     };

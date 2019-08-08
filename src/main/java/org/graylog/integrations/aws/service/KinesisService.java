@@ -74,6 +74,9 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int RECORDS_SAMPLE_SIZE = 10;
     private static final int SHARD_COUNT = 1;
+    private static final String ROLE_NAME_FORMAT = "graylog-cloudwatch-role-%s";
+    private static final String ROLE_POLICY_NAME_FORMAT = "graylog-cloudwatch-role-policy-%s";
+    private static final String UNIQUE_ROLE_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
     private final IamClientBuilder iamClientBuilder;
     private final KinesisClientBuilder kinesisClientBuilder;
@@ -452,48 +455,41 @@ public class KinesisService {
     /**
      * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
      *
-     * @param rolePermissionRequest
+     * @param request
      * @return role Arn associated with the associated kinesis stream
      */
-    public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest rolePermissionRequest) {
+    public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest request) {
 
-        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", rolePermissionRequest.roleName());
-        KinesisClient kinesisClient = createClient(rolePermissionRequest.region(),
-                                                   rolePermissionRequest.awsAccessKeyId(),
-                                                   rolePermissionRequest.awsSecretAccessKey());
+        LOG.debug("Creating the role that will allow CloudWatch to talk to Kinesis");
+        KinesisClient kinesisClient = createClient(request.region(),
+                                                   request.awsAccessKeyId(),
+                                                   request.awsSecretAccessKey());
 
+        String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
+        final String rolePolicyName = String.format(ROLE_POLICY_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
-            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", rolePermissionRequest.streamName());
-            String streamArn = kinesisClient.describeStream(r -> r.streamName(rolePermissionRequest.streamName()))
-                                            .streamDescription()
-                                            .streamARN();
-
-            final IamClient iamClient = createIamClient(rolePermissionRequest.region(),
-                                                        rolePermissionRequest.awsAccessKeyId(),
-                                                        rolePermissionRequest.awsSecretAccessKey());
-            String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, rolePermissionRequest.roleName(), rolePermissionRequest.region());
+            final IamClient iamClient = createIamClient(request.region(),
+                                                        request.awsAccessKeyId(),
+                                                        request.awsSecretAccessKey());
+            String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
 
-            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iamClient,
-                                                                                      rolePermissionRequest.roleName(),
-                                                                                      streamArn,
-                                                                                      rolePermissionRequest.rolePolicyName());
-            LOG.debug(setPermissionsRoleResponse);
+            setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn(), rolePolicyName);
 
-            final String roleArn = getRolePermissionsArn(iamClient, rolePermissionRequest.roleName());
-            final String explanation = String.format("Success! The role [%s] has been created.", roleArn);
+            final String roleArn = getRolePermissionsArn(iamClient, roleName);
+            final String explanation = String.format("Success! The role [%s/%s] has been created with policy [%s].", roleName, roleArn, rolePolicyName);
             return CreateRolePermissionResponse.create(explanation, roleArn);
 
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
-                                                         "following error [%s]", rolePermissionRequest.roleName(),
+                                                         "following error [%s]", roleName,
                                                          specificError);
             throw new BadRequestException(responseMessage);
         }
     }
 
-    private static String setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
+    private static void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
         String rolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -504,10 +500,11 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
+
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         try {
             iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
-            return String.format("Success! The role policy [%s] was assigned.", rolePolicyName);
+            LOG.debug("Success! The role policy [{}] was assigned.", rolePolicyName);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to create role [%s] due to the " +
@@ -516,7 +513,9 @@ public class KinesisService {
         }
     }
 
-    private static String createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region) {
+    private static String createRoleForKinesisAutoSetup(IamClient iam, String region, String roleName) {
+
+        // Create unique role name in this format "graylog-cloudwatch-role-2019-08-08-07-35-34"
         LOG.debug("Create Kinesis Auto Setup Role [{}] to region [{}]", roleName, region);
         String assumeRolePolicy =
                 "{\n" +

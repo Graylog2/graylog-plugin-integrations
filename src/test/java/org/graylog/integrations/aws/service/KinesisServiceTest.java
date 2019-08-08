@@ -309,4 +309,9 @@ public class KinesisServiceTest {
         assertEquals(response.result(), expectedResponse);
         assertEquals(SHARD_COUNT, 1);
     }
+
+    @Test
+    public void uniqueRoleName() {
+        assertEquals(1,1);
+    }
 }

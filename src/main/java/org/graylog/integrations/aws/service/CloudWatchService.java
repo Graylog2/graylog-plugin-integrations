@@ -72,7 +72,7 @@ public class CloudWatchService {
                                                        logSubscriptionRequest.awsSecretAccessKey());
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
-                                            .logGroupName(logSubscriptionRequest.getLogGroupName())
+                                            .logGroupName(logSubscriptionRequest.logGroupName())
                                             .filterName(logSubscriptionRequest.filterName())
                                             .filterPattern(logSubscriptionRequest.filterPattern())
                                             .destinationArn(logSubscriptionRequest.destinationStreamArn())
@@ -82,14 +82,14 @@ public class CloudWatchService {
         try {
             cloudWatch.putSubscriptionFilter(putSubscriptionFilterRequest);
             String explanation = String.format("Success. The subscription filter [%s] was added for the CloudWatch log group [%s].",
-                                 logSubscriptionRequest.filterName(), logSubscriptionRequest.getLogGroupName());
+                                 logSubscriptionRequest.filterName(), logSubscriptionRequest.logGroupName());
             return CreateLogSubscriptionResponse.create(explanation);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Attempt to add subscription [%s] to Cloudwatch log group " +
                                                          "[%s] failed due to the following exception: [%s]",
                                                          logSubscriptionRequest.filterName(),
-                                                         logSubscriptionRequest.getLogGroupName(), specificError);
+                                                         logSubscriptionRequest.logGroupName(), specificError);
             LOG.error(responseMessage);
             throw new BadRequestException(responseMessage, e);
         }

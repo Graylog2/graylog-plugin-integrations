@@ -52,8 +52,6 @@ public class KinesisSetupResourceTest {
     private static final String STREAM_NAME = "stream-name";
     private static final String STREAM_ARN = "stream-arn";
     private static final String ROLE_ARN = "role-arn";
-    private static final String ROLE_NAME = "role-name";
-    private static final String ROLE_POLICY_NAME = "role-policy-name";
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
@@ -141,8 +139,8 @@ public class KinesisSetupResourceTest {
         // Policy
         final CreateRolePermissionRequest policyRequest =
                 CreateRolePermissionRequest.create(REGION, KEY, SECRET, streamResponse.streamName(),
-                                                   streamResponse.streamArn(), ROLE_NAME, ROLE_POLICY_NAME);
-        final CreateRolePermissionResponse policyResponse = setupResource.createPolicies(policyRequest);
+                                                   streamResponse.streamArn());
+        final CreateRolePermissionResponse policyResponse = setupResource.autoKinesisPermissions(policyRequest);
         assertEquals(ROLE_ARN, policyResponse.roleArn());
 
         // Subscription

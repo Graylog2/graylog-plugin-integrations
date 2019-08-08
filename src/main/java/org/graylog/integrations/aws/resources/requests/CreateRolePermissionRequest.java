@@ -13,8 +13,6 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
 
     private static final String STREAM_NAME = "stream_name";
     private static final String STREAM_ARN = "stream_arn";
-    private static final String ROLE_NAME = "role_name";
-    private static final String ROLE_POLICY_NAME = "role_policy_name";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -31,20 +29,12 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
     @JsonProperty(STREAM_ARN)
     public abstract String streamArn();
 
-    @JsonProperty(ROLE_NAME)
-    public abstract String roleName();
-
-    @JsonProperty(ROLE_POLICY_NAME)
-    public abstract String rolePolicyName();
-
     @JsonCreator
     public static CreateRolePermissionRequest create(@JsonProperty(REGION) String region,
                                                      @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                      @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
                                                      @JsonProperty(STREAM_NAME) String streamName,
-                                                     @JsonProperty(STREAM_ARN) String streamArn,
-                                                     @JsonProperty(ROLE_NAME) String roleName,
-                                                     @JsonProperty(ROLE_POLICY_NAME) String rolePolicyName) {
-        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, streamArn, roleName, rolePolicyName);
+                                                     @JsonProperty(STREAM_ARN) String streamArn) {
+        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, streamArn);
     }
 }
