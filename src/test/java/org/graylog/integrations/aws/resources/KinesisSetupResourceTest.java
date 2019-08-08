@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -63,22 +64,22 @@ public class KinesisSetupResourceTest {
     private KinesisService kinesisService;
 
     @Mock
-    private IamClientBuilder iamClientBuilder;
+    private IamClientBuilder iamClientBuilder = Mockito.mock(IamClientBuilder.class);
 
     @Mock
-    private IamClient iamClient;
+    private IamClient iamClient = Mockito.mock(IamClient.class);
 
     @Mock
-    private CloudWatchLogsClientBuilder logsClientBuilder;
+    private CloudWatchLogsClientBuilder logsClientBuilder = Mockito.mock(CloudWatchLogsClientBuilder.class);
 
     @Mock
-    private CloudWatchLogsClient logsClient;
+    private CloudWatchLogsClient logsClient = Mockito.mock(CloudWatchLogsClient.class);
 
     @Mock
-    private KinesisClientBuilder kinesisClientBuilder;
+    private KinesisClientBuilder kinesisClientBuilder = Mockito.mock(KinesisClientBuilder.class);
 
     @Mock
-    private KinesisClient kinesisClient;
+    private KinesisClient kinesisClient = Mockito.mock(KinesisClient.class);
 
     @Before
     public void setUp() throws Exception {
@@ -125,7 +126,6 @@ public class KinesisSetupResourceTest {
         // Subscription AWS request mocks
         when(logsClient.putSubscriptionFilter(isA(PutSubscriptionFilterRequest.class)))
                 .thenReturn(PutSubscriptionFilterResponse.builder().build());
-
     }
 
     @Test
@@ -150,8 +150,8 @@ public class KinesisSetupResourceTest {
                 CreateLogSubscriptionRequest.create(REGION, KEY, SECRET, "log-group-name", "filter-name",
                                                     "filter-pattern", streamResponse.streamArn(), policyResponse.roleArn());
         final CreateLogSubscriptionResponse subscriptionResponse = setupResource.createSubscription(subscriptionRequest);
-        subscriptionResponse.explanation();
+        subscriptionResponse.result();
         assertEquals("Success. The subscription filter [filter-name] was added to [log-group-name].",
-                     subscriptionResponse.explanation());
+                     subscriptionResponse.result());
     }
 }

@@ -306,7 +306,7 @@ public class KinesisServiceTest {
         // Check the values are whats expected.
         final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "] was created with ["
                                         + SHARD_COUNT + "] shards with the following stream ARN [" + STREAM_ARN + "].";
-        assertEquals(response.explanation(), expectedResponse);
+        assertEquals(response.result(), expectedResponse);
         assertEquals(SHARD_COUNT, 1);
     }
 }

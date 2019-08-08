@@ -432,7 +432,7 @@ public class KinesisService {
                 seconds++;
             } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
             String streamArn = streamDescription.streamARN();
-            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards" +
+            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shard" +
                                                          "with the following stream ARN [%s].",
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT, streamArn);
 
@@ -483,7 +483,7 @@ public class KinesisService {
             LOG.debug(setPermissionsRoleResponse);
 
             final String roleArn = getRolePermissionsArn(iamClient, rolePermissionRequest.roleName());
-            final String explanation = String.format("Success! The roleArn [%s] has been returned.", roleArn);
+            final String explanation = String.format("Success! The role [%s] has been created.", roleArn);
             return CreateRolePermissionResponse.create(explanation, roleArn);
 
         } catch (Exception e) {
