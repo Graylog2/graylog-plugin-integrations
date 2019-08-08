@@ -51,8 +51,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   }, [ groupNamesStatus.error ]);
 
   const handleSubmit = () => {
-    console.log('Starting Kinesis auto-setup');
-    createStreamFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM);
+    setDisplaySetupSteps(true);
   };
 
   let [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
@@ -61,9 +60,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     return (
       <Row>
         <Col md={8}>
-          <FormWrap onSubmit={() => {
-            setDisplaySetupSteps(true)
-          }}
+          <FormWrap onSubmit={handleSubmit}
                     buttonContent="Begin Automated Setup"
                     disabled={formValidation.isFormValid([
                                                            'awsCloudWatchKinesisStream',
@@ -122,6 +119,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
                  to confirm that this is what they want to do. Add a description of specifically which resources and
                  will be created and which fees might apply. Caution the user that this operation might remove
                  any existing log subscription from the group, since it seems that there can be only one. */}
+
+            {/* TODO: Add nav away protection. */}
             <h2>Beginning Auto-setup</h2>
             <br/>
             <p>Auto-setup is now executing. Please wait...</p>
@@ -134,6 +133,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
         </Row>
         <Row>
           <Col md={8}>
+            {/* TODO: Cancel setup operation. */}
             <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>
           </Col>}
         </Row>

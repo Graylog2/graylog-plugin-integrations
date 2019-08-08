@@ -57,8 +57,8 @@ const KinesisSetupSteps = ({}) => {
       aws_secret_access_key: secret,
       region: 'us-east-1',
       log_group_name: logGroupName,
-      filter_name: 'filter-name',
-      filter_pattern: 'pattern',
+      filter_name: 'filter-name', // TODO: Use unique filter name
+      filter_pattern: '',
       destination_stream_arn: streamArn,
       role_arn: roleArn,
     };
