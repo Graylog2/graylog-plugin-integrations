@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 public class CloudWatchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudWatchService.class);
-    private static final int MAX_ATTEMPTS = 4;
     private static final int SUBSCRIPTION_RETRY_DELAY = 1000;
+    private static final int SUBSCRIPTION_RETRY_MAX_ATTEMPTS = 120;
     private static final TimeUnit SUBSCRIPTION_RETRY_DELAY_UNIT = TimeUnit.MILLISECONDS;
 
     private CloudWatchLogsClientBuilder logsClientBuilder;
@@ -92,21 +92,22 @@ public class CloudWatchService {
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
         try {
+            // IAM roles/policies are eventually consistent (created in the previous step). So, the only way to
+            // find out when the CloudWatch log subscription can be created successfully is to retry until it works.
+            // InvalidParameterException is thrown by the AWS SDK when the subscription policy cannot successfully use
+            // the specified role. The following retryer catches that exception and reties.
             final Retryer<Void> retryer = RetryerBuilder.<Void>newBuilder()
                     .retryIfExceptionOfType(InvalidParameterException.class)
                     .withWaitStrategy(WaitStrategies.fixedWait(SUBSCRIPTION_RETRY_DELAY, SUBSCRIPTION_RETRY_DELAY_UNIT))
-                    .withStopStrategy(StopStrategies.stopAfterAttempt(MAX_ATTEMPTS))
+                    .withStopStrategy(StopStrategies.stopAfterAttempt(SUBSCRIPTION_RETRY_MAX_ATTEMPTS))
                     .withRetryListener(new RetryListener() {
                         public <V> void onRetry(Attempt<V> attempt) {
                             if (attempt.hasException()) {
-                                LOG.info("Failed to create subscription for log group on retry attempt [{}]. " +
+                                LOG.info("Failed to create log group subscription on retry attempt [{}]. " +
                                          "This is probably normal and indicates that the specified IAM role is not ready yet due to IAM eventual consistency." +
-                                         "Retrying now." +
-                                         " Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause().getMessage());
-                                LOG.debug("Subscription retry error.", attempt.getExceptionCause());
-                            } else if (attempt.hasException() && attempt.getAttemptNumber() == MAX_ATTEMPTS) {
-                                LOG.error("Failed to put subscription in [{}] attempts. Giving up." +
-                                          " Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause());
+                                         "Retrying now. Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause().getMessage());
+                            } else if (attempt.hasException() && attempt.getAttemptNumber() == SUBSCRIPTION_RETRY_MAX_ATTEMPTS) {
+                                LOG.error("Failed to put subscription after [{}] attempts. Giving up. Exception [{}]", attempt.getAttemptNumber(), attempt.getExceptionCause());
                             } else if (attempt.getAttemptNumber() > 1) {
                                 LOG.info("Retry of CloudWatch log group [{}] subscription was finally successful on attempt [{}].",
                                          request.logGroupName(), attempt.getAttemptNumber());
@@ -124,8 +125,8 @@ public class CloudWatchService {
                                                    request.filterName(), request.logGroupName());
                 return CreateLogSubscriptionResponse.create(explanation);
             } catch (RetryException e) {
-                throw new RuntimeException(String.format("Failed to create the CloudWatch subscription after [%d] attempts",
-                                                         e.getNumberOfFailedAttempts()), e.getCause()); // e.getCause() returns the actual AWS exception to the UI.
+                throw new RuntimeException(String.format("Failed to create the CloudWatch subscription after [%d] attempts. Exception [%s]",
+                                                         e.getNumberOfFailedAttempts(), e.getCause()), e.getCause() ); // e.getCause() returns the actual AWS exception to the UI.
             }
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
