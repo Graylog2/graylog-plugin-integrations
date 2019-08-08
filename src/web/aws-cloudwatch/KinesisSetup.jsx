@@ -120,7 +120,7 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
           <Col md={8}>
             <h2>Beginning Auto-setup</h2>
             <br/>
-            <p>Auto-setup is now executing...</p>
+            <p>Auto-setup is now executing. Please wait...</p>
           </Col>}
         </Row>
         <Row>
