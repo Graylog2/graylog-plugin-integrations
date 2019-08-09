@@ -26,7 +26,19 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     { region: formData.awsCloudWatchAwsRegion.value },
   );
 
+  const {setStreams } = useContext(ApiContext);
+  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
+    null,
+    (response) => {
+      setStreams(response);
+      toggleSetup();
+    },
+    'POST',
+    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+  );
+
   useEffect(() => {
+    setStreamsFetch(null);
     if (groupNamesStatus.error) {
       setGroupNamesUrl(null);
 
@@ -52,6 +64,10 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
 
   const handleSubmit = () => {
     setDisplaySetupSteps(true);
+  };
+
+  const handleContinue = () => {
+    setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 
   let [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
@@ -134,7 +150,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
         <Row>
           <Col md={8}>
             {/* TODO: Cancel setup operation. */}
-            <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>
+            <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>&nbsp;
+            <button onClick={handleContinue} type="button" className="btn btn-primary">Continue Setup</button>
           </Col>}
         </Row>
       </>

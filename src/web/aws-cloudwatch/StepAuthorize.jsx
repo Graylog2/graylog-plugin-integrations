@@ -30,7 +30,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
   );
 
-
   useEffect(() => {
     setStreamsFetch(null);
     if (fetchRegionsStatus.error) {
