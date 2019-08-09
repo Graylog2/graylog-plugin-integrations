@@ -5,8 +5,9 @@ import { ApiRoutes } from "../common/Routes";
 import { FormDataContext } from "./context/FormData";
 import { awsAuth } from "./context/default_settings";
 import KinesisSetupStep from "./KinesisSetupStep";
+import KinesisStreams from "./KinesisStreams";
 
-const KinesisSetupSteps = ({}) => {
+const KinesisSetupSteps = ({toggleSetupInProgress}) => {
 
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);
@@ -116,6 +117,7 @@ const KinesisSetupSteps = ({}) => {
                 await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
                                                                                              streamArn,
                                                                                              response.role_arn));
+                toggleSetupInProgress();
               }
 
               // TODO: Display success message.
@@ -138,6 +140,10 @@ const KinesisSetupSteps = ({}) => {
 const parseError = (error) => {
   const fullError = error.additional && error.additional.body && error.additional.body.message;
   return fullError || error.message;
+};
+
+KinesisSetupSteps.propTypes = {
+  toggleSetupInProgress: PropTypes.func.isRequired,
 };
 
 export default KinesisSetupSteps;

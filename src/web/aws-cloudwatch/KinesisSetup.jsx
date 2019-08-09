@@ -70,7 +70,9 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 
-  let [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
+  const [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
+  {/* Toggle that allows the Continue Setup button to be disabled while Auto-setup is in progress. */}
+  const [setupComplete, toggleSetupComplete] = useState(false);
 
   if (!displaySetupSteps) {
     return (
@@ -144,14 +146,13 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
         </Row>
         <Row>
           <Col md={8}>
-            <KinesisSetupSteps/>
+            <KinesisSetupSteps toggleSetupInProgress={()=>{toggleSetupComplete(true)}}/>
           </Col>}
         </Row>
         <Row>
           <Col md={8}>
-            {/* TODO: Cancel setup operation. */}
-            <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>&nbsp;
-            <button onClick={handleContinue} type="button" className="btn btn-primary">Continue Setup</button>
+            <button onClick={toggleSetup} type="button" className="btn btn-primary">Cancel</button>&nbsp;
+            <button onClick={handleContinue} type="button" className="btn btn-primary" disabled={!setupComplete}>Continue Setup</button>
           </Col>}
         </Row>
       </>
