@@ -44,6 +44,7 @@ import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.Shard;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
 import software.amazon.awssdk.services.kinesis.model.StreamDescription;
 import software.amazon.awssdk.services.kinesis.model.StreamStatus;
@@ -80,6 +81,7 @@ public class KinesisService {
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
+    private static final String CONTROL_MESSAGE_TOKEN = "CWL CONTROL MESSAGE";
 
     @Inject
     public KinesisService(IamClientBuilder iamClientBuilder, KinesisClientBuilder kinesisClientBuilder,
@@ -271,8 +273,8 @@ public class KinesisService {
         final List<Record> recordsList = new ArrayList<>();
 
         // Iterate through the shards that exist
-        for (int i = 0; i < listShardsResponse.shards().size(); i++) {
-            final String shardId = listShardsResponse.shards().get(i).shardId();
+        for (Shard shard : listShardsResponse.shards()) {
+            final String shardId = shard.shardId();
             final GetShardIteratorRequest getShardIteratorRequest =
                     GetShardIteratorRequest.builder()
                                            .shardId(shardId)
@@ -290,9 +292,12 @@ public class KinesisService {
                 final GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
                 shardIterator = getRecordsResponse.nextShardIterator();
 
-                final int recordSize = getRecordsResponse.records().size();
-                for (int k = 0; k < recordSize; k++) {
-                    recordsList.add(getRecordsResponse.records().get(k));
+                for (Record record : getRecordsResponse.records()) {
+                    if (isControlMessage(record)) {
+                        continue;
+                    }
+                    recordsList.add(record);
+
                     // Return as soon as sample size is met
                     if (recordsList.size() == RECORDS_SAMPLE_SIZE) {
                         LOG.debug("Returning the list of records now that sample size [{}] has been met.", RECORDS_SAMPLE_SIZE);
@@ -309,6 +314,25 @@ public class KinesisService {
         }
         LOG.debug("Returning the list with [{}] records.", recordsList.size());
         return recordsList;
+    }
+
+    /**
+     * Skip messages that contain the CloudWatch control token (CWL CONTROL MESSAGE).
+     * These messages are automatically written by CloudWatch when the CloudWatch log subscription is
+     * created in order to test the subscription (and can be safely ignored).
+     *
+     * @return true if the message contains
+     */
+    private boolean isControlMessage(Record record) {
+        final byte[] recordData = record.data().asByteArray();
+        if (isCompressed(recordData)) {
+            try {
+                return Tools.decompressGzip(recordData).contains(CONTROL_MESSAGE_TOKEN);
+            } catch (IOException e) {
+                throw new BadRequestException("Failed to decode message from CloudWatch and check if it's a control message.");
+            }
+        }
+        return false;
     }
 
     /**
