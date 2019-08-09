@@ -181,7 +181,7 @@ public class KinesisService {
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
         final List<String> streamNames = new ArrayList<>(listStreamsResponse.streamNames());
 
-        // Create retryer to keep checking if more streams exist
+        // Create retryer to keep checking if more streams exist.
         final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(b -> Objects.equals(b, Boolean.TRUE))
                 .withStopStrategy(StopStrategies.stopAfterAttempt(KINESIS_LIST_STREAMS_MAX_ATTEMPTS))

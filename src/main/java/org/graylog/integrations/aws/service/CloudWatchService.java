@@ -126,7 +126,7 @@ public class CloudWatchService {
                 return CreateLogSubscriptionResponse.create(explanation);
             } catch (RetryException e) {
                 throw new RuntimeException(String.format("Failed to create the CloudWatch subscription after [%d] attempts. Exception [%s]",
-                                                         e.getNumberOfFailedAttempts(), e.getCause()), e.getCause() ); // e.getCause() returns the actual AWS exception to the UI.
+                                                         e.getNumberOfFailedAttempts(), e.getCause()), e.getCause()); // e.getCause() returns the actual AWS exception to the UI.
             }
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);

@@ -2,9 +2,9 @@ package org.graylog.integrations.aws.codecs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.assistedinject.Assisted;
-import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.cloudwatch.IANAProtocolNumbers;
+import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -59,7 +59,7 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
             final Message result = new Message(
                     buildSummary(flowLogMessage),
                     source,
-                    flowLogMessage.getTimestamp() );
+                    flowLogMessage.getTimestamp());
             result.addFields(buildFields(flowLogMessage));
             result.addField(FIELD_KINESIS_STREAM, logEvent.kinesisStream());
             result.addField(FIELD_LOG_GROUP, logEvent.logGroup());

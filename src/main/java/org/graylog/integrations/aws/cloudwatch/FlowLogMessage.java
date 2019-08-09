@@ -27,20 +27,20 @@ public class FlowLogMessage {
     private final String logStatus;
 
     private FlowLogMessage(DateTime timestamp,
-                          int version,
-                          String accountId,
-                          String interfaceId,
-                          String sourceAddress,
-                          String destinationAddress,
-                          int sourcePort,
-                          int destinationPort,
-                          int protocolNumber,
-                          long packets,
-                          long bytes,
-                          DateTime captureWindowStart,
-                          DateTime captureWindowEnd,
-                          String action,
-                          String logStatus) {
+                           int version,
+                           String accountId,
+                           String interfaceId,
+                           String sourceAddress,
+                           String destinationAddress,
+                           int sourcePort,
+                           int destinationPort,
+                           int protocolNumber,
+                           long packets,
+                           long bytes,
+                           DateTime captureWindowStart,
+                           DateTime captureWindowEnd,
+                           String action,
+                           String logStatus) {
         this.timestamp = timestamp;
         this.version = version;
         this.accountId = accountId;
@@ -79,34 +79,34 @@ public class FlowLogMessage {
                 safeInteger(parts[7]),
                 safeLong(parts[8]),
                 safeLong(parts[9]),
-                new DateTime(Long.valueOf(parts[10])*1000),
-                new DateTime(Long.valueOf(parts[11])*1000),
+                new DateTime(Long.valueOf(parts[10]) * 1000),
+                new DateTime(Long.valueOf(parts[11]) * 1000),
                 parts[12],
                 parts[13]
         );
     }
 
     private static int safeInteger(String x) {
-        if("-".equals(x)) {
+        if ("-".equals(x)) {
             return 0;
         }
 
         try {
             return Integer.valueOf(x);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.debug("Could not parse value of FlowLog message to Integer.", e);
             return 0;
         }
     }
 
     private static long safeLong(String x) {
-        if("-".equals(x)) {
+        if ("-".equals(x)) {
             return 0L;
         }
 
         try {
             return Long.valueOf(x);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.debug("Could not parse value of FlowLog message to Long.", e);
             return 0L;
         }

@@ -77,7 +77,7 @@ public class KinesisSetupResource implements PluginRestResource {
     @ApiOperation(value = "Step 2: Create AWS IAM policy needed for CloudWatch to write logs to Kinesis")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                               CreateRolePermissionRequest request) throws InterruptedException {
+                                                                       CreateRolePermissionRequest request) throws InterruptedException {
         LOG.info("Policy request: [{}]", request);
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);

@@ -87,7 +87,7 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling ) {
+                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey,
                                                    streamName, assumeRoleArn, region, batchSize, global,
                                                    enableThrottling);
