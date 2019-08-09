@@ -71,9 +71,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   };
 
   const [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
-  {/* Toggle that allows the Continue Setup button to be disabled while Auto-setup is in progress. */
-  }
   const [ setupComplete, toggleSetupComplete ] = useState(false);
+  const [ agreedToAWSResourceCreation, setAgreedToAWSResourceCreation ] = useState(false);
 
   if (!displaySetupSteps) {
     return (
@@ -140,16 +139,36 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
                  any existing log subscription from the group, since it seems that there can be only one. */}
 
             {/* TODO: Add nav away protection. */}
-            <h2>Beginning Auto-setup</h2>
+            <h2>Run Auto-setup</h2>
             <br/>
-            <p>Auto-setup is now executing. Please wait...</p>
+            <p>This auto setup will create the following AWS resources. Click below to acknowledge that you understand
+              that these resources will be created and that you are solely responsible for any associated AWS fees incurred
+              from them. Note that all resources must be manually deleted by you if they are not needed. </p>
+
+            <ol>
+              <li>Create a Kinesis Stream with [1] shard.</li>
+              <li>Create an IAM Role and Policy to allow the specified CloudWatch group [{formData.awsCloudWatchAwsGroupName}]
+                to publish log messages to the Kinesis stream [{formData.awsCloudWatchKinesisStream}]</li>
+              <li>Create a CloudWatch Subscription, which publishes log messages to the Kinesis stream.</li>
+            </ol>
+
           </Col>}
         </Row>
         <Row>
           <Col md={8}>
-            <KinesisSetupSteps toggleSetupInProgress={() => {
-              toggleSetupComplete(true)
-            }}/>
+
+            <button onClick={setAgreedToAWSResourceCreation(true)} type="button" className="btn btn-primary">
+              Agree to Create AWS Resources
+            </button>
+
+            {agreedToAWSResourceCreation ?
+              <>
+                <p>Auto-setup is now executing. Please wait...</p>
+                <KinesisSetupSteps toggleSetupInProgress={() => {
+                  toggleSetupComplete(true)
+                }}/>
+              </>
+              : ""}
           </Col>}
         </Row>
         {setupComplete ? <Row>

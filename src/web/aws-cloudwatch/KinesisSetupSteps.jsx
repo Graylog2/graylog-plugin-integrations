@@ -67,13 +67,13 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
 
 // State for each step must be maintained separately in order for the UI to be correctly updated.
   let [ streamStep, setStreamStep ] = useState({
-                                                 label: "Create Stream",
+                                                 label: "Create Kinesis Stream",
                                                  route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
                                                  state: pendingState('Creating stream...')
                                                });
 
   let [ policyStep, setPolicyStep ] = useState({
-                                                 label: "Create Policy",
+                                                 label: "Create Subscription Policy",
                                                  route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
                                                  state: pendingState('')
                                                });
@@ -107,6 +107,8 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
                 }
 
                 // Flow control for auto-setup steps.
+
+                // Create Stream
                 let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
 
                 let streamArn = response.stream_arn;
