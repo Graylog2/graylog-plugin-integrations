@@ -5,9 +5,9 @@ import { ApiRoutes } from "../common/Routes";
 import { FormDataContext } from "./context/FormData";
 import { awsAuth } from "./context/default_settings";
 import KinesisSetupStep from "./KinesisSetupStep";
-import KinesisStreams from "./KinesisStreams";
+import PropTypes from 'prop-types';
 
-const KinesisSetupSteps = ({toggleSetupInProgress}) => {
+const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
 
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);

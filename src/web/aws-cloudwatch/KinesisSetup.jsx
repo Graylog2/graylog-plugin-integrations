@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Col, Row } from 'react-bootstrap';
+import { Alert, Col, Row } from 'react-bootstrap';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -26,8 +26,8 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
     { region: formData.awsCloudWatchAwsRegion.value },
   );
 
-  const {setStreams } = useContext(ApiContext);
-  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
+  const { setStreams } = useContext(ApiContext);
+  const [ fetchStreamsStatus, setStreamsFetch ] = useFetch(
     null,
     (response) => {
       setStreams(response);
@@ -71,8 +71,9 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
   };
 
   const [ displaySetupSteps, setDisplaySetupSteps ] = useState(false);
-  {/* Toggle that allows the Continue Setup button to be disabled while Auto-setup is in progress. */}
-  const [setupComplete, toggleSetupComplete] = useState(false);
+  {/* Toggle that allows the Continue Setup button to be disabled while Auto-setup is in progress. */
+  }
+  const [ setupComplete, toggleSetupComplete ] = useState(false);
 
   if (!displaySetupSteps) {
     return (
@@ -146,13 +147,32 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
         </Row>
         <Row>
           <Col md={8}>
-            <KinesisSetupSteps toggleSetupInProgress={()=>{toggleSetupComplete(true)}}/>
+            <KinesisSetupSteps toggleSetupInProgress={() => {
+              toggleSetupComplete(true)
+            }}/>
           </Col>}
         </Row>
+        {setupComplete ? <Row>
+          <Col md={8}>
+            <Alert key={"delayedLogs"} variant={"warning"}>
+              It may take up to ten minutes for the first messages to arrive in the Kinesis Stream.{' '}
+              The Kinesis Health Check in the following step will not complete successfully until messages are present
+              in
+              the stream{' '}
+              Please see the official <a
+              href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html">CloudWatch
+              Subscriptions</a> documentation for more information.
+            </Alert>
+          </Col>
+        </Row> : ""}
+
         <Row>
           <Col md={8}>
-            <button onClick={toggleSetup} type="button" className="btn btn-primary">Cancel</button>&nbsp;
-            <button onClick={handleContinue} type="button" className="btn btn-primary" disabled={!setupComplete}>Continue Setup</button>
+            <button onClick={toggleSetup} type="button" className="btn btn-primary">Cancel</button>
+            &nbsp;
+            <button onClick={handleContinue} type="button" className="btn btn-primary"
+                    disabled={!setupComplete}>Continue Setup
+            </button>
           </Col>}
         </Row>
       </>
