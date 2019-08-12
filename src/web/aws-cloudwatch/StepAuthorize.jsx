@@ -13,7 +13,7 @@ import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 import useFetch from '../common/hooks/useFetch';
 
-import formValidation from '../utils/formValidation'
+import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);

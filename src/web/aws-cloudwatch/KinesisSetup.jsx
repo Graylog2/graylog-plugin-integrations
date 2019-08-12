@@ -4,10 +4,12 @@ import { Alert, Col, Row } from 'react-bootstrap';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
-import useFetch from '../common/hooks/useFetch';
 import { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
+import useFetch from '../common/hooks/useFetch';
+
 import formValidation from '../utils/formValidation';
+
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import KinesisSetupSteps from './KinesisSetupSteps';
@@ -153,7 +155,6 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
       </Row>
       <Row>
         <Col md={8}>
-
           <button onClick={() => (setAgreedToAWSResourceCreation(true))}
                   disabled={agreedToAWSResourceCreation}
                   type="button"
@@ -163,7 +164,6 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
           <br />
           <br />
           <br />
-
           {agreedToAWSResourceCreation
             ? (
               <>
