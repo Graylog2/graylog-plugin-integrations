@@ -1,16 +1,16 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Col, Row } from 'react-bootstrap';
-import styled from "styled-components";
+import styled from 'styled-components';
 
 const KinesisSetupStep = ({ step }) => {
-
   return (
     <Col md={8}>
       <Row>
-        {step.state.type === 'pending' ?
-          <i className={`fa fa-hourglass-start fa-2x`} style={{ color: '#919191' }}/> : ""}
-        {step.state.type === 'success' ? <i className={`fa fa-check fa-2x`} style={{ color: '#00AE42' }}/> : ""}
-        {step.state.type === 'error' ? <i className={`fa fa-times fa-2x`} style={{ color: '#D43F3F' }}/> : ""}
+        {step.state.type === 'pending'
+          ? <i className="fa fa-hourglass-start fa-2x" style={{ color: '#919191' }} /> : ''}
+        {step.state.type === 'success' ? <i className="fa fa-check fa-2x" style={{ color: '#00AE42' }} /> : ''}
+        {step.state.type === 'error' ? <i className="fa fa-times fa-2x" style={{ color: '#D43F3F' }} /> : ''}
         <StepHeader><span>{step.label}</span></StepHeader>
       </Row>
       <Row>
@@ -22,6 +22,13 @@ const KinesisSetupStep = ({ step }) => {
       </Row>
     </Col>
   );
+};
+
+KinesisSetupStep.propTypes = {
+  step: PropTypes.shape({
+    state: PropTypes.object,
+    label: PropTypes.string,
+  }).isRequired,
 };
 
 const StepHeader = styled.span`

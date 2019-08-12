@@ -1,35 +1,40 @@
 import React, { useContext, useEffect, useState } from 'react';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
-import { ApiRoutes } from "../common/Routes";
-import { FormDataContext } from "./context/FormData";
-import { awsAuth } from "./context/default_settings";
-import KinesisSetupStep from "./KinesisSetupStep";
 import PropTypes from 'prop-types';
+import { ApiRoutes } from '../common/Routes';
+import { FormDataContext } from './context/FormData';
+import { awsAuth } from './context/default_settings';
+import KinesisSetupStep from './KinesisSetupStep';
+
+// TODO: Code duplicated from useFetch.
+const parseError = (error) => {
+  const fullError = error.additional && error.additional.body && error.additional.body.message;
+  return fullError || error.message;
+};
 
 const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
-
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);
 
   function pendingState(message) {
     return {
       type: 'pending',
-      additional: message
+      additional: message,
     };
   }
 
   function successState(result) {
     return {
       type: 'success',
-      additional: result
+      additional: result,
     };
   }
 
   function errorState(message) {
     return {
       type: 'error',
-      additional: message
+      additional: message,
     };
   }
 
@@ -65,83 +70,75 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
     };
   }
 
-// State for each step must be maintained separately in order for the UI to be correctly updated.
-  let [ streamStep, setStreamStep ] = useState({
-                                                 label: "Create Kinesis Stream",
-                                                 route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
-                                                 state: pendingState('Creating stream...')
-                                               });
+  // State for each step must be maintained separately in order for the UI to be correctly updated.
+  const [streamStep, setStreamStep] = useState({
+    label: 'Create Kinesis Stream',
+    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
+    state: pendingState('Creating stream...'),
+  });
 
-  let [ policyStep, setPolicyStep ] = useState({
-                                                 label: "Create Subscription Policy",
-                                                 route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
-                                                 state: pendingState('')
-                                               });
+  const [policyStep, setPolicyStep] = useState({
+    label: 'Create Subscription Policy',
+    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
+    state: pendingState(''),
+  });
 
-  let [ subscriptionStep, setSubscriptionStep ] = useState({
-                                                             label: "Create Subscription",
-                                                             route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
-                                                             state: pendingState('')
-                                                           });
+  const [subscriptionStep, setSubscriptionStep] = useState({
+    label: 'Create Subscription',
+    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
+    state: pendingState(''),
+  });
 
   useEffect(() => {
+    async function autoSetup() {
+      async function executeStep(step, setStep, request) {
+        const url = URLUtils.qualifyUrl(step.route);
+        let response;
+        try {
+          response = await fetch('POST', url, request);
+        } catch (e) {
+          // eslint-disable-next-line
+          console.log('Setup request error:', e);
+          const error = errorState(parseError(e));
+          setStep({ ...step, state: error });
+          throw error;
+        }
 
-              async function autoSetup() {
+        // Copy step object and set state field.
+        setStep({ ...step, state: successState(response.result) });
+        return response;
+      }
 
-                async function executeStep(step, setStep, request) {
+      // Flow control for auto-setup steps.
 
-                  const url = URLUtils.qualifyUrl(step.route);
-                  let response;
-                  try {
-                    response = await fetch('POST', url, request);
-                  } catch (e) {
-                    console.log('Setup request error:', e);
-                    let error = errorState(parseError(e));
-                    setStep({ ...step, state: error });
-                    throw error;
-                  }
+      // Create Stream
+      let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
 
-                  // Copy step object and set state field.
-                  setStep({ ...step, state: successState(response.result) });
-                  return response;
-                }
+      const streamArn = response.stream_arn;
+      // setPolicyStep(pendingState('Creating policy...'));
+      response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
+        streamArn));
 
-                // Flow control for auto-setup steps.
+      await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
+        streamArn,
+        response.role_arn));
+      toggleSetupInProgress();
+    }
 
-                // Create Stream
-                let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
+    // TODO: Display success message.
 
-                let streamArn = response.stream_arn;
-                // setPolicyStep(pendingState('Creating policy...'));
-                response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
-                                                                                      streamArn));
+    // TODO: Add navigation and the ability to interrupt?
 
-                await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
-                                                                                             streamArn,
-                                                                                             response.role_arn));
-                toggleSetupInProgress();
-              }
-
-              // TODO: Display success message.
-
-              // TODO: Add navigation and the ability to interrupt?
-
-              autoSetup()
-            }, [] // [] causes useEffect to only be called once.
-  );
+    autoSetup();
+  }, []);
 
   return (
     <>
-      <KinesisSetupStep step={streamStep}/>
-      <KinesisSetupStep step={policyStep}/>
-      <KinesisSetupStep step={subscriptionStep}/>
-    </> );
-};
-
-// TODO: Code duplicated from useFetch.
-const parseError = (error) => {
-  const fullError = error.additional && error.additional.body && error.additional.body.message;
-  return fullError || error.message;
+      <KinesisSetupStep step={streamStep} />
+      <KinesisSetupStep step={policyStep} />
+      <KinesisSetupStep step={subscriptionStep} />
+    </>
+  );
 };
 
 KinesisSetupSteps.propTypes = {
