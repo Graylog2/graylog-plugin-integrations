@@ -72,7 +72,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                 ], formData)}
                 error={formError}
                 title="Create Integration &amp; Authorize AWS"
-                description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
+                description="Enter the following details to begin setting up the AWS CloudWatch/Kinesis integration. This integration allows Graylog to read messages directly from a Kinesis Stream. CloudWatch messages can optionally be forwarded to Kinesis VIA CloudWatch Subscriptions and then read by Graylog.">
 
         {/* Fighting AutoComplete Forms */}
         <DisappearingInput id="name" type="text" />
@@ -122,7 +122,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                         fieldData={formData.awsCloudWatchAwsRegion}
                         onChange={onChange}
                         label="Region"
-                        help="Provide the region your CloudWatch instance is deployed."
+                        help="Provide the region you are running AWS Kinesis."
                         disabled={fetchRegionsStatus.loading}
                         required>
           {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
