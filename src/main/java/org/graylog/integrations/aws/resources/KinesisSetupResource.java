@@ -39,14 +39,14 @@ import javax.ws.rs.core.MediaType;
 public class KinesisSetupResource implements PluginRestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
-    private static final int REQUEST_DELAY = 1000;
+    private static final int REQUEST_DELAY = 2000;
 
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
 
     // Enable mocked responses for UI testing.
     // TODO: Remove later.
-    private boolean mockResponses = false;
+    private boolean mockResponses = true;
 
     @Inject
     public KinesisSetupResource(CloudWatchService cloudWatchService, KinesisService kinesisService) {

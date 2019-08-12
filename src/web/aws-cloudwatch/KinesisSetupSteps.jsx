@@ -115,7 +115,6 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
       let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
 
       const streamArn = response.stream_arn;
-      // setPolicyStep(pendingState('Creating policy...'));
       response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
         streamArn));
 
