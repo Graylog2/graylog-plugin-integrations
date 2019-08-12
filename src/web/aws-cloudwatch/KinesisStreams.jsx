@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Panel } from 'react-bootstrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
@@ -34,9 +35,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
 
   useEffect(() => {
     setSidebar(
-      <>
-        <AutoSetupTitle>Don&apos;t see the stream you need?</AutoSetupTitle>
-
+      <Panel bsStyle="info" header={<span>Don&apos;t see the stream you need?</span>}>
         <AutoSetupContent>
           <p>
             {/* TODO: Add documentation link */}
@@ -56,7 +55,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                 className="btn btn-default">
           Setup Kinesis Automatically
         </button>
-      </>,
+      </Panel>,
     );
   }, []);
 
@@ -113,10 +112,6 @@ KinesisStreams.defaultProps = {
   toggleSetup: () => {
   },
 };
-
-const AutoSetupTitle = styled.h3`
-  margin-bottom: 9px;
-`;
 
 const AutoSetupContent = styled.div`
   margin-bottom: 9px;
