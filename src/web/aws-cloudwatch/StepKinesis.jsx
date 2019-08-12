@@ -10,12 +10,10 @@ const StepKinesis = ({ hasStreams, ...restProps }) => {
 
   return (
     <AdvancedOptionsProvider>
-      <>
-        { renderStreams
-          ? <KinesisStreams {...restProps} toggleSetup={() => toggleRenderStreams(false)} />
-          : <KinesisSetup {...restProps} toggleSetup={hasStreams ? () => toggleRenderStreams(true) : null} />
-        }
-      </>
+      { renderStreams
+        ? <KinesisStreams {...restProps} toggleSetup={() => toggleRenderStreams(false)} />
+        : <KinesisSetup {...restProps} toggleSetup={hasStreams ? () => toggleRenderStreams(true) : null} />
+      }
     </AdvancedOptionsProvider>
   );
 };

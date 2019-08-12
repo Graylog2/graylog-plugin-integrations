@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Col, Row } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -77,136 +77,121 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
 
   if (!displaySetupSteps) {
     return (
-      <Row>
-        <Col md={8}>
-          <FormWrap onSubmit={handleSubmit}
-                    buttonContent="Begin Automated Setup"
-                    disabled={formValidation.isFormValid([
-                      'awsCloudWatchKinesisStream',
-                      'awsCloudWatchAwsGroupName',
-                    ], formData)}
-                    loading={groupNamesStatus.loading || fetchStreamsStatus.loading}
-                    error={formError}
-                    title="Setup Kinesis Automatically"
-                    description="">
+      <FormWrap onSubmit={handleSubmit}
+                buttonContent="Begin Automated Setup"
+                disabled={formValidation.isFormValid([
+                  'awsCloudWatchKinesisStream',
+                  'awsCloudWatchAwsGroupName',
+                ], formData)}
+                loading={groupNamesStatus.loading || fetchStreamsStatus.loading}
+                error={formError}
+                title="Setup Kinesis Automatically"
+                description="">
 
 
-            <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
+        <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
               following operations within your AWS account.
               See <a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">Using CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.
-            </p>
+        </p>
 
-            <ol>
-              <li>Create a new Kinesis Stream with the specified name.</li>
-              <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
-              <li>Subscribe the new Kinesis Stream to the Log Group.</li>
-            </ol>
+        <ol>
+          <li>Create a new Kinesis Stream with the specified name.</li>
+          <li>Create the IAM role/policy needed to subscribe the Kinesis stream to the CloudWatch Log Group.</li>
+          <li>Subscribe the new Kinesis Stream to the Log Group.</li>
+        </ol>
 
-            <ValidatedInput id="awsCloudWatchKinesisStream"
-                            type="text"
-                            label="Kinesis Stream Name"
-                            placeholder="Create Stream Name"
-                            onChange={onChange}
-                            fieldData={formData.awsCloudWatchKinesisStream}
-                            required />
+        <ValidatedInput id="awsCloudWatchKinesisStream"
+                        type="text"
+                        label="Kinesis Stream Name"
+                        placeholder="Create Stream Name"
+                        onChange={onChange}
+                        fieldData={formData.awsCloudWatchKinesisStream}
+                        required />
 
-            <ValidatedInput id="awsCloudWatchAwsGroupName"
-                            type="select"
-                            fieldData={formData.awsCloudWatchAwsGroupName}
-                            onChange={onChange}
-                            label="CloudWatch Group Name"
-                            required
-                            disabled={groupNamesStatus.loading || disabledGroups}>
+        <ValidatedInput id="awsCloudWatchAwsGroupName"
+                        type="select"
+                        fieldData={formData.awsCloudWatchAwsGroupName}
+                        onChange={onChange}
+                        label="CloudWatch Group Name"
+                        required
+                        disabled={groupNamesStatus.loading || disabledGroups}>
 
-              {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
-            </ValidatedInput>
+          {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
+        </ValidatedInput>
 
-            {toggleSetup
+        {toggleSetup
             && <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>}
             &nbsp;&nbsp;
-          </FormWrap>
-        </Col>
-      </Row>
+      </FormWrap>
     );
   }
 
   return (
     <>
-      <Row>
-        <Col md={8}>
-          <h2>Kinesis Auto Setup</h2>
-          <br />
-          <p>This auto setup will create the following AWS resources. Click below to acknowledge that you understand
+      <div>
+        <h2>Kinesis Auto Setup</h2>
+        <br />
+        <p>This auto setup will create the following AWS resources. Click below to acknowledge that you understand
               that these resources will be created and that you are solely responsible for any associated AWS fees
               incurred
               from them. Note that all resources must be manually deleted by you if they are not needed.
-          </p>
+        </p>
 
-          <ol>
-            <li>Create a Kinesis Stream with [1] shard.</li>
-            <li>Create an IAM Role and Policy to allow the specified CloudWatch group
+        <ol>
+          <li>Create a Kinesis Stream with [1] shard.</li>
+          <li>Create an IAM Role and Policy to allow the specified CloudWatch group
                 [{formData.awsCloudWatchAwsGroupName.value}]
                 to publish log messages to the Kinesis stream [{formData.awsCloudWatchKinesisStream.value}]
-            </li>
-            <li>Create a CloudWatch Subscription, which publishes log messages to the Kinesis stream.</li>
-          </ol>
+          </li>
+          <li>Create a CloudWatch Subscription, which publishes log messages to the Kinesis stream.</li>
+        </ol>
+      </div>
 
-        </Col>
-      </Row>
-      <Row>
-        <Col md={8}>
-          <button onClick={() => (setAgreedToAWSResourceCreation(true))}
-                  disabled={agreedToAWSResourceCreation}
-                  type="button"
-                  className="btn btn-success">
-              I Agree! Create these AWS resources now.
-          </button>
-          <br />
-          <br />
-          <br />
-          {agreedToAWSResourceCreation
-            ? (
-              <>
-                <p>Auto-setup is now executing. Please wait...</p>
-                <KinesisSetupSteps toggleSetupInProgress={() => {
-                  toggleSetupComplete(true);
-                }} />
-              </>
-            )
-            : ''}
-        </Col>
-      </Row>
+      <div>
+        <button onClick={() => (setAgreedToAWSResourceCreation(true))}
+                disabled={agreedToAWSResourceCreation}
+                type="button"
+                className="btn btn-success">
+          I Agree! Create these AWS resources now.
+        </button>
+        <br />
+        <br />
+        <br />
+        {agreedToAWSResourceCreation
+          ? (
+            <>
+              <p>Auto-setup is now executing. Please wait...</p>
+              <KinesisSetupSteps toggleSetupInProgress={() => {
+                toggleSetupComplete(true);
+              }} />
+            </>
+          )
+          : ''}
+      </div>
+
       {setupComplete ? (
-        <Row>
-          <Col md={8}>
-            <Alert key="delayedLogs" variant="warning">
-              It may take up to ten minutes for the first messages to arrive in the Kinesis Stream.{' '}
-              The Kinesis Health Check in the following step will not complete successfully until messages are present
-              in
-              the stream{' '}
-              Please see the official <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html">CloudWatch Subscriptions</a> documentation for more information.
-            </Alert>
-          </Col>
-        </Row>
+        <Alert key="delayedLogs" variant="warning">
+          It may take up to ten minutes for the first messages to arrive in the Kinesis Stream.{' '}
+          The Kinesis Health Check in the following step will not complete successfully until messages are present
+          in
+          the stream{' '}
+          Please see the official <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html">CloudWatch Subscriptions</a> documentation for more information.
+        </Alert>
       ) : ''}
 
-      <br />
-
-      <Row>
-        <Col md={8}>
-          <button onClick={toggleSetup}
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={setupComplete}>Cancel
-          </button>
+      <div>
+        <button onClick={toggleSetup}
+                type="button"
+                className="btn btn-primary"
+                disabled={setupComplete}>Cancel
+        </button>
             &nbsp;
-          <button onClick={handleContinue}
-                  type="button"
-                  className="btn btn-primary"
-                  disabled={!setupComplete}>Continue Setup
-          </button>
-        </Col>
-      </Row>
+        <button onClick={handleContinue}
+                type="button"
+                className="btn btn-primary"
+                disabled={!setupComplete}>Continue Setup
+        </button>
+      </div>
     </>
   );
 };

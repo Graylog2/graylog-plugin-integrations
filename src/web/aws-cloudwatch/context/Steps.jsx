@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
 export const StepsContext = createContext();
 
 export const StepsProvider = ({ children }) => {
-  const [currentStep, setCurrentStep] = useState('kinesis-setup');
-  const [enabledSteps, enableStep] = useState(['authorize', 'kinesis-setup']);
+  const [currentStep, setCurrentStep] = useState('authorize');
+  const [enabledSteps, enableStep] = useState(['authorize']);
   const [availableSteps, setAvailableStep] = useState([]);
 
   const isDisabledStep = (step) => {

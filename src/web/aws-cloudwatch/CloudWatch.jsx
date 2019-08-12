@@ -16,6 +16,7 @@ import StepReview from './StepReview';
 import { StepsContext } from './context/Steps';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
+import { SidebarContext } from './context/Sidebar';
 
 const CloudWatch = ({ route }) => {
   const {
@@ -28,10 +29,12 @@ const CloudWatch = ({ route }) => {
   } = useContext(StepsContext);
   const { setFormData } = useContext(FormDataContext);
   const { availableStreams } = useContext(ApiContext);
+  const { sidebar, clearSidebar } = useContext(SidebarContext);
   const [dirty, setDirty] = useState(false);
   const [lastStep, setLastStep] = useState(false);
 
   const handleStepChange = (nextStep) => {
+    clearSidebar();
     setCurrentStep(nextStep);
   };
 
@@ -106,7 +109,9 @@ const CloudWatch = ({ route }) => {
               onStepChange={handleStepChange}
               horizontal
               justified
-              hidePreviousNextButtons />
+              hidePreviousNextButtons>
+        {sidebar}
+      </Wizard>
     </>
   );
 };
