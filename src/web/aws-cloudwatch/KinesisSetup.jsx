@@ -153,7 +153,6 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
         </Row>
         <Row>
           <Col md={8}>
-
             <button onClick={() => ( setAgreedToAWSResourceCreation(true) )} disabled={agreedToAWSResourceCreation}
                     type="button" className="btn btn-success">
               I Agree! Create these AWS resources now.

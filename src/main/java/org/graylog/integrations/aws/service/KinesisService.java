@@ -293,6 +293,7 @@ public class KinesisService {
                 shardIterator = getRecordsResponse.nextShardIterator();
 
                 for (Record record : getRecordsResponse.records()) {
+                    // Skip CloudWatch control records
                     if (isControlMessage(record)) {
                         continue;
                     }
