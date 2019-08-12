@@ -13,6 +13,21 @@ const DEFAULT_SETTINGS = {
   awsCloudWatchThrottleEnabled: {
     value: true, // We want to default to true on render, but never compare the default
   },
+  awsCloudWatchName: {
+    value: 'asdf', // We want to default to true on render, but never compare the default
+  },
+  awsCloudWatchDescription: {
+    value: 'asdf', // We want to default to true on render, but never compare the default
+  },
+  awsCloudWatchAwsKey: {
+    value: 'adfs', // We want to default to true on render, but never compare the default
+  },
+  awsCloudWatchAwsSecret: {
+    value: 'asdf', // We want to default to true on render, but never compare the default
+  },
+  awsCloudWatchAwsRegion: {
+    value: 'eu-west-1', // We want to default to true on render, but never compare the default
+  },
 };
 
 export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {
