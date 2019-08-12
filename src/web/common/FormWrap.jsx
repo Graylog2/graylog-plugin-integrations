@@ -121,7 +121,7 @@ FormWrap.propTypes = {
 
 FormWrap.defaultProps = {
   buttonContent: 'Submit',
-  disabled: true,
+  disabled: false,
   error: null,
   description: null,
   loading: false,

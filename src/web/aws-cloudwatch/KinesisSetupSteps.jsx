@@ -1,21 +1,26 @@
 import React, { useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
+import { Alert, Panel } from 'react-bootstrap';
+
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
-import PropTypes from 'prop-types';
+
 import { ApiRoutes } from '../common/Routes';
+
 import { FormDataContext } from './context/FormData';
 import { awsAuth } from './context/default_settings';
 import KinesisSetupStep from './KinesisSetupStep';
 
-// TODO: Code duplicated from useFetch.
 const parseError = (error) => {
+  // TODO: Code duplicated from useFetch.
   const fullError = error.additional && error.additional.body && error.additional.body.message;
   return fullError || error.message;
 };
 
-const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
+const KinesisSetupSteps = ({ onSubmit }) => {
   const { formData } = useContext(FormDataContext);
   const { key, secret } = awsAuth(formData);
+  const { awsCloudWatchAwsRegion } = formData;
 
   function pendingState(message) {
     return {
@@ -42,7 +47,7 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
     return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
-      region: 'us-east-1',
+      region: awsCloudWatchAwsRegion.value,
       stream_name: streamName,
     };
   }
@@ -51,7 +56,7 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
     return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
-      region: 'us-east-1',
+      region: awsCloudWatchAwsRegion.value,
       stream_name: streamName,
       stream_arn: streamArn,
     };
@@ -61,7 +66,7 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
     return {
       aws_access_key_id: key,
       aws_secret_access_key: secret,
-      region: 'us-east-1',
+      region: awsCloudWatchAwsRegion.value,
       log_group_name: logGroupName,
       filter_name: 'filter-name', // TODO: Use unique filter name
       filter_pattern: '',
@@ -71,6 +76,7 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
   }
 
   // State for each step must be maintained separately in order for the UI to be correctly updated.
+  const [success, setSuccess] = useState(false);
   const [streamStep, setStreamStep] = useState({
     label: 'Create Kinesis Stream',
     route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
@@ -121,7 +127,8 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
       await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
         streamArn,
         response.role_arn));
-      toggleSetupInProgress();
+
+      setSuccess(true);
     }
 
     // TODO: Display success message.
@@ -132,16 +139,29 @@ const KinesisSetupSteps = ({ toggleSetupInProgress }) => {
   }, []);
 
   return (
-    <>
+    <Panel header={<p>Executing Auto-Setup</p>}>
       <KinesisSetupStep step={streamStep} />
       <KinesisSetupStep step={policyStep} />
       <KinesisSetupStep step={subscriptionStep} />
-    </>
+
+      {success && (
+      <>
+        <Alert key="delayedLogs" variant="warning">
+          It may take up to ten minutes for the first messages to arrive in the Kinesis Stream. The Kinesis Health Check in the following step will not complete successfully until messages are present in the stream. Please see the official <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html" target="_blank" rel="noopener noreferrer">CloudWatch Subscriptions</a> documentation for more information.
+        </Alert>
+
+        <button onClick={onSubmit}
+                type="button"
+                className="btn btn-primary">Continue Setup
+        </button>
+      </>
+      )}
+    </Panel>
   );
 };
 
 KinesisSetupSteps.propTypes = {
-  toggleSetupInProgress: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default KinesisSetupSteps;
