@@ -160,7 +160,6 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
             <br/>
             <br/>
             <br/>
-
             {agreedToAWSResourceCreation ?
               <>
                 <p>Auto-setup is now executing. Please wait...</p>

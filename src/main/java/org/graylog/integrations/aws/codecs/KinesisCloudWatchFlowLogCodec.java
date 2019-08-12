@@ -5,6 +5,7 @@ import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.cloudwatch.IANAProtocolNumbers;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
+import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -19,6 +20,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.graylog.integrations.aws.codecs.AWSCodec.CK_NO_FLOW_LOG_PREFIX;
 
 public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "FlowLog";
@@ -36,13 +39,16 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     static final String FIELD_ACTION = "action";
     static final String FIELD_LOG_STATUS = "log_status";
     static final String SOURCE = "aws-kinesis-flowlogs";
+    private static final String FLOW_LOG_PREFIX = "flow_log_";
 
     private final IANAProtocolNumbers protocolNumbers;
+    private final boolean noFlowLogPrefix;
 
     @Inject
     public KinesisCloudWatchFlowLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
         super(configuration, objectMapper);
         this.protocolNumbers = new IANAProtocolNumbers();
+        this.noFlowLogPrefix = configuration.getBoolean(CK_NO_FLOW_LOG_PREFIX, false);
     }
 
     @Nullable
@@ -84,20 +90,22 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     }
 
     private Map<String, Object> buildFields(FlowLogMessage msg) {
+
+        final String prefix = this.noFlowLogPrefix ? "" : FLOW_LOG_PREFIX;
         return new HashMap<String, Object>() {{
-            put(FIELD_ACCOUNT_ID, msg.getAccountId());
-            put(FIELD_INTERFACE_ID, msg.getInterfaceId());
-            put(FIELD_SRC_ADDR, msg.getSourceAddress());
-            put(FIELD_DST_ADDR, msg.getDestinationAddress());
-            put(FIELD_SRC_PORT, msg.getSourcePort());
-            put(FIELD_DST_PORT, msg.getDestinationPort());
-            put(FIELD_PROTOCOL_NUMBER, msg.getProtocolNumber());
-            put(FIELD_PROTOCOL, protocolNumbers.lookup(msg.getProtocolNumber()));
-            put(FIELD_PACKETS, msg.getPackets());
-            put(FIELD_BYTES, msg.getBytes());
-            put(FIELD_CAPTURE_WINDOW_DURATION, Seconds.secondsBetween(msg.getCaptureWindowStart(), msg.getCaptureWindowEnd()).getSeconds());
-            put(FIELD_ACTION, msg.getAction());
-            put(FIELD_LOG_STATUS, msg.getLogStatus());
+            put(prefix + FIELD_ACCOUNT_ID, msg.getAccountId());
+            put(prefix + FIELD_INTERFACE_ID, msg.getInterfaceId());
+            put(prefix + FIELD_SRC_ADDR, msg.getSourceAddress());
+            put(prefix + FIELD_DST_ADDR, msg.getDestinationAddress());
+            put(prefix + FIELD_SRC_PORT, msg.getSourcePort());
+            put(prefix + FIELD_DST_PORT, msg.getDestinationPort());
+            put(prefix + FIELD_PROTOCOL_NUMBER, msg.getProtocolNumber());
+            put(prefix + FIELD_PROTOCOL, protocolNumbers.lookup(msg.getProtocolNumber()));
+            put(prefix + FIELD_PACKETS, msg.getPackets());
+            put(prefix + FIELD_BYTES, msg.getBytes());
+            put(prefix + FIELD_CAPTURE_WINDOW_DURATION, Seconds.secondsBetween(msg.getCaptureWindowStart(), msg.getCaptureWindowEnd()).getSeconds());
+            put(prefix + FIELD_ACTION, msg.getAction());
+            put(prefix + FIELD_LOG_STATUS, msg.getLogStatus());
         }};
     }
 
@@ -119,7 +127,9 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public static class Config extends AbstractCodec.Config {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
-            return new ConfigurationRequest();
+            final ConfigurationRequest config = new ConfigurationRequest();
+
+            return config;
         }
 
         @Override
