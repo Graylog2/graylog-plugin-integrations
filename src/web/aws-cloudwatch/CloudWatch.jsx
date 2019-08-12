@@ -47,7 +47,7 @@ const CloudWatch = ({ route }) => {
 
     let value = FormUtils.getValueFromInput(target);
     if (typeof value === 'string') {
-      value = value.trim()
+      value = value.trim();
     }
 
     if (!dirty) {

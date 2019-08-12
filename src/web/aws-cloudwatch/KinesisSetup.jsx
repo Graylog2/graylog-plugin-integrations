@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Alert } from 'react-bootstrap';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -19,7 +18,7 @@ import Agree from './auto-setup-steps/Agree';
 
 const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
-  const { /* clearSidebar, */ sidebar, setSidebar } = useContext(SidebarContext);
+  const { setSidebar } = useContext(SidebarContext);
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
   const [disabledGroups, setDisabledGroups] = useState(false);
@@ -71,21 +70,6 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
   const handleContinue = () => {
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
-
-  // const confirmDelay = () => {
-  //   setSidebar(
-  //     <>
-  //       <Alert key="delayedLogs" variant="warning">
-  // It may take up to ten minutes for the first messages to arrive in the Kinesis Stream. The Kinesis Health Check in the following step will not complete successfully until messages are present in the stream. Please see the official <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Subscriptions.html" target="_blank" rel="noopener noreferrer">CloudWatch Subscriptions</a> documentation for more information.
-  //       </Alert>
-
-  //       <button onClick={handleContinue}
-  //               type="button"
-  //               className="btn btn-primary">Continue Setup
-  //       </button>
-  //     </>,
-  //   );
-  // };
 
   const agreeToSetup = () => {
     setSidebar(<KinesisSetupSteps onSubmit={handleContinue} />);

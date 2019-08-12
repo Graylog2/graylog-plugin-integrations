@@ -79,8 +79,6 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     setSubmitFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.SAVE);
   };
 
-  console.log('fetchSubmitStatus', fetchSubmitStatus);
-
   return (
     <FormWrap onSubmit={handleSubmit}
               buttonContent="Complete CloudWatch Setup"

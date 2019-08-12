@@ -15,7 +15,7 @@ const FormAdvancedOptions = ({ onChange }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
-    awsCloudWatchAddFlowLogPrefix
+    awsCloudWatchAddFlowLogPrefix,
   } = formData;
 
   const handleToggle = () => {
