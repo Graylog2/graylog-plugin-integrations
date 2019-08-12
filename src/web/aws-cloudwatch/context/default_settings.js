@@ -28,6 +28,9 @@ const DEFAULT_SETTINGS = {
   awsCloudWatchAwsRegion: {
     value: 'eu-west-1', // We want to default to true on render, but never compare the default
   },
+  awsCloudWatchAddFlowLogPrefix: {
+    value: true, // We want to default to true on render, but never compare the default
+  },
 };
 
 export const awsAuth = ({ awsCloudWatchAwsKey, awsCloudWatchAwsSecret }) => {

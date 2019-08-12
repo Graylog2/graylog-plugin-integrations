@@ -44,7 +44,11 @@ const CloudWatch = ({ route }) => {
 
   const handleFieldUpdate = ({ target }, fieldData) => {
     const id = target.name || target.id;
-    const value = FormUtils.getValueFromInput(target).trim();
+
+    let value = FormUtils.getValueFromInput(target);
+    if (typeof value === 'string') {
+      value = value.trim()
+    }
 
     if (!dirty) {
       setDirty(true);

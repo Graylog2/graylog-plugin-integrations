@@ -21,9 +21,6 @@ public enum AWSMessageType {
 
     /**
      * A raw string stored in CloudWatch or Kinesis.
-     *
-     * KINESIS_FLOW_LOGS
-     * KINESIS_RAW
      */
     KINESIS_RAW(Source.KINESIS, "Raw", KinesisRawLogCodec.NAME,
                 AbstractCodec.Factory.class, KinesisTransport.NAME, KinesisTransport.Factory.class),

@@ -84,6 +84,7 @@ public class AWSServiceTest {
                                              10000,
                                              "",
                                              false,
+                                             true,
                                              true);
         awsService.saveInput(request, user);
 

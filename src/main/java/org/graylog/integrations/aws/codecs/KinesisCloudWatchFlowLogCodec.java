@@ -5,7 +5,6 @@ import com.google.inject.assistedinject.Assisted;
 import org.graylog.integrations.aws.cloudwatch.FlowLogMessage;
 import org.graylog.integrations.aws.cloudwatch.IANAProtocolNumbers;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
-import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
@@ -20,8 +19,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.graylog.integrations.aws.codecs.AWSCodec.CK_NO_FLOW_LOG_PREFIX;
 
 public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public static final String NAME = "FlowLog";
@@ -48,7 +45,7 @@ public class KinesisCloudWatchFlowLogCodec extends AbstractKinesisCodec {
     public KinesisCloudWatchFlowLogCodec(@Assisted Configuration configuration, ObjectMapper objectMapper) {
         super(configuration, objectMapper);
         this.protocolNumbers = new IANAProtocolNumbers();
-        this.noFlowLogPrefix = configuration.getBoolean(CK_NO_FLOW_LOG_PREFIX, false);
+        this.noFlowLogPrefix = configuration.getBoolean(AWSCodec.CK_FLOW_LOG_PREFIX, AWSCodec.FLOW_LOG_PREFIX_DEFAULT);
     }
 
     @Nullable

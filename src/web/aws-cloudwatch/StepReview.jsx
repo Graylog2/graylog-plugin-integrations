@@ -39,10 +39,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
+    awsCloudWatchAddFlowLogPrefix,
   } = formData;
 
   const globalInputEnabled = awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value;
   const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value;
+  const addPrefix = awsCloudWatchAddFlowLogPrefix && awsCloudWatchAddFlowLogPrefix.value;
 
   const [fetchSubmitStatus, setSubmitFetch] = useFetch(
     null,
@@ -60,6 +62,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
       assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
       global: globalInputEnabled,
       enable_throttling: throttleEnabled,
+      add_flow_log_prefix: addPrefix,
     },
   );
 
@@ -137,6 +140,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           <li>
             <strong>Enable Throttling</strong>
             <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
+          </li>
+          <li>
+            <strong>Add Flow Log prefix to field names</strong>
+            <span>{<i className={`fa fa-${addPrefix ? 'check' : 'times'}`} />}</span>
           </li>
         </ReviewItems>
 

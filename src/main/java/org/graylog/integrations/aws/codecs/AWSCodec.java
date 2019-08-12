@@ -33,7 +33,9 @@ public class AWSCodec extends AbstractCodec {
      * should be used.
      */
     public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
-    public static final String CK_NO_FLOW_LOG_PREFIX = "aws_no_flowlog_prefix";
+    public static final String CK_FLOW_LOG_PREFIX = "aws_flow_log_prefix";
+
+    public static final boolean FLOW_LOG_PREFIX_DEFAULT = true;
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
@@ -98,10 +100,10 @@ public class AWSCodec extends AbstractCodec {
                     ConfigurationField.Optional.NOT_OPTIONAL));
 
             request.addField(new BooleanField(
-                    CK_NO_FLOW_LOG_PREFIX,
-                    "Do not add the Flow Log prefix",
-                    false,
-                    "Do not prefix each field with the Flow Log prefix e. g. \"src_addr\" -> \"flow_log_src_addr\"."
+                    CK_FLOW_LOG_PREFIX,
+                    "Add Flow Log field name prefix",
+                    FLOW_LOG_PREFIX_DEFAULT,
+                    "Add field with the Flow Log prefix e. g. \"src_addr\" -> \"flow_log_src_addr\"."
             ));
 
             return request;
