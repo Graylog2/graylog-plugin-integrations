@@ -1,148 +1,82 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-
-import URLUtils from 'util/URLUtils';
-import fetch from 'logic/rest/FetchProvider';
+import styled from 'styled-components';
 
 import { ApiRoutes } from '../../common/Routes';
+import useFetch from '../../common/hooks/useFetch';
 
 import { FormDataContext } from '../context/FormData';
-import { awsAuth } from '../context/default_settings';
-import KinesisSetupStep from './KinesisSetupStep';
 
-const parseError = (error) => {
-  // TODO: Code duplicated from useFetch.
-  const fullError = error.additional && error.additional.body && error.additional.body.message;
-  return fullError || error.message;
-};
+import KinesisSetupStep from './KinesisSetupStep';
 
 const KinesisSetupSteps = ({ onSuccess, onError }) => {
   const { formData } = useContext(FormDataContext);
-  const { key, secret } = awsAuth(formData);
-  const { awsCloudWatchAwsRegion } = formData;
+  const [streamArn, setStreamArn] = useState(null);
+  const [roleArn, setRoleArn] = useState(null);
 
-  function pendingState(message) {
-    return {
-      type: 'pending',
-      additional: message,
-    };
-  }
-
-  function successState(result) {
-    return {
-      type: 'success',
-      additional: result,
-    };
-  }
-
-  function errorState(message) {
-    return {
-      type: 'error',
-      additional: message,
-    };
-  }
-
-  function streamRequest(streamName) {
-    return {
-      aws_access_key_id: key,
-      aws_secret_access_key: secret,
-      region: awsCloudWatchAwsRegion.value,
-      stream_name: streamName,
-    };
-  }
-
-  function policyRequest(streamName, streamArn) {
-    return {
-      aws_access_key_id: key,
-      aws_secret_access_key: secret,
-      region: awsCloudWatchAwsRegion.value,
-      stream_name: streamName,
-      stream_arn: streamArn,
-    };
-  }
-
-  function subscriptionRequest(logGroupName, streamArn, roleArn) {
-    return {
-      aws_access_key_id: key,
-      aws_secret_access_key: secret,
-      region: awsCloudWatchAwsRegion.value,
-      log_group_name: logGroupName,
+  const [createSubsciptionProgress, setCreateSubsciptionUrl] = useFetch(
+    null,
+    (response) => {
+      console.log('CreateSubsciption response', response);
+      onSuccess();
+    },
+    'POST',
+    {
+      region: formData.awsCloudWatchAwsRegion.value,
+      stream_name: formData.awsCloudWatchKinesisStream.value,
+      log_group_name: formData.awsCloudWatchAwsGroupName.value,
       filter_name: 'filter-name', // TODO: Use unique filter name
       filter_pattern: '',
       destination_stream_arn: streamArn,
       role_arn: roleArn,
-    };
-  }
+    },
+  );
 
-  // State for each step must be maintained separately in order for the UI to be correctly updated.
-  const [streamStep, setStreamStep] = useState({
-    label: 'Create Kinesis Stream',
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM,
-    state: pendingState('Creating stream...'),
-  });
+  const [createPolicyProgress, setCreatePolicyUrl] = useFetch(
+    null,
+    (response) => {
+      console.log('CreatePolicy response', response);
+      setRoleArn(response.role_arn);
+      setCreateSubsciptionUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
+    },
+    'POST',
+    {
+      region: formData.awsCloudWatchAwsRegion.value,
+      stream_name: formData.awsCloudWatchKinesisStream.value,
+      stream_arn: streamArn,
+    },
+  );
 
-  const [policyStep, setPolicyStep] = useState({
-    label: 'Create Subscription Policy',
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY,
-    state: pendingState(''),
-  });
-
-  const [subscriptionStep, setSubscriptionStep] = useState({
-    label: 'Create Subscription',
-    route: ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION,
-    state: pendingState(''),
-  });
+  const [createStreamProgress, setCreateStreamUrl] = useFetch(
+    null,
+    (response) => {
+      console.log('CreateStream response', response);
+      setStreamArn(response.stream_arn);
+      setCreatePolicyUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
+    },
+    'POST',
+    {
+      region: formData.awsCloudWatchAwsRegion.value,
+      stream_name: formData.awsCloudWatchKinesisStream.value,
+    },
+  );
 
   useEffect(() => {
-    async function autoSetup() {
-      async function executeStep(step, setStep, request) {
-        const url = URLUtils.qualifyUrl(step.route);
-        let response;
-        try {
-          response = await fetch('POST', url, request);
-        } catch (e) {
-          // eslint-disable-next-line
-          console.log('Setup request error:', e);
-          const error = errorState(parseError(e));
-          onError();
-          setStep({ ...step, state: error });
-          throw error;
-        }
-
-        // Copy step object and set state field.
-        setStep({ ...step, state: successState(response.result) });
-        return response;
-      }
-
-      // Flow control for auto-setup steps.
-
-      // Create Stream
-      let response = await executeStep(streamStep, setStreamStep, streamRequest(formData.awsCloudWatchKinesisStream.value)); // TODO: Pull from input field.
-
-      const streamArn = response.stream_arn;
-      response = await executeStep(policyStep, setPolicyStep, policyRequest(response.stream_name,
-        streamArn));
-
-      await executeStep(subscriptionStep, setSubscriptionStep, subscriptionRequest(formData.awsCloudWatchAwsGroupName.value,
-        streamArn,
-        response.role_arn));
-
-      onSuccess();
-    }
-
-    // TODO: Display success message.
-
-    // TODO: Add navigation and the ability to interrupt?
-
-    autoSetup();
+    setCreateStreamUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_STREAM);
   }, []);
 
+  useEffect(() => {
+    if (createStreamProgress.error || createPolicyProgress.error || createSubsciptionProgress.error) {
+      onError();
+    }
+  }, [createStreamProgress.error, createPolicyProgress.error, createSubsciptionProgress.error]);
+
   return (
-    <>
-      <KinesisSetupStep step={streamStep} />
-      <KinesisSetupStep step={policyStep} />
-      <KinesisSetupStep step={subscriptionStep} />
-    </>
+    <StepItems>
+      <KinesisSetupStep label="Kinesis Stream" progress={createStreamProgress} />
+      <KinesisSetupStep label="Subscription Policy" progress={createPolicyProgress} />
+      <KinesisSetupStep label="Subscription" progress={createSubsciptionProgress} />
+    </StepItems>
   );
 };
 
@@ -150,5 +84,11 @@ KinesisSetupSteps.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
 };
+
+const StepItems = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
 
 export default KinesisSetupSteps;

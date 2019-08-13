@@ -2,39 +2,62 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const KinesisSetupStep = ({ step }) => {
-  return (
-    <>
-      {step.state.type === 'pending'
-        ? <i className="fa fa-hourglass-start fa-2x" style={{ color: '#919191' }} /> : ''}
-      {step.state.type === 'success' ? <i className="fa fa-check fa-2x" style={{ color: '#00AE42' }} /> : ''}
-      {step.state.type === 'error' ? <i className="fa fa-times fa-2x" style={{ color: '#D43F3F' }} /> : ''}
-      <StepHeader><span>{step.label}</span></StepHeader>
+const KinesisSetupStep = ({ label, progress }) => {
+  const { data, error, loading } = progress;
 
-      <p>
+  const waitingText = !data && !loading && !error && 'Waiting...';
+  const loadingText = loading ? `Creating ${label}` : waitingText;
+  const successText = data ? data.result : loadingText;
+  const defaultText = error || successText;
+
+  return (
+    <StepItem>
+      <IconWrap>
+        {!data && !loading && !error && <i className="fa fa-hourglass-start fa-2x" style={{ color: '#919191' }} />}
+        {loading && <i className="fa fa-hourglass-start fa-2x fa-spin" style={{ color: '#919191' }} />}
+        {data && <i className="fa fa-check fa-2x" style={{ color: '#00AE42' }} />}
+        {error && <i className="fa fa-times fa-2x" style={{ color: '#D43F3F' }} />}
+      </IconWrap>
+
+      <Content>
+        <StepHeader>Create {label}</StepHeader>
+
         <StepDetails>
-          <span>{step.state.additional}</span>
+          {defaultText}
         </StepDetails>
-      </p>
-    </>
+      </Content>
+    </StepItem>
   );
 };
 
 KinesisSetupStep.propTypes = {
-  step: PropTypes.shape({
-    state: PropTypes.object,
-    label: PropTypes.string,
+  progress: PropTypes.shape({
+    data: PropTypes.object,
+    error: PropTypes.object,
+    loading: PropTypes.bool,
   }).isRequired,
+  label: PropTypes.string.isRequired,
 };
+
+const StepItem = styled.li`
+  display: flex;
+  margin: 0 0 12px;
+`;
+
+const IconWrap = styled.div`
+  min-width: 36px;
+`;
+
+const Content = styled.div`
+  flex-grow: 1;
+`;
 
 const StepHeader = styled.span`
   font-size: 18px;
-  position: absolute;
-  left: 30px;
 `;
 
-const StepDetails = styled.span`
-  margin-left: 10px;
+const StepDetails = styled.p`
+  margin: 3px 0 0;
 `;
 
 export default KinesisSetupStep;

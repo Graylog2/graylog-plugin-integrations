@@ -10,6 +10,9 @@ const SetupModal = ({ onSubmit, onCancel, groupName, streamName }) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(false);
 
+  const buttonOtherText = (!error && !success) ? 'Creating...' : 'Close';
+  const buttonText = success ? 'Continue Setup' : buttonOtherText;
+
   const handleSuccess = () => {
     setSuccess(true);
     setError(false);
@@ -39,37 +42,29 @@ const SetupModal = ({ onSubmit, onCancel, groupName, streamName }) => {
       </Modal.Body>
 
       <Modal.Footer>
-        {success && (
-        <Button onClick={onSubmit}
-                type="button"
-                className="btn btn-success">
-          Continue Setup
-        </Button>
-        )}
-
-        {error && (
-        <Button onClick={onCancel}
-                type="button"
-                className="btn btn-default">
-          Close
-        </Button>
-        )}
-
-        {!agreed && (
-          <>
-            <Button onClick={onCancel}
+        {agreed
+          ? (
+            <Button onClick={success ? onSubmit : onCancel}
                     type="button"
-                    className="btn btn-default">
-              Cancel
+                    className={`btn btn-${success ? 'success' : 'default'}`}
+                    disabled={!error && !success}>
+              {buttonText}
             </Button>
-            <Button onClick={() => (setAgreed(true))}
-                    type="button"
-                    className="btn btn-success">
-              I Agree! Create these AWS resources now.
-            </Button>
-          </>
-        )}
-
+          )
+          : (
+            <>
+              <Button onClick={onCancel}
+                      type="button"
+                      className="btn btn-default">
+                Cancel
+              </Button>
+              <Button onClick={() => (setAgreed(true))}
+                      type="button"
+                      className="btn btn-success">
+                I Agree! Create these AWS resources now.
+              </Button>
+            </>
+          )}
       </Modal.Footer>
     </Modal>
   );
