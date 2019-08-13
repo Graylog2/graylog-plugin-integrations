@@ -20,6 +20,7 @@ import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResp
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
+import org.graylog.integrations.aws.transports.KinesisPayloadDecoder;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
@@ -231,17 +232,8 @@ public class KinesisService {
     private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
 
-        final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
-        LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
-
         // Assume that the payload is from CloudWatch.
-        // Extract messages, so that they can be committed to journal one by one.
-        final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
-
-        if (LOG.isTraceEnabled()) {
-            // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
-            LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents().size());
-        }
+        final CloudWatchLogSubscriptionData data = KinesisPayloadDecoder.decompressCloudWatchMessages(payloadBytes, objectMapper);
 
         // Pick just one log entry.
         Optional<CloudWatchLogEvent> logEntryOptional = data.logEvents().stream().findAny();
