@@ -15,6 +15,7 @@ const FormAdvancedOptions = ({ onChange }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
+    awsCloudWatchAddFlowLogPrefix,
   } = formData;
 
   const handleToggle = () => {
@@ -41,6 +42,13 @@ const FormAdvancedOptions = ({ onChange }) => {
                defaultChecked={awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value}
                onChange={onChange}
                label="Enable Throttling" />
+
+        <Input id="awsCloudWatchAddFlowLogPrefix"
+               type="checkbox"
+               value="enable-throttling"
+               defaultChecked={awsCloudWatchAddFlowLogPrefix && awsCloudWatchAddFlowLogPrefix.value}
+               onChange={onChange}
+               label="Add Flow Log field name prefix" />
 
         <Input id="awsCloudWatchAssumeARN"
                type="text"

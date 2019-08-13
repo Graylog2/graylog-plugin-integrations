@@ -209,6 +209,7 @@ public class AWSService {
         configuration.put(AWSInput.CK_DESCRIPTION, request.description());
         configuration.put(AWSInput.CK_GLOBAL, request.global());
         configuration.put(ThrottleableTransport.CK_THROTTLING_ALLOWED, request.throttlingAllowed());
+        configuration.put(AWSCodec.CK_FLOW_LOG_PREFIX, request.addFlowLogPrefix());
         configuration.put(AWSInput.CK_AWS_REGION, request.region());
         configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKeyId());
         configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretAccessKey());

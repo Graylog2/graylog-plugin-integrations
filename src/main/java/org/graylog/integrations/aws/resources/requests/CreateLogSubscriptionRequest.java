@@ -32,7 +32,7 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
      * @return
      */
     @JsonProperty(LOG_GROUP_NAME)
-    public abstract String getLogGroupName();
+    public abstract String logGroupName();
 
     @JsonProperty(FILTER_NAME)
     public abstract String filterName();

@@ -10,12 +10,12 @@ import org.graylog.autovalue.WithBeanGetter;
 @WithBeanGetter
 public abstract class CreateLogSubscriptionResponse {
 
-    private static final String EXPLANATION = "explanation";
+    private static final String RESULT = "result";
 
-    @JsonProperty(EXPLANATION)
-    public abstract String explanation();
+    @JsonProperty(RESULT)
+    public abstract String result();
 
-    public static CreateLogSubscriptionResponse create(@JsonProperty(EXPLANATION) String explanation) {
-        return new AutoValue_CreateLogSubscriptionResponse(explanation);
+    public static CreateLogSubscriptionResponse create(@JsonProperty(RESULT) String result) {
+        return new AutoValue_CreateLogSubscriptionResponse(result);
     }
 }

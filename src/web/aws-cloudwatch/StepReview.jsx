@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 
 import Routes from 'routing/Routes';
@@ -40,10 +39,12 @@ const StepReview = ({ onSubmit, onEditClick }) => {
     awsCloudWatchAssumeARN,
     awsCloudWatchBatchSize,
     awsCloudWatchThrottleEnabled,
+    awsCloudWatchAddFlowLogPrefix,
   } = formData;
 
   const globalInputEnabled = awsCloudWatchGlobalInput && awsCloudWatchGlobalInput.value;
   const throttleEnabled = awsCloudWatchThrottleEnabled && awsCloudWatchThrottleEnabled.value;
+  const addPrefix = awsCloudWatchAddFlowLogPrefix && awsCloudWatchAddFlowLogPrefix.value;
 
   const [fetchSubmitStatus, setSubmitFetch] = useFetch(
     null,
@@ -61,6 +62,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
       assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
       global: globalInputEnabled,
       enable_throttling: throttleEnabled,
+      add_flow_log_prefix: addPrefix,
     },
   );
 
@@ -78,23 +80,21 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   };
 
   return (
-    <Row>
-      <Col md={8}>
-        <FormWrap onSubmit={handleSubmit}
-                  buttonContent="Complete CloudWatch Setup"
-                  loading={fetchSubmitStatus.loading}
-                  error={formError}
-                  title="Final Review"
-                  description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
+    <FormWrap onSubmit={handleSubmit}
+              buttonContent="Complete CloudWatch Setup"
+              loading={fetchSubmitStatus.loading}
+              error={formError}
+              title="Final Review"
+              description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
 
-          <Container>
-            <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
-            <ReviewItems>
-              <li>
-                <strong>Name</strong>
-                <span>{awsCloudWatchName.value}</span>
-              </li>
-              {
+      <Container>
+        <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
+        <ReviewItems>
+          <li>
+            <strong>Name</strong>
+            <span>{awsCloudWatchName.value}</span>
+          </li>
+          {
                 awsCloudWatchDescription
                 && (
                   <li>
@@ -103,59 +103,61 @@ const StepReview = ({ onSubmit, onEditClick }) => {
                   </li>
                 )
               }
-              <li>
-                <strong>AWS Key</strong>
-                <span>{awsCloudWatchAwsKey.value}</span>
-              </li>
-              <li>
-                <strong>AWS Region</strong>
-                <span>{awsCloudWatchAwsRegion.value}</span>
-              </li>
-            </ReviewItems>
+          <li>
+            <strong>AWS Key</strong>
+            <span>{awsCloudWatchAwsKey.value}</span>
+          </li>
+          <li>
+            <strong>AWS Region</strong>
+            <span>{awsCloudWatchAwsRegion.value}</span>
+          </li>
+        </ReviewItems>
 
-            <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
-            <ReviewItems>
-              <li>
-                <strong>Stream</strong>
-                <span>{awsCloudWatchKinesisStream.value}</span>
-              </li>
-              <li>
-                <strong>Global Input</strong>
-                <span>{<i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} />}</span>
-              </li>
-              <li>
-                <strong>AWS Assumed ARN Role</strong>
-                <span>{awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : 'None'}</span>
-              </li>
-              <li>
-                <strong>Record Batch Size</strong>
-                <span>
-                  {
+        <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
+        <ReviewItems>
+          <li>
+            <strong>Stream</strong>
+            <span>{awsCloudWatchKinesisStream.value}</span>
+          </li>
+          <li>
+            <strong>Global Input</strong>
+            <span>{<i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} />}</span>
+          </li>
+          <li>
+            <strong>AWS Assumed ARN Role</strong>
+            <span>{awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : 'None'}</span>
+          </li>
+          <li>
+            <strong>Record Batch Size</strong>
+            <span>
+              {
                     awsCloudWatchBatchSize.value
                       ? awsCloudWatchBatchSize.value
                       : <Default value={awsCloudWatchBatchSize.defaultValue} />
                   }
-                </span>
-              </li>
-              <li>
-                <strong>Enable Throttling</strong>
-                <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
-              </li>
-            </ReviewItems>
+            </span>
+          </li>
+          <li>
+            <strong>Enable Throttling</strong>
+            <span>{<i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} />}</span>
+          </li>
+          <li>
+            <strong>Add Flow Log prefix to field names</strong>
+            <span>{<i className={`fa fa-${addPrefix ? 'check' : 'times'}`} />}</span>
+          </li>
+        </ReviewItems>
 
-            <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
-            <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
+        <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
+        <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
-            <Input id="awsCloudWatchLog"
-                   type="textarea"
-                   label=""
-                   value={logData.message}
-                   rows={10}
-                   disabled />
-          </Container>
-        </FormWrap>
-      </Col>
-    </Row>
+        <Input id="awsCloudWatchLog"
+               type="textarea"
+               label=""
+               value={logData.message}
+               rows={10}
+               disabled />
+      </Container>
+    </FormWrap>
   );
 };
 

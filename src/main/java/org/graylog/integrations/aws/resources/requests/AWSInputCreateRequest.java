@@ -42,6 +42,7 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     private static final String ASSUME_ROLE_ARN = "assume_role_arn";
     private static final String GLOBAL = "global";
     private static final String THROTTLING_ALLOWED = "enable_throttling";
+    private static final String ADD_FLOW_LOG_PREFIX = "add_flow_log_prefix";
 
     @JsonProperty(NAME)
     public abstract String name();
@@ -76,6 +77,9 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(THROTTLING_ALLOWED)
     public abstract boolean throttlingAllowed();
 
+    @JsonProperty(ADD_FLOW_LOG_PREFIX)
+    public abstract boolean addFlowLogPrefix();
+
     @JsonCreator
     public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
                                                @JsonProperty(DESCRIPTION) String description,
@@ -87,9 +91,10 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling ) {
+                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
+                                               @JsonProperty(ADD_FLOW_LOG_PREFIX) boolean addFlowLogPrefix) {
         return new AutoValue_AWSInputCreateRequest(name, description, awsMessageType, awsAccessKey, awsSecretKey,
                                                    streamName, assumeRoleArn, region, batchSize, global,
-                                                   enableThrottling);
+                                                   enableThrottling, addFlowLogPrefix);
     }
 }

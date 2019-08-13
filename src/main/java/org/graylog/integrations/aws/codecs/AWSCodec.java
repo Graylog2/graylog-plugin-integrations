@@ -5,6 +5,7 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.BooleanField;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
 import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
@@ -32,6 +33,9 @@ public class AWSCodec extends AbstractCodec {
      * should be used.
      */
     public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
+    public static final String CK_FLOW_LOG_PREFIX = "aws_flow_log_prefix";
+
+    static final boolean FLOW_LOG_PREFIX_DEFAULT = true;
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
@@ -92,8 +96,15 @@ public class AWSCodec extends AbstractCodec {
                     Region.US_EAST_1.id(),
                     AWSMessageType.getMessageTypes().stream()
                                   .collect(Collectors.toMap(AWSMessageType::toString, AWSMessageType::getLabel)),
-                    "The AWS region the Kinesis stream is running in.",
+                    "The type of AWS message that this input will receive.",
                     ConfigurationField.Optional.NOT_OPTIONAL));
+
+            request.addField(new BooleanField(
+                    CK_FLOW_LOG_PREFIX,
+                    "Add Flow Log field name prefix",
+                    FLOW_LOG_PREFIX_DEFAULT,
+                    "Add field with the Flow Log prefix e. g. \"src_addr\" -> \"flow_log_src_addr\"."
+            ));
 
             return request;
         }

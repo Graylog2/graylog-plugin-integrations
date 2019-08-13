@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Col, Row } from 'react-bootstrap';
 import styled from 'styled-components';
 
 import { FormDataContext } from './context/FormData';
@@ -30,7 +29,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
   );
 
-
   useEffect(() => {
     setStreamsFetch(null);
     if (fetchRegionsStatus.error) {
@@ -44,7 +42,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
       } else if (fetchStreamsStatus.error.match(badSecret)) {
         setFormError({ full_message: fetchStreamsStatus.error, nice_message: 'Invalid AWS Secret, it is usually a 40-character long, base-64 encoded string, but you only get to view it once when you create the Key' });
       } else if (fetchStreamsStatus.error.match(noStreams)) {
-        setFormError({ full_message: fetchStreamsStatus.error, nice_message: "We're unable to find any Kinesis Streams in the chosen region, please try choosing a different region." });
+        // NOTE: If no streams are present we want to move to the KinesisSetup screen
+        setStreams({ streams: [] });
+        onSubmit();
       } else {
         setFormError({ full_message: fetchStreamsStatus.error });
       }
@@ -60,77 +60,75 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   };
 
   return (
-    <Row>
-      <Col md={8}>
-        <FormWrap onSubmit={handleSubmit}
-                  buttonContent="Authorize &amp; Choose Stream"
-                  loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
-                  disabled={formValidation.isFormValid([
-                    'awsCloudWatchName',
-                    'awsCloudWatchAwsKey',
-                    'awsCloudWatchAwsSecret',
-                    'awsCloudWatchAwsRegion',
-                  ], formData)}
-                  error={formError}
-                  title="Create Integration &amp; Authorize AWS"
-                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ipsum facere quis maiores doloribus asperiores modi dignissimos enim accusamus sunt aliquid, pariatur eligendi esse dolore temporibus corporis corrupti dolorum, soluta consectetur?">
+    <>
+      <FormWrap onSubmit={handleSubmit}
+                buttonContent="Authorize &amp; Choose Stream"
+                loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+                disabled={formValidation.isFormValid([
+                  'awsCloudWatchName',
+                  'awsCloudWatchAwsKey',
+                  'awsCloudWatchAwsSecret',
+                  'awsCloudWatchAwsRegion',
+                ], formData)}
+                error={formError}
+                title="Create Integration &amp; Authorize AWS"
+                description="Enter the following details to begin setting up the AWS CloudWatch/Kinesis integration. This integration allows Graylog to read messages directly from a Kinesis Stream. CloudWatch messages can optionally be forwarded to Kinesis VIA CloudWatch Subscriptions and then read by Graylog.">
 
-          {/* Fighting AutoComplete Forms */}
-          <DisappearingInput id="name" type="text" />
-          <DisappearingInput id="password" type="password" />
-          {/* Continue on, Nothing to See Here */}
+        {/* Fighting AutoComplete Forms */}
+        <DisappearingInput id="name" type="text" />
+        <DisappearingInput id="password" type="password" />
+        {/* Continue on, Nothing to See Here */}
 
-          <ValidatedInput id="awsCloudWatchName"
-                          type="text"
-                          fieldData={formData.awsCloudWatchName}
-                          onChange={onChange}
-                          placeholder="CloudWatch Integration Name"
-                          label="Name of integration"
-                          autoComplete="off"
-                          required />
+        <ValidatedInput id="awsCloudWatchName"
+                        type="text"
+                        fieldData={formData.awsCloudWatchName}
+                        onChange={onChange}
+                        placeholder="CloudWatch Integration Name"
+                        label="Name of integration"
+                        autoComplete="off"
+                        required />
 
-          <ValidatedInput id="awsCloudWatchDescription"
-                          type="textarea"
-                          label="Integration description"
-                          placeholder="CloudWatch Integration Description"
-                          onChange={onChange}
-                          fieldData={formData.awsCloudWatchDescription}
-                          rows={4} />
+        <ValidatedInput id="awsCloudWatchDescription"
+                        type="textarea"
+                        label="Integration description"
+                        placeholder="CloudWatch Integration Description"
+                        onChange={onChange}
+                        fieldData={formData.awsCloudWatchDescription}
+                        rows={4} />
 
-          <ValidatedInput id="awsCloudWatchAwsKey"
-                          type="text"
-                          label="AWS Key"
-                          placeholder="CloudWatch Integration AWS Key"
-                          onChange={onChange}
-                          fieldData={formData.awsCloudWatchAwsKey}
-                          autoComplete="off"
-                          maxLength="512"
-                          help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
-                          required />
+        <ValidatedInput id="awsCloudWatchAwsKey"
+                        type="text"
+                        label="AWS Key"
+                        placeholder="CloudWatch Integration AWS Key"
+                        onChange={onChange}
+                        fieldData={formData.awsCloudWatchAwsKey}
+                        autoComplete="off"
+                        maxLength="512"
+                        help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
+                        required />
 
-          <MaskedInput id="awsCloudWatchAwsSecret"
-                       label="AWS Secret"
-                       placeholder="CloudWatch Integration AWS Secret"
-                       onChange={onChange}
-                       fieldData={formData.awsCloudWatchAwsSecret}
-                       autoComplete="off"
-                       maxLength="512"
-                       help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
-                       required />
+        <MaskedInput id="awsCloudWatchAwsSecret"
+                     label="AWS Secret"
+                     placeholder="CloudWatch Integration AWS Secret"
+                     onChange={onChange}
+                     fieldData={formData.awsCloudWatchAwsSecret}
+                     autoComplete="off"
+                     maxLength="512"
+                     help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
+                     required />
 
-          <ValidatedInput id="awsCloudWatchAwsRegion"
-                          type="select"
-                          fieldData={formData.awsCloudWatchAwsRegion}
-                          onChange={onChange}
-                          label="Region"
-                          help="Provide the region your CloudWatch instance is deployed."
-                          disabled={fetchRegionsStatus.loading}
-                          required>
-            {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
-          </ValidatedInput>
-        </FormWrap>
-      </Col>
-    </Row>
+        <ValidatedInput id="awsCloudWatchAwsRegion"
+                        type="select"
+                        fieldData={formData.awsCloudWatchAwsRegion}
+                        onChange={onChange}
+                        label="Region"
+                        help="Provide the region you are running AWS Kinesis."
+                        disabled={fetchRegionsStatus.loading}
+                        required>
+          {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
+        </ValidatedInput>
+      </FormWrap>
+    </>
   );
 };
 

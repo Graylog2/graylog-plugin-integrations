@@ -13,7 +13,7 @@ public abstract class KinesisNewStreamResponse {
 
     private static final String STREAM_NAME = "stream_name";
     private static final String STREAM_ARN = "stream_arn";
-    private static final String EXPLANATION = "explanation";
+    private static final String RESULT = "result";
 
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
@@ -22,12 +22,12 @@ public abstract class KinesisNewStreamResponse {
     public abstract String streamArn();
 
     // Some specific success or error message from AWS SDK.
-    @JsonProperty(EXPLANATION)
-    public abstract String explanation();
+    @JsonProperty(RESULT)
+    public abstract String result();
 
     public static KinesisNewStreamResponse create(@JsonProperty(STREAM_NAME) String streamName,
                                                   @JsonProperty(STREAM_ARN) String streamArn,
-                                                  @JsonProperty(EXPLANATION) String explanation) {
-        return new AutoValue_KinesisNewStreamResponse(streamName, streamArn, explanation);
+                                                  @JsonProperty(RESULT) String result) {
+        return new AutoValue_KinesisNewStreamResponse(streamName, streamArn, result);
     }
 }

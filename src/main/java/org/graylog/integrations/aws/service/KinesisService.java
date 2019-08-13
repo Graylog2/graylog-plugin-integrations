@@ -13,11 +13,14 @@ import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
+import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
+import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
+import org.graylog.integrations.aws.transports.KinesisPayloadDecoder;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.configuration.Configuration;
@@ -30,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
+import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
@@ -41,11 +45,13 @@ import software.amazon.awssdk.services.kinesis.model.ListShardsResponse;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
+import software.amazon.awssdk.services.kinesis.model.Shard;
 import software.amazon.awssdk.services.kinesis.model.ShardIteratorType;
+import software.amazon.awssdk.services.kinesis.model.StreamDescription;
+import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,16 +74,22 @@ public class KinesisService {
     private static final int KINESIS_LIST_STREAMS_LIMIT = 30;
     private static final int RECORDS_SAMPLE_SIZE = 10;
     private static final int SHARD_COUNT = 1;
+    private static final String ROLE_NAME_FORMAT = "graylog-cloudwatch-role-%s";
+    private static final String ROLE_POLICY_NAME_FORMAT = "graylog-cloudwatch-role-policy-%s";
+    private static final String UNIQUE_ROLE_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
+    private final IamClientBuilder iamClientBuilder;
     private final KinesisClientBuilder kinesisClientBuilder;
     private final ObjectMapper objectMapper;
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
+    private static final String CONTROL_MESSAGE_TOKEN = "CWL CONTROL MESSAGE";
 
     @Inject
-    public KinesisService(KinesisClientBuilder kinesisClientBuilder,
+    public KinesisService(IamClientBuilder iamClientBuilder, KinesisClientBuilder kinesisClientBuilder,
                           ObjectMapper objectMapper,
                           Map<String, Codec.Factory<? extends Codec>> availableCodecs) {
 
+        this.iamClientBuilder = iamClientBuilder;
         this.kinesisClientBuilder = kinesisClientBuilder;
         this.objectMapper = objectMapper;
         this.availableCodecs = availableCodecs;
@@ -88,6 +100,15 @@ public class KinesisService {
         return kinesisClientBuilder.region(Region.of(regionName))
                                    .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
                                    .build();
+    }
+
+
+    private IamClient createIamClient(String accessKeyId, String secretAccessKey) {
+
+        // IAM Always uses the Global region.
+        return iamClientBuilder.region(Region.AWS_GLOBAL)
+                               .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
+                               .build();
     }
 
     /**
@@ -163,7 +184,7 @@ public class KinesisService {
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
         final List<String> streamNames = new ArrayList<>(listStreamsResponse.streamNames());
 
-        // Create retryer to keep checking if more streams exist
+        // Create retryer to keep checking if more streams exist.
         final Retryer<Boolean> retryer = RetryerBuilder.<Boolean>newBuilder()
                 .retryIfResult(b -> Objects.equals(b, Boolean.TRUE))
                 .withStopStrategy(StopStrategies.stopAfterAttempt(KINESIS_LIST_STREAMS_MAX_ATTEMPTS))
@@ -211,17 +232,8 @@ public class KinesisService {
     private KinesisHealthCheckResponse handleCompressedMessages(KinesisHealthCheckRequest request, byte[] payloadBytes) throws IOException {
         LOG.debug("The supplied payload is GZip compressed. Proceeding to decompress.");
 
-        final byte[] bytes = Tools.decompressGzip(payloadBytes).getBytes();
-        LOG.debug("They payload was decompressed successfully. size [{}]", bytes.length);
-
         // Assume that the payload is from CloudWatch.
-        // Extract messages, so that they can be committed to journal one by one.
-        final CloudWatchLogSubscriptionData data = objectMapper.readValue(bytes, CloudWatchLogSubscriptionData.class);
-
-        if (LOG.isTraceEnabled()) {
-            // Log the number of events retrieved from CloudWatch. DO NOT log the content of the messages.
-            LOG.trace("[{}] messages obtained from CloudWatch", data.logEvents().size());
-        }
+        final CloudWatchLogSubscriptionData data = KinesisPayloadDecoder.decompressCloudWatchMessages(payloadBytes, objectMapper);
 
         // Pick just one log entry.
         Optional<CloudWatchLogEvent> logEntryOptional = data.logEvents().stream().findAny();
@@ -253,8 +265,8 @@ public class KinesisService {
         final List<Record> recordsList = new ArrayList<>();
 
         // Iterate through the shards that exist
-        for (int i = 0; i < listShardsResponse.shards().size(); i++) {
-            final String shardId = listShardsResponse.shards().get(i).shardId();
+        for (Shard shard : listShardsResponse.shards()) {
+            final String shardId = shard.shardId();
             final GetShardIteratorRequest getShardIteratorRequest =
                     GetShardIteratorRequest.builder()
                                            .shardId(shardId)
@@ -272,9 +284,13 @@ public class KinesisService {
                 final GetRecordsResponse getRecordsResponse = kinesisClient.getRecords(getRecordsRequest);
                 shardIterator = getRecordsResponse.nextShardIterator();
 
-                final int recordSize = getRecordsResponse.records().size();
-                for (int k = 0; k < recordSize; k++) {
-                    recordsList.add(getRecordsResponse.records().get(k));
+                for (Record record : getRecordsResponse.records()) {
+                    // Skip CloudWatch control records
+                    if (isControlMessage(record)) {
+                        continue;
+                    }
+                    recordsList.add(record);
+
                     // Return as soon as sample size is met
                     if (recordsList.size() == RECORDS_SAMPLE_SIZE) {
                         LOG.debug("Returning the list of records now that sample size [{}] has been met.", RECORDS_SAMPLE_SIZE);
@@ -291,6 +307,25 @@ public class KinesisService {
         }
         LOG.debug("Returning the list with [{}] records.", recordsList.size());
         return recordsList;
+    }
+
+    /**
+     * Skip messages that contain the CloudWatch control token (CWL CONTROL MESSAGE).
+     * These messages are automatically written by CloudWatch when the CloudWatch log subscription is
+     * created in order to test the subscription (and can be safely ignored).
+     *
+     * @return true if the message contains
+     */
+    private boolean isControlMessage(Record record) {
+        final byte[] recordData = record.data().asByteArray();
+        if (isCompressed(recordData)) {
+            try {
+                return Tools.decompressGzip(recordData).contains(CONTROL_MESSAGE_TOKEN);
+            } catch (IOException e) {
+                throw new BadRequestException("Failed to decode message from CloudWatch and check if it's a control message.");
+            }
+        }
+        return false;
     }
 
     /**
@@ -399,13 +434,33 @@ public class KinesisService {
         LOG.debug("Sending request to create new Kinesis stream [{}] with [{}] shards.",
                   kinesisNewStreamRequest.streamName(), SHARD_COUNT);
 
+        StreamDescription streamDescription;
         try {
             kinesisClient.createStream(createStreamRequest);
-            final String responseMessage = String.format("Success. The new stream [%s] was created with [%d] shards.",
-                                                         kinesisNewStreamRequest.streamName(), SHARD_COUNT);
+            int seconds = 0;
+            do {
+                try {
+                    Thread.sleep(1_000);
+                } catch (InterruptedException e) {
+                    LOG.error("Request interrupted while waiting for shard to become available.");
+                    return null; // Give up on request.
+                }
+                streamDescription = kinesisClient
+                        .describeStream(r -> r.streamName(kinesisNewStreamRequest.streamName()))
+                        .streamDescription();
+                if (seconds > 300) {
+                    final String responseMessage = String.format("Fail. Stream [%s] has failed to become active " +
+                                                                 "within 60 seconds.", kinesisNewStreamRequest.streamName());
+                    throw new BadRequestException(responseMessage);
+                }
+                seconds++;
+            } while (streamDescription.streamStatus() != StreamStatus.ACTIVE);
+            String streamArn = streamDescription.streamARN();
+            final String responseMessage = String.format("Success. The new stream [%s/%s] was created with [%d] shard.",
+                                                         kinesisNewStreamRequest.streamName(), streamArn, SHARD_COUNT);
 
             return KinesisNewStreamResponse.create(createStreamRequest.streamName(),
-                                                   "", // TODO: Supply ARN to the response.
+                                                   streamArn,
                                                    responseMessage);
         } catch (Exception e) {
 
@@ -415,54 +470,44 @@ public class KinesisService {
                                                          kinesisNewStreamRequest.streamName(), SHARD_COUNT,
                                                          specificError);
             LOG.error(responseMessage);
-            //TODO change exception error when refactoring createKinesisStream method
-            throw new InternalServerErrorException(responseMessage, e);
+            throw new BadRequestException(responseMessage, e);
         }
     }
 
     /**
      * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
      *
-     * @param regionName      The region where the kinesis stream exists
-     * @param accessKeyId     The AWS access key
-     * @param secretAccessKey The AWS secret key
-     * @param kinesisStream   The AWS kinesis stream
-     * @param roleName        The name of the role that will be created
-     * @param rolePolicyName  The name of the policy that will be created
+     * @param request
      * @return role Arn associated with the associated kinesis stream
      */
-    public String autoKinesisPermissionsRequired(String regionName, String accessKeyId, String secretAccessKey,
-                                                 String kinesisStream, String roleName, String rolePolicyName) {
+    public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest request) {
 
-        LOG.debug("Creating the role [{}] that will allow CloudWatch to talk to Kinesis", roleName);
-        KinesisClient kinesisClient = createClient(accessKeyId, secretAccessKey, regionName);
+        LOG.debug("Creating the role that will allow CloudWatch to talk to Kinesis");
+        KinesisClient kinesisClient = createClient(request.region(),
+                                                   request.awsAccessKeyId(),
+                                                   request.awsSecretAccessKey());
 
+        String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
-            LOG.debug("Acquiring the stream ARN from Kinesis stream [{}].", kinesisStream);
-            String streamArn = kinesisClient.describeStream(r -> r.streamName(kinesisStream)).streamDescription().streamARN();
-
-            final IamClient iam = IamClient.builder()
-                                           .region(Region.AWS_GLOBAL)
-                                           .credentialsProvider(AWSService.buildCredentialProvider(accessKeyId, secretAccessKey))
-                                           .build();
-
-            String createRoleResponse = createRoleForKinesisAutoSetup(iam, roleName, regionName);
+            final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey());
+            String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
+            setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn());
 
-            String setPermissionsRoleResponse = setPermissionsForKinesisAutoSetupRole(iam, roleName, streamArn, rolePolicyName);
-            LOG.debug(setPermissionsRoleResponse);
-
-            return getRolePermissionsArn(iam, roleName);
+            final String roleArn = getRolePermissionsArn(iamClient, roleName);
+            final String explanation = String.format("Success! The role [%s/%s] has been created.", roleName, roleArn);
+            return CreateRolePermissionResponse.create(explanation, roleArn);
 
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to automatically setup Kinesis role [%s] due to the " +
-                                                         "following error [%s]", roleName, specificError);
+                                                         "following error [%s]", roleName,
+                                                         specificError);
             throw new BadRequestException(responseMessage);
         }
     }
 
-    private static String setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
+    private static void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn) {
         String rolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -473,10 +518,12 @@ public class KinesisService {
                 "    }\n" +
                 "  ]\n" +
                 "}";
+
+        final String rolePolicyName = String.format(ROLE_POLICY_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         try {
             iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
-            return String.format("Success! The role policy [%s] was assigned.", rolePolicyName);
+            LOG.debug("Success! The role policy [{}] was assigned.", rolePolicyName);
         } catch (Exception e) {
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Unable to create role [%s] due to the " +
@@ -485,7 +532,9 @@ public class KinesisService {
         }
     }
 
-    private static String createRoleForKinesisAutoSetup(IamClient iam, String roleName, String region) {
+    private static String createRoleForKinesisAutoSetup(IamClient iam, String region, String roleName) {
+
+        // Create unique role name in this format "graylog-cloudwatch-role-2019-08-08-07-35-34"
         LOG.debug("Create Kinesis Auto Setup Role [{}] to region [{}]", roleName, region);
         String assumeRolePolicy =
                 "{\n" +
@@ -510,8 +559,8 @@ public class KinesisService {
         }
     }
 
-    private static String getRolePermissionsArn(IamClient iam, String roleName) {
+    private static String getRolePermissionsArn(IamClient iamClient, String roleName) {
         LOG.debug("Acquiring the role ARN associated to the role [{}]", roleName);
-        return iam.getRole(r -> r.roleName(roleName)).role().arn();
+        return iamClient.getRole(r -> r.roleName(roleName)).role().arn();
     }
 }
