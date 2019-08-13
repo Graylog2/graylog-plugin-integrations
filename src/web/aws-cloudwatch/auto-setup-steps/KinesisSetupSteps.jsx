@@ -16,14 +16,12 @@ const KinesisSetupSteps = ({ onSuccess, onError }) => {
 
   const [createSubsciptionProgress, setCreateSubsciptionUrl] = useFetch(
     null,
-    (response) => {
-      console.log('CreateSubsciption response', response);
+    () => {
       onSuccess();
     },
     'POST',
     {
       region: formData.awsCloudWatchAwsRegion.value,
-      stream_name: formData.awsCloudWatchKinesisStream.value,
       log_group_name: formData.awsCloudWatchAwsGroupName.value,
       filter_name: 'filter-name', // TODO: Use unique filter name
       filter_pattern: '',
@@ -35,9 +33,8 @@ const KinesisSetupSteps = ({ onSuccess, onError }) => {
   const [createPolicyProgress, setCreatePolicyUrl] = useFetch(
     null,
     (response) => {
-      console.log('CreatePolicy response', response);
       setRoleArn(response.role_arn);
-      setCreateSubsciptionUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
+      setCreateSubsciptionUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION);
     },
     'POST',
     {
@@ -50,7 +47,6 @@ const KinesisSetupSteps = ({ onSuccess, onError }) => {
   const [createStreamProgress, setCreateStreamUrl] = useFetch(
     null,
     (response) => {
-      console.log('CreateStream response', response);
       setStreamArn(response.stream_arn);
       setCreatePolicyUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS_AUTO_SETUP.CREATE_SUBSCRIPTION_POLICY);
     },
