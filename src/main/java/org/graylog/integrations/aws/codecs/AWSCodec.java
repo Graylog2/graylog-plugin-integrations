@@ -35,7 +35,7 @@ public class AWSCodec extends AbstractCodec {
     public static final String CK_AWS_MESSAGE_TYPE = "aws_message_type";
     public static final String CK_FLOW_LOG_PREFIX = "aws_flow_log_prefix";
 
-    public static final boolean FLOW_LOG_PREFIX_DEFAULT = true;
+    static final boolean FLOW_LOG_PREFIX_DEFAULT = true;
 
     private final Map<String, Codec.Factory<? extends Codec>> availableCodecs;
 
@@ -96,7 +96,7 @@ public class AWSCodec extends AbstractCodec {
                     Region.US_EAST_1.id(),
                     AWSMessageType.getMessageTypes().stream()
                                   .collect(Collectors.toMap(AWSMessageType::toString, AWSMessageType::getLabel)),
-                    "The AWS region the Kinesis stream is running in.",
+                    "The type of AWS message that this input will receive.",
                     ConfigurationField.Optional.NOT_OPTIONAL));
 
             request.addField(new BooleanField(

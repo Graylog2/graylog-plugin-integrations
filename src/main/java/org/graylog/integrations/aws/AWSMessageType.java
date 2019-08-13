@@ -22,11 +22,11 @@ public enum AWSMessageType {
     /**
      * A raw string stored in CloudWatch or Kinesis.
      */
-    KINESIS_RAW(Source.KINESIS, "Raw", KinesisRawLogCodec.NAME,
+    KINESIS_RAW(Source.KINESIS, "Kinesis Raw", KinesisRawLogCodec.NAME,
                 AbstractCodec.Factory.class, KinesisTransport.NAME, KinesisTransport.Factory.class),
 
     // Flow Logs delivered to Kinesis via CloudWatch subscriptions.
-    KINESIS_FLOW_LOGS(Source.KINESIS, "Flow Log", KinesisCloudWatchFlowLogCodec.NAME,
+    KINESIS_FLOW_LOGS(Source.KINESIS, "Kinesis Flow Log", KinesisCloudWatchFlowLogCodec.NAME,
                       KinesisCloudWatchFlowLogCodec.Factory.class, KinesisTransport.NAME, KinesisTransport.Factory.class),
 
     UNKNOWN();
