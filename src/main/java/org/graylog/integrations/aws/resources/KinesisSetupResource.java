@@ -65,7 +65,7 @@ public class KinesisSetupResource implements PluginRestResource {
         LOG.info("Stream request: [{}]", request);
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
-            return KinesisNewStreamResponse.create("stream-name", "stream-arn", String.format("Created stream [%s] successfully.", request.streamName()));
+            return KinesisNewStreamResponse.create(request.streamName(), request.streamName() + "-arn", String.format("Created stream [%s] successfully.", request.streamName()));
         }
 
         return kinesisService.createNewKinesisStream(request);

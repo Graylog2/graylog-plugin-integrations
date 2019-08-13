@@ -83,7 +83,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                 title="Choose Kinesis Stream"
                 description={(
                   <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please
-                    choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>setting up your CloudWatch Log Group</a> to feed messages into a new Kinesis Stream.
+                    choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>CloudWatch Log Subscription</a> to feed messages into a new Kinesis Stream.
                   </p>
                   )}>
 
