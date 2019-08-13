@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 import ValidatedInput from '../common/ValidatedInput';
 import FormWrap from '../common/FormWrap';
@@ -11,17 +12,16 @@ import formValidation from '../utils/formValidation';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
-import { SidebarContext } from './context/Sidebar';
-import KinesisSetupSteps from './KinesisSetupSteps';
 
-import Agree from './auto-setup-steps/Agree';
+import SetupModal from './auto-setup-steps/SetupModal';
 
 const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
   const { availableGroups, setGroups } = useContext(ApiContext);
-  const { setSidebar } = useContext(SidebarContext);
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
+  const [disabledForm, setDisabledForm] = useState(false);
   const [disabledGroups, setDisabledGroups] = useState(false);
+  const [showTOS, setShowTOS] = useState(false);
   const [groupNamesStatus, setGroupNamesUrl] = useFetch(
     ApiRoutes.INTEGRATIONS.AWS.CLOUDWATCH.GROUPS,
     (response) => {
@@ -67,27 +67,27 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
     };
   }, [groupNamesStatus.error]);
 
-  const handleContinue = () => {
+  const handleAgreeSubmit = () => {
     setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
   };
 
-  const agreeToSetup = () => {
-    setSidebar(<KinesisSetupSteps onSubmit={handleContinue} />);
+  const handleFormSubmit = () => {
+    setDisabledForm(true);
+    setShowTOS(true);
   };
 
-  const handleSubmit = () => {
-    setSidebar(<Agree onSubmit={agreeToSetup}
-                      groupName={formData.awsCloudWatchAwsGroupName.value}
-                      streamName={formData.awsCloudWatchKinesisStream.value} />);
+  const handleAgreeCancel = () => {
+    setDisabledForm(false);
+    setShowTOS(false);
   };
 
   return (
-    <FormWrap onSubmit={handleSubmit}
+    <FormWrap onSubmit={handleFormSubmit}
               buttonContent="Begin Automated Setup"
               disabled={formValidation.isFormValid([
                 'awsCloudWatchKinesisStream',
                 'awsCloudWatchAwsGroupName',
-              ], formData)}
+              ], formData) || disabledForm}
               loading={groupNamesStatus.loading || fetchStreamsStatus.loading}
               error={formError}
               title="Setup Kinesis Automatically"
@@ -110,6 +110,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
                       placeholder="Create Stream Name"
                       onChange={onChange}
                       fieldData={formData.awsCloudWatchKinesisStream}
+                      disabled={disabledForm}
                       required />
 
       <ValidatedInput id="awsCloudWatchAwsGroupName"
@@ -118,14 +119,27 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
                       onChange={onChange}
                       label="CloudWatch Group Name"
                       required
-                      disabled={groupNamesStatus.loading || disabledGroups}>
+                      disabled={groupNamesStatus.loading || disabledGroups || disabledForm}>
 
         {renderOptions(availableGroups, 'Choose CloudWatch Group', groupNamesStatus.loading)}
       </ValidatedInput>
 
       {toggleSetup
-            && <button onClick={toggleSetup} type="button" className="btn btn-primary">Back</button>}
-            &nbsp;&nbsp;
+        && (
+        <BackButton onClick={toggleSetup}
+                    type="button"
+                    className="btn btn-primary"
+                    disabled={disabledForm}>
+          Back to Stream Selection
+        </BackButton>
+        )}
+
+      {showTOS && (
+      <SetupModal onSubmit={handleAgreeSubmit}
+                  onCancel={handleAgreeCancel}
+                  groupName={formData.awsCloudWatchAwsGroupName.value}
+                  streamName={formData.awsCloudWatchKinesisStream.value} />
+      )}
     </FormWrap>
   );
 };
@@ -139,5 +153,9 @@ KinesisSetup.propTypes = {
 KinesisSetup.defaultProps = {
   toggleSetup: null,
 };
+
+const BackButton = styled.button`
+  margin-right: 9px;
+`;
 
 export default KinesisSetup;
