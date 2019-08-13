@@ -141,6 +141,14 @@ public class AWSInput extends MessageInput {
                     TextField.Attribute.IS_PASSWORD));
 
             request.addField(new TextField(
+                    CK_ASSUME_ROLE_ARN,
+                    "AWS assume role ARN",
+                    "",
+                    "Role ARN with required permissions (cross account access)",
+                    ConfigurationField.Optional.OPTIONAL
+            ));
+
+            request.addField(new TextField(
                     KinesisTransport.CK_KINESIS_STREAM_NAME,
                     "Kinesis Stream name",
                     "",
