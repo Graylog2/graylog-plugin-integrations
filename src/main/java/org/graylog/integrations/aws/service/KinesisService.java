@@ -488,16 +488,14 @@ public class KinesisService {
                                                    request.awsSecretAccessKey());
 
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
-        final String rolePolicyName = String.format(ROLE_POLICY_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
             final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey());
             String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
-
-            setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn(), rolePolicyName);
+            setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn());
 
             final String roleArn = getRolePermissionsArn(iamClient, roleName);
-            final String explanation = String.format("Success! The role [%s/%s] has been created with policy [%s].", roleName, roleArn, rolePolicyName);
+            final String explanation = String.format("Success! The role [%s/%s] has been created.", roleName, roleArn);
             return CreateRolePermissionResponse.create(explanation, roleArn);
 
         } catch (Exception e) {
@@ -509,7 +507,7 @@ public class KinesisService {
         }
     }
 
-    private static void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn, String rolePolicyName) {
+    private static void setPermissionsForKinesisAutoSetupRole(IamClient iam, String roleName, String streamArn) {
         String rolePolicy =
                 "{\n" +
                 "  \"Statement\": [\n" +
@@ -521,6 +519,7 @@ public class KinesisService {
                 "  ]\n" +
                 "}";
 
+        final String rolePolicyName = String.format(ROLE_POLICY_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         LOG.debug("Attaching [{}] policy to [{}] role", rolePolicyName, roleName);
         try {
             iam.putRolePolicy(r -> r.roleName(roleName).policyName(rolePolicyName).policyDocument(rolePolicy));
