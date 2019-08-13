@@ -41,10 +41,11 @@ const StepHealthCheck = ({ onSubmit }) => {
                <Notice><i className="fa fa-exclamation-triangle fa-2x" />
                  <span>We haven&apos;t received a response back from Amazon yet.</span>
                </Notice>
-           )}>
-        Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!
+            )}>
+        <p>Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!</p>
 
-        Do not refresh your browser, this page will automatically refresh when your logs are available.
+        <p>Do not refresh your browser, this page will automatically refresh when your logs are available.</p>
+
       </Panel>
     );
   }
