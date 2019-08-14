@@ -165,7 +165,7 @@ public class AWSService {
     }
 
     /**
-     * @return A list of required permissions for the regular Kinesis setup and for the auto-setup.
+     * @return A list of required permissions for the regular AWS Kinesis setup and for the auto-setup.
      */
     public KinesisPermissionsResponse getPermissions() {
 
@@ -174,6 +174,10 @@ public class AWSService {
         return KinesisPermissionsResponse.create(setupPolicyString, autoSetupPolicyString);
     }
 
+    /**
+     * Convert the {@link AWSPolicy} object into a JSON string.
+     * @return A JSON policy string.
+     */
     private String policyAsJsonString(AWSPolicy setupPolicy) {
         try {
             return objectMapper.writeValueAsString(setupPolicy);
@@ -185,8 +189,7 @@ public class AWSService {
     }
 
     /**
-     * Create an AWSPolicy object that can be serialized into JSON.
-     * The user will use this as a guide to create a policy in their AWS account.
+     * Create the AWS Kinesis setup policy.
      */
     private AWSPolicy buildAwsSetupPolicy() {
         List<String> actions = Arrays.asList("cloudwatch:PutMetricData",
@@ -221,19 +224,18 @@ public class AWSService {
     }
 
     /**
-     * Create an AWSPolicy object that can be serialized into JSON.
-     * The user will use this as a guide to create a policy in their AWS account.
+     * Create the AWS Kinesis auto-setup policy.
      */
     private AWSPolicy buildAwsAutoSetupPolicy() {
         List<String> actions = Arrays.asList("iam:PassRole",
-                                             "logs:DescribeSubscriptionFilters",
-                                             "logs:PutLogEvents",
                                              "logs:CreateLogGroup",
                                              "logs:CreateLogStream",
-                                             "kinesis:DescribeStreamConsumer",
+                                             "logs:DescribeSubscriptionFilters",
+                                             "logs:PutLogEvents",
                                              "kinesis:CreateStream",
-                                             "kinesis:RegisterStreamConsumer",
-                                             "kinesis:PutRecord");
+                                             "kinesis:DescribeStreamConsumer",
+                                             "kinesis:PutRecord",
+                                             "kinesis:RegisterStreamConsumer");
 
         AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogKinesisAutoSetup",
                                                                  "Allow",
