@@ -69,8 +69,8 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
         // user names in the server log file.
         final User user = getCurrentUser();
         LOG.info("User [{}] agreed to the Kinesis auto-setup, which will create a Kinesis stream [{}], " +
-                 "role/policy, and a CloudWatch log group Subscription. " +
-                 "This has been recorded as the listed user has accepted the responsibility in associated potentially " +
+                 "role/policy, and a CloudWatch log group subscription. " +
+                 "This has been recorded, as the listed user has accepted the responsibility in associated potentially " +
                  "incurring cost(s).", user.getId(), request.streamName());
 
         if (mockResponses) {
