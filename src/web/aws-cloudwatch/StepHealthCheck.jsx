@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Panel } from 'react-bootstrap';
+import { Button, Panel } from 'react-bootstrap';
 import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
@@ -62,16 +62,20 @@ const StepHealthCheck = ({ onSubmit }) => {
             )}>
         <p>Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!</p>
 
-        <p>Do not refresh your browser, we are continually checking for your logs and this page will automatically refresh when your logs are available.</p>
+        <CheckAgain>
+          <strong>Checking again in: <Countdown timeInSeconds={120} callback={checkForLogs} paused={pauseCountdown} /></strong>
 
-        <p>
-          <Countdown timeInSeconds={12} callback={checkForLogs} paused={pauseCountdown} />
-          <button type="button"
+          <Button type="button"
+                  bsStyle="primary"
+                  bsSize="sm"
                   onClick={checkForLogs}
                   disabled={logDataProgress.loading}>
-            {logDataProgress.loading ? 'Checking...' : 'Check Again'}
-          </button>
-        </p>
+            {logDataProgress.loading ? 'Checking...' : 'Check Now'}
+          </Button>
+        </CheckAgain>
+
+
+        <p><em>Do not refresh your browser, we are continually checking for your logs and this page will automatically refresh when your logs are available.</em></p>
       </Panel>
     );
   }
@@ -129,6 +133,15 @@ const Notice = styled.span`
 
   > span {
     margin-left: 6px;
+  }
+`;
+
+const CheckAgain = styled.p`
+  display: flex;
+  align-items: center;
+
+  > strong {
+    margin-right: 9px;
   }
 `;
 
