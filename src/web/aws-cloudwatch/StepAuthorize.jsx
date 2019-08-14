@@ -18,7 +18,7 @@ import formValidation from '../utils/formValidation';
 
 const StepAuthorize = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);
-  const { setSidebar } = useContext(SidebarContext);
+  const { clearSidebar, setSidebar } = useContext(SidebarContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
   const [formError, setFormError] = useState(null);
   const [fetchRegionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.REGIONS, setRegions, 'GET');
@@ -64,6 +64,10 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
   useEffect(() => {
     setSidebar(<Permissions />);
+
+    return () => {
+      clearSidebar();
+    };
   }, []);
 
   return (
