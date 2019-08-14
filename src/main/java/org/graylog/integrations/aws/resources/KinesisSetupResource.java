@@ -17,7 +17,6 @@ import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.rest.PluginRestResource;
-import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
 import org.graylog2.shared.rest.resources.RestResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +71,7 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
         LOG.info("User [{}] agreed to the Kinesis auto-setup, which will create a Kinesis stream [{}], " +
                  "role/policy, and a CloudWatch log group Subscription. " +
                  "This has been recorded, since AWS resources that will cost money are being created " +
-                 "at the sole request of this user.", user.getId(), request.streamName() );
+                 "at the sole request of this user.", user.getId(), request.streamName());
 
         LOG.info("Stream request: [{}]", request);
         if (mockResponses) {
