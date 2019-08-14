@@ -1,16 +1,54 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Panel } from 'react-bootstrap';
 import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
 
-import { ApiContext } from './context/Api';
-
 import FormWrap from '../common/FormWrap';
+import useFetch from '../common/hooks/useFetch';
+import { ApiRoutes } from '../common/Routes';
+
+import { ApiContext } from './context/Api';
+import { FormDataContext } from './context/FormData';
 
 const StepHealthCheck = ({ onSubmit }) => {
-  const { logData } = useContext(ApiContext);
+  const { logData, setLogData } = useContext(ApiContext);
+  const { formData } = useContext(FormDataContext);
+
+  const [, setLogDataUrl] = useFetch(
+    null,
+    (response) => {
+      setLogData(response);
+    },
+    'POST',
+    {
+      region: formData.awsCloudWatchAwsRegion.value,
+      stream_name: formData.awsCloudWatchKinesisStream.value,
+    },
+  );
+
+  useEffect(() => {
+    if (!logData) {
+      setLogDataUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
+    }
+  }, []);
+
+  if (!logData) {
+    return (
+      <Panel bsStyle="warning"
+             header={(
+               <Notice><i className="fa fa-exclamation-triangle fa-2x" />
+                 <span>We haven&apos;t received a response back from Amazon yet.</span>
+               </Notice>
+            )}>
+        <p>Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!</p>
+
+        <p>Do not refresh your browser, this page will automatically refresh when your logs are available.</p>
+
+      </Panel>
+    );
+  }
 
   const unknownLog = logData.type === 'KINESIS_RAW';
   const iconClass = unknownLog ? 'times' : 'check';
