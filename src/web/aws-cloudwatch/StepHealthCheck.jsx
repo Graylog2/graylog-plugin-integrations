@@ -11,10 +11,12 @@ import { ApiRoutes } from '../common/Routes';
 
 import { ApiContext } from './context/Api';
 import { FormDataContext } from './context/FormData';
+import { SidebarContext } from './context/Sidebar';
 
 const StepHealthCheck = ({ onSubmit }) => {
   const { logData, setLogData } = useContext(ApiContext);
   const { formData } = useContext(FormDataContext);
+  const { clearSidebar } = useContext(SidebarContext);
 
   const [, setLogDataUrl] = useFetch(
     null,
@@ -29,6 +31,8 @@ const StepHealthCheck = ({ onSubmit }) => {
   );
 
   useEffect(() => {
+    clearSidebar();
+
     if (!logData) {
       setLogDataUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
     }
