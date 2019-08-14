@@ -228,8 +228,6 @@ public class AWSService {
      */
     private AWSPolicy buildAwsAutoSetupPolicy() {
         List<String> actions = Arrays.asList("iam:PassRole",
-                                             "logs:CreateLogGroup",
-                                             "logs:CreateLogStream",
                                              "logs:DescribeSubscriptionFilters",
                                              "logs:PutLogEvents",
                                              "kinesis:CreateStream",
