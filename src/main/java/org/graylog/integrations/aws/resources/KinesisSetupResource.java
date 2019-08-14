@@ -70,10 +70,9 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
         final User user = getCurrentUser();
         LOG.info("User [{}] agreed to the Kinesis auto-setup, which will create a Kinesis stream [{}], " +
                  "role/policy, and a CloudWatch log group Subscription. " +
-                 "This has been recorded, since AWS resources that will cost money are being created " +
-                 "at the sole request of this user.", user.getId(), request.streamName());
+                 "This has been recorded as the listed user has accepted the responsibility in associated potentially " +
+                 "incurring cost(s).", user.getId(), request.streamName());
 
-        LOG.info("Stream request: [{}]", request);
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return KinesisNewStreamResponse.create(request.streamName(), request.streamName() + "-arn", String.format("Created stream [%s] successfully.", request.streamName()));
@@ -89,7 +88,6 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                        CreateRolePermissionRequest request) throws InterruptedException {
-        LOG.info("Policy request: [{}]", request);
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return CreateRolePermissionResponse.create(String.format("Created policy [%s] successfully.", "policy-arn"), "policy-arn");
@@ -105,7 +103,6 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                     CreateLogSubscriptionRequest request) throws InterruptedException {
-        LOG.info("Subscription request: [{}]", request);
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return CreateLogSubscriptionResponse.create(String.format("Created subscription for log group [%s] successfully.", "log-group"));
