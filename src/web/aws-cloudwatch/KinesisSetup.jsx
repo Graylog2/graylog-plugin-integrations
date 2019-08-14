@@ -111,6 +111,8 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
                       onChange={onChange}
                       fieldData={formData.awsCloudWatchKinesisStream}
                       disabled={disabledForm}
+                      pattern="^[a-zA-Z][a-zA-Z0-9_.-]{0,128}$"
+                      help="1-128 alphanumeric characters and special characters underscore (_), period (.), and hyphen (-)."
                       required />
 
       <ValidatedInput id="awsCloudWatchAwsGroupName"
