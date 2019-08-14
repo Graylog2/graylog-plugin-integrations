@@ -46,7 +46,7 @@ public class KinesisSetupResource implements PluginRestResource {
 
     // Enable mocked responses for UI testing.
     // TODO: Remove later.
-    private boolean mockResponses = true;
+    public boolean mockResponses = true;
 
     @Inject
     public KinesisSetupResource(CloudWatchService cloudWatchService, KinesisService kinesisService) {
