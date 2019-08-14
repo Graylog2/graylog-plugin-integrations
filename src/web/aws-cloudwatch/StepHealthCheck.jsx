@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Panel } from 'react-bootstrap';
 import styled from 'styled-components';
@@ -12,13 +12,15 @@ import { ApiRoutes } from '../common/Routes';
 import { ApiContext } from './context/Api';
 import { FormDataContext } from './context/FormData';
 import { SidebarContext } from './context/Sidebar';
+import Countdown from '../common/Countdown';
 
 const StepHealthCheck = ({ onSubmit }) => {
   const { logData, setLogData } = useContext(ApiContext);
   const { formData } = useContext(FormDataContext);
   const { clearSidebar } = useContext(SidebarContext);
+  const [pauseCountdown, setPauseCountdown] = useState(false);
 
-  const [, setLogDataUrl] = useFetch(
+  const [logDataProgress, setLogDataUrl] = useFetch(
     null,
     (response) => {
       setLogData(response);
@@ -30,13 +32,25 @@ const StepHealthCheck = ({ onSubmit }) => {
     },
   );
 
+  const checkForLogs = () => {
+    setPauseCountdown(true);
+    setLogDataUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
+  };
+
   useEffect(() => {
     clearSidebar();
 
     if (!logData) {
-      setLogDataUrl(ApiRoutes.INTEGRATIONS.AWS.KINESIS.HEALTH_CHECK);
+      checkForLogs();
     }
   }, []);
+
+  useEffect(() => {
+    if (!logDataProgress.loading && !logDataProgress.data) {
+      setPauseCountdown(false);
+      setLogDataUrl(null);
+    }
+  }, [logDataProgress.loading]);
 
   if (!logData) {
     return (
@@ -48,8 +62,16 @@ const StepHealthCheck = ({ onSubmit }) => {
             )}>
         <p>Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!</p>
 
-        <p>Do not refresh your browser, this page will automatically refresh when your logs are available.</p>
+        <p>Do not refresh your browser, we are continually checking for your logs and this page will automatically refresh when your logs are available.</p>
 
+        <p>
+          <Countdown timeInSeconds={12} callback={checkForLogs} paused={pauseCountdown} />
+          <button type="button"
+                  onClick={checkForLogs}
+                  disabled={logDataProgress.loading}>
+            {logDataProgress.loading ? 'Checking...' : 'Check Again'}
+          </button>
+        </p>
       </Panel>
     );
   }
