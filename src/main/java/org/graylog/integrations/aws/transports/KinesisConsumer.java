@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -46,7 +45,7 @@ public class KinesisConsumer implements Runnable {
     private final Integer recordBatchSize;
     private final ObjectMapper objectMapper;
     private final AWSMessageType awsMessageType;
-    private final StaticCredentialsProvider credentialsProvider;
+    private final AwsCredentialsProvider credentialsProvider;
     private final Consumer<byte[]> handleMessageCallback;
     private Scheduler kinesisScheduler;
 
@@ -57,12 +56,9 @@ public class KinesisConsumer implements Runnable {
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
                     Region region,
-                    String awsKey,
-                    String awsSecret,
+                    AwsCredentialsProvider credentialsProvider,
                     int recordBatchSize) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
-        Preconditions.checkArgument(StringUtils.isNotBlank(awsKey), "An AWS key is required.");
-        Preconditions.checkArgument(StringUtils.isNotBlank(awsSecret), "An AWS secret is required.");
         Preconditions.checkNotNull(region, "A Region is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
@@ -73,7 +69,7 @@ public class KinesisConsumer implements Runnable {
         this.region = requireNonNull(region, "region");
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
-        this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
+        this.credentialsProvider = credentialsProvider;
         this.recordBatchSize = recordBatchSize;
     }
 
