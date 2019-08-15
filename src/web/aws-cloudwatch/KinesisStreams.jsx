@@ -64,7 +64,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
       setLogDataUrl(null);
       setFormError({
         full_message: logDataStatus.error,
-        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please choose a different stream.</span>,
+        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please select a different stream.</span>,
       });
     }
   }, [logDataStatus.error]);
@@ -80,20 +80,27 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                 loading={logDataStatus.loading}
                 error={formError}
                 disabled={formValidation.isFormValid(['awsCloudWatchKinesisStream'], formData)}
-                title="Choose Kinesis Stream"
+                title="Select Kinesis Stream"
                 description={(
-                  <p>Below is a list of all Kinesis Streams found within the specified AWS account. Please
-                    choose the Stream you would like us to read messages from, or follow the directions to begin <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>CloudWatch Log Subscription</a> to feed messages into a new Kinesis Stream.
-                  </p>
+                  <>
+                    <p>
+                      Below is a list of all Kinesis Streams found within the specified AWS account.
+                    </p>
+                    <p>
+                      Please select the stream you would like to read messages from, or follow the directions set up&nbsp;
+                      <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>CloudWatch Log Subscription</a>,
+                      which can forward messages into a new Kinesis Stream.
+                    </p>
+                  </>
                   )}>
 
         <ValidatedInput id="awsCloudWatchKinesisStream"
                         type="select"
                         fieldData={formData.awsCloudWatchKinesisStream}
                         onChange={onChange}
-                        label="Choose Stream"
+                        label="Select Stream"
                         required>
-          {renderOptions(availableStreams, 'Choose Kinesis Stream')}
+          {renderOptions(availableStreams, 'Select Kinesis Stream')}
         </ValidatedInput>
 
         <FormAdvancedOptions onChange={onChange} />
