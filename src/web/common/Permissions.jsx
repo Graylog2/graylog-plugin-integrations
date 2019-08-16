@@ -3,23 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Panel } from 'react-bootstrap';
 
-const DEMODATA = {
-  Version: '2012-10-17',
-  Statement: [
-    {
-      Sid: 'statement1',
-      Effect: 'Allow',
-      Action: [
-        's3:CreateBucket',
-        's3:ListAllMyBuckets',
-        's3:GetBucketLocation',
-      ],
-      Resource: [
-        'arn:aws:s3:::*',
-      ],
-    },
-  ],
-};
+import useFetch from './hooks/useFetch';
+import { ApiRoutes } from './Routes';
 
 function Policies({ title, note, policy }) {
   const [opened, setOpened] = useState(false);
@@ -52,17 +37,28 @@ Policies.propTypes = {
 };
 
 export default function Permissions() {
+  const [permissionsStatus] = useFetch(
+    ApiRoutes.INTEGRATIONS.AWS.PERMISSIONS,
+    (response) => {
+      console.log('permissions', response);
+    },
+  );
+
   return (
     <Panel bsStyle="info" header={<span>AWS Policy Permissions</span>}>
       <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa debitis, voluptatum id illo excepturi, magni recusandae accusamus veritatis repellendus nam voluptas nihil ad dolorum dolores cum laboriosam minima cupiditate necessitatibus.</p>
 
-      <Policies title="Recommended Policy"
-                note="To be able to use all available functionality for Kinesis setup."
-                policy={DEMODATA} />
+      {/* {!permissionsStatus.loading && (
+      <>
+        <Policies title="Recommended Policy"
+                  note="To be able to use all available functionality for Kinesis setup."
+                  policy={permissionsStatus.data.setup_policy} />
 
-      <Policies title="Least Privilege Policy"
-                note="Doesn&apos;t include Kinesis auto-subscribtion controls."
-                policy={DEMODATA} />
+        <Policies title="Least Privilege Policy"
+                  note="Doesn&apos;t include Kinesis auto-subscribtion controls."
+                  policy={permissionsStatus.data.auto_setup_policy} />
+      </>
+      )} */}
     </Panel>
   );
 }
