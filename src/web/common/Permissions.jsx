@@ -37,28 +37,24 @@ Policies.propTypes = {
 };
 
 export default function Permissions() {
-  const [permissionsStatus] = useFetch(
-    ApiRoutes.INTEGRATIONS.AWS.PERMISSIONS,
-    (response) => {
-      console.log('permissions', response);
-    },
-  );
+  const [permissionsStatus] = useFetch(ApiRoutes.INTEGRATIONS.AWS.PERMISSIONS);
 
   return (
     <Panel bsStyle="info" header={<span>AWS Policy Permissions</span>}>
+      { // TODO: Update content }
       <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa debitis, voluptatum id illo excepturi, magni recusandae accusamus veritatis repellendus nam voluptas nihil ad dolorum dolores cum laboriosam minima cupiditate necessitatibus.</p>
 
-      {/* {!permissionsStatus.loading && (
+      {!permissionsStatus.loading && permissionsStatus.data && (
       <>
         <Policies title="Recommended Policy"
                   note="To be able to use all available functionality for Kinesis setup."
-                  policy={permissionsStatus.data.setup_policy} />
+                  policy={JSON.parse(permissionsStatus.data.setup_policy)} />
 
         <Policies title="Least Privilege Policy"
                   note="Doesn&apos;t include Kinesis auto-subscribtion controls."
-                  policy={permissionsStatus.data.auto_setup_policy} />
+                  policy={JSON.parse(permissionsStatus.data.auto_setup_policy)} />
       </>
-      )} */}
+      )}
     </Panel>
   );
 }
@@ -66,6 +62,7 @@ export default function Permissions() {
 const Header = styled.header`
   display: flex;
   align-items: center;
+  cursor: pointer;
 `;
 
 const HeaderContent = styled.div`
