@@ -41,7 +41,7 @@ export default function Permissions() {
 
   return (
     <Panel bsStyle="info" header={<span>AWS Policy Permissions</span>}>
-      { // TODO: Update content }
+      { /* TODO: Update content */ }
       <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa debitis, voluptatum id illo excepturi, magni recusandae accusamus veritatis repellendus nam voluptas nihil ad dolorum dolores cum laboriosam minima cupiditate necessitatibus.</p>
 
       {!permissionsStatus.loading && permissionsStatus.data && (
