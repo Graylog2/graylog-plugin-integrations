@@ -29,7 +29,7 @@ const formValidation = {
   },
 
   isFormValid: (requiredFields, context) => {
-    return !!requiredFields.find(field => !context[field] || !context[field].value);
+    return !!requiredFields.find(field => (!context[field] || !context[field].value || context[field].error));
   },
 };
 
