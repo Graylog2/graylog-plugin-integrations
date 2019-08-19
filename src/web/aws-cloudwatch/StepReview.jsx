@@ -130,11 +130,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           <li>
             <strong>Record Batch Size</strong>
             <span>
-              {
-                    awsCloudWatchBatchSize.value
-                      ? awsCloudWatchBatchSize.value
-                      : <Default value={awsCloudWatchBatchSize.defaultValue} />
-                  }
+              {awsCloudWatchBatchSize.value
+                ? awsCloudWatchBatchSize.value
+                : <Default value={awsCloudWatchBatchSize.defaultValue} />
+              }
             </span>
           </li>
           <li>

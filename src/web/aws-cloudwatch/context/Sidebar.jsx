@@ -4,10 +4,11 @@ import PropTypes from 'prop-types';
 export const SidebarContext = createContext();
 
 export const SidebarProvider = ({ children }) => {
-  const [sidebar, setSidebar] = useState(<></>);
+  const DefaultSidebar = <></>;
+  const [sidebar, setSidebar] = useState(DefaultSidebar);
 
   const clearSidebar = () => {
-    setSidebar(<></>);
+    setSidebar(DefaultSidebar);
   };
 
   return (
