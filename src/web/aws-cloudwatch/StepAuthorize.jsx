@@ -72,7 +72,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                 ], formData)}
                 error={formError}
                 title="Create Input &amp; Authorize AWS"
-                description="This integration allows Graylog to read messages directly from a Kinesis Stream. CloudWatch messages can optionally be forwarded to Kinesis VIA CloudWatch subscriptions and then read by Graylog.">
+                description="This integration allows Graylog to read messages directly from a Kinesis Stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">
 
         {/* Fighting AutoComplete Forms */}
         <DisappearingInput id="name" type="text" />
@@ -98,8 +98,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
 
         <ValidatedInput id="awsCloudWatchAwsKey"
                         type="text"
-                        label="AWS Key"
-                        placeholder="Kinesis Integration AWS Key"
+                        label="AWS Access Key"
+                        placeholder="AK****************"
                         onChange={onChange}
                         fieldData={formData.awsCloudWatchAwsKey}
                         autoComplete="off"
@@ -108,8 +108,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                         required />
 
         <MaskedInput id="awsCloudWatchAwsSecret"
-                     label="AWS Secret"
-                     placeholder="Kinesis Integration AWS Secret"
+                     label="AWS Secret Key"
+                     placeholder="***********"
                      onChange={onChange}
                      fieldData={formData.awsCloudWatchAwsSecret}
                      autoComplete="off"
@@ -121,8 +121,8 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                         type="select"
                         fieldData={formData.awsCloudWatchAwsRegion}
                         onChange={onChange}
-                        label="Region"
-                        help="The AWS Region where AWS Kinesis is running."
+                        label="AWS Region"
+                        help="The AWS Region where Kinesis is running."
                         disabled={fetchRegionsStatus.loading}
                         required>
           {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}

@@ -85,7 +85,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
               loading={fetchSubmitStatus.loading}
               error={formError}
               title="Final Review"
-              description="Check out everything below to make sure it&apos;s correct, then click the button below to complete your CloudWatch setup!">
+              description="Check out everything below to make sure it is correct, then click the button below to complete your CloudWatch setup!">
 
       <Container>
         <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
@@ -148,7 +148,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
         </ReviewItems>
 
         <Subheader>Formatting <FormatIcon success><i className="fa fa-smile-o" /></FormatIcon></Subheader>
-        <p>Parsed as LogFlow, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
+        <p>Parsed as Flow Log, if you need a different type you&apos;ll need to setup a <Link to={Routes.SYSTEM.PIPELINES.RULES}>Pipeline Rule</Link>.</p>
 
         <Input id="awsCloudWatchLog"
                type="textarea"

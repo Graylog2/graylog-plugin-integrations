@@ -64,7 +64,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
       setLogDataUrl(null);
       setFormError({
         full_message: logDataStatus.error,
-        nice_message: <span>We were unable to find any logs in this Kinesis Stream. Please select a different stream.</span>,
+        nice_message: <span>We were unable to find any logs in this Kinesis stream. Please select a different Kinesis stream.</span>,
       });
     }
   }, [logDataStatus.error]);
@@ -84,12 +84,12 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                 description={(
                   <>
                     <p>
-                      Below is a list of all Kinesis Streams found within the specified AWS account.
+                      Below is a list of all Kinesis streams found within the specified AWS account.
                     </p>
                     <p>
                       Please select the stream you would like to read messages from, or follow the directions set up&nbsp;
                       <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>CloudWatch Log Subscription</a>,
-                      which can forward messages into a new Kinesis Stream.
+                      which can forward messages into a new Kinesis stream.
                     </p>
                   </>
                   )}>
