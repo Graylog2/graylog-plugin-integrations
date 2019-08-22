@@ -19,7 +19,9 @@
   },
   "private": true,
   "devDependencies": {
+    "@testing-library/react": "^9.1.3",
     "eslint-loader": "^1.6.3",
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
-  }
+  },
+  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
 }
