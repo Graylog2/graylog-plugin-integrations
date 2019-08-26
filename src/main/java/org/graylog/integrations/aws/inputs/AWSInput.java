@@ -27,10 +27,7 @@ import org.graylog2.plugin.ServerStatus;
 import org.graylog2.plugin.buffers.InputBuffer;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
-<<<<<<< HEAD
 import org.graylog2.plugin.configuration.fields.BooleanField;
-=======
->>>>>>> master
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
 import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.configuration.fields.NumberField;
@@ -144,16 +141,6 @@ public class AWSInput extends MessageInput {
                     TextField.Attribute.IS_PASSWORD));
 
             request.addField(new TextField(
-<<<<<<< HEAD
-=======
-                    CK_ASSUME_ROLE_ARN,
-                    "AWS assume role ARN",
-                    "",
-                    "Role ARN with required permissions (cross account access)",
-                    ConfigurationField.Optional.OPTIONAL));
-
-            request.addField(new TextField(
->>>>>>> master
                     KinesisTransport.CK_KINESIS_STREAM_NAME,
                     "Kinesis Stream name",
                     "",

@@ -15,11 +15,7 @@ import { ApiContext } from './context/Api';
 
 import SetupModal from './auto-setup-steps/SetupModal';
 
-<<<<<<< HEAD
 const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
-=======
-const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
->>>>>>> master
   const { availableGroups, setGroups } = useContext(ApiContext);
   const { formData } = useContext(FormDataContext);
   const [formError, setFormError] = useState(null);
@@ -35,23 +31,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
     { region: formData.awsCloudWatchAwsRegion.value },
   );
 
-<<<<<<< HEAD
   useEffect(() => {
-=======
-  const { setStreams } = useContext(ApiContext);
-  const [fetchStreamsStatus, setStreamsFetch] = useFetch(
-    null,
-    (response) => {
-      setStreams(response);
-      toggleSetup();
-    },
-    'POST',
-    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
-  );
-
-  useEffect(() => {
-    setStreamsFetch(null);
->>>>>>> master
     if (groupNamesStatus.error) {
       setGroupNamesUrl(null);
 
@@ -76,11 +56,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
   }, [groupNamesStatus.error]);
 
   const handleAgreeSubmit = () => {
-<<<<<<< HEAD
     onSubmit();
-=======
-    setStreamsFetch(ApiRoutes.INTEGRATIONS.AWS.KINESIS.STREAMS);
->>>>>>> master
   };
 
   const handleFormSubmit = () => {
@@ -100,23 +76,13 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
                 'awsCloudWatchKinesisStream',
                 'awsCloudWatchAwsGroupName',
               ], formData) || disabledForm}
-<<<<<<< HEAD
               loading={groupNamesStatus.loading}
-=======
-              loading={groupNamesStatus.loading || fetchStreamsStatus.loading}
->>>>>>> master
               error={formError}
               title="Setup Kinesis Automatically"
               description="">
 
-<<<<<<< HEAD
       <p>
         Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the following operations within your AWS account. See <a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">Using CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.
-=======
-      <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
-              following operations within your AWS account.
-              See <a target="_blank" rel="noopener noreferrer" href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">Using CloudWatch Logs Subscription Filters</a> in the AWS documentation for more information.
->>>>>>> master
       </p>
 
       <ol>
@@ -132,11 +98,6 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
                       onChange={onChange}
                       fieldData={formData.awsCloudWatchKinesisStream}
                       disabled={disabledForm}
-<<<<<<< HEAD
-=======
-                      pattern="[a-zA-Z0-9_.-]{1,128}$"
-                      help="1-128 alphanumeric characters and special characters underscore (_), period (.), and hyphen (-)."
->>>>>>> master
                       required />
 
       <ValidatedInput id="awsCloudWatchAwsGroupName"
@@ -154,11 +115,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
         && (
         <BackButton onClick={toggleSetup}
                     type="button"
-<<<<<<< HEAD
                     className="btn btn-default"
-=======
-                    className="btn btn-primary"
->>>>>>> master
                     disabled={disabledForm}>
           Back to Stream Selection
         </BackButton>
@@ -175,11 +132,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
 };
 
 KinesisSetup.propTypes = {
-<<<<<<< HEAD
   onSubmit: PropTypes.func.isRequired,
-=======
-  // onSubmit: PropTypes.func.isRequired,
->>>>>>> master
   onChange: PropTypes.func.isRequired,
   toggleSetup: PropTypes.func,
 };

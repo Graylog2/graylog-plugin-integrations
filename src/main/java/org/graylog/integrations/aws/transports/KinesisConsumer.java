@@ -5,18 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
-<<<<<<< HEAD
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-=======
-import org.graylog2.plugin.system.NodeId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
->>>>>>> master
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
@@ -53,11 +46,7 @@ public class KinesisConsumer implements Runnable {
     private final Integer recordBatchSize;
     private final ObjectMapper objectMapper;
     private final AWSMessageType awsMessageType;
-<<<<<<< HEAD
     private final StaticCredentialsProvider credentialsProvider;
-=======
-    private final AwsCredentialsProvider credentialsProvider;
->>>>>>> master
     private final Consumer<byte[]> handleMessageCallback;
     private Scheduler kinesisScheduler;
 
@@ -68,18 +57,12 @@ public class KinesisConsumer implements Runnable {
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
                     Region region,
-<<<<<<< HEAD
                     String awsKey,
                     String awsSecret,
                     int recordBatchSize) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
         Preconditions.checkArgument(StringUtils.isNotBlank(awsKey), "An AWS key is required.");
         Preconditions.checkArgument(StringUtils.isNotBlank(awsSecret), "An AWS secret is required.");
-=======
-                    AwsCredentialsProvider credentialsProvider,
-                    int recordBatchSize) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
->>>>>>> master
         Preconditions.checkNotNull(region, "A Region is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
@@ -90,11 +73,7 @@ public class KinesisConsumer implements Runnable {
         this.region = requireNonNull(region, "region");
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
-<<<<<<< HEAD
         this.credentialsProvider = AWSService.buildCredentialProvider(awsKey, awsSecret);
-=======
-        this.credentialsProvider = credentialsProvider;
->>>>>>> master
         this.recordBatchSize = recordBatchSize;
     }
 

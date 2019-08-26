@@ -19,7 +19,7 @@ const Label = ({ label, error }) => {
   return label;
 };
 
-const ValidatedInput = ({ help, onChange, id, label, fieldData, type, ...restProps }) => {
+const ValidatedInput = ({ help, onChange, id, label, fieldData, ...restProps }) => {
   const { dirty, error, value } = fieldData;
 
   const handleChange = (event) => {
@@ -37,12 +37,10 @@ const ValidatedInput = ({ help, onChange, id, label, fieldData, type, ...restPro
   return (
     <Input {...restProps}
            id={id}
-           type={type}
            onChange={handleChange}
            onBlur={checkValidity}
            bsStyle={(error && dirty && 'error') || null}
-           defaultValue={(type !== 'select' && value) || null}
-           value={(type === 'select' && value) || null}
+           defaultValue={value}
            label={<Label label={label} error={error} />}
            help={help} />
   );
@@ -62,7 +60,6 @@ ValidatedInput.propTypes = {
   id: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   required: PropTypes.bool,
-  type: PropTypes.string.isRequired,
 };
 
 ValidatedInput.defaultProps = {

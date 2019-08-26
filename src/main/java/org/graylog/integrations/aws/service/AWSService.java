@@ -15,10 +15,6 @@ import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableService;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
-<<<<<<< HEAD
-=======
-import org.graylog.integrations.aws.resources.responses.KinesisPermissionsResponse;
->>>>>>> master
 import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.database.NotFoundException;
@@ -141,66 +137,9 @@ public class AWSService {
      * @return A list of available AWS services supported by the AWS Graylog AWS integration.
      */
     public AvailableServiceResponse getAvailableServices() {
-<<<<<<< HEAD
 
         // Create an AWSPolicy object that can be serialized into JSON.
         // The user will use this as a guide to create a policy in their AWS account.
-=======
-        AWSPolicy awsPolicy = buildAwsSetupPolicy();
-
-        ArrayList<AvailableService> services = new ArrayList<>();
-
-        // Deliberately provide the policy JSON as a string. The UI will format and display this to the user.
-        String policy;
-        try {
-            policy = objectMapper.writeValueAsString(awsPolicy);
-        } catch (JsonProcessingException e) {
-            // Return a more general internal server error if JSON encoding fails.
-            LOG.error(POLICY_ENCODING_ERROR, e);
-            throw new InternalServerErrorException(POLICY_ENCODING_ERROR, e);
-        }
-        AvailableService cloudWatchService =
-                AvailableService.create("CloudWatch",
-                                        "Retrieve CloudWatch logs via Kinesis. Kinesis allows streaming of the logs " +
-                                        "in real time. AWS CloudWatch is a monitoring and management service built " +
-                                        "for developers, system operators, site reliability engineers (SRE), " +
-                                        "and IT managers.",
-                                        policy,
-                                        "Requires Kinesis",
-                                        "https://aws.amazon.com/cloudwatch/");
-        services.add(cloudWatchService);
-        return AvailableServiceResponse.create(services, services.size());
-    }
-
-    /**
-     * @return A list of required permissions for the regular AWS Kinesis setup and for the auto-setup.
-     */
-    public KinesisPermissionsResponse getPermissions() {
-
-        final String setupPolicyString = policyAsJsonString(buildAwsSetupPolicy());
-        final String autoSetupPolicyString = policyAsJsonString(buildAwsAutoSetupPolicy());
-        return KinesisPermissionsResponse.create(setupPolicyString, autoSetupPolicyString);
-    }
-
-    /**
-     * Convert the {@link AWSPolicy} object into a JSON string.
-     * @return A JSON policy string.
-     */
-    private String policyAsJsonString(AWSPolicy setupPolicy) {
-        try {
-            return objectMapper.writeValueAsString(setupPolicy);
-        } catch (JsonProcessingException e) {
-            // Return a more general internal server error if JSON encoding fails.
-            LOG.error(POLICY_ENCODING_ERROR, e);
-            throw new InternalServerErrorException(POLICY_ENCODING_ERROR, e);
-        }
-    }
-
-    /**
-     * Create the AWS Kinesis setup policy.
-     */
-    private AWSPolicy buildAwsSetupPolicy() {
->>>>>>> master
         List<String> actions = Arrays.asList("cloudwatch:PutMetricData",
                                              "dynamodb:CreateTable",
                                              "dynamodb:DescribeTable",
@@ -225,7 +164,6 @@ public class AWSService {
                                              "logs:DescribeLogGroups",
                                              "logs:PutSubscriptionFilter");
 
-<<<<<<< HEAD
         AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogCloudWatchPolicy",
                                                                  "Allow",
                                                                  actions,
@@ -254,32 +192,6 @@ public class AWSService {
                                         "https://aws.amazon.com/cloudwatch/");
         services.add(cloudWatchService);
         return AvailableServiceResponse.create(services, services.size());
-=======
-        AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogKinesisSetup",
-                                                                 "Allow",
-                                                                 actions,
-                                                                 "*");
-        return AWSPolicy.create(AWS_POLICY_VERSION, Collections.singletonList(statement));
-    }
-
-    /**
-     * Create the AWS Kinesis auto-setup policy.
-     */
-    private AWSPolicy buildAwsAutoSetupPolicy() {
-        List<String> actions = Arrays.asList("iam:PassRole",
-                                             "logs:DescribeSubscriptionFilters",
-                                             "logs:PutLogEvents",
-                                             "kinesis:CreateStream",
-                                             "kinesis:DescribeStreamConsumer",
-                                             "kinesis:PutRecord",
-                                             "kinesis:RegisterStreamConsumer");
-
-        AWSPolicyStatement statement = AWSPolicyStatement.create("GraylogKinesisAutoSetup",
-                                                                 "Allow",
-                                                                 actions,
-                                                                 "*");
-        return AWSPolicy.create(AWS_POLICY_VERSION, Collections.singletonList(statement));
->>>>>>> master
     }
 
     /**
