@@ -90,7 +90,7 @@ const KinesisSetup = ({ onChange, /* onSubmit, */ toggleSetup }) => {
               ], formData) || disabledForm}
               loading={groupNamesStatus.loading || fetchStreamsStatus.loading}
               error={formError}
-              title="Setup Kinesis Automatically"
+              title="Set Up Kinesis Automatically"
               description="">
 
       <p>Complete the fields below and Graylog will perform the automated Kinesis setup, which performs the
