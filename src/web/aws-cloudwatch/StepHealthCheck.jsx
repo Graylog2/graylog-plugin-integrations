@@ -63,7 +63,7 @@ const StepHealthCheck = ({ onSubmit }) => {
         <p>Hang out for a few moments while we keep checking your AWS stream for logs. Amazon&apos;s servers parse logs every 10 minutes, so grab a cup of coffee because this may take some time!</p>
 
         <CheckAgain>
-          <strong>Checking again in: <Countdown timeInSeconds={62} callback={checkForLogs} paused={pauseCountdown} /></strong>
+          <strong>Checking again in: <Countdown timeInSeconds={120} callback={checkForLogs} paused={pauseCountdown} /></strong>
 
           <Button type="button"
                   bsStyle="primary"
