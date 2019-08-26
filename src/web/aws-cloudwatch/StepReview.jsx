@@ -69,9 +69,9 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   useEffect(() => {
     if (fetchSubmitStatus.error) {
       setFormError({
-        full_message: fetchSubmitStatus.error,
-        nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
-      });
+                     full_message: fetchSubmitStatus.error,
+                     nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
+                   });
     }
   }, [fetchSubmitStatus.error]);
 
@@ -95,14 +95,14 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <span>{awsCloudWatchName.value}</span>
           </li>
           {
-                awsCloudWatchDescription
-                && (
-                  <li>
-                    <strong>Description</strong>
-                    <span>{awsCloudWatchDescription.value || ''}</span>
-                  </li>
-                )
-              }
+            awsCloudWatchDescription
+            && (
+              <li>
+                <strong>Description</strong>
+                <span>{awsCloudWatchDescription.value || ''}</span>
+              </li>
+            )
+          }
           <li>
             <strong>AWS Key</strong>
             <span>{awsCloudWatchAwsKey.value}</span>
@@ -131,10 +131,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <strong>Record Batch Size</strong>
             <span>
               {
-                    awsCloudWatchBatchSize.value
-                      ? awsCloudWatchBatchSize.value
-                      : <Default value={awsCloudWatchBatchSize.defaultValue} />
-                  }
+                awsCloudWatchBatchSize.value
+                  ? awsCloudWatchBatchSize.value
+                  : <Default value={awsCloudWatchBatchSize.defaultValue} />
+              }
             </span>
           </li>
           <li>
