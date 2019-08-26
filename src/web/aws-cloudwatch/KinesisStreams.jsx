@@ -63,9 +63,9 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
     if (logDataStatus.error) {
       setLogDataUrl(null);
       setFormError({
-                     full_message: logDataStatus.error,
-                     nice_message: <span>We were unable to find any logs in this Kinesis stream. Please select a different Kinesis stream.</span>,
-                   });
+        full_message: logDataStatus.error,
+        nice_message: <span>We were unable to find any logs in this Kinesis stream. Please select a different Kinesis stream.</span>,
+      });
     }
   }, [logDataStatus.error]);
 

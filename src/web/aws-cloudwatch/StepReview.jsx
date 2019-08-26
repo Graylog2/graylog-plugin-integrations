@@ -69,9 +69,9 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   useEffect(() => {
     if (fetchSubmitStatus.error) {
       setFormError({
-                     full_message: fetchSubmitStatus.error,
-                     nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
-                   });
+        full_message: fetchSubmitStatus.error,
+        nice_message: <span>We were unable to save your Input, please try again in a few moments.</span>,
+      });
     }
   }, [fetchSubmitStatus.error]);
 

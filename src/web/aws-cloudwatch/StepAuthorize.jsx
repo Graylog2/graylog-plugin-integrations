@@ -65,11 +65,11 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                 buttonContent="Authorize &amp; Choose Stream"
                 loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
                 disabled={formValidation.isFormValid([
-                                                       'awsCloudWatchName',
-                                                       'awsCloudWatchAwsKey',
-                                                       'awsCloudWatchAwsSecret',
-                                                       'awsCloudWatchAwsRegion',
-                                                     ], formData)}
+                  'awsCloudWatchName',
+                  'awsCloudWatchAwsKey',
+                  'awsCloudWatchAwsSecret',
+                  'awsCloudWatchAwsRegion',
+                ], formData)}
                 error={formError}
                 title="Create Input &amp; Authorize AWS"
                 description="This integration allows Graylog to read messages directly from a Kinesis Stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">

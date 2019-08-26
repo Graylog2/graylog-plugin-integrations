@@ -42,7 +42,7 @@ const StepHealthCheck = ({ onSubmit }) => {
                  <span>{acknowledgment} looks like <em>{logType}</em> log type.</span>
                </Notice>
              )}>
-        {unknownLog ? "Not to worry, we have parsed what we could and you can build Pipeline Rules to do the rest!" : "Take a look at what we have parsed so far and you can create Pipeline Rules to handle even more!"}
+        {unknownLog ? 'Not to worry, we have parsed what we could and you can build Pipeline Rules to do the rest!' : 'Take a look at what we have parsed so far and you can create Pipeline Rules to handle even more!'}
       </Panel>
 
       <Input id="awsCloudWatchLog"
