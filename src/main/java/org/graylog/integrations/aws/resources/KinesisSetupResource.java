@@ -15,7 +15,13 @@ import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResp
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
+<<<<<<< HEAD
 import org.graylog2.plugin.rest.PluginRestResource;
+=======
+import org.graylog2.plugin.database.users.User;
+import org.graylog2.plugin.rest.PluginRestResource;
+import org.graylog2.shared.rest.resources.RestResource;
+>>>>>>> master
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +42,11 @@ import javax.ws.rs.core.MediaType;
 @RequiresAuthentication
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+<<<<<<< HEAD
 public class KinesisSetupResource implements PluginRestResource {
+=======
+public class KinesisSetupResource extends RestResource implements PluginRestResource {
+>>>>>>> master
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
     private static final int REQUEST_DELAY = 2000;
@@ -62,7 +72,19 @@ public class KinesisSetupResource implements PluginRestResource {
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                    KinesisNewStreamRequest request) throws InterruptedException {
 
+<<<<<<< HEAD
         LOG.info("Stream request: [{}]", request);
+=======
+        // Record the fact that a particular user agreed to create AWS resources.
+        // Print the user id (instead of name) in the log. This is harder to trace back, but it avoids recording actual
+        // user names in the server log file.
+        final User user = getCurrentUser();
+        LOG.info("User [{}] agreed to the Kinesis auto-setup, which will create a Kinesis stream [{}], " +
+                 "role/policy, and a CloudWatch log group subscription. " +
+                 "This has been recorded, as the listed user has accepted the responsibility in associated potentially " +
+                 "incurring cost(s).", user.getId(), request.streamName());
+
+>>>>>>> master
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return KinesisNewStreamResponse.create(request.streamName(), request.streamName() + "-arn", String.format("Created stream [%s] successfully.", request.streamName()));
@@ -78,7 +100,10 @@ public class KinesisSetupResource implements PluginRestResource {
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                        CreateRolePermissionRequest request) throws InterruptedException {
+<<<<<<< HEAD
         LOG.info("Policy request: [{}]", request);
+=======
+>>>>>>> master
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return CreateRolePermissionResponse.create(String.format("Created policy [%s] successfully.", "policy-arn"), "policy-arn");
@@ -94,7 +119,10 @@ public class KinesisSetupResource implements PluginRestResource {
     @RequiresPermissions(AWSPermissions.AWS_READ)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
                                                                     CreateLogSubscriptionRequest request) throws InterruptedException {
+<<<<<<< HEAD
         LOG.info("Subscription request: [{}]", request);
+=======
+>>>>>>> master
         if (mockResponses) {
             Thread.sleep(REQUEST_DELAY);
             return CreateLogSubscriptionResponse.create(String.format("Created subscription for log group [%s] successfully.", "log-group"));

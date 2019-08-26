@@ -14,6 +14,10 @@ import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
+<<<<<<< HEAD
+=======
+import org.graylog.integrations.aws.resources.responses.KinesisPermissionsResponse;
+>>>>>>> master
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.resources.responses.RegionsResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
@@ -86,6 +90,21 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return awsService.getAvailableServices();
     }
 
+<<<<<<< HEAD
+=======
+    @GET
+    @Timed
+    @Path("/permissions")
+    @ApiResponses(value = {
+            @ApiResponse(code = 500, message = AWSService.POLICY_ENCODING_ERROR),
+    })
+    @ApiOperation(value = "Get the permissions required for the AWS Kinesis setup and for the Kinesis auto-setup.")
+    @RequiresPermissions(AWSPermissions.AWS_READ)
+    public KinesisPermissionsResponse getPermissions() {
+        return awsService.getPermissions();
+    }
+
+>>>>>>> master
     /**
      * Get all available AWS CloudWatch log groups names for the specified region.
      */

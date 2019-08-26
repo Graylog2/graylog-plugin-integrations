@@ -7,6 +7,10 @@ import org.graylog.integrations.aws.inputs.AWSInput;
 import org.graylog.integrations.aws.resources.requests.AWSInputCreateRequest;
 import org.graylog.integrations.aws.resources.responses.AWSRegion;
 import org.graylog.integrations.aws.resources.responses.AvailableServiceResponse;
+<<<<<<< HEAD
+=======
+import org.graylog.integrations.aws.resources.responses.KinesisPermissionsResponse;
+>>>>>>> master
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.inputs.Input;
 import org.graylog2.inputs.InputServiceImpl;
@@ -151,4 +155,26 @@ public class AWSServiceTest {
         assertTrue(policy.contains("elasticloadbalancing"));
         assertTrue(policy.contains("kinesis"));
     }
+<<<<<<< HEAD
+=======
+
+    @Test
+    public void testPermissions() throws JsonProcessingException {
+
+        final KinesisPermissionsResponse permissions = awsService.getPermissions();
+
+        // Verify that the setup policy contains some needed permissions.
+        assertTrue(permissions.setupPolicy().contains("cloudwatch"));
+        assertTrue(permissions.setupPolicy().contains("dynamodb"));
+        assertTrue(permissions.setupPolicy().contains("ec2"));
+        assertTrue(permissions.setupPolicy().contains("elasticloadbalancing"));
+        assertTrue(permissions.setupPolicy().contains("kinesis"));
+
+        // Verify that the auto-setup policy contains some needed permissions.
+        assertTrue(permissions.autoSetupPolicy().contains("CreateStream"));
+        assertTrue(permissions.autoSetupPolicy().contains("DescribeSubscriptionFilters"));
+        assertTrue(permissions.autoSetupPolicy().contains("PutRecord"));
+        assertTrue(permissions.autoSetupPolicy().contains("RegisterStreamConsumer"));
+    }
+>>>>>>> master
 }
