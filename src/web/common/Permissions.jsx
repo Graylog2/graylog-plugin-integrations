@@ -41,8 +41,7 @@ export default function Permissions() {
 
   return (
     <Panel bsStyle="info" header={<span>AWS Policy Permissions</span>}>
-      { /* TODO: Update content */ }
-      <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsa debitis, voluptatum id illo excepturi, magni recusandae accusamus veritatis repellendus nam voluptas nihil ad dolorum dolores cum laboriosam minima cupiditate necessitatibus.</p>
+      <p>Please verify that you have granted your AWS IAM user sufficient permissions. You can use the following policies for reference.</p>
 
       {!permissionsStatus.loading && permissionsStatus.data && (
       <>
@@ -51,7 +50,7 @@ export default function Permissions() {
                   policy={JSON.parse(permissionsStatus.data.setup_policy)} />
 
         <Policies title="Least Privilege Policy"
-                  note="Doesn&apos;t include Kinesis auto-subscribtion controls."
+                  note="Doesn&apos;t include Kinesis auto-subscription controls."
                   policy={JSON.parse(permissionsStatus.data.auto_setup_policy)} />
       </>
       )}
