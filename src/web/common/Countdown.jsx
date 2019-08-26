@@ -7,12 +7,13 @@ function Countdown({ callback, className, timeInSeconds, paused }) {
   let logInterval;
 
   const defaultDuration = duration(timeInSeconds, 'seconds').format('mm:ss');
-  const currentDuration = duration(tickTock, 'seconds').format('mm:ss');
   const [currentTime, setCurrentTime] = useState(defaultDuration);
 
   const startCountdown = () => {
     logInterval = setInterval(() => {
       tickTock -= 1;
+
+      const currentDuration = duration(tickTock, 'seconds').format('mm:ss', { trim: false });
 
       if (tickTock < 0) {
         tickTock = timeInSeconds;
