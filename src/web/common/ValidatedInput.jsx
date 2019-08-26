@@ -62,6 +62,7 @@ ValidatedInput.propTypes = {
   id: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   required: PropTypes.bool,
+  type: PropTypes.string.isRequired,
 };
 
 ValidatedInput.defaultProps = {
