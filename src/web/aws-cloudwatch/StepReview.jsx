@@ -81,14 +81,14 @@ const StepReview = ({ onSubmit, onEditClick }) => {
 
   return (
     <FormWrap onSubmit={handleSubmit}
-              buttonContent="Complete CloudWatch Setup"
+              buttonContent="Complete Setup & Save Input"
               loading={fetchSubmitStatus.loading}
               error={formError}
               title="Final Review"
               description="Check out everything below to make sure it is correct, then click the button below to complete your CloudWatch setup!">
 
       <Container>
-        <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
+        <Subheader>General Settings <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
         <ReviewItems>
           <li>
             <strong>Name</strong>
@@ -113,7 +113,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           </li>
         </ReviewItems>
 
-        <Subheader>Setting up Kinesis <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
+        <Subheader>Kinesis Settings <small><EditAnchor onClick={onEditClick('kinesis-setup')}>Edit</EditAnchor></small></Subheader>
         <ReviewItems>
           <li>
             <strong>Stream</strong>

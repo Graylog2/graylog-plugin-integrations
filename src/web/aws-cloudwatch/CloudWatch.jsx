@@ -74,13 +74,13 @@ const CloudWatch = ({ route }) => {
   const wizardSteps = [
     {
       key: 'authorize',
-      title: 'AWS CloudWatch Authorize',
+      title: 'AWS Kinesis Authorize',
       component: (<StepAuthorize onSubmit={handleSubmit} onChange={handleFieldUpdate} />),
       disabled: isDisabledStep('authorize'),
     },
     {
       key: 'kinesis-setup',
-      title: 'AWS CloudWatch Kinesis Setup',
+      title: 'AWS Kinesis Setup',
       component: (<StepKinesis onSubmit={handleSubmit}
                                onChange={handleFieldUpdate}
                                hasStreams={availableStreams.length > 0} />),
@@ -88,13 +88,13 @@ const CloudWatch = ({ route }) => {
     },
     {
       key: 'health-check',
-      title: 'AWS CloudWatch Health Check',
+      title: 'AWS Kinesis Health Check',
       component: (<StepHealthCheck onSubmit={handleSubmit} />),
       disabled: isDisabledStep('health-check'),
     },
     {
       key: 'review',
-      title: 'AWS CloudWatch Review',
+      title: 'AWS Kinesis Review',
       component: (<StepReview onSubmit={handleSubmit}
                               onEditClick={handleEditClick} />),
       disabled: isDisabledStep('review'),
