@@ -1,31 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { duration as momentDuration } from 'moment';
 
 function Countdown({ callback, className, timeInSeconds, paused }) {
   const [currentTime, setCurrentTime] = useState('00:00');
   let logInterval;
-  let duration = timeInSeconds;
+  let tickTock = timeInSeconds;
 
   const startCountdown = () => {
-    let minutes;
-    let seconds;
-
     logInterval = setInterval(() => {
-      minutes = parseInt(duration / 60, 10);
-      seconds = parseInt(duration % 60, 10);
+      const duration = momentDuration(tickTock, 'seconds');
 
-      minutes = minutes < 10 ? `0${minutes}` : minutes;
-      seconds = seconds < 10 ? `0${seconds}` : seconds;
-
-      duration -= 1;
+      tickTock -= 1;
 
       if (duration < 0) {
-        duration = timeInSeconds;
+        tickTock = timeInSeconds;
         setCurrentTime('00:00');
         clearInterval(logInterval);
         callback();
       } else {
-        setCurrentTime(`${minutes}:${seconds}`);
+        setCurrentTime(duration.format('mm:ss'));
       }
     }, 1000);
   };
