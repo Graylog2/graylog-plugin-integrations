@@ -77,7 +77,6 @@ public class AWSServiceTest {
 
         AWSInputCreateRequest request =
                 AWSInputCreateRequest.create("AWS Input",
-                                             "An AWS Input",
                                              AWSMessageType.KINESIS_FLOW_LOGS.toString(),
                                              "a-key", "a-secret",
                                              "a-stream",
