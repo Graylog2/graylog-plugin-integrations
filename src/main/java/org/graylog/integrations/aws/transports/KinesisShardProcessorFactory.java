@@ -76,7 +76,7 @@ public class KinesisShardProcessorFactory implements ShardRecordProcessorFactory
         @Override
         public void processRecords(ProcessRecordsInput processRecordsInput) {
 
-            LOG.info("Received [{}] Kinesis events.", processRecordsInput.records().size());
+            LOG.debug("Received [{}] Kinesis events.", processRecordsInput.records().size());
 
             // Check if the transport is throttled before processing more messages.
             // Blocking here is the only way to temporarily pause message processing.
