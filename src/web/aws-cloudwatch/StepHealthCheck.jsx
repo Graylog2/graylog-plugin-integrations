@@ -89,7 +89,6 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
   const bsStyle = knownLog ? 'success' : 'warning';
   const logTypeLabel = KINESIS_LOG_TYPES.filter(type => type.value === logData.type)[ 0 ].label;
   const logType = knownLog ? 'a ' + logTypeLabel : 'an unknown';
-  debugger;
   const handleSubmit = () => {
     onSubmit();
     onChange({ target: { name: 'awsCloudWatchKinesisInputType', value: logData.type } });
