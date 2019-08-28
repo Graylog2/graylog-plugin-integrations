@@ -37,10 +37,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
     setSidebar(
       <Panel bsStyle="info" header={<span>Don&apos;t see the stream you need?</span>}>
         <AutoSetupContent>
-          <p>
-            {/* TODO: Add documentation link */}
-            Have you performed the needed setup as described in the <a href="/">documentation</a>? At least one Kinesis stream must exist in the specified region in order to continue with the setup. The log stream must contain at least a few log messages.
-          </p>
+          <p>At least one Kinesis stream must exist in the specified region in order to continue with the setup. The log stream must contain at least a few log messages.</p>
 
           <p>
             Graylog also supports the ability to create a Kinesis stream for you and subscribe it to a CloudWatch log group of your choice. Please be aware that this option will create additional resources in your AWS environment that will incur billing charges.
