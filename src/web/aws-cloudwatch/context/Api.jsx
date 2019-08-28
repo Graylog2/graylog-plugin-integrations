@@ -29,7 +29,7 @@ export const ApiProvider = ({ children }) => {
     });
   };
 
-  const clearLogData = (response) => {
+  const clearLogData = () => {
     setLogDataState(null);
   };
 

@@ -42,7 +42,12 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 public class KinesisSetupResource extends RestResource implements PluginRestResource {
 
+    // Enable mocked responses for UI testing.
+    // TODO: Remove later.
+    public boolean mockResponses = true;
+
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
+    private static final int REQUEST_DELAY = 2000;
 
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
@@ -60,16 +65,21 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_STREAM)
     public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true)
-                                                           @Valid @NotNull KinesisNewStreamRequest request) {
+                                                           @Valid @NotNull KinesisNewStreamRequest request) throws InterruptedException {
+
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return KinesisNewStreamResponse.create(request.streamName(), request.streamName() + "-arn", String.format("Created stream [%s] successfully.", request.streamName()));
+        }
 
         // Record the fact that a particular user agreed to create AWS resources.
         // Print the user id (instead of name) in the log. This is harder to trace back, but it avoids recording actual
         // user names in the server log file.
         final User user = getCurrentUser();
         LOG.info("User [{}] agreed to the Kinesis auto-setup, which will create a Kinesis stream [{}], " +
-                 "role/policy, and a CloudWatch log group subscription. " +
-                 "This has been recorded, as the listed user has accepted the responsibility in associated potentially " +
-                 "incurring cost(s).", user.getId(), request.streamName());
+                "role/policy, and a CloudWatch log group subscription. " +
+                "This has been recorded, as the listed user has accepted the responsibility in associated potentially " +
+                "incurring cost(s).", user.getId(), request.streamName());
 
         return kinesisService.createNewKinesisStream(request);
     }
@@ -81,7 +91,12 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_POLICY)
     public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true)
-                                                               @Valid @NotNull CreateRolePermissionRequest request) {
+                                                               @Valid @NotNull CreateRolePermissionRequest request) throws InterruptedException {
+
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return CreateRolePermissionResponse.create(String.format("Created policy [%s] successfully.", "policy-arn"), "policy-arn", "role-name");
+        }
 
         return kinesisService.autoKinesisPermissions(request);
     }
@@ -93,7 +108,12 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_SUBSCRIPTION)
     public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true)
-                                                            @Valid @NotNull CreateLogSubscriptionRequest request) {
+                                                            @Valid @NotNull CreateLogSubscriptionRequest request) throws InterruptedException {
+
+        if (mockResponses) {
+            Thread.sleep(REQUEST_DELAY);
+            return CreateLogSubscriptionResponse.create(String.format("Created subscription for log group [%s] successfully.", "log-group"));
+        }
 
         return cloudWatchService.addSubscriptionFilter(request);
     }

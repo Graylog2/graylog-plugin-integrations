@@ -147,7 +147,7 @@ public class KinesisSetupResourceTest {
     }
 
     @Test
-    public void testAll() {
+    public void testAll() throws InterruptedException {
 
         // Stream
         final KinesisNewStreamRequest request =
