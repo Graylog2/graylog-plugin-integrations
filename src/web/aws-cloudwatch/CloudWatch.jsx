@@ -88,8 +88,8 @@ const CloudWatch = ({ route }) => {
     },
     {
       key: 'health-check',
-      title: 'AWS Kinesis Health Check',
-      component: (<StepHealthCheck onSubmit={handleSubmit} />),
+      title: 'AWS CloudWatch Health Check',
+      component: (<StepHealthCheck onSubmit={handleSubmit} onChange={handleFieldUpdate} />),
       disabled: isDisabledStep('health-check'),
     },
     {

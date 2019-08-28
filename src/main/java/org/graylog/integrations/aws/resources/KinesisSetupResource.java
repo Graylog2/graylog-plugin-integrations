@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.graylog.integrations.audit.IntegrationsAuditEventTypes;
 import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
@@ -15,6 +16,7 @@ import org.graylog.integrations.aws.resources.responses.CreateRolePermissionResp
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
+import org.graylog2.audit.jersey.AuditEvent;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.shared.rest.resources.RestResource;
@@ -41,14 +43,9 @@ import javax.ws.rs.core.MediaType;
 public class KinesisSetupResource extends RestResource implements PluginRestResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(KinesisSetupResource.class);
-    private static final int REQUEST_DELAY = 2000;
 
     private KinesisService kinesisService;
     private CloudWatchService cloudWatchService;
-
-    // Enable mocked responses for UI testing.
-    // TODO: Remove later.
-    public boolean mockResponses = true;
 
     @Inject
     public KinesisSetupResource(CloudWatchService cloudWatchService, KinesisService kinesisService) {
@@ -61,8 +58,9 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @Path("/create_stream")
     @ApiOperation(value = "Step 1: Attempt to create a new kinesis stream and wait for it to be ready.")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                   KinesisNewStreamRequest request) throws InterruptedException {
+    @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_STREAM)
+    public KinesisNewStreamResponse createNewKinesisStream(@ApiParam(name = "JSON body", required = true)
+                                                           @Valid @NotNull KinesisNewStreamRequest request) {
 
         // Record the fact that a particular user agreed to create AWS resources.
         // Print the user id (instead of name) in the log. This is harder to trace back, but it avoids recording actual
@@ -73,11 +71,6 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
                  "This has been recorded, as the listed user has accepted the responsibility in associated potentially " +
                  "incurring cost(s).", user.getId(), request.streamName());
 
-        if (mockResponses) {
-            Thread.sleep(REQUEST_DELAY);
-            return KinesisNewStreamResponse.create(request.streamName(), request.streamName() + "-arn", String.format("Created stream [%s] successfully.", request.streamName()));
-        }
-
         return kinesisService.createNewKinesisStream(request);
     }
 
@@ -86,12 +79,9 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @Path("/create_subscription_policy")
     @ApiOperation(value = "Step 2: Create AWS IAM policy needed for CloudWatch to write logs to Kinesis")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                       CreateRolePermissionRequest request) throws InterruptedException {
-        if (mockResponses) {
-            Thread.sleep(REQUEST_DELAY);
-            return CreateRolePermissionResponse.create(String.format("Created policy [%s] successfully.", "policy-arn"), "policy-arn");
-        }
+    @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_POLICY)
+    public CreateRolePermissionResponse autoKinesisPermissions(@ApiParam(name = "JSON body", required = true)
+                                                               @Valid @NotNull CreateRolePermissionRequest request) {
 
         return kinesisService.autoKinesisPermissions(request);
     }
@@ -101,12 +91,9 @@ public class KinesisSetupResource extends RestResource implements PluginRestReso
     @Path("/create_subscription")
     @ApiOperation(value = "Step 3: Subscribe a Kinesis stream to a CloudWatch log group")
     @RequiresPermissions(AWSPermissions.AWS_READ)
-    public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true) @Valid @NotNull
-                                                                    CreateLogSubscriptionRequest request) throws InterruptedException {
-        if (mockResponses) {
-            Thread.sleep(REQUEST_DELAY);
-            return CreateLogSubscriptionResponse.create(String.format("Created subscription for log group [%s] successfully.", "log-group"));
-        }
+    @AuditEvent(type = IntegrationsAuditEventTypes.KINESIS_SETUP_CREATE_SUBSCRIPTION)
+    public CreateLogSubscriptionResponse createSubscription(@ApiParam(name = "JSON body", required = true)
+                                                            @Valid @NotNull CreateLogSubscriptionRequest request) {
 
         return cloudWatchService.addSubscriptionFilter(request);
     }
