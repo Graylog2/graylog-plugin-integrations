@@ -32,7 +32,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.2.0-SNAPSHOT</graylog.version>
-        <aws-java-sdk-2.version>2.7.32</aws-java-sdk-2.version>
+        <aws-java-sdk-2.version>2.7.33</aws-java-sdk-2.version>
         <aws-kinesis-client.version>2.2.2</aws-kinesis-client.version>
     </properties>
 
@@ -49,9 +49,13 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Include the bundled/shaded AWS SDK dependency. This includes all third party dependencies in a remapped
+             package location (software.amazon.awssdk.thirdparty...) to avoid conflicts with dependencies used in the Graylog Server core.
+             This was initially needed to resolve a conflict with the Apache HTTP client.
+             See https://github.com/aws/aws-sdk-java-v2/blob/master/bundle/pom.xml for the remapped locations. -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>aws-sdk-java</artifactId>
+            <artifactId>bundle</artifactId>
             <version>${aws-java-sdk-2.version}</version>
         </dependency>
         <!-- AWS maintains a separate client for Kinesis. -->
@@ -59,23 +63,6 @@
             <groupId>software.amazon.kinesis</groupId>
             <artifactId>amazon-kinesis-client</artifactId>
             <version>${aws-kinesis-client.version}</version>
-        </dependency>
-
-        <!-- Include the latest version of the Apache Http Client as required by the AWS SDK v2 -->
-        <!-- See https://github.com/aws/aws-sdk-java-v2/issues/652 -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.9</version>
-        </dependency>
-        <!-- Explicitly include commons-codec in this POM, since the AWS SDK v2 internally remaps
-             commons-codec to another internal package. This makes the commons-codec from
-             graylog-project-parent unavailable.
-             See https://aws.amazon.com/blogs/developer/java-sdk-bundle/ -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -117,11 +104,6 @@
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>kinesis</artifactId>
-            <version>2.7.32</version>
         </dependency>
         <dependency>
             <groupId>com.github.rholder</groupId>
