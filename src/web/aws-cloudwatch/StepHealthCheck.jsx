@@ -9,8 +9,7 @@ import FormWrap from '../common/FormWrap';
 import useFetch from '../common/hooks/useFetch';
 import { ApiRoutes } from '../common/Routes';
 import Countdown from '../common/Countdown';
-import { KINESIS_LOG_TYPES } from '../common/constants';
-import { DEFAULT_KINESIS_LOG_TYPE } from '../common/constants';
+import { DEFAULT_KINESIS_LOG_TYPE, KINESIS_LOG_TYPES } from '../common/constants';
 
 import { ApiContext } from './context/Api';
 import { FormDataContext } from './context/FormData';
@@ -85,10 +84,10 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
 
   const knownLog = logData.type === DEFAULT_KINESIS_LOG_TYPE;
   const iconClass = knownLog ? 'check' : 'exclamation-triangle';
-  const acknowledgment = knownLog ?  'Awesome!' : 'Drats!';
+  const acknowledgment = knownLog ? 'Awesome!' : 'Drats!';
   const bsStyle = knownLog ? 'success' : 'warning';
-  const logTypeLabel = KINESIS_LOG_TYPES.filter(type => type.value === logData.type)[ 0 ].label;
-  const logType = knownLog ? 'a ' + logTypeLabel : 'an unknown';
+  const logTypeLabel = KINESIS_LOG_TYPES.find(type => type.value === logData.type).label;
+  const logType = knownLog ? `a ${logTypeLabel}` : 'an unknown';
   const handleSubmit = () => {
     onSubmit();
     onChange({ target: { name: 'awsCloudWatchKinesisInputType', value: logData.type } });
