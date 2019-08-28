@@ -99,14 +99,6 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
                         autoComplete="off"
                         required />
 
-        <ValidatedInput id="awsCloudWatchDescription"
-                        type="textarea"
-                        label="Integration description"
-                        placeholder="CloudWatch Integration Description"
-                        onChange={onChange}
-                        fieldData={formData.awsCloudWatchDescription}
-                        rows={4} />
-
         <ValidatedInput id="awsCloudWatchAwsKey"
                         type="text"
                         label="AWS Key"
