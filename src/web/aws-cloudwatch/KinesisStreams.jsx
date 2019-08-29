@@ -1,19 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Panel } from 'react-bootstrap';
+import { Panel, Modal } from 'react-bootstrap';
+import { LoadingIndicator } from 'components/common';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import { SidebarContext } from './context/Sidebar';
-import useFetch from '../common/hooks/useFetch';
 
+import useFetch from '../common/hooks/useFetch';
 import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';
 import Routes, { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
+
 
 const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
   const { formData } = useContext(FormDataContext);
@@ -72,6 +74,8 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
 
   return (
     <>
+      {logDataStatus.loading && <LoadingIndicator />}
+
       <FormWrap onSubmit={handleSubmit}
                 buttonContent="Verify Stream &amp; Format"
                 loading={logDataStatus.loading}
