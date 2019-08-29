@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Panel, Modal } from 'react-bootstrap';
+import { Panel } from 'react-bootstrap';
 import { LoadingIndicator } from 'components/common';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
