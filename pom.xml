@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:filter="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -171,6 +171,34 @@
                             <exclude>com.google.protobuf:protobuf-java</exclude>
                         </excludes>
                     </artifactSet>
+                    <filters>
+                        <!-- The AWS SDK Bundle imports the entire SDK. Explicitly include only the packages that are
+                             needed. This prevents the entire SDK from being packaged and distributed with this plugin (~150MB).
+                             See the comment on the bundle above for more info. -->
+                        <filter>
+                            <artifact>software.amazon.awssdk:bundle</artifact>
+                            <includes>
+                                <!-- Include core AWS SDK packages. -->
+                                <include>software/amazon/awssdk/annotations/**</include>
+                                <include>software/amazon/awssdk/auth/**</include>
+                                <include>software/amazon/awssdk/awscore/**</include>
+                                <include>software/amazon/awssdk/core/**</include>
+                                <include>software/amazon/awssdk/http/**</include>
+                                <include>software/amazon/awssdk/internal/http/**</include>
+                                <include>software/amazon/awssdk/profiles/**</include>
+                                <include>software/amazon/awssdk/protocols/**</include>
+                                <include>software/amazon/awssdk/regions/**</include>
+                                <include>software/amazon/awssdk/thirdparty/**</include>
+                                <include>software/amazon/awssdk/utils/**</include>
+                                <!-- Include only the specific service packages that are needed. -->
+                                <include>software/amazon/awssdk/services/cloudwatchlogs/**</include>
+                                <include>software/amazon/awssdk/services/dynamodb/**</include>
+                                <include>software/amazon/awssdk/services/iam/**</include>
+                                <include>software/amazon/awssdk/services/kinesis/**</include>
+                                <include>software/amazon/awssdk/services/sts/**</include>
+                            </includes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
