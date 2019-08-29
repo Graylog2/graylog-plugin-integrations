@@ -135,6 +135,8 @@ const AutoSetupContent = styled.div`
 const LoadingModal = styled(Modal)`
   > .modal-dialog {
     width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 `;
 
