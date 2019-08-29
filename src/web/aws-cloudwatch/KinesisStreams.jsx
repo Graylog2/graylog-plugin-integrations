@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Panel } from 'react-bootstrap';
-import { LoadingIndicator } from 'components/common';
+import { Modal, Panel } from 'react-bootstrap';
+import { Spinner } from 'components/common';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
@@ -74,7 +74,12 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
 
   return (
     <>
-      {logDataStatus.loading && <LoadingIndicator />}
+      <LoadingModal show backdrop="static" keyboard={false} bsSize="small">
+        <LoadingContent>
+          <i className="fa fa-spin fa-spinner" />
+          <LoadingMessage>This request may take a few moments.</LoadingMessage>
+        </LoadingContent>
+      </LoadingModal>
 
       <FormWrap onSubmit={handleSubmit}
                 buttonContent="Verify Stream &amp; Format"
@@ -123,6 +128,28 @@ KinesisStreams.defaultProps = {
 
 const AutoSetupContent = styled.div`
   margin-bottom: 9px;
+`;
+
+const LoadingModal = styled(Modal)`
+  > .modal-dialog {
+    width: 400px;
+  }
+`;
+
+const LoadingContent = styled(Modal.Body)`
+  text-align: center;
+
+  i.fa {
+    font-size: 48px;
+    color: #702785;
+  }
+`;
+
+const LoadingMessage = styled.p`
+  font-size: 16px;
+  font-weight: bold;
+  padding-top: 15px;
+  color: #A6AFBD;
 `;
 
 export default KinesisStreams;
