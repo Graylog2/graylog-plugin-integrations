@@ -74,7 +74,10 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
 
   return (
     <>
-      <LoadingModal show backdrop="static" keyboard={false} bsSize="small">
+      <LoadingModal show={logDataStatus.loading}
+                    backdrop="static"
+                    keyboard={false}
+                    bsSize="small">
         <LoadingContent>
           <i className="fa fa-spin fa-spinner" />
           <LoadingMessage>This request may take a few moments.</LoadingMessage>
