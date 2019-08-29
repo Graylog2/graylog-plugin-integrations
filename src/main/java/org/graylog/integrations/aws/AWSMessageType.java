@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Identifies the type of input for a particular log source (eg. Cloud Watch or Kinesis) and
+ * Identifies the type of input for a particular log source (eg. CloudWatch or Kinesis) and
  * log format.
  *
  * This type will be saved with the input to indicate which transport and codec should be used.
