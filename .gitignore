@@ -12,3 +12,4 @@ node
 build
 build.config.js.sample
 /cache/
+src/web/aws-cloudwatch/context/aws.js
