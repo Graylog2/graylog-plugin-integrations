@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "extends": [
+    "graylog"
+  ],
+  "settings": {
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.js"
+      }
+    }
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": 0
+  },
+  "env": {
+    "browser": true,
+    "jest": true
+  }
+}

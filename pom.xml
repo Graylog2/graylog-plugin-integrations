@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:filter="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -32,6 +32,8 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.1.1-SNAPSHOT</graylog.version>
+        <aws-java-sdk-2.version>2.7.33</aws-java-sdk-2.version>
+        <aws-kinesis-client.version>2.2.2</aws-kinesis-client.version>
     </properties>
 
     <dependencyManagement>
@@ -47,10 +49,30 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Include the bundled/shaded AWS SDK dependency. This includes all third party dependencies in a remapped
+             package location (software.amazon.awssdk.thirdparty...) to avoid conflicts with dependencies used in the Graylog Server core.
+             This was initially needed to resolve a conflict with the Apache HTTP client.
+             See https://github.com/aws/aws-sdk-java-v2/blob/master/bundle/pom.xml for the remapped locations. -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>bundle</artifactId>
+            <version>${aws-java-sdk-2.version}</version>
+        </dependency>
+        <!-- AWS maintains a separate client for Kinesis. -->
+        <dependency>
+            <groupId>software.amazon.kinesis</groupId>
+            <artifactId>amazon-kinesis-client</artifactId>
+            <version>${aws-kinesis-client.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.graylog2</groupId>
@@ -59,19 +81,17 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.auto.value</groupId>
-            <artifactId>auto-value</artifactId>
-            <version>${auto-value.version}</version>
+            <groupId>org.graylog.autovalue</groupId>
+            <artifactId>auto-value-javabean</artifactId>
+            <version>${auto-value-javabean.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <version>${auto-service.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -83,6 +103,17 @@
             <artifactId>assertj-core</artifactId>
             <version>${assertj-core.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.rholder</groupId>
+            <artifactId>guava-retrying</artifactId>
+            <version>2.0.0</version>
         </dependency>
     </dependencies>
 
@@ -140,6 +171,34 @@
                             <exclude>com.google.protobuf:protobuf-java</exclude>
                         </excludes>
                     </artifactSet>
+                    <filters>
+                        <!-- The AWS SDK Bundle imports the entire SDK. Explicitly include only the packages that are
+                             needed. This prevents the entire SDK from being packaged and distributed with this plugin (~150MB).
+                             See the comment on the bundle above for more info. -->
+                        <filter>
+                            <artifact>software.amazon.awssdk:bundle</artifact>
+                            <includes>
+                                <!-- Include core AWS SDK packages. -->
+                                <include>software/amazon/awssdk/annotations/**</include>
+                                <include>software/amazon/awssdk/auth/**</include>
+                                <include>software/amazon/awssdk/awscore/**</include>
+                                <include>software/amazon/awssdk/core/**</include>
+                                <include>software/amazon/awssdk/http/**</include>
+                                <include>software/amazon/awssdk/internal/http/**</include>
+                                <include>software/amazon/awssdk/profiles/**</include>
+                                <include>software/amazon/awssdk/protocols/**</include>
+                                <include>software/amazon/awssdk/regions/**</include>
+                                <include>software/amazon/awssdk/thirdparty/**</include>
+                                <include>software/amazon/awssdk/utils/**</include>
+                                <!-- Include only the specific service packages that are needed. -->
+                                <include>software/amazon/awssdk/services/cloudwatchlogs/**</include>
+                                <include>software/amazon/awssdk/services/dynamodb/**</include>
+                                <include>software/amazon/awssdk/services/iam/**</include>
+                                <include>software/amazon/awssdk/services/kinesis/**</include>
+                                <include>software/amazon/awssdk/services/sts/**</include>
+                            </includes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
