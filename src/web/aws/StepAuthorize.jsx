@@ -15,8 +15,6 @@ import useFetch from './common/hooks/useFetch';
 
 import formValidation from './utils/formValidation';
 
-import AWSAuthorize from './context/AWSAuthorize';
-
 const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   const { formData } = useContext(FormDataContext);
   const { clearSidebar, setSidebar } = useContext(SidebarContext);
@@ -74,7 +72,7 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   }, []);
 
   return (
-    <AWSAuthorize>
+    <>
       <FormWrap onSubmit={handleSubmit}
                 buttonContent="Authorize &amp; Choose Stream"
                 loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
@@ -134,7 +132,7 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
           {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
         </ValidatedInput>
       </FormWrap>
-    </AWSAuthorize>
+    </>
   );
 };
 
