@@ -1,20 +1,20 @@
 import PropTypes from 'prop-types';
 
 import history from 'util/History';
-import Routes from './common/Routes.js';
+import Routes from 'aws/common/Routes.js';
 
-const InputConfiguration = ({ url }) => {
+const AWSInputConfiguration = ({ url }) => {
   history.push(url);
 
   return null;
 };
 
-InputConfiguration.propTypes = {
+AWSInputConfiguration.propTypes = {
   url: PropTypes.string,
 };
 
-InputConfiguration.defaultProps = {
+AWSInputConfiguration.defaultProps = {
   url: Routes.INTEGRATIONS.AWS.CLOUDWATCH.index,
 };
 
-export default InputConfiguration;
+export default AWSInputConfiguration;

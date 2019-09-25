@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
+import { AdvancedOptionsProvider } from 'aws/context/AdvancedOptions';
+
 import ExistingStreams from './kinesis/ExistingStreams';
 import SetupNewStream from './kinesis/SetupNewStream';
-
-import { AdvancedOptionsProvider } from '../context/AdvancedOptions';
 
 const StepKinesis = ({ hasStreams, ...restProps }) => {
   const [renderStreams, toggleRenderStreams] = useState(hasStreams);
