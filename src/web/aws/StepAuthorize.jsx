@@ -6,17 +6,18 @@ import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import { SidebarContext } from './context/Sidebar';
 
-import ValidatedInput from '../common/ValidatedInput';
-import MaskedInput from '../common/MaskedInput';
-import FormWrap from '../common/FormWrap';
-import Permissions from '../common/Permissions';
-import { renderOptions } from '../common/Options';
-import { ApiRoutes } from '../common/Routes';
-import useFetch from '../common/hooks/useFetch';
+import ValidatedInput from './common/ValidatedInput';
+import MaskedInput from './common/MaskedInput';
+import FormWrap from './common/FormWrap';
+import { renderOptions } from './common/Options';
+import { ApiRoutes } from './common/Routes';
+import useFetch from './common/hooks/useFetch';
 
-import formValidation from '../utils/formValidation';
+import formValidation from './utils/formValidation';
 
-const StepAuthorize = ({ onChange, onSubmit }) => {
+import AWSAuthorize from './context/AWSAuthorize';
+
+const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   const { formData } = useContext(FormDataContext);
   const { clearSidebar, setSidebar } = useContext(SidebarContext);
   const { availableRegions, setRegions, setStreams } = useContext(ApiContext);
@@ -63,7 +64,9 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   };
 
   useEffect(() => {
-    setSidebar(<Permissions />);
+    if (sidebarComponent) {
+      setSidebar(sidebarComponent);
+    }
 
     return () => {
       clearSidebar();
@@ -71,7 +74,7 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
   }, []);
 
   return (
-    <>
+    <AWSAuthorize>
       <FormWrap onSubmit={handleSubmit}
                 buttonContent="Authorize &amp; Choose Stream"
                 loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
@@ -131,13 +134,18 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
           {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
         </ValidatedInput>
       </FormWrap>
-    </>
+    </AWSAuthorize>
   );
 };
 
 StepAuthorize.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  sidebarComponent: PropTypes.node,
+};
+
+StepAuthorize.defaultProps = {
+  sidebarComponent: null,
 };
 
 const DisappearingInput = styled.input`

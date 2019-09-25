@@ -6,8 +6,8 @@ import { Link } from 'react-router';
 import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from './context/FormData';
-import { ApiContext } from './context/Api';
+import { FormDataContext } from '../context/FormData';
+import { ApiContext } from '../context/Api';
 
 import useFetch from '../common/hooks/useFetch';
 import FormWrap from '../common/FormWrap';

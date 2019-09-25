@@ -1,13 +1,10 @@
 import React, { createContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import DEFAULT_SETTINGS from './default_settings';
-
 export const FormDataContext = createContext();
 
-export const FormDataProvider = ({ children }) => {
-  const initialState = { ...DEFAULT_SETTINGS };
-  const [formData, updateState] = useState(initialState);
+export const FormDataProvider = ({ initialFormData, children }) => {
+  const [formData, updateState] = useState(initialFormData);
 
   const setFormData = (id, fieldData) => updateState({
     ...formData,

@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import { Modal, Panel } from 'components/graylog';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
-import { FormDataContext } from './context/FormData';
-import { ApiContext } from './context/Api';
-import { SidebarContext } from './context/Sidebar';
 
+import { FormDataContext } from '../context/FormData';
+import { ApiContext } from '../context/Api';
+import { SidebarContext } from '../context/Sidebar';
 import useFetch from '../common/hooks/useFetch';
 import FormWrap from '../common/FormWrap';
 import ValidatedInput from '../common/ValidatedInput';

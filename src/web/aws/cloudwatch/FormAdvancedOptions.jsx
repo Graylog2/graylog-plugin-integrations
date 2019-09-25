@@ -4,9 +4,8 @@ import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from './context/FormData';
-import { AdvancedOptionsContext } from './context/AdvancedOptions';
-
+import { FormDataContext } from '../context/FormData';
+import { AdvancedOptionsContext } from '../context/AdvancedOptions';
 import AdditionalFields from '../common/AdditionalFields';
 
 const FormAdvancedOptions = ({ onChange }) => {

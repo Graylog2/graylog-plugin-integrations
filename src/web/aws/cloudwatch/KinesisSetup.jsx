@@ -10,8 +10,8 @@ import useFetch from '../common/hooks/useFetch';
 
 import formValidation from '../utils/formValidation';
 
-import { FormDataContext } from './context/FormData';
-import { ApiContext } from './context/Api';
+import { FormDataContext } from '../context/FormData';
+import { ApiContext } from '../context/Api';
 
 import SetupModal from './auto-setup-steps/SetupModal';
 

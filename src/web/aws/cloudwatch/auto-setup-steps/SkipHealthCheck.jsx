@@ -8,7 +8,7 @@ import { renderOptions } from '../../common/Options';
 import ValidatedInput from '../../common/ValidatedInput';
 import { KINESIS_LOG_TYPES } from '../../common/constants';
 
-import { FormDataContext } from '../context/FormData';
+import { FormDataContext } from '../../context/FormData';
 
 const SkipHealthCheck = ({ onChange, onSubmit }) => {
   const { formData } = useContext(FormDataContext);

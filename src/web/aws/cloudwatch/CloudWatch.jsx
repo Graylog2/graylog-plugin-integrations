@@ -9,14 +9,16 @@ import FormUtils from 'util/FormsUtils.js';
 import history from 'util/History';
 import Routes from 'routing/Routes';
 
-import StepAuthorize from './StepAuthorize';
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
-import { StepsContext } from './context/Steps';
-import { FormDataContext } from './context/FormData';
-import { ApiContext } from './context/Api';
-import { SidebarContext } from './context/Sidebar';
+import SidebarPermissions from './SidebarPermissions';
+
+import StepAuthorize from '../StepAuthorize';
+import { StepsContext } from '../context/Steps';
+import { FormDataContext } from '../context/FormData';
+import { ApiContext } from '../context/Api';
+import { SidebarContext } from '../context/Sidebar';
 
 const CloudWatch = ({ route }) => {
   const {
@@ -75,7 +77,9 @@ const CloudWatch = ({ route }) => {
     {
       key: 'authorize',
       title: 'AWS Kinesis Authorize',
-      component: (<StepAuthorize onSubmit={handleSubmit} onChange={handleFieldUpdate} />),
+      component: (<StepAuthorize onSubmit={handleSubmit}
+                                 onChange={handleFieldUpdate}
+                                 sidebarComponent={<SidebarPermissions />} />),
       disabled: isDisabledStep('authorize'),
     },
     {

@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { ApiRoutes } from '../../common/Routes';
 import useFetch from '../../common/hooks/useFetch';
 
-import { FormDataContext } from '../context/FormData';
+import { FormDataContext } from '../../context/FormData';
 
 import KinesisSetupStep from './KinesisSetupStep';
 

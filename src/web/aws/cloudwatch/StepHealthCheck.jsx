@@ -11,8 +11,9 @@ import { ApiRoutes } from '../common/Routes';
 import Countdown from '../common/Countdown';
 import { DEFAULT_KINESIS_LOG_TYPE, KINESIS_LOG_TYPES } from '../common/constants';
 
-import { ApiContext } from './context/Api';
-import { FormDataContext } from './context/FormData';
+import { ApiContext } from '../context/Api';
+import { FormDataContext } from '../context/FormData';
+
 import SkipHealthCheck from './auto-setup-steps/SkipHealthCheck';
 
 const StepHealthCheck = ({ onChange, onSubmit }) => {
