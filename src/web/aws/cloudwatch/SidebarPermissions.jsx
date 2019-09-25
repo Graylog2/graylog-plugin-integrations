@@ -4,8 +4,8 @@ import styled from 'styled-components';
 
 import { Panel } from 'components/graylog';
 
-import useFetch from '../common/hooks/useFetch';
-import { ApiRoutes } from '../common/Routes';
+import useFetch from 'aws/common/hooks/useFetch';
+import { ApiRoutes } from 'aws/common/Routes';
 
 function Policies({ title, note, policy }) {
   const [opened, setOpened] = useState(false);

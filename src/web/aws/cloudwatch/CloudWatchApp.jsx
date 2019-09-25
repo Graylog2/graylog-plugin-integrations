@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 
 import PageHeader from 'components/common/PageHeader';
 
-import { SidebarProvider } from '../context/Sidebar';
-import { FormDataProvider } from '../context/FormData';
-import { StepsProvider } from '../context/Steps';
+import { SidebarProvider } from 'aws/context/Sidebar';
+import { FormDataProvider } from 'aws/context/FormData';
+import { StepsProvider } from 'aws/context/Steps';
+import { ApiProvider } from 'aws/context/Api';
 
-import { ApiProvider } from '../context/Api';
 import CloudWatch from './CloudWatch';
-
 import INITIAL_FORMDATA from './_initialFormData';
 
 const CloudWatchApp = ({ params: { step }, route }) => {

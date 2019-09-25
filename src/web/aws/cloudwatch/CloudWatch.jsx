@@ -3,22 +3,22 @@ import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 
 import ConfirmLeaveDialog from 'components/common/ConfirmLeaveDialog';
-
 import Wizard from 'components/common/Wizard';
+
 import FormUtils from 'util/FormsUtils.js';
 import history from 'util/History';
 import Routes from 'routing/Routes';
+
+import StepAuthorize from 'aws/StepAuthorize';
+import { StepsContext } from 'aws/context/Steps';
+import { FormDataContext } from 'aws/context/FormData';
+import { ApiContext } from 'aws/context/Api';
+import { SidebarContext } from 'aws/context/Sidebar';
 
 import StepKinesis from './StepKinesis';
 import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import SidebarPermissions from './SidebarPermissions';
-
-import StepAuthorize from '../StepAuthorize';
-import { StepsContext } from '../context/Steps';
-import { FormDataContext } from '../context/FormData';
-import { ApiContext } from '../context/Api';
-import { SidebarContext } from '../context/Sidebar';
 
 const CloudWatch = ({ route }) => {
   const {

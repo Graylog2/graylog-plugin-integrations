@@ -23,4 +23,11 @@ export const FormDataProvider = ({ initialFormData, children }) => {
 
 FormDataProvider.propTypes = {
   children: PropTypes.any.isRequired,
+  initialFormData: PropTypes.object,
 };
+
+FormDataProvider.defaultProps = {
+  initialFormData: {},
+};
+
+export default FormDataProvider;

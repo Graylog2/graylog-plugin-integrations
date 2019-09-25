@@ -4,9 +4,10 @@ import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
 
-import { FormDataContext } from '../context/FormData';
-import { AdvancedOptionsContext } from '../context/AdvancedOptions';
-import AdditionalFields from '../common/AdditionalFields';
+import { FormDataContext } from 'aws/context/FormData';
+import { AdvancedOptionsContext } from 'aws/context/AdvancedOptions';
+
+import AdditionalFields from 'aws/common/AdditionalFields';
 
 const FormAdvancedOptions = ({ onChange }) => {
   const { formData } = useContext(FormDataContext);
