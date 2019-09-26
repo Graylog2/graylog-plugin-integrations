@@ -7,13 +7,13 @@ import { ApiContext } from 'aws/context/Api';
 import { SidebarContext } from 'aws/context/Sidebar';
 
 import ValidatedInput from 'aws/common/ValidatedInput';
-import MaskedInput from 'aws/common/MaskedInput';
 import FormWrap from 'aws/common/FormWrap';
 import { renderOptions } from 'aws/common/Options';
 import { ApiRoutes } from 'aws/common/Routes';
 import useFetch from 'aws/common/hooks/useFetch';
 
 import formValidation from 'aws/utils/formValidation';
+import AWSAuthenticationTypes from 'aws/authentication/AWSAuthenticationTypes';
 
 const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   const { formData } = useContext(FormDataContext);
@@ -100,26 +100,7 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
                         autoComplete="off"
                         required />
 
-        <ValidatedInput id="awsCloudWatchAwsKey"
-                        type="text"
-                        label="AWS Access Key"
-                        placeholder="AK****************"
-                        onChange={onChange}
-                        fieldData={formData.awsCloudWatchAwsKey}
-                        autoComplete="off"
-                        maxLength="512"
-                        help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
-                        required />
-
-        <MaskedInput id="awsCloudWatchAwsSecret"
-                     label="AWS Secret Key"
-                     placeholder="***********"
-                     onChange={onChange}
-                     fieldData={formData.awsCloudWatchAwsSecret}
-                     autoComplete="off"
-                     maxLength="512"
-                     help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
-                     required />
+        <AWSAuthenticationTypes onChange={onChange} />
 
         <ValidatedInput id="awsCloudWatchAwsRegion"
                         type="select"
