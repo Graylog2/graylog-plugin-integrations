@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { FormDataContext } from 'aws/context/FormData';
@@ -6,20 +6,51 @@ import KeySecret from './KeySecret';
 import ARN from './ARN';
 import Automatic from './Automatic';
 
+const TYPE_AUTOMATIC = 'automatic';
+const TYPE_KEYSECRET = 'key-secret';
+const TYPE_ARN = 'arn';
 
 const AWSAuthenticationTypes = ({ onChange }) => {
-  const { formData } = useContext(FormDataContext);
+  const { clearField, formData } = useContext(FormDataContext);
+  const [currentType, setCurrenType] = useState('automatic');
+
+  const isType = (type) => {
+    return currentType === type;
+  };
+
+  const handleTypeChange = (e) => {
+    setCurrenType(e.target.value);
+
+    if (isType(TYPE_AUTOMATIC) || isType(TYPE_ARN)) {
+      clearField('awsCloudWatchAwsKey');
+      clearField('awsCloudWatchAwsSecret');
+    }
+
+    if (isType(TYPE_AUTOMATIC) || isType(TYPE_KEYSECRET)) {
+      clearField('awsCloudWatchAssumeARN');
+    }
+  };
 
   return (
     <>
+      <select name="awsAuthType" id="awsAuthType" onChange={handleTypeChange}>
+        <option value="automatic" selected={isType(TYPE_AUTOMATIC)}>Automatic</option>
+        <option value="key-secret" selected={isType(TYPE_KEYSECRET)}>Key &amp; Secret</option>
+        <option value="arn" selected={isType(TYPE_ARN)}>ARN - Amazon Resource Name</option>
+      </select>
+
+      {isType(TYPE_KEYSECRET) && (
       <KeySecret awsKey={formData.awsCloudWatchAwsKey}
                  awsSecret={formData.awsCloudWatchAwsSecret}
                  onChange={onChange} />
+      )}
 
-      <ARN awsARN={formData.awsCloudWatchAwsKey}
+      {isType(TYPE_ARN) && (
+      <ARN awsARN={formData.awsCloudWatchAssumeARN}
            onChange={onChange} />
+      )}
 
-      <Automatic />
+      {isType(TYPE_AUTOMATIC) && <Automatic />}
     </>
   );
 };

@@ -33,14 +33,8 @@ const KeySecret = ({ onChange, awsKey, awsSecret }) => {
 
 KeySecret.propTypes = {
   onChange: PropTypes.func.isRequired,
-  awsKey: PropTypes.shape({
-    dirty: PropTypes.bool,
-    value: PropTypes.string,
-  }),
-  awsSecret: PropTypes.shape({
-    dirty: PropTypes.bool,
-    value: PropTypes.string,
-  }),
+  awsKey: PropTypes.object,
+  awsSecret: PropTypes.object,
 };
 
 KeySecret.defaultProps = {
