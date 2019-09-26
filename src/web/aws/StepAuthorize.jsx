@@ -95,8 +95,8 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
                         type="text"
                         fieldData={formData.awsCloudWatchName}
                         onChange={onChange}
-                        placeholder="Kinesis Input Name"
-                        label="Name"
+                        placeholder="Graylog Input Name"
+                        label="Graylog Input Name"
                         autoComplete="off"
                         required />
 
@@ -107,7 +107,7 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
                         fieldData={formData.awsCloudWatchAwsRegion}
                         onChange={onChange}
                         label="AWS Region"
-                        help="The AWS Region where Kinesis is running."
+                        help="The AWS Region your service is running in."
                         disabled={fetchRegionsStatus.loading}
                         required>
           {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}

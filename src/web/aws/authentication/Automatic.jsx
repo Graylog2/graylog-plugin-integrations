@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Table } from 'components/graylog';
 
+import AdditionalFields from 'aws/common/AdditionalFields';
+
 const Automatic = () => {
+  const [opened, setOpened] = useState(false);
+
+  const handleToggle = () => {
+    setOpened(!opened);
+  };
+
   return (
-    <div>
+    <StyledAdditionalFields title="What does this include?" visible={opened} onToggle={handleToggle}>
+
       <StyledTable condensed>
+        <thead>
+          <tr>
+            <td colSpan="2">
+              <Title>Automatic authentication will attempt each of the following in the listed order.</Title>
+            </td>
+          </tr>
+        </thead>
+
         <tbody>
           <tr>
             <th>Environment variables</th>
@@ -30,15 +47,33 @@ const Automatic = () => {
           </tr>
         </tbody>
       </StyledTable>
-    </div>
+
+      <DocumentationNote>For more information, check out the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html" target="_blank" rel="noopener noreferrer">AWS Credential Configuration Documentation <i className="fa fa-external-link fa-sm" /></a></DocumentationNote>
+    </StyledAdditionalFields>
   );
 };
 
+const Title = styled.p`
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-bottom: 12px;
+`;
+
 const StyledTable = styled(Table)`
   && {
-    max-width: 75%;
-    margin: 25px 0;
+    max-width: 90%;
+    margin: 18px 0 12px;
   }
+`;
+
+const StyledAdditionalFields = styled(AdditionalFields)`
+  margin: -12px 0 9px;
+  padding: 0;
+`;
+
+const DocumentationNote = styled.p`
+  font-style: italic;
+  margin: 0 0 18px;
 `;
 
 export default Automatic;

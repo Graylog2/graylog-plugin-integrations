@@ -9,8 +9,10 @@ const ARN = ({ awsARN, onChange }) => {
            type="text"
            value={awsARN}
            onChange={onChange}
-           label="AWS Amazon Resource Name (ARN)"
-           help="Role ARN with required permissions (cross account access)" />
+           label="AWS Assume Role (ARN)"
+           help="Role ARN with required permissions (cross account access)"
+           placeholder="arn:aws:sts::123456789012:assumed-role/some-role"
+           maxlength="2048" />
   );
 };
 
