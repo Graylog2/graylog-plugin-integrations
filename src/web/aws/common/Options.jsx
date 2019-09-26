@@ -14,7 +14,7 @@ const renderOptions = (options = [], label = 'Choose One', loading = false) => {
 
   return (
     <>
-      <option value="" disabled selected>{label}</option>
+      <option value={label} disabled>{label}</option>
       {options.map(option => Options({ value: option.value, label: option.label }))}
     </>
   );

@@ -12,7 +12,7 @@ const ARN = ({ awsARN, onChange }) => {
            label="AWS Assume Role (ARN)"
            help="Role ARN with required permissions (cross account access)"
            placeholder="arn:aws:sts::123456789012:assumed-role/some-role"
-           maxlength="2048" />
+           maxLength="2048" />
   );
 };
 

@@ -14,7 +14,7 @@ const TYPE_ARN = 'arn';
 
 const AWSAuthenticationTypes = ({ onChange }) => {
   const { clearField, formData } = useContext(FormDataContext);
-  const [currentType, setCurrenType] = useState('automatic');
+  const [currentType, setCurrenType] = useState(formData.awsAuthenticationType ? formData.awsAuthenticationType.value : 'automatic');
 
   const isType = (type) => {
     return currentType === type;
@@ -22,6 +22,7 @@ const AWSAuthenticationTypes = ({ onChange }) => {
 
   const handleTypeChange = (e) => {
     setCurrenType(e.target.value);
+    onChange({ target: { name: 'awsAuthenticationType', value: e.target.value } });
 
     if (isType(TYPE_AUTOMATIC) || isType(TYPE_ARN)) {
       clearField('awsCloudWatchAwsKey');
@@ -39,10 +40,11 @@ const AWSAuthenticationTypes = ({ onChange }) => {
              name="awsAuthType"
              id="awsAuthType"
              onChange={handleTypeChange}
-             label="AWS Authentication Type">
-        <option value="automatic" selected={isType(TYPE_AUTOMATIC)}>Automatic</option>
-        <option value="key-secret" selected={isType(TYPE_KEYSECRET)}>Key &amp; Secret</option>
-        <option value="arn" selected={isType(TYPE_ARN)}>ARN - Amazon Resource Name</option>
+             label="AWS Authentication Type"
+             defaultValue={currentType}>
+        <option value="automatic">Automatic</option>
+        <option value="key-secret">Key &amp; Secret</option>
+        <option value="arn">ARN - Amazon Resource Name</option>
       </Input>
 
       {isType(TYPE_KEYSECRET) && (
