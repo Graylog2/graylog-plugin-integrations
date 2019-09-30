@@ -15,11 +15,10 @@
   ],
   "author": "Graylog, Inc. <hello@graylog.com>",
   "dependencies": {
-    "styled-components": "^4.3.2"
+    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
   "private": true,
   "devDependencies": {
-    "eslint-loader": "^1.6.3",
-    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
+    "eslint-loader": "^1.6.3"
   }
 }
