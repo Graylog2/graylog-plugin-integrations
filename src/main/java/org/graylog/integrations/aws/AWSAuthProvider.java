@@ -1,7 +1,5 @@
 package org.graylog.integrations.aws;
 
-import com.sun.istack.internal.Nullable;
-import org.graylog.integrations.aws.transports.AWSPluginConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -15,55 +13,74 @@ import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.model.GetCallerIdentityRequest;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 
+/**
+ * Resolves the appropriate AWS authorization provider.
+ *
+ * If an {@code accessKey} and {@code secretKey} are provided, they will be used explicitly.
+ * If not, the default DefaultCredentialsProvider will be used instead. This will resolve the policy to
+ * use using Java props, environment variables, EC2 instance roles etc. See the {@link DefaultCredentialsProvider}
+ * Javadoc for more information.
+ */
 public class AWSAuthProvider implements AwsCredentialsProvider {
     private static final Logger LOG = LoggerFactory.getLogger(AWSAuthProvider.class);
 
-    private AwsCredentialsProvider credentials;
+    private AwsCredentials credentials;
 
-    public AWSAuthProvider(AWSPluginConfiguration config) {
-        this(config, null, null, null, null);
-    }
-
-    public AWSAuthProvider(AWSPluginConfiguration config,
-                           @Nullable String accessKey,
+    public AWSAuthProvider(@Nullable String accessKey,
                            @Nullable String secretKey,
                            @Nullable String region,
                            @Nullable String assumeRoleArn) {
-        this.credentials = this.resolveAuthentication(config, accessKey, secretKey, region, assumeRoleArn);
+        this.credentials = this.resolveAuthentication(accessKey, secretKey, region, assumeRoleArn);
     }
 
-    private AwsCredentialsProvider resolveAuthentication(AWSPluginConfiguration config,
-                                                         @Nullable String accessKey,
-                                                         @Nullable String secretKey,
-                                                         @Nullable String region,
-                                                         @Nullable String assumeRoleArn) {
+    private AwsCredentials resolveAuthentication(@Nullable String accessKey,
+                                                 @Nullable String secretKey,
+                                                 @Nullable String region,
+                                                 @Nullable String assumeRoleArn) {
         AwsCredentialsProvider awsCredentials;
         if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
-            awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
-            LOG.debug("Using input specific config");
-        } else if (!isNullOrEmpty(config.accessKey()) && !isNullOrEmpty(config.secretKey())) {
-            awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(config.accessKey(), config.secretKey()));
-            LOG.debug("Using AWS Plugin config");
-        } else {
             awsCredentials = DefaultCredentialsProvider.create();
-            LOG.debug("Using Default Provider Chain");
+            LOG.debug("Using default authorization provider chain.");
+        } else {
+            awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+            LOG.debug("Using explicitly provided key and secret.");
         }
+
+        // Apply the Assume Role ARN Authorization if specified.
         if (!isNullOrEmpty(assumeRoleArn) && !isNullOrEmpty(region)) {
             LOG.debug("Creating cross account assume role credentials");
-            return this.getSTSCredentialsProvider(awsCredentials, region, assumeRoleArn);
-        } else {
-            return awsCredentials;
+            return applyStsCredentialsProvider(awsCredentials, region, assumeRoleArn, accessKey)
+                    .resolveCredentials();
         }
+
+        return awsCredentials.resolveCredentials();
     }
 
-    private AwsCredentialsProvider getSTSCredentialsProvider(AwsCredentialsProvider awsCredentials, String region, String assumeRoleArn) {
+    /**
+     * In order to assume a role, a role must be provided to the AWS STS client a role that has the "sts:AssumeRole"
+     * permission, which allows a role to be assumed.
+     *
+     * @param awsCredentials A pre-initialized AwsCredentialsProvider that has a role, which is authorized for the
+     *                       "sts:AssumeRole" permission.
+     * @param region         The desired AWS region.
+     * @param assumeRoleArn  The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
+     * @param accessKey      The AWS access key if specified.
+     * @return A new AwsCredentialsProvider instance which will assume the indicated role.
+     */
+    private AwsCredentialsProvider applyStsCredentialsProvider(AwsCredentialsProvider awsCredentials, String region,
+                                                               String assumeRoleArn, @Nullable String accessKey) {
 
         StsClient stsClient = StsClient.builder().region(Region.of(region)).credentialsProvider(awsCredentials).build();
-        String roleSessionName = String.format("API_KEY_%s@ACCOUNT_%s",
-                                               awsCredentials.resolveCredentials().accessKeyId(),
+
+        // The custom roleSessionName is extra metadata, which will be logged in AWS CloudTrail with each request
+        // to help with auditing and debugging.
+        String roleSessionName = String.format("ACCESS_KEY_%s@ACCOUNT_%s",
+                                               accessKey != null ? accessKey : "NONE", // Use "NONE" when access key not provided.
                                                stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
         LOG.debug("Cross account role session name: " + roleSessionName);
         return StsAssumeRoleCredentialsProvider.builder().refreshRequest(AssumeRoleRequest.builder()
@@ -76,6 +93,6 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
 
     @Override
     public AwsCredentials resolveCredentials() {
-        return null;
+        return credentials;
     }
 }
