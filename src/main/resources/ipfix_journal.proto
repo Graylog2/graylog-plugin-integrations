@@ -1,12 +1,12 @@
 syntax = "proto2";
 
-package org.graylog.plugins.ipfix;
+package org.graylog.integrations.ipfix;
 
 // to regenerate:
 // install protobuf compiler (this was generated with 3.0.0, be careful with newer versions due to API changes in the runtime)
 // protoc --java_out=src/main/java src/main/resources/ipfix_journal.proto
 
-option java_package = "org.graylog.plugins.ipfix";
+option java_package = "org.graylog.integrations.ipfix";
 option java_outer_classname = "IpfixJournal";
 
 message RawIpfix {

@@ -105,10 +105,11 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     }
 
     private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr, Number srcPort, Number dstPort, long protocol) {
-        return String.format(Locale.ROOT, "Ipfix [%s]:%d <> [%s]:%d proto:%d pkts:%d bytes:%d",
+        String message = String.format(Locale.ROOT, "Ipfix [%s]:%d <> [%s]:%d proto:%d pkts:%d bytes:%d",
                              srcAddr, srcPort,
                              dstAddr, dstPort,
                              protocol, packetCount, octetCount);
+        return message;
     }
 
     @Nullable
