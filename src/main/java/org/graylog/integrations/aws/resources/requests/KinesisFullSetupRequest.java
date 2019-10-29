@@ -11,7 +11,6 @@ import org.graylog.autovalue.WithBeanGetter;
 @WithBeanGetter
 public abstract class KinesisFullSetupRequest implements AWSRequest {
 
-    private static final String ROLE_NAME = "role_name";
     private static final String LOG_GROUP_NAME = "log_group_name";
     private static final String STREAM_NAME = "stream_name";
     private static final String ROLE_POLICY_NAME = "role_policy_name";
@@ -27,8 +26,8 @@ public abstract class KinesisFullSetupRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
-    @JsonProperty(ROLE_NAME)
-    public abstract String roleName();
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
 
     @JsonProperty(LOG_GROUP_NAME)
     public abstract String getLogGroupName();
@@ -49,12 +48,12 @@ public abstract class KinesisFullSetupRequest implements AWSRequest {
     public static KinesisFullSetupRequest create(@JsonProperty(REGION) String region,
                                                  @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                  @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
-                                                 @JsonProperty(ROLE_NAME) String roleName,
+                                                 @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                  @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
                                                  @JsonProperty(STREAM_NAME) String streamName,
                                                  @JsonProperty(ROLE_POLICY_NAME) String rolePolicyName,
                                                  @JsonProperty(FILTER_NAME) String filterName,
                                                  @JsonProperty(FILTER_PATTERN) String filterPattern) {
-        return new AutoValue_KinesisFullSetupRequest(region, awsAccessKeyId, awsSecretAccessKey, roleName, getLogGroupName, streamName, rolePolicyName, filterName, filterPattern);
+        return new AutoValue_KinesisFullSetupRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn, getLogGroupName, streamName, rolePolicyName, filterName, filterPattern);
     }
 }

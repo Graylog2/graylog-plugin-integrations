@@ -23,10 +23,14 @@ public abstract class AWSRequestImpl implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
+
     @JsonCreator
     public static AWSRequestImpl create(@JsonProperty(REGION) String region,
                                         @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
-                                        @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey) {
-        return new AutoValue_AWSRequestImpl(region, awsAccessKeyId, awsSecretAccessKey);
+                                        @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
+                                        @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn) {
+        return new AutoValue_AWSRequestImpl(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn);
     }
 }

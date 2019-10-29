@@ -110,7 +110,8 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @NoAuditEvent("This does not change any data")
     public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) {
-        return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
+        return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(),
+                                                  awsRequest.awsSecretAccessKey(), awsRequest.assumeRoleArn());
     }
 
     /**
@@ -122,8 +123,8 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @ApiOperation(value = "Get all available Kinesis streams for the specified region.")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @NoAuditEvent("This does not change any data")
-    public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) throws ExecutionException {
-        return kinesisService.getKinesisStreamNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey());
+    public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl request) throws ExecutionException {
+        return kinesisService.getKinesisStreamNames(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey(), request.assumeRoleArn());
     }
 
     /**

@@ -22,6 +22,9 @@ public abstract class KinesisNewStreamRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
+
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
@@ -29,7 +32,8 @@ public abstract class KinesisNewStreamRequest implements AWSRequest {
     public static KinesisNewStreamRequest create(@JsonProperty(REGION) String region,
                                                  @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                  @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
+                                                 @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                  @JsonProperty(STREAM_NAME) String streamName) {
-        return new AutoValue_KinesisNewStreamRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName);
+        return new AutoValue_KinesisNewStreamRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn, streamName);
     }
 }

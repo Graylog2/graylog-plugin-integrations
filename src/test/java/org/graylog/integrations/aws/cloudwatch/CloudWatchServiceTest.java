@@ -17,7 +17,6 @@ import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRes
 import software.amazon.awssdk.services.cloudwatchlogs.model.LogGroup;
 import software.amazon.awssdk.services.cloudwatchlogs.paginators.DescribeLogGroupsIterable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,7 +69,7 @@ public class CloudWatchServiceTest {
         when(logGroupsIterable.iterator()).thenReturn(responses.iterator());
         when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
 
-        final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(Region.US_EAST_1.id(), "key", "secret");
+        final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(Region.US_EAST_1.id(), "key", "secret", null);
 
         // Inspect the log groups returned and verify the contents and size.
         assertEquals("The number of groups should be because the two responses " +

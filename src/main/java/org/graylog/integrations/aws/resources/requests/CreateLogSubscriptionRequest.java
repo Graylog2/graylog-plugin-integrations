@@ -15,7 +15,6 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     private static final String FILTER_NAME = "filter_name";
     private static final String FILTER_PATTERN = "filter_pattern";
     private static final String DESTINATION_STREAM_ARN = "destination_stream_arn";
-    private static final String ROLE_ARN = "role_arn";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -25,6 +24,9 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
 
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
+
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
 
     /**
      * {@see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subscription Filter</a>},
@@ -43,18 +45,16 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     @JsonProperty(DESTINATION_STREAM_ARN)
     public abstract String destinationStreamArn();
 
-    @JsonProperty(ROLE_ARN)
-    public abstract String getRoleArn();
-
     @JsonCreator
     public static CreateLogSubscriptionRequest create(@JsonProperty(REGION) String region,
                                                       @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                       @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
+                                                      @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                       @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
                                                       @JsonProperty(FILTER_NAME) String filterName,
                                                       @JsonProperty(FILTER_PATTERN) String filterPattern,
-                                                      @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn,
-                                                      @JsonProperty(ROLE_ARN) String getRoleArn) {
-        return new AutoValue_CreateLogSubscriptionRequest(region, awsAccessKeyId, awsSecretAccessKey, getLogGroupName, filterName, filterPattern, destinationStreamArn, getRoleArn);
+                                                      @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn) {
+        return new AutoValue_CreateLogSubscriptionRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
+                                                          getLogGroupName, filterName, filterPattern, destinationStreamArn);
     }
 }

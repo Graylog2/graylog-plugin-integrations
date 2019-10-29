@@ -151,14 +151,14 @@ public class KinesisSetupResourceTest {
 
         // Stream
         final KinesisNewStreamRequest request =
-                KinesisNewStreamRequest.create(REGION, KEY, SECRET, STREAM_NAME);
+                KinesisNewStreamRequest.create(REGION, KEY, SECRET, null, STREAM_NAME);
         final KinesisNewStreamResponse streamResponse = setupResource.createNewKinesisStream(request);
         assertEquals(STREAM_NAME, streamResponse.streamName());
         assertEquals(STREAM_ARN, streamResponse.streamArn());
 
         // Policy
         final CreateRolePermissionRequest policyRequest =
-                CreateRolePermissionRequest.create(REGION, KEY, SECRET, streamResponse.streamName(),
+                CreateRolePermissionRequest.create(REGION, KEY, SECRET, null, streamResponse.streamName(),
                                                    streamResponse.streamArn());
         final CreateRolePermissionResponse policyResponse = setupResource.autoKinesisPermissions(policyRequest);
         assertEquals(ROLE_ARN, policyResponse.roleArn());

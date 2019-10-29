@@ -23,6 +23,9 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
+
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
@@ -33,8 +36,9 @@ public abstract class CreateRolePermissionRequest implements AWSRequest {
     public static CreateRolePermissionRequest create(@JsonProperty(REGION) String region,
                                                      @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                      @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
+                                                     @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                      @JsonProperty(STREAM_NAME) String streamName,
                                                      @JsonProperty(STREAM_ARN) String streamArn) {
-        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName, streamArn);
+        return new AutoValue_CreateRolePermissionRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn, streamName, streamArn);
     }
 }

@@ -7,6 +7,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang.StringUtils;
+import org.graylog.integrations.aws.AWSAuthProvider;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
@@ -93,11 +94,11 @@ public class KinesisTransport extends ThrottleableTransport {
     public void doLaunch(MessageInput input) throws MisfireException {
 
         final Region region = Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION)));
-        final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
         final String key = configuration.getString(CK_ACCESS_KEY);
         final String secret = configuration.getString(CK_SECRET_KEY);
+        final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
         Preconditions.checkArgument(StringUtils.isNotBlank(key), "An AWS key is required.");
-        AwsCredentialsProvider awsCredentialsProvider = AWSService.buildCredentialProvider(key, secret);
+        AwsCredentialsProvider awsCredentialsProvider = new AWSAuthProvider(key, secret, region.id(), assumeRoleArn);
         Preconditions.checkArgument(StringUtils.isNotBlank(secret), "An AWS secret is required.");
 
         // Assume role ARN functionality only applies to the Kinesis runtime (not to the setup flows).

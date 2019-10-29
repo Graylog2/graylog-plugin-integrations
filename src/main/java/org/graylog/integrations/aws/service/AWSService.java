@@ -123,18 +123,6 @@ public class AWSService {
     }
 
     /**
-     * Checks that the supplied accessKey and secretKey are not null or blank
-     *
-     * @return A credential provider
-     */
-    public static StaticCredentialsProvider buildCredentialProvider(String accessKeyId, String secretAccessKey) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(accessKeyId), "An AWS access key is required.");
-        Preconditions.checkArgument(StringUtils.isNotBlank(secretAccessKey), "An AWS secret key is required.");
-
-        return StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey));
-    }
-
-    /**
      * @return A list of available AWS services supported by the AWS Graylog AWS integration.
      */
     public AvailableServiceResponse getAvailableServices() {
@@ -260,7 +248,7 @@ public class AWSService {
         configuration.put(AWSInput.CK_AWS_REGION, request.region());
         configuration.put(AWSInput.CK_ACCESS_KEY, request.awsAccessKeyId());
         configuration.put(AWSInput.CK_SECRET_KEY, request.awsSecretAccessKey());
-        configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleARN());
+        configuration.put(AWSInput.CK_ASSUME_ROLE_ARN, request.assumeRoleArn());
 
         AWSMessageType inputType = AWSMessageType.valueOf(request.awsMessageType());
         if (inputType.isKinesis()) {

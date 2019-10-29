@@ -30,18 +30,27 @@ import org.graylog.autovalue.WithBeanGetter;
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
-// TODO: Remove this ignore annotation once https://github.com/Graylog2/graylog-plugin-integrations/issues/156 is fixed.
-@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AWSInputCreateRequest implements AWSRequest {
 
     private static final String NAME = "name";
     private static final String AWS_MESSAGE_TYPE = "aws_input_type";
     private static final String STREAM_NAME = "stream_name";
     private static final String BATCH_SIZE = "batch_size";
-    private static final String ASSUME_ROLE_ARN = "assume_role_arn";
     private static final String GLOBAL = "global";
     private static final String THROTTLING_ALLOWED = "enable_throttling";
     private static final String ADD_FLOW_LOG_PREFIX = "add_flow_log_prefix";
+
+    @JsonProperty(REGION)
+    public abstract String region();
+
+    @JsonProperty(AWS_ACCESS_KEY_ID)
+    public abstract String awsAccessKeyId();
+
+    @JsonProperty(AWS_SECRET_ACCESS_KEY)
+    public abstract String awsSecretAccessKey();
+
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
 
     @JsonProperty(NAME)
     public abstract String name();
@@ -49,20 +58,8 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(AWS_MESSAGE_TYPE)
     public abstract String awsMessageType();
 
-    @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID)
-    public abstract String awsAccessKeyId();
-
-    @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY)
-    public abstract String awsSecretAccessKey();
-
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
-
-    @JsonProperty(ASSUME_ROLE_ARN)
-    public abstract String assumeRoleARN();
-
-    @JsonProperty(AWSRequest.REGION)
-    public abstract String region();
 
     @JsonProperty(BATCH_SIZE)
     public abstract int batchSize();
@@ -77,19 +74,19 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     public abstract boolean addFlowLogPrefix();
 
     @JsonCreator
-    public static AWSInputCreateRequest create(@JsonProperty(NAME) String name,
-                                               @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
-                                               @JsonProperty(AWSRequest.AWS_ACCESS_KEY_ID) String awsAccessKey,
-                                               @JsonProperty(AWSRequest.AWS_SECRET_ACCESS_KEY) String awsSecretKey,
-                                               @JsonProperty(STREAM_NAME) String streamName,
-                                               @JsonProperty(AWSRequest.REGION) String region,
-                                               @JsonProperty(BATCH_SIZE) int batchSize,
+    public static AWSInputCreateRequest create(@JsonProperty(REGION) String region,
+                                               @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKey,
+                                               @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretKey,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                               @JsonProperty(NAME) String name,
+                                               @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
+                                               @JsonProperty(STREAM_NAME) String streamName,
+                                               @JsonProperty(BATCH_SIZE) int batchSize,
                                                @JsonProperty(GLOBAL) boolean global,
                                                @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
                                                @JsonProperty(ADD_FLOW_LOG_PREFIX) boolean addFlowLogPrefix) {
-        return new AutoValue_AWSInputCreateRequest(name, awsMessageType, awsAccessKey, awsSecretKey,
-                                                   streamName, assumeRoleArn, region, batchSize, global,
+        return new AutoValue_AWSInputCreateRequest(region, awsAccessKey, awsSecretKey, assumeRoleArn,
+                                                   name, awsMessageType, streamName, batchSize, global,
                                                    enableThrottling, addFlowLogPrefix);
     }
 }

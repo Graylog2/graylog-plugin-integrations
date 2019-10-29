@@ -175,19 +175,19 @@ public class KinesisServiceTest {
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             "key", "secret", TEST_STREAM_1);
+                                                                             "key", "secret", null, TEST_STREAM_1);
         return kinesisService.healthCheck(request);
     }
 
     @Test
     public void testGetStreamsCredentials() {
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", ""))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "", null))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS access key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "dsfadsdf", ""))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "dsfadsdf", "", null))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS secret key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "dsfadsdf"))
+        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "dsfadsdf", null))
                                .isExactlyInstanceOf(IllegalArgumentException.class)
                                .hasMessageContaining("An AWS access key is required");
     }
@@ -206,7 +206,7 @@ public class KinesisServiceTest {
                                                .hasMoreStreams(false).build());
 
 
-        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey");
+        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey", null);
         assertEquals(2, streamsResponse.total());
         assertEquals(2, streamsResponse.streams().size());
 
@@ -226,7 +226,7 @@ public class KinesisServiceTest {
                                                .streamNames(TWO_TEST_STREAMS)
                                                .hasMoreStreams(false).build()); // Indicate no more streams.
 
-        streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey");
+        streamsResponse = kinesisService.getKinesisStreamNames(TEST_REGION, "accessKey", "secretKey", null);
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, streamsResponse.total());
@@ -285,7 +285,7 @@ public class KinesisServiceTest {
         assertEquals(fakeRecordsList.size(), 10);
     }
 
-    @Ignore ("Test ignored as this method is still being implemented.")
+    @Ignore("Test ignored as this method is still being implemented.")
     @Test
     public void testCreateNewKinesisStream() {
 
@@ -298,7 +298,7 @@ public class KinesisServiceTest {
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
 
         final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
-                                                                                               "accessKey", "secretKey",
+                                                                                               "accessKey", "secretKey", null,
                                                                                                TEST_STREAM_1);
         // TODO debug the error
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
@@ -312,6 +312,6 @@ public class KinesisServiceTest {
 
     @Test
     public void uniqueRoleName() {
-        assertEquals(1,1);
+        assertEquals(1, 1);
     }
 }

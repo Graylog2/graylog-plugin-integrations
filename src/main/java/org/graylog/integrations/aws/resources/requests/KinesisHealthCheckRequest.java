@@ -12,7 +12,6 @@ import org.graylog.autovalue.WithBeanGetter;
 public abstract class KinesisHealthCheckRequest implements AWSRequest {
 
     private static final String STREAM_NAME = "stream_name";
-    private static final String LOG_GROUP_NAME = "log_group_name";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -23,6 +22,9 @@ public abstract class KinesisHealthCheckRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @JsonProperty(ASSUME_ROLE_ARN)
+    public abstract String assumeRoleArn();
+
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
@@ -30,7 +32,8 @@ public abstract class KinesisHealthCheckRequest implements AWSRequest {
     public static KinesisHealthCheckRequest create(@JsonProperty(REGION) String region,
                                                    @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                    @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
+                                                   @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
                                                    @JsonProperty(STREAM_NAME) String streamName) {
-        return new AutoValue_KinesisHealthCheckRequest(region, awsAccessKeyId, awsSecretAccessKey, streamName);
+        return new AutoValue_KinesisHealthCheckRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn, streamName);
     }
 }

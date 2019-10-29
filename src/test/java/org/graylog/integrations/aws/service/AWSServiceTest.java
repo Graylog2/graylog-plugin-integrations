@@ -76,13 +76,13 @@ public class AWSServiceTest {
         when(messageInputFactory.create(isA(InputCreateRequest.class), isA(String.class), isA(String.class))).thenReturn(messageInput);
 
         AWSInputCreateRequest request =
-                AWSInputCreateRequest.create("AWS Input",
-                                             AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString(),
+                AWSInputCreateRequest.create(Region.US_EAST_1.id(),
                                              "a-key", "a-secret",
+                                             null,
+                                             "AWS Input",
+                                             AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString(),
                                              "a-stream",
-                                             Region.US_EAST_1.id(),
                                              10000,
-                                             "",
                                              false,
                                              true,
                                              true);
