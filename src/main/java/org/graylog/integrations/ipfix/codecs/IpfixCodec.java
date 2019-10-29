@@ -104,11 +104,10 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         return createMessageString(packetCount, octetCount, srcAddr, dstAddr, srcPort, dstPort, protocol);
     }
 
-    private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr, Number srcPort, Number dstPort, long protocol) {
-        String message = String.format(Locale.ROOT, "Ipfix [%s]:%d <> [%s]:%d proto:%d pkts:%d bytes:%d",
-                             srcAddr, srcPort,
-                             dstAddr, dstPort,
-                             protocol, packetCount, octetCount);
+    private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr,
+                                              Number srcPort, Number dstPort, long protocol) {
+        String message = String.format(Locale.ROOT, "Ipfix ["+srcAddr+"]:"+srcPort+" <> ["+dstAddr+"]:"+dstPort+" " +
+                                                    "proto:"+protocol+" pkts:"+packetCount+" bytes:"+octetCount);
         return message;
     }
 
