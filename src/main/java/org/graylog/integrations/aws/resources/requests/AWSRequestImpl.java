@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 /**
  * A common implementation on AWSRequest, which can be used for any AWS request that just needs region and credentials.
  */
@@ -23,6 +25,7 @@ public abstract class AWSRequestImpl implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @Nullable
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 

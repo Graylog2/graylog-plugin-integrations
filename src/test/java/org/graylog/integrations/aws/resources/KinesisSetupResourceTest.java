@@ -165,7 +165,7 @@ public class KinesisSetupResourceTest {
 
         // Subscription
         final CreateLogSubscriptionRequest subscriptionRequest =
-                CreateLogSubscriptionRequest.create(REGION, KEY, SECRET, "log-group-name", "filter-name",
+                CreateLogSubscriptionRequest.create(REGION, KEY, SECRET, null, "log-group-name", "filter-name",
                                                     "filter-pattern", streamResponse.streamArn(), policyResponse.roleArn());
         final CreateLogSubscriptionResponse subscriptionResponse = setupResource.createSubscription(subscriptionRequest);
         subscriptionResponse.result();

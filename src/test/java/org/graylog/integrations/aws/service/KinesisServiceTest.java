@@ -180,19 +180,6 @@ public class KinesisServiceTest {
     }
 
     @Test
-    public void testGetStreamsCredentials() {
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "", null))
-                               .isExactlyInstanceOf(IllegalArgumentException.class)
-                               .hasMessageContaining("An AWS access key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "dsfadsdf", "", null))
-                               .isExactlyInstanceOf(IllegalArgumentException.class)
-                               .hasMessageContaining("An AWS secret key is required");
-        AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.getKinesisStreamNames(TEST_REGION, "", "dsfadsdf", null))
-                               .isExactlyInstanceOf(IllegalArgumentException.class)
-                               .hasMessageContaining("An AWS access key is required");
-    }
-
-    @Test
     public void testGetStreams() throws ExecutionException {
 
         // Test with two streams and one page. This is the most common case for most AWS accounts.

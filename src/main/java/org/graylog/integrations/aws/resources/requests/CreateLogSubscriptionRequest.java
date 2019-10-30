@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
@@ -15,6 +17,7 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     private static final String FILTER_NAME = "filter_name";
     private static final String FILTER_PATTERN = "filter_pattern";
     private static final String DESTINATION_STREAM_ARN = "destination_stream_arn";
+    private static final String ROLE_ARN = "ROLE_ARN";
 
     @JsonProperty(REGION)
     public abstract String region();
@@ -25,6 +28,7 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @Nullable
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 
@@ -45,6 +49,9 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     @JsonProperty(DESTINATION_STREAM_ARN)
     public abstract String destinationStreamArn();
 
+    @JsonProperty(ROLE_ARN)
+    public abstract String roleArn();
+
     @JsonCreator
     public static CreateLogSubscriptionRequest create(@JsonProperty(REGION) String region,
                                                       @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
@@ -53,8 +60,9 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
                                                       @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
                                                       @JsonProperty(FILTER_NAME) String filterName,
                                                       @JsonProperty(FILTER_PATTERN) String filterPattern,
-                                                      @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn) {
+                                                      @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn,
+                                                      @JsonProperty(ROLE_ARN) String roleArn) {
         return new AutoValue_CreateLogSubscriptionRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
-                                                          getLogGroupName, filterName, filterPattern, destinationStreamArn);
+                                                          getLogGroupName, filterName, filterPattern, destinationStreamArn, roleArn);
     }
 }

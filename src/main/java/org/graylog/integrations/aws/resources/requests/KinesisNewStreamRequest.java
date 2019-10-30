@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 @JsonAutoDetect
 @AutoValue
 @WithBeanGetter
@@ -22,6 +24,7 @@ public abstract class KinesisNewStreamRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @Nullable
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 

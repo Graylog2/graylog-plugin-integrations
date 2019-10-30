@@ -23,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
+import javax.annotation.Nullable;
+
 /**
  * This request is used to save a new Kinesis AWS input. Each type of AWS input will use it's own request
  * object due to typically very unique required fields for each.
@@ -49,6 +51,7 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(AWS_SECRET_ACCESS_KEY)
     public abstract String awsSecretAccessKey();
 
+    @Nullable
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 
