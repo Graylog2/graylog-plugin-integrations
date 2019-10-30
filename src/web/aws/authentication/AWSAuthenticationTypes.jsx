@@ -1,7 +1,10 @@
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
+import { Button, ControlLabel } from 'components/graylog';
+import { useTheme } from 'theme/GraylogThemeContext';
 
 import { FormDataContext } from 'aws/context/FormData';
 import KeySecret from './KeySecret';
@@ -10,11 +13,18 @@ import Automatic from './Automatic';
 
 const TYPE_AUTOMATIC = 'automatic';
 const TYPE_KEYSECRET = 'key-secret';
-const TYPE_ARN = 'arn';
 
 const AWSAuthenticationTypes = ({ onChange }) => {
+  const { colors } = useTheme();
   const { clearField, formData } = useContext(FormDataContext);
+  const [showARN, setShowARN] = useState(false);
   const [currentType, setCurrenType] = useState(formData.awsAuthenticationType ? formData.awsAuthenticationType.value : 'automatic');
+
+  const AuthWrapper = React.useCallback(styled.div`
+    margin: 0 0 21px 9px;
+    padding: 3px 0 3px 21px;
+    border-left: 3px solid ${colors.secondary.tre};
+  `, []);
 
   const isType = (type) => {
     return currentType === type;
@@ -24,15 +34,28 @@ const AWSAuthenticationTypes = ({ onChange }) => {
     setCurrenType(e.target.value);
     onChange({ target: { name: 'awsAuthenticationType', value: e.target.value } });
 
-    if (isType(TYPE_AUTOMATIC) || isType(TYPE_ARN)) {
+    if (isType(TYPE_AUTOMATIC)) {
       clearField('awsCloudWatchAwsKey');
       clearField('awsCloudWatchAwsSecret');
     }
+  };
 
-    if (isType(TYPE_AUTOMATIC) || isType(TYPE_KEYSECRET)) {
+  const toggleShowARN = () => {
+    if (showARN) {
       clearField('awsCloudWatchAssumeARN');
     }
+
+    setShowARN(!showARN);
   };
+
+  const ToggleLabel = React.useMemo(() => (
+    <ControlLabel>
+      AWS Authentication Type
+      <Button bsStyle="link" bsSize="sm" onClick={toggleShowARN}>
+        {showARN ? 'Clear' : 'Use'} Assumed Role (ARN)
+      </Button>
+    </ControlLabel>
+  ));
 
   return (
     <>
@@ -40,28 +63,29 @@ const AWSAuthenticationTypes = ({ onChange }) => {
              name="awsAuthType"
              id="awsAuthType"
              onChange={handleTypeChange}
-             label="AWS Authentication Type"
+             label={ToggleLabel}
              defaultValue={currentType}>
         <option value="automatic">Automatic</option>
         <option value="key-secret">Key &amp; Secret</option>
-        <option value="arn">ARN - Amazon Resource Name</option>
       </Input>
 
-      {isType(TYPE_KEYSECRET) && (
-      <KeySecret awsKey={formData.awsCloudWatchAwsKey}
-                 awsSecret={formData.awsCloudWatchAwsSecret}
-                 onChange={onChange} />
-      )}
+      <AuthWrapper>
+        {showARN && (
+          <ARN awsARN={formData.awsCloudWatchAssumeARN} onChange={onChange} />
+        )}
 
-      {isType(TYPE_ARN) && (
-      <ARN awsARN={formData.awsCloudWatchAssumeARN}
-           onChange={onChange} />
-      )}
+        {isType(TYPE_AUTOMATIC) && <Automatic />}
 
-      {isType(TYPE_AUTOMATIC) && <Automatic />}
+        {isType(TYPE_KEYSECRET) && (
+          <KeySecret awsKey={formData.awsCloudWatchAwsKey}
+                     awsSecret={formData.awsCloudWatchAwsSecret}
+                     onChange={onChange} />
+        )}
+      </AuthWrapper>
     </>
   );
 };
+
 
 AWSAuthenticationTypes.propTypes = {
   onChange: PropTypes.func.isRequired,

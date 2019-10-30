@@ -72,48 +72,46 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   }, []);
 
   return (
-    <>
-      <FormWrap onSubmit={handleSubmit}
-                buttonContent="Authorize &amp; Choose Stream"
-                loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
-                disabled={formValidation.isFormValid([
-                  'awsCloudWatchName',
-                  'awsCloudWatchAwsKey',
-                  'awsCloudWatchAwsSecret',
-                  'awsCloudWatchAwsRegion',
-                ], formData)}
-                error={formError}
-                title="Create Input &amp; Authorize AWS"
-                description="This integration allows Graylog to read messages directly from a Kinesis stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">
+    <FormWrap onSubmit={handleSubmit}
+              buttonContent="Authorize &amp; Choose Stream"
+              loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+              disabled={formValidation.isFormValid([
+                'awsCloudWatchName',
+                'awsCloudWatchAwsKey',
+                'awsCloudWatchAwsSecret',
+                'awsCloudWatchAwsRegion',
+              ], formData)}
+              error={formError}
+              title="Create Input &amp; Authorize AWS"
+              description="This integration allows Graylog to read messages directly from a Kinesis stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">
 
-        {/* Fighting AutoComplete Forms */}
-        <DisappearingInput id="name" type="text" />
-        <DisappearingInput id="password" type="password" />
-        {/* Continue on, Nothing to See Here */}
+      {/* Fighting AutoComplete Forms */}
+      <DisappearingInput id="name" type="text" />
+      <DisappearingInput id="password" type="password" />
+      {/* Continue on, Nothing to See Here */}
 
-        <ValidatedInput id="awsCloudWatchName"
-                        type="text"
-                        fieldData={formData.awsCloudWatchName}
-                        onChange={onChange}
-                        placeholder="Graylog Input Name"
-                        label="Graylog Input Name"
-                        autoComplete="off"
-                        required />
+      <ValidatedInput id="awsCloudWatchName"
+                      type="text"
+                      fieldData={formData.awsCloudWatchName}
+                      onChange={onChange}
+                      placeholder="Graylog Input Name"
+                      label="Graylog Input Name"
+                      autoComplete="off"
+                      required />
 
-        <AWSAuthenticationTypes onChange={onChange} />
+      <AWSAuthenticationTypes onChange={onChange} />
 
-        <ValidatedInput id="awsCloudWatchAwsRegion"
-                        type="select"
-                        fieldData={formData.awsCloudWatchAwsRegion}
-                        onChange={onChange}
-                        label="AWS Region"
-                        help="The AWS Region your service is running in."
-                        disabled={fetchRegionsStatus.loading}
-                        required>
-          {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
-        </ValidatedInput>
-      </FormWrap>
-    </>
+      <ValidatedInput id="awsCloudWatchAwsRegion"
+                      type="select"
+                      fieldData={formData.awsCloudWatchAwsRegion}
+                      onChange={onChange}
+                      label="AWS Region"
+                      help="The AWS Region your service is running in."
+                      disabled={fetchRegionsStatus.loading}
+                      required>
+        {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
+      </ValidatedInput>
+    </FormWrap>
   );
 };
 

@@ -7,7 +7,7 @@ const ARN = ({ awsARN, onChange }) => {
   return (
     <Input id="awsCloudWatchAssumeARN"
            type="text"
-           value={awsARN}
+           value={awsARN.value}
            onChange={onChange}
            label="AWS Assume Role (ARN)"
            help="Role ARN with required permissions (cross account access)"
