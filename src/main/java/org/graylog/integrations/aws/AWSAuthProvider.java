@@ -44,11 +44,11 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
                                                  @Nullable String assumeRoleArn) {
         AwsCredentialsProvider awsCredentials;
         if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
-            awsCredentials = DefaultCredentialsProvider.create();
-            LOG.debug("Using default authorization provider chain.");
-        } else {
             awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
             LOG.debug("Using explicitly provided key and secret.");
+        } else {
+            awsCredentials = DefaultCredentialsProvider.create();
+            LOG.debug("Using default authorization provider chain.");
         }
 
         // Apply the Assume Role ARN Authorization if specified.
