@@ -32,6 +32,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   const { logData } = useContext(ApiContext);
   const {
     awsCloudWatchName,
+    awsAuthenticationType,
     awsCloudWatchAwsKey,
     awsCloudWatchAwsRegion,
     awsCloudWatchKinesisStream,
@@ -91,13 +92,31 @@ const StepReview = ({ onSubmit, onEditClick }) => {
         <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
         <ReviewItems>
           <li>
-            <strong>Name</strong>
-            <span>{awsCloudWatchName.value}</span>
+            <strong>Authorization Type</strong>
+            <span>{awsAuthenticationType.value}</span>
           </li>
-          <li>
-            <strong>AWS Key</strong>
-            <span>{awsCloudWatchAwsKey.value}</span>
-          </li>
+
+          {awsCloudWatchName.value && (
+            <li>
+              <strong>Name</strong>
+              <span>{awsCloudWatchName.value}</span>
+            </li>
+          )}
+
+          {awsCloudWatchAwsKey.value && (
+            <li>
+              <strong>AWS Key</strong>
+              <span>{awsCloudWatchAwsKey.value}</span>
+            </li>
+          )}
+
+          {awsCloudWatchAssumeARN.value && (
+            <li>
+              <strong>AWS Assumed ARN Role</strong>
+              <span>{awsCloudWatchAssumeARN.value}</span>
+            </li>
+          )}
+
           <li>
             <strong>AWS Region</strong>
             <span>{awsCloudWatchAwsRegion.value}</span>
@@ -113,10 +132,6 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           <li>
             <strong>Global Input</strong>
             <span>{<i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} />}</span>
-          </li>
-          <li>
-            <strong>AWS Assumed ARN Role</strong>
-            <span>{awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : 'None'}</span>
           </li>
           <li>
             <strong>Record Batch Size</strong>
