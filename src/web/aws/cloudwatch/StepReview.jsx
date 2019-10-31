@@ -60,7 +60,6 @@ const StepReview = ({ onSubmit, onEditClick }) => {
       aws_input_type: awsCloudWatchKinesisInputType ? awsCloudWatchKinesisInputType.value : DEFAULT_KINESIS_LOG_TYPE,
       stream_name: awsCloudWatchKinesisStream.value,
       batch_size: Number(awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue),
-      assume_role_arn: awsCloudWatchAssumeARN ? awsCloudWatchAssumeARN.value : '',
       global: globalInputEnabled,
       enable_throttling: throttleEnabled,
       add_flow_log_prefix: addPrefix,

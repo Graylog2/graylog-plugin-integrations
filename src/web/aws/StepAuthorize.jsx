@@ -29,7 +29,10 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
       onSubmit();
     },
     'POST',
-    { region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '' },
+    {
+      region: formData.awsCloudWatchAwsRegion ? formData.awsCloudWatchAwsRegion.value : '',
+      assume_role_arn: formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : '',
+    },
   );
 
   useEffect(() => {
