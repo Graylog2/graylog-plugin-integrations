@@ -2,6 +2,7 @@ package org.graylog.integrations.aws.resources.requests;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
@@ -17,7 +18,7 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     private static final String FILTER_NAME = "filter_name";
     private static final String FILTER_PATTERN = "filter_pattern";
     private static final String DESTINATION_STREAM_ARN = "destination_stream_arn";
-    private static final String ROLE_ARN = "ROLE_ARN";
+    private static final String ROLE_ARN = "role_arn";
 
     @JsonProperty(REGION)
     public abstract String region();
