@@ -71,6 +71,7 @@ const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
           fetcher = fetch(method, qualifiedURL, {
             aws_access_key_id: key,
             aws_secret_access_key: secret,
+            assume_role_arn: formData.awsCloudWatchAssumeARN ? formData.awsCloudWatchAssumeARN.value : '',
             ...options,
           });
         }
