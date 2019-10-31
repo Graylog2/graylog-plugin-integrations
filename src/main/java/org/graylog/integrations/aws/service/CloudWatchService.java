@@ -93,7 +93,7 @@ public class CloudWatchService {
                                             .filterName(request.filterName())
                                             .filterPattern(request.filterPattern())
                                             .destinationArn(request.destinationStreamArn())
-                                            .roleArn(request.assumeRoleArn())
+                                            .roleArn(request.roleArn())
                                             .distribution(Distribution.BY_LOG_STREAM)
                                             .build();
         try {

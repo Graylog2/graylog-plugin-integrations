@@ -104,12 +104,13 @@ public class KinesisService {
     }
 
 
-    private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn) {
+    private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn, String region) {
 
-        // IAM Always uses the Global region.
+        // IAM Always uses the Global region. However, the AWSAuthProvider.stsRegion must be that where the resources
+        // will be created.
         return iamClientBuilder.region(Region.AWS_GLOBAL)
                                .credentialsProvider(new AWSAuthProvider(accessKeyId, secretAccessKey,
-                                                                        Region.AWS_GLOBAL.id(), assumeRoleArn))
+                                                                        region, assumeRoleArn))
                                .build();
     }
 
@@ -498,7 +499,7 @@ public class KinesisService {
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
             final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey(),
-                                                        request.assumeRoleArn());
+                                                        request.assumeRoleArn(), request.region());
             String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
             setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn());
