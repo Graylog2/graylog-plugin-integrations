@@ -91,25 +91,23 @@ const StepReview = ({ onSubmit, onEditClick }) => {
         <Subheader>Setting up CloudWatch <small><EditAnchor onClick={onEditClick('authorize')}>Edit</EditAnchor></small></Subheader>
         <ReviewItems>
           <li>
+            <strong>Name</strong>
+            <span>{awsCloudWatchName.value}</span>
+          </li>
+
+          <li>
             <strong>Authorization Type</strong>
             <span>{awsAuthenticationType.value}</span>
           </li>
 
-          {awsCloudWatchName.value && (
-            <li>
-              <strong>Name</strong>
-              <span>{awsCloudWatchName.value}</span>
-            </li>
-          )}
-
-          {awsCloudWatchAwsKey.value && (
+          {(awsCloudWatchAwsKey && awsCloudWatchAwsKey.value) && (
             <li>
               <strong>AWS Key</strong>
               <span>{awsCloudWatchAwsKey.value}</span>
             </li>
           )}
 
-          {awsCloudWatchAssumeARN.value && (
+          {(awsCloudWatchAssumeARN && awsCloudWatchAssumeARN.value) && (
             <li>
               <strong>AWS Assumed ARN Role</strong>
               <span>{awsCloudWatchAssumeARN.value}</span>
