@@ -20,7 +20,6 @@ import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.configuration.fields.NumberField;
 import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
-import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
@@ -91,14 +90,14 @@ public class KinesisTransport extends ThrottleableTransport {
     }
 
     @Override
-    public void doLaunch(MessageInput input) throws MisfireException {
+    public void doLaunch(MessageInput input) {
 
         final Region region = Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION)));
         final String key = configuration.getString(CK_ACCESS_KEY);
         final String secret = configuration.getString(CK_SECRET_KEY);
         final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
         Preconditions.checkArgument(StringUtils.isNotBlank(key), "An AWS key is required.");
-        AwsCredentialsProvider awsCredentialsProvider = new AWSAuthProvider(key, secret, region.id(), assumeRoleArn);
+        AwsCredentialsProvider awsCredentialsProvider = new AWSAuthProvider(region.id(), key, secret, assumeRoleArn);
         Preconditions.checkArgument(StringUtils.isNotBlank(secret), "An AWS secret is required.");
 
         // Assume role ARN functionality only applies to the Kinesis runtime (not to the setup flows).

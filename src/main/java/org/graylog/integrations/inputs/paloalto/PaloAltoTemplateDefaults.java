@@ -29,7 +29,7 @@ public class PaloAltoTemplateDefaults {
 
     public static String POSITION = "position";
     public static String FIELD = "field";
-    public static  String TYPE = "type";
+    public static String TYPE = "type";
 
     private PaloAltoTemplateDefaults() {
 

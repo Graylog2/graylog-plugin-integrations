@@ -48,7 +48,7 @@ public class CloudWatchService {
         Preconditions.checkNotNull(regionName, "An AWS region is required.");
 
         return logsClientBuilder.region(Region.of(regionName))
-                                .credentialsProvider(new AWSAuthProvider(accessKeyId, secretAccessKey, regionName, assumeRoleArn))
+                                .credentialsProvider(new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn))
                                 .build();
     }
 
@@ -58,7 +58,7 @@ public class CloudWatchService {
      * @param region             The AWS region
      * @param awsAccessKeyId     The AWS accessKey
      * @param awsSecretAccessKey The AWS secretKey
-     * @param assumeRoleArn
+     * @param assumeRoleArn      The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
      * @return A list of log groups in alphabetical order.
      */
     public LogGroupsResponse getLogGroupNames(String region, String awsAccessKeyId, String awsSecretAccessKey, String assumeRoleArn) {

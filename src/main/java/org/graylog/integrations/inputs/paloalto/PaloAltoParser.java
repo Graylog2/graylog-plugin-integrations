@@ -135,9 +135,9 @@ public class PaloAltoParser {
     }
 
     /**
-     * @param timestamp The message timestamp.
+     * @param timestamp      The message timestamp.
      * @param messagePayload The full CSV message payload. eg. <14>Aug 22 11:21:04 hq-lx-net-7.dart.org 1,2018/08/22...
-     * @param source The message source.
+     * @param source         The message source.
      * @return The PaloAltoMessageBase, which contains all data needed to build the message.
      */
     private PaloAltoMessageBase buildPaloAltoMessageBase(DateTime timestamp, String messagePayload, String source) {

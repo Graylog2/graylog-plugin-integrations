@@ -2,10 +2,8 @@ package org.graylog.integrations.aws.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import org.apache.commons.lang.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.AWSPolicy;
 import org.graylog.integrations.aws.AWSPolicyStatement;
@@ -31,8 +29,6 @@ import org.graylog2.shared.inputs.MessageInputFactory;
 import org.graylog2.shared.inputs.NoSuchInputTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.RegionMetadata;
 
@@ -164,6 +160,7 @@ public class AWSService {
 
     /**
      * Convert the {@link AWSPolicy} object into a JSON string.
+     *
      * @return A JSON policy string.
      */
     private String policyAsJsonString(AWSPolicy setupPolicy) {

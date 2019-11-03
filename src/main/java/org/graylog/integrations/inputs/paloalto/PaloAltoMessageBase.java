@@ -28,15 +28,19 @@ public abstract class PaloAltoMessageBase {
     private static final Logger LOG = LoggerFactory.getLogger(PaloAltoParser.class);
 
     public abstract String source();
+
     public abstract DateTime timestamp();
+
     public abstract String payload();
+
     public abstract String panType();
+
     public abstract ImmutableList<String> fields();
 
     public static PaloAltoMessageBase create(String source, DateTime timestamp, String payload, String panType, ImmutableList<String> fields) {
 
         LOG.trace("Syslog header parsed successfully: " +
-                  "Source {} Timestamp {} Pan Type {} Payload {}", source, timestamp, panType, payload );
+                  "Source {} Timestamp {} Pan Type {} Payload {}", source, timestamp, panType, payload);
 
         return builder()
                 .source(source)

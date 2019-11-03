@@ -65,7 +65,7 @@ public class PaloAltoTypeParser {
                         try {
                             value = Long.valueOf(rawValue);
                         } catch (NumberFormatException e) {
-                            LOG.error("[{}] is an invalid LONG value for the [{}] [{}] field", rawValue, messageType, field.field() );
+                            LOG.error("[{}] is an invalid LONG value for the [{}] [{}] field", rawValue, messageType, field.field());
                             continue;
                         }
                     } else {

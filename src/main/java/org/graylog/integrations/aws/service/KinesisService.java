@@ -99,7 +99,7 @@ public class KinesisService {
     private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) {
 
         return kinesisClientBuilder.region(Region.of(regionName))
-                                   .credentialsProvider(new AWSAuthProvider(accessKeyId, secretAccessKey, regionName, assumeRoleArn))
+                                   .credentialsProvider(new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn))
                                    .build();
     }
 
@@ -109,8 +109,7 @@ public class KinesisService {
         // IAM Always uses the Global region. However, the AWSAuthProvider.stsRegion must be that where the resources
         // will be created.
         return iamClientBuilder.region(Region.AWS_GLOBAL)
-                               .credentialsProvider(new AWSAuthProvider(accessKeyId, secretAccessKey,
-                                                                        region, assumeRoleArn))
+                               .credentialsProvider(new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn))
                                .build();
     }
 
@@ -172,8 +171,8 @@ public class KinesisService {
     /**
      * Get a list of Kinesis stream names. All available streams will be returned.
      *
-     * @param assumeRoleArn
-     * @param regionName The AWS region to query Kinesis stream names from.
+     * @param assumeRoleArn The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
+     * @param regionName    The AWS region to query Kinesis stream names from.
      * @return A list of all available Kinesis streams in the supplied region.
      */
     public StreamsResponse getKinesisStreamNames(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) throws ExecutionException {
@@ -485,7 +484,7 @@ public class KinesisService {
     /**
      * Creates and sets the new role and permissions for Kinesis to talk to Cloudwatch.
      *
-     * @param request
+     * @param request The create permission request.
      * @return role Arn associated with the associated kinesis stream
      */
     public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest request) {
