@@ -94,8 +94,16 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         if (octetCount == 0L) {
             octetCount = (long) fields.getOrDefault("fwd_flow_delta_bytes", 0L);
         }
-        final String srcAddr = (String) fields.get("sourceIPv4Address");
-        final String dstAddr = (String) fields.get("destinationIPv4Address");
+
+        String srcAddr = (String) fields.get("sourceIPv4Address");
+        String dstAddr = (String) fields.get("destinationIPv4Address");
+        if(srcAddr == null){
+            srcAddr = (String) fields.get("sourceIPv6Address");
+        }
+        if (dstAddr == null){
+            dstAddr = (String) fields.get("destinationIPv6Address");
+        }
+
         final Number srcPort = (Number) fields.get("sourceTransportPort");
         final Number dstPort = (Number) fields.get("destinationTransportPort");
         final long protocol = Long.parseLong(String.valueOf(fields.getOrDefault("protocolIdentifier", 0L)));
