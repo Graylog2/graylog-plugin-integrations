@@ -133,32 +133,41 @@ public class IpfixAggregator implements RemoteAddressCodecAggregator {
                 return new Result(null, true);
             }
 
-            LOG.debug("Assembling the packet with necessary templates and data records which include the templates needed.");
             final IpfixJournal.RawIpfix.Builder journalBuilder = IpfixJournal.RawIpfix.newBuilder();
-            for (TemplateKey templateKey : templatesList) {
-                final ShallowTemplateSet.Record record = templateCache.getIfPresent(templateKey);
-                journalBuilder.putTemplates(templateKey.getTemplateId(), ByteString.copyFrom(record.getRecordBytes()));
-            }
-
-            // TODO write out options template sets, too
-
-            // in IPFIX a data set contains records for the same template id, so we can just dump the entire set and don't
-            // have to deal with records at all
-            LOG.debug("IPFIX data set has been processed for the same template id, adding data set to IPFIX journal.");
-            for (ShallowDataSet dataSet : packetsToSendCollection) {
-                journalBuilder.addDataSets(IpfixJournal.DataSet.newBuilder()
-                                                               .setTemplateId(dataSet.templateId())
-                                                               .setTimestampEpochSeconds(dataSet.epochSeconds())
-                                                               .setDataRecords(ByteString.copyFrom(dataSet.content()))
-                                                               .build());
-            }
+            buildJournalObject(packetsToSendCollection, templatesList, journalBuilder);
             final IpfixJournal.RawIpfix rawIpfix = journalBuilder.build();
-            return new Result(Unpooled.wrappedBuffer(rawIpfix.toByteArray()), true);
+            return getCompleteResult(rawIpfix);
 
         } catch (Exception e) {
-            LOG.error("Unable to aggregate IPFIX message", e);
+               LOG.error("Unable to aggregate IPFIX message due to the following error ", e);
             return new Result(null, false);
         }
+    }
+
+    public void buildJournalObject(Set<ShallowDataSet> packetsToSendCollection, Set<TemplateKey> templatesList, IpfixJournal.RawIpfix.Builder journalBuilder) {
+        LOG.debug("Assembling the packet with necessary templates and data records which include the templates needed.");
+        for (TemplateKey templateKey : templatesList) {
+            final ShallowTemplateSet.Record record = templateCache.getIfPresent(templateKey);
+            journalBuilder.putTemplates(templateKey.getTemplateId(), ByteString.copyFrom(record.getRecordBytes()));
+        }
+
+        // TODO write out options template sets, too
+
+        // in IPFIX a data set contains records for the same template id, so we can just dump the entire set and don't
+        // have to deal with records at all
+        LOG.debug("IPFIX data set has been processed for the same template id, adding data set to IPFIX journal.");
+        for (ShallowDataSet dataSet : packetsToSendCollection) {
+            journalBuilder.addDataSets(IpfixJournal.DataSet.newBuilder()
+                                                           .setTemplateId(dataSet.templateId())
+                                                           .setTimestampEpochSeconds(dataSet.epochSeconds())
+                                                           .setDataRecords(ByteString.copyFrom(dataSet.content()))
+                                                           .build());
+        }
+    }
+
+    public Result getCompleteResult(IpfixJournal.RawIpfix rawIpfix) {
+        LOG.debug("Raw ipfix object complete, returning result.");
+        return new Result(Unpooled.wrappedBuffer(rawIpfix.toByteArray()), true);
     }
 
     public void handleBufferedPackets(Set<ShallowDataSet> packetsToSendCollection, Set<Integer> bufferedTemplateIdList,
