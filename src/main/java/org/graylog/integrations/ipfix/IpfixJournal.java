@@ -930,7 +930,7 @@ public final class IpfixJournal {
                             bitField0_ = (bitField0_ & ~0x00000004);
                             dataSetsBuilder_ =
                                     com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                                             getDataSetsFieldBuilder() : null;
+                                            getDataSetsFieldBuilder() : null;
                         } else {
                             dataSetsBuilder_.addAllMessages(other.dataSets_);
                         }

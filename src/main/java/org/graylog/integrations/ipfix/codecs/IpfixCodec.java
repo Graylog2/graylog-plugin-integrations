@@ -83,6 +83,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
     /**
      * Parses out the fields from the flow record, assigns v5 fixed format fields and create message
+     *
      * @param record
      * @return
      */
@@ -97,10 +98,10 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
         String srcAddr = (String) fields.get("sourceIPv4Address");
         String dstAddr = (String) fields.get("destinationIPv4Address");
-        if(srcAddr == null){
+        if (srcAddr == null) {
             srcAddr = (String) fields.get("sourceIPv6Address");
         }
-        if (dstAddr == null){
+        if (dstAddr == null) {
             dstAddr = (String) fields.get("destinationIPv6Address");
         }
 
@@ -114,8 +115,8 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
     private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr,
                                               Number srcPort, Number dstPort, long protocol) {
-        String message = String.format(Locale.ROOT, "Ipfix ["+srcAddr+"]:"+srcPort+" <> ["+dstAddr+"]:"+dstPort+" " +
-                                                    "proto:"+protocol+" pkts:"+packetCount+" bytes:"+octetCount);
+        String message = String.format(Locale.ROOT, "Ipfix [" + srcAddr + "]:" + srcPort + " <> [" + dstAddr + "]:" + dstPort + " " +
+                                                    "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
         return message;
     }
 

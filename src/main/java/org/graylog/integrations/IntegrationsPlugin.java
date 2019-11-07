@@ -33,7 +33,7 @@ public class IntegrationsPlugin implements Plugin {
     }
 
     @Override
-    public Collection<PluginModule> modules () {
+    public Collection<PluginModule> modules() {
         return Collections.<PluginModule>singletonList(new IntegrationsModule());
     }
 }

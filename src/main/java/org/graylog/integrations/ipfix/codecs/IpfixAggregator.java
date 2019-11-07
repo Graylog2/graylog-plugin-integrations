@@ -139,7 +139,7 @@ public class IpfixAggregator implements RemoteAddressCodecAggregator {
             return getCompleteResult(rawIpfix);
 
         } catch (Exception e) {
-               LOG.error("Unable to aggregate IPFIX message due to the following error ", e);
+            LOG.error("Unable to aggregate IPFIX message due to the following error ", e);
             return new Result(null, false);
         }
     }

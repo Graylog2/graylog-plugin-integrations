@@ -42,10 +42,7 @@ public class IpfixAggregatorTest {
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
         assertThat(result.getMessage()).isNotNull();
-
         // TODO complete unit test
-        //final IpfixMessage ipfixMessage = new IpfixParser(definitions).parseMessage(result.getMessage());
-        //assertThat(ipfixMessage).isNotNull();
     }
 
     @Test
@@ -60,10 +57,8 @@ public class IpfixAggregatorTest {
         final CodecAggregator.Result resultComplete = ipfixAggregator.addChunk(withTemplatesBytes, someAddress);
         assertThat(resultComplete.isValid()).isTrue();
         assertThat(resultComplete.getMessage()).isNotNull();
-
         // TODO complete unit test
-        //final IpfixMessage ipfixMessage = new IpfixParser(definitions).parseMessage(resultComplete.getMessage());
-        //assertThat(ipfixMessage.flows()).hasSize(4);
+
     }
 
     @Test
