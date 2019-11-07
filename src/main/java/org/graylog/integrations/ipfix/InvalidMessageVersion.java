@@ -22,5 +22,4 @@ public class InvalidMessageVersion extends IpfixException {
         super("Not a valid IPFIX version: " + foundVersion);
     }
 
-
 }

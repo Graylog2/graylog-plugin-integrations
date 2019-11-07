@@ -38,5 +38,4 @@ public abstract class MessageHeader {
     public static MessageHeader create(int length, ZonedDateTime exportTime, long sequenceNumber, long observationDomainId) {
         return new AutoValue_MessageHeader(length, exportTime, sequenceNumber, observationDomainId);
     }
-
 }

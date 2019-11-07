@@ -29,5 +29,4 @@ public abstract class InformationElement {
     public static InformationElement create(int id, int length, long enterpriseNumber) {
         return new AutoValue_InformationElement(id, length, enterpriseNumber);
     }
-
 }

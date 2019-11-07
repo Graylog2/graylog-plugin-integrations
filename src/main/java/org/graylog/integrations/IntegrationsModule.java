@@ -16,7 +16,6 @@
  */
 package org.graylog.integrations;
 
-
 import org.graylog.integrations.audit.IntegrationsAuditEventTypes;
 import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.codecs.AWSCodec;
@@ -86,7 +85,7 @@ public class IntegrationsModule extends PluginModule {
 
         addAuditEventTypes(IntegrationsAuditEventTypes.class);
 
-        //IPFIX
+        // IPFIX
         addMessageInput(IpfixUdpInput.class);
         addCodec("ipfix", IpfixCodec.class);
         addTransport("ipfix-udp", IpfixUdpTransport.class);

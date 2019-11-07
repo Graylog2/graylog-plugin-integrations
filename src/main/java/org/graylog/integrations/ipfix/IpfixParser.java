@@ -79,7 +79,7 @@ public class IpfixParser {
     public MessageDescription shallowParseMessage(ByteBuf packet) {
         final ByteBuf buffer = packet.readSlice(MessageHeader.LENGTH);
         LOG.debug("Attempting a shallow parse on message. [{}]", ByteBufUtil.prettyHexDump(buffer));
-//        LOG.error("Shallow parse header\n{}", ByteBufUtil.prettyHexDump(buffer));
+        LOG.debug("Shallow parse header\n{}", ByteBufUtil.prettyHexDump(buffer));
         final MessageHeader header = parseMessageHeader(buffer);
         final MessageDescription messageDescription = new MessageDescription(header);
 
@@ -232,10 +232,10 @@ public class IpfixParser {
      */
     public IpfixMessage parseMessage(ByteBuf packet) {
         LOG.debug("Attempting to parse message.");
-//        LOG.error("IPFIX message\n{}", ByteBufUtil.prettyHexDump(packet));
+        LOG.debug("IPFIX message\n{}", ByteBufUtil.prettyHexDump(packet));
         final IpfixMessage.Builder builder = IpfixMessage.builder();
         final ByteBuf headerBuffer = packet.readSlice(MessageHeader.LENGTH);
-//        LOG.error("Message header buffer\n{}", ByteBufUtil.prettyHexDump(headerBuffer));
+        LOG.debug("Message header buffer\n{}", ByteBufUtil.prettyHexDump(headerBuffer));
         final MessageHeader header = parseMessageHeader(headerBuffer);
         // sanity check: we need the complete packet in the buffer
         if (header.length() > packet.readableBytes() + MessageHeader.LENGTH) {
@@ -248,7 +248,7 @@ public class IpfixParser {
         while (packet.isReadable()) {
             final int setId = packet.readUnsignedShort();
             final int setLength = packet.readUnsignedShort();
-//            LOG.error("Set id {} buffer\n{}", setId, ByteBufUtil.prettyHexDump(packet, packet.readerIndex() - 4, setLength));
+            LOG.debug("Set id {} buffer\n{}", setId, ByteBufUtil.prettyHexDump(packet, packet.readerIndex() - 4, setLength));
             // the buffer limited to the declared length of the set.
             final ByteBuf setContent = packet.readSlice(setLength - 4);
             switch (setId) {
