@@ -76,8 +76,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
         infoElementDefs = new InformationElementDefinitions(
-                Resources.getResource("ipfix-iana-elements.json"),
-                Resources.getResource("ixia-ipfix.json"));
+                Resources.getResource("ipfix-iana-elements.json"));
         this.parser = new IpfixParser(this.infoElementDefs);
     }
 
