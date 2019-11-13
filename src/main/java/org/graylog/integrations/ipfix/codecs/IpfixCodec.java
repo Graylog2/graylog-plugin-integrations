@@ -76,7 +76,13 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
         infoElementDefs = new InformationElementDefinitions(
-                Resources.getResource("ipfix-iana-elements.json"));
+                // files are used to parse through the message,
+                // first file is the standard iana elements,
+                // second file is intended to be configurable and provided by the user which will contain their
+                // private enterprise number and additional custom fields the user would like to parse
+                Resources.getResource("ipfix-iana-elements.json")
+                //Resources.getResource("ipfix_definition_path")
+        );
         this.parser = new IpfixParser(this.infoElementDefs);
     }
 
@@ -198,13 +204,13 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest configuration = super.getRequestedConfiguration();
-            configuration.addField(
-                    new TextField(CK_IPFIX_DEFINITION_PATH,
-                                  "IPFIX field definitions",
-                                  "",
-                                  "Path to the JSON file containing IPFIX field definitions",
-                                  ConfigurationField.Optional.OPTIONAL)
-            );
+//            configuration.addField(
+//                    new TextField(CK_IPFIX_DEFINITION_PATH,
+//                                  "IPFIX field definitions",
+//                                  "",
+//                                  "Path to the JSON file containing IPFIX field definitions",
+//                                  ConfigurationField.Optional.OPTIONAL)
+//            );
             return configuration;
         }
     }
