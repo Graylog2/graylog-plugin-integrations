@@ -80,6 +80,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
                 // first file is the standard iana elements,
                 // second file is intended to be configurable and provided by the user which will contain their
                 // private enterprise number and additional custom fields the user would like to parse
+                // See https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
                 Resources.getResource("ipfix-iana-elements.json")
                 //Resources.getResource("ipfix_definition_path")
         );
