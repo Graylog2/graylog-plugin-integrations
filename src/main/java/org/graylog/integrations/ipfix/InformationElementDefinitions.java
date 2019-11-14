@@ -23,9 +23,11 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Holds the information element definitions for the IANA assigned IPFIX information elements, as well as the
@@ -60,6 +62,48 @@ public class InformationElementDefinitions {
             }
         }
     }
+
+    public InformationElementDefinitions(URL standardDefFile, Optional<File> customDefFile) {
+        LOG.debug("Reading information element definition file with private enterprise numbers.");
+        final ObjectMapper objectMapper = new ObjectMapper();
+
+            try {
+                final JsonNode jsonNode = objectMapper.readTree(standardDefFile);
+                 buildPenToIedsMap(jsonNode);
+            } catch (IOException e) {
+                LOG.error("Unable to read information element definition file", e);
+            }
+            buildPenToIedsMap(objectMapper,customDefFile);
+    }
+
+    Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(final ObjectMapper objectMapper, final Optional<File> custDefFilePath) {
+        JsonNode custDefJsonNode = null;
+
+        try {
+            custDefJsonNode = objectMapper.readTree(custDefFilePath.get());
+            buildPenToIedsMap(custDefJsonNode);
+        } catch (IOException e) {
+            LOG.error("Unable to read custom information element definition file", e);
+        }
+        return penToIedsMap;
+    }
+
+    private Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(JsonNode jsonNode){
+
+        final long enterpriseNumber = jsonNode.get("enterprise_number").asLong();
+        ImmutableMap.Builder<Integer, InformationElementDefinition> iedBuilder = ImmutableMap.builder();
+        jsonNode.path("information_elements").elements()
+                .forEachRemaining(ied -> {
+                    final int elementId = ied.get("element_id").asInt();
+                    final String dataType = ied.get("data_type").asText();
+                    final String fieldName = ied.get("name").asText();
+                    iedBuilder.put(elementId, InformationElementDefinition.create(dataType, fieldName, elementId));
+                });
+        penToIedsMap.put(enterpriseNumber, iedBuilder.build());
+        return penToIedsMap;
+    }
+
+
 
     public static InformationElementDefinitions empty() {
         return new InformationElementDefinitions();
