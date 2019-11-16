@@ -32,6 +32,8 @@ import org.graylog2.plugin.Message;
 import org.graylog2.plugin.ResolvableInetSocketAddress;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.annotations.Codec;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
@@ -49,16 +51,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Codec(name = "ipfix", displayName = "IPFIX Codec")
@@ -73,15 +71,27 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-        infoElementDefs = new InformationElementDefinitions(
-                // files are used to parse through the message,
-                // first file is the standard iana elements,
-                // second file is intended to be configurable and provided by the user which will contain their
-                // private enterprise number and additional custom fields the user would like to parse
-                // See https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
-                Resources.getResource("ipfix-iana-elements.json")
-                //Resources.getResource("ipfix_definition_path")
-        );
+
+
+        //feature toggles, until its safe to remove the else block
+        //
+        if(configuration.getSource().containsValue(Config.CK_IPFIX_DEFINITION_PATH)) {
+                File custDefFile = new File(((String) configuration.getSource().get(Config.CK_IPFIX_DEFINITION_PATH)));
+                infoElementDefs = new InformationElementDefinitions( Resources.getResource("ipfix-iana-elements.json"),
+                                   Optional.of(custDefFile));
+        }
+        else {
+            infoElementDefs = new InformationElementDefinitions(
+                    // files are used to parse through the message,
+                    // first file is the standard iana elements,
+                    // second file is intended to be configurable and provided by the user which will contain their
+                    // private enterprise number and additional custom fields the user would like to parse
+                    // See https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
+                    Resources.getResource("ipfix-iana-elements.json")
+
+                    //Resources.getResource("ipfix_definition_path")
+            );
+        }
         this.parser = new IpfixParser(this.infoElementDefs);
     }
 
@@ -203,13 +213,13 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest configuration = super.getRequestedConfiguration();
-//            configuration.addField(
-//                    new TextField(CK_IPFIX_DEFINITION_PATH,
-//                                  "IPFIX field definitions",
-//                                  "",
-//                                  "Path to the JSON file containing IPFIX field definitions",
-//                                  ConfigurationField.Optional.OPTIONAL)
-//            );
+            configuration.addField(
+                    new TextField(CK_IPFIX_DEFINITION_PATH,
+                                  "IPFIX field definitions",
+                                  "",
+                                  "Path to the JSON file containing IPFIX field definitions",
+                                  ConfigurationField.Optional.OPTIONAL)
+            );
             return configuration;
         }
     }

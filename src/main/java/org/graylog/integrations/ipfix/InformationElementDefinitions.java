@@ -77,8 +77,8 @@ public class InformationElementDefinitions {
     }
 
     Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(final ObjectMapper objectMapper, final Optional<File> custDefFilePath) {
-        JsonNode custDefJsonNode = null;
 
+        JsonNode custDefJsonNode = null;
         try {
             custDefJsonNode = objectMapper.readTree(custDefFilePath.get());
             buildPenToIedsMap(custDefJsonNode);
