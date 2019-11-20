@@ -16,18 +16,15 @@
  */
 package org.graylog.integrations.ipfix.codecs;
 
+
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.inject.assistedinject.Assisted;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.Unpooled;
-import org.graylog.integrations.ipfix.Flow;
-import org.graylog.integrations.ipfix.InformationElementDefinitions;
-import org.graylog.integrations.ipfix.IpfixException;
-import org.graylog.integrations.ipfix.IpfixJournal;
-import org.graylog.integrations.ipfix.IpfixParser;
-import org.graylog.integrations.ipfix.TemplateRecord;
+import org.graylog.integrations.ipfix.*;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.ResolvableInetSocketAddress;
 import org.graylog2.plugin.configuration.Configuration;
@@ -51,8 +48,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -61,6 +60,10 @@ import java.util.stream.Collectors;
 
 @Codec(name = "ipfix", displayName = "IPFIX Codec")
 public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
+
+    @VisibleForTesting
+    static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
+
     private static final Logger LOG = LoggerFactory.getLogger(IpfixCodec.class);
 
     private final IpfixAggregator ipfixAggregator;
@@ -68,29 +71,23 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private InformationElementDefinitions infoElementDefs;
 
     @Inject
-    protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) {
+    protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws MalformedURLException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
 
+        //below is my imagination, on how I want my method signature to look like,
+        //without any if else blocks for null checks
+        //mandatory fields go in the constructor, optional fields follow the build method
+        // infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate).build().customDefTemplate(customIPFixDefURL);
 
-        //feature toggles, until its safe to remove the else block
-        //
-        if(configuration.getSource().containsValue(Config.CK_IPFIX_DEFINITION_PATH)) {
-                File custDefFile = new File(((String) configuration.getSource().get(Config.CK_IPFIX_DEFINITION_PATH)));
-                infoElementDefs = new InformationElementDefinitions( Resources.getResource("ipfix-iana-elements.json"),
-                                   Optional.of(custDefFile));
-        }
-        else {
-            infoElementDefs = new InformationElementDefinitions(
-                    // files are used to parse through the message,
-                    // first file is the standard iana elements,
-                    // second file is intended to be configurable and provided by the user which will contain their
-                    // private enterprise number and additional custom fields the user would like to parse
-                    // See https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers
-                    Resources.getResource("ipfix-iana-elements.json")
+        final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
+        final String ipFixCustomDefPath = configuration.getString(CK_IPFIX_DEFINITION_PATH);
+        final URL customIPFixDefURL = Paths.get(ipFixCustomDefPath).toUri().toURL();
 
-                    //Resources.getResource("ipfix_definition_path")
-            );
+        if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
+            infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
+        } else {
+            infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, customIPFixDefURL);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
     }
@@ -130,7 +127,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr,
                                               Number srcPort, Number dstPort, long protocol) {
         String message = String.format(Locale.ROOT, "Ipfix [" + srcAddr + "]:" + srcPort + " <> [" + dstAddr + "]:" + dstPort + " " +
-                                                    "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
+                "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
         return message;
     }
 
@@ -151,24 +148,24 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             final Map<Integer, ByteString> templatesMap = rawIpfix.getTemplatesMap();
 
             final Map<Integer, TemplateRecord> templateRecordMap = Seq.seq(templatesMap)
-                                                                      .map(entry -> entry.map2(byteString -> parser.parseTemplateRecord(Unpooled.wrappedBuffer(byteString.toByteArray()))))
-                                                                      .toMap(Tuple2::v1, Tuple2::v2);
+                    .map(entry -> entry.map2(byteString -> parser.parseTemplateRecord(Unpooled.wrappedBuffer(byteString.toByteArray()))))
+                    .toMap(Tuple2::v1, Tuple2::v2);
 
             return rawIpfix.getDataSetsList().stream()
-                           .map(dataSet -> {
-                               final int templateId = dataSet.getTemplateId();
-                               final ZonedDateTime flowExportTimestamp = ZonedDateTime.ofInstant(Instant.ofEpochSecond(dataSet.getTimestampEpochSeconds()), ZoneOffset.UTC);
-                               final TemplateRecord templateRecord = templateRecordMap.get(templateId);
-                               if (templateRecord == null) {
-                                   throw new IpfixException("Missing required template in journal entry for data records: template id " + templateId);
-                               }
-                               final Set<Flow> flows = parser.parseDataSet(templateRecord.informationElements(),
-                                                                           Unpooled.wrappedBuffer(dataSet.getDataRecords().toByteArray()));
-                               return flows.stream()
-                                           .map(flow -> formatFlow(flowExportTimestamp, sender, flow));
-                           })
-                           .flatMap(messageStream -> messageStream)
-                           .collect(Collectors.toList());
+                    .map(dataSet -> {
+                        final int templateId = dataSet.getTemplateId();
+                        final ZonedDateTime flowExportTimestamp = ZonedDateTime.ofInstant(Instant.ofEpochSecond(dataSet.getTimestampEpochSeconds()), ZoneOffset.UTC);
+                        final TemplateRecord templateRecord = templateRecordMap.get(templateId);
+                        if (templateRecord == null) {
+                            throw new IpfixException("Missing required template in journal entry for data records: template id " + templateId);
+                        }
+                        final Set<Flow> flows = parser.parseDataSet(templateRecord.informationElements(),
+                                Unpooled.wrappedBuffer(dataSet.getDataRecords().toByteArray()));
+                        return flows.stream()
+                                .map(flow -> formatFlow(flowExportTimestamp, sender, flow));
+                    })
+                    .flatMap(messageStream -> messageStream)
+                    .collect(Collectors.toList());
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Unable to parse ipfix journal message", e);
             return Collections.emptyList();
@@ -201,7 +198,6 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
     @ConfigClass
     public static class Config extends AbstractCodec.Config {
-        private static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
 
         @Override
         public void overrideDefaultValues(@Nonnull ConfigurationRequest cr) {
@@ -215,10 +211,10 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             final ConfigurationRequest configuration = super.getRequestedConfiguration();
             configuration.addField(
                     new TextField(CK_IPFIX_DEFINITION_PATH,
-                                  "IPFIX field definitions",
-                                  "",
-                                  "Path to the JSON file containing IPFIX field definitions",
-                                  ConfigurationField.Optional.OPTIONAL)
+                            "IPFIX field definitions",
+                            "",
+                            "Path to the JSON file containing IPFIX field definitions",
+                            ConfigurationField.Optional.OPTIONAL)
             );
             return configuration;
         }
