@@ -32,6 +32,22 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 
+    @Nullable
+    @JsonProperty(CLOUDWATCH_ENDPOINT)
+    public abstract String cloudwatchEndpoint();
+
+    @Nullable
+    @JsonProperty(DYNAMODB_ENDPOINT)
+    public abstract String dynamodbEndpoint();
+
+    @Nullable
+    @JsonProperty(IAM_ENDPOINT)
+    public abstract String iamEndpoint();
+
+    @Nullable
+    @JsonProperty(KINESIS_ENDPOINT)
+    public abstract String kinesisEndpoint();
+
     /**
      * {@see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subscription Filter</a>},
      *
@@ -57,12 +73,17 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
                                                       @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                                       @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
                                                       @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                                      @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
+                                                      @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
+                                                      @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
+                                                      @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint,
                                                       @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
                                                       @JsonProperty(FILTER_NAME) String filterName,
                                                       @JsonProperty(FILTER_PATTERN) String filterPattern,
                                                       @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn,
                                                       @JsonProperty(ROLE_ARN) String roleArn) {
         return new AutoValue_CreateLogSubscriptionRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
+                                                          cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint,
                                                           getLogGroupName, filterName, filterPattern, destinationStreamArn, roleArn);
     }
 }

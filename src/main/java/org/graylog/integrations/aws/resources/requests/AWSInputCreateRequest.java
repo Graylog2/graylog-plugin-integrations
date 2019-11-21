@@ -54,6 +54,22 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 
+    @Nullable
+    @JsonProperty(CLOUDWATCH_ENDPOINT)
+    public abstract String cloudwatchEndpoint();
+
+    @Nullable
+    @JsonProperty(DYNAMODB_ENDPOINT)
+    public abstract String dynamodbEndpoint();
+
+    @Nullable
+    @JsonProperty(IAM_ENDPOINT)
+    public abstract String iamEndpoint();
+
+    @Nullable
+    @JsonProperty(KINESIS_ENDPOINT)
+    public abstract String kinesisEndpoint();
+
     @JsonProperty(NAME)
     public abstract String name();
 
@@ -80,6 +96,10 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKey,
                                                @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretKey,
                                                @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                               @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
+                                               @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
+                                               @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
+                                               @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint,
                                                @JsonProperty(NAME) String name,
                                                @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
                                                @JsonProperty(STREAM_NAME) String streamName,
@@ -88,6 +108,7 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
                                                @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
                                                @JsonProperty(ADD_FLOW_LOG_PREFIX) boolean addFlowLogPrefix) {
         return new AutoValue_AWSInputCreateRequest(region, awsAccessKey, awsSecretKey, assumeRoleArn,
+                                                   cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint,
                                                    name, awsMessageType, streamName, batchSize, global,
                                                    enableThrottling, addFlowLogPrefix);
     }

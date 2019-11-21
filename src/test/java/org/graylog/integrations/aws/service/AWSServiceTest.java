@@ -78,7 +78,7 @@ public class AWSServiceTest {
         AWSInputCreateRequest request =
                 AWSInputCreateRequest.create(Region.US_EAST_1.id(),
                                              "a-key", "a-secret",
-                                             null,
+                                             null,null,null,null,null,
                                              "AWS Input",
                                              AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString(),
                                              "a-stream",

@@ -5,13 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
+import software.amazon.awssdk.core.client.builder.SdkClientBuilder;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClient;
+import software.amazon.awssdk.services.cloudwatch.CloudWatchAsyncClientBuilder;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.kinesis.common.ConfigsBuilder;
@@ -19,6 +24,7 @@ import software.amazon.kinesis.common.KinesisClientUtil;
 import software.amazon.kinesis.coordinator.Scheduler;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
+import java.net.URI;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -47,6 +53,7 @@ public class KinesisConsumer implements Runnable {
     private final AWSMessageType awsMessageType;
     private final AwsCredentialsProvider credentialsProvider;
     private final Consumer<byte[]> handleMessageCallback;
+    private final AWSRequest request;
     private Scheduler kinesisScheduler;
 
     KinesisConsumer(NodeId nodeId,
@@ -57,7 +64,7 @@ public class KinesisConsumer implements Runnable {
                     AWSMessageType awsMessageType,
                     Region region,
                     AwsCredentialsProvider credentialsProvider,
-                    int recordBatchSize) {
+                    int recordBatchSize, AWSRequest request) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
         Preconditions.checkNotNull(region, "A Region is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
@@ -71,23 +78,40 @@ public class KinesisConsumer implements Runnable {
         this.awsMessageType = awsMessageType;
         this.credentialsProvider = credentialsProvider;
         this.recordBatchSize = recordBatchSize;
+        this.request = request;
+    }
+
+    /**
+     * Initialize the builder with the appropriate authorization, region, and endpoints.
+     * @param builder Any AWS client builder.
+     * @param endpoint See {@link SdkClientBuilder#endpointOverride(java.net.URI)} javadoc.
+     */
+    private void initializeBuilder(AwsClientBuilder builder, String endpoint) {
+        builder.region(region);
+        builder.credentialsProvider(credentialsProvider);
+
+        // The endpoint override explicitly overrides the default URL used for all
+        // AWS API communication.
+        if (StringUtils.isNotEmpty(endpoint)) {
+            builder.endpointOverride(URI.create(endpoint));
+        }
     }
 
     public void run() {
 
         LOG.debug("Starting the Kinesis Consumer.");
-        // Create the clients needed for the Kinesis consumer.
-        final DynamoDbAsyncClient dynamoClient = DynamoDbAsyncClient.builder()
-                                                                    .region(region)
-                                                                    .credentialsProvider(credentialsProvider)
-                                                                    .build();
-        final CloudWatchAsyncClient cloudWatchClient = CloudWatchAsyncClient.builder()
-                                                                            .region(region)
-                                                                            .credentialsProvider(credentialsProvider)
-                                                                            .build();
-        final KinesisAsyncClientBuilder kinesisAsyncClientBuilder = KinesisAsyncClient.builder()
-                                                                                      .region(this.region)
-                                                                                      .credentialsProvider(credentialsProvider);
+
+        // Create all clients needed for the Kinesis consumer.
+        final DynamoDbAsyncClientBuilder dynamoDbClientBuilder = DynamoDbAsyncClient.builder();
+        initializeBuilder(dynamoDbClientBuilder, request.dynamodbEndpoint());
+        final DynamoDbAsyncClient dynamoClient = dynamoDbClientBuilder.build();
+
+        final CloudWatchAsyncClientBuilder cloudwatchClientBuilder = CloudWatchAsyncClient.builder();
+        initializeBuilder(cloudwatchClientBuilder, request.cloudwatchEndpoint());
+        final CloudWatchAsyncClient cloudWatchClient = cloudwatchClientBuilder.build();
+
+        final KinesisAsyncClientBuilder kinesisAsyncClientBuilder = KinesisAsyncClient.builder();
+        initializeBuilder(kinesisAsyncClientBuilder, request.kinesisEndpoint());
         final KinesisAsyncClient kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(kinesisAsyncClientBuilder);
 
         final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());

@@ -175,7 +175,9 @@ public class KinesisServiceTest {
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             "key", "secret", null, TEST_STREAM_1);
+                                                                             "key", "secret",
+                                                                             null, null, null, null, null,
+                                                                             TEST_STREAM_1);
         return kinesisService.healthCheck(request);
     }
 
@@ -285,7 +287,8 @@ public class KinesisServiceTest {
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
 
         final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
-                                                                                               "accessKey", "secretKey", null,
+                                                                                               "accessKey", "secretKey",
+                                                                                               null, null, null, null, null,
                                                                                                TEST_STREAM_1);
         // TODO debug the error
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);

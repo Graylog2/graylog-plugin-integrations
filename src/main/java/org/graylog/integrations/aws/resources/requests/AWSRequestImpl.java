@@ -29,11 +29,32 @@ public abstract class AWSRequestImpl implements AWSRequest {
     @JsonProperty(ASSUME_ROLE_ARN)
     public abstract String assumeRoleArn();
 
+    @Nullable
+    @JsonProperty(CLOUDWATCH_ENDPOINT)
+    public abstract String cloudwatchEndpoint();
+
+    @Nullable
+    @JsonProperty(DYNAMODB_ENDPOINT)
+    public abstract String dynamodbEndpoint();
+
+    @Nullable
+    @JsonProperty(IAM_ENDPOINT)
+    public abstract String iamEndpoint();
+
+    @Nullable
+    @JsonProperty(KINESIS_ENDPOINT)
+    public abstract String kinesisEndpoint();
+
     @JsonCreator
     public static AWSRequestImpl create(@JsonProperty(REGION) String region,
                                         @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
                                         @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
-                                        @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn) {
-        return new AutoValue_AWSRequestImpl(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn);
+                                        @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
+                                        @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
+                                        @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
+                                        @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
+                                        @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint) {
+        return new AutoValue_AWSRequestImpl(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
+                                            cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint);
     }
 }

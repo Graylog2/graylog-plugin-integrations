@@ -13,6 +13,11 @@ public interface AWSRequest {
     String AWS_SECRET_ACCESS_KEY = "aws_secret_access_key";
     String ASSUME_ROLE_ARN = "assume_role_arn";
 
+    String CLOUDWATCH_ENDPOINT = "cloudwatch_endpoint";
+    String DYNAMODB_ENDPOINT = "dynamodb_endpoint";
+    String IAM_ENDPOINT = "iam_endpoint";
+    String KINESIS_ENDPOINT = "kinesis_endpoint";
+
     String region();
 
     String awsAccessKeyId();
@@ -20,4 +25,12 @@ public interface AWSRequest {
     String awsSecretAccessKey();
 
     String assumeRoleArn();
+
+    String cloudwatchEndpoint();
+
+    String dynamodbEndpoint();
+
+    String iamEndpoint();
+
+    String kinesisEndpoint();
 }
