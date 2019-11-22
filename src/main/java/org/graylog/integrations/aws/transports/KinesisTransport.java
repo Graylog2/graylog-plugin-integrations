@@ -11,6 +11,7 @@ import org.graylog.integrations.aws.AWSAuthProvider;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
+import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
@@ -96,6 +97,12 @@ public class KinesisTransport extends ThrottleableTransport {
         final String key = configuration.getString(CK_ACCESS_KEY);
         final String secret = configuration.getString(CK_SECRET_KEY);
         final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
+
+        final String cloudwatchEndpoint = configuration.getString(AWSInput.CK_CLOUDWATCH_ENDPOINT);
+        final String dynamodbEndpoint = configuration.getString(AWSInput.CK_DYNAMODB_ENDPOINT);
+        final String iamEndpoint = configuration.getString(AWSInput.CK_IAM_ENDPOINT);
+        final String kinesisEndpoint = configuration.getString(AWSInput.CK_KINESIS_ENDPOINT);
+
         Preconditions.checkArgument(StringUtils.isNotBlank(key), "An AWS key is required.");
         AwsCredentialsProvider awsCredentialsProvider = new AWSAuthProvider(region.id(), key, secret, assumeRoleArn);
         Preconditions.checkArgument(StringUtils.isNotBlank(secret), "An AWS secret is required.");
@@ -118,7 +125,8 @@ public class KinesisTransport extends ThrottleableTransport {
                 AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)), region,
                 awsCredentialsProvider,
                 configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
-                null); // TODO Dan: Specify request object.
+                AWSRequestImpl.create(region.id(), key, secret, assumeRoleArn, cloudwatchEndpoint,
+                                      dynamodbEndpoint, iamEndpoint, kinesisEndpoint));
 
         LOG.debug("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         executor.submit(this.kinesisConsumer);

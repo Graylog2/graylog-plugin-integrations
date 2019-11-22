@@ -53,6 +53,10 @@ public class AWSInput extends MessageInput {
     public static final String CK_ACCESS_KEY = "aws_access_key";
     public static final String CK_SECRET_KEY = "aws_secret_key";
     public static final String CK_ASSUME_ROLE_ARN = "aws_assume_role_arn";
+    public static final String CK_CLOUDWATCH_ENDPOINT = "cloudwatch_endpoint";
+    public static final String CK_DYNAMODB_ENDPOINT = "dynamodb_endpoint";
+    public static final String CK_IAM_ENDPOINT = "iam_endpoint";
+    public static final String CK_KINESIS_ENDPOINT = "kinesis_endpoint";
 
     @Inject
     public AWSInput(@Assisted Configuration configuration,
