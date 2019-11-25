@@ -108,6 +108,8 @@ public class AWSInput extends MessageInput {
     @ConfigClass
     public static class Config extends MessageInput.Config {
 
+        private static final String AWS_SDK_ENDPOINT_DESCRIPTION = "Only specify this if you want to override the endpoint, which the AWS SDK communicates with.";
+
         @Inject
         public Config(AWSTransport.Factory transport, AWSCodec.Factory codec) {
             super(transport.getConfig(), codec.getConfig());
@@ -147,6 +149,34 @@ public class AWSInput extends MessageInput {
                     "AWS assume role ARN",
                     "",
                     "Role ARN with required permissions (cross account access)",
+                    ConfigurationField.Optional.OPTIONAL));
+
+            request.addField(new TextField(
+                    CK_CLOUDWATCH_ENDPOINT,
+                    "AWS CloudWatch Override Endpoint",
+                    "",
+                    AWS_SDK_ENDPOINT_DESCRIPTION,
+                    ConfigurationField.Optional.OPTIONAL));
+
+            request.addField(new TextField(
+                    CK_DYNAMODB_ENDPOINT,
+                    "AWS DynamoDB Override Endpoint",
+                    "",
+                    AWS_SDK_ENDPOINT_DESCRIPTION,
+                    ConfigurationField.Optional.OPTIONAL));
+
+            request.addField(new TextField(
+                    CK_IAM_ENDPOINT,
+                    "AWS IAM Override Endpoint",
+                    "",
+                    AWS_SDK_ENDPOINT_DESCRIPTION,
+                    ConfigurationField.Optional.OPTIONAL));
+
+            request.addField(new TextField(
+                    CK_KINESIS_ENDPOINT,
+                    "AWS Kinesis Override Endpoint",
+                    "",
+                    AWS_SDK_ENDPOINT_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL));
 
             request.addField(new TextField(
