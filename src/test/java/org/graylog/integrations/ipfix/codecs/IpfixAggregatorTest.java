@@ -6,8 +6,7 @@ import io.netty.buffer.Unpooled;
 import io.pkts.Pcap;
 import io.pkts.packet.UDPPacket;
 import io.pkts.protocol.Protocol;
-import org.graylog.integrations.ipfix.InformationElementDefinitions;
-import org.graylog.integrations.ipfix.Utils;
+import org.graylog.integrations.ipfix.*;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
 import org.junit.Test;
@@ -24,11 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IpfixAggregatorTest {
     private static final Logger LOG = LoggerFactory.getLogger(IpfixAggregatorTest.class);
     private final InetSocketAddress someAddress = InetSocketAddress.createUnresolved("192.168.1.1", 999);
-    private InformationElementDefinitions definitions = new InformationElementDefinitions(
+
+    private InformationElementDefinitions standardDefinition = new InformationElementDefinitions(
             Resources.getResource("ipfix-iana-elements.json")
     );
 
-    @Test
+    @Test(expected = InvalidMessageVersion.class)
     public void completePacket() throws IOException {
         final ByteBuf packetBytes = Utils.readPacket("templates-data.ipfix");
 
@@ -38,10 +38,12 @@ public class IpfixAggregatorTest {
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
         assertThat(result.getMessage()).isNotNull();
-        // TODO complete unit test
+
+        final IpfixMessage ipfixMessage = new IpfixParser(standardDefinition).parseMessage(result.getMessage());
+        //assertThat(ipfixMessage).isNotNull();
     }
 
-    @Test
+    @Test(expected = InvalidMessageVersion.class)
     public void multipleMessagesTemplateLater() throws IOException {
         final ByteBuf datasetOnlyBytes = Utils.readPacket("dataset-only.ipfix");
         final ByteBuf withTemplatesBytes = Utils.readPacket("templates-data.ipfix");
@@ -53,9 +55,11 @@ public class IpfixAggregatorTest {
         final CodecAggregator.Result resultComplete = ipfixAggregator.addChunk(withTemplatesBytes, someAddress);
         assertThat(resultComplete.isValid()).isTrue();
         assertThat(resultComplete.getMessage()).isNotNull();
-        // TODO complete unit test
 
+        final IpfixMessage ipfixMessage = new IpfixParser(standardDefinition).parseMessage(resultComplete.getMessage());
+        //assertThat(ipfixMessage.flows()).hasSize(4);
     }
+
 
     @Test
     public void dataAndDataTemplate() throws IOException {
