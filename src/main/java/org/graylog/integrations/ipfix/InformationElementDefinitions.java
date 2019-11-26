@@ -63,32 +63,7 @@ public class InformationElementDefinitions {
         }
     }
 
-    public InformationElementDefinitions(URL standardDefFile, Optional<File> customDefFile) {
-        LOG.debug("Reading information element definition file with private enterprise numbers.");
-        final ObjectMapper objectMapper = new ObjectMapper();
-
-            try {
-                final JsonNode jsonNode = objectMapper.readTree(standardDefFile);
-                 buildPenToIedsMap(jsonNode);
-            } catch (IOException e) {
-                LOG.error("Unable to read information element definition file", e);
-            }
-            buildPenToIedsMap(objectMapper,customDefFile);
-    }
-
-    Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(final ObjectMapper objectMapper, final Optional<File> custDefFilePath) {
-
-        JsonNode custDefJsonNode = null;
-        try {
-            custDefJsonNode = objectMapper.readTree(custDefFilePath.get());
-            buildPenToIedsMap(custDefJsonNode);
-        } catch (IOException e) {
-            LOG.error("Unable to read custom information element definition file", e);
-        }
-        return penToIedsMap;
-    }
-
-    private Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(JsonNode jsonNode){
+    Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(JsonNode jsonNode){
 
         final long enterpriseNumber = jsonNode.get("enterprise_number").asLong();
         ImmutableMap.Builder<Integer, InformationElementDefinition> iedBuilder = ImmutableMap.builder();
