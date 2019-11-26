@@ -74,15 +74,8 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws MalformedURLException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-
-        //below is my imagination, on how I want my method signature to look like,
-        //without any if else blocks for null checks
-        //mandatory fields go in the constructor, optional fields follow the build method
-        // infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate).build().customDefTemplate(customIPFixDefURL);
-
         final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
         final String ipFixCustomDefPath = configuration.getString(CK_IPFIX_DEFINITION_PATH);
-
 
         if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
