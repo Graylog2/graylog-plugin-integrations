@@ -87,6 +87,8 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(PaloAltoTCPInput.class);
         addCodec(PaloAltoCodec.NAME, PaloAltoCodec.class);
 
+        // Test comment
+
         // AWS
         addCodec(AWSCodec.NAME, AWSCodec.class);
         addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
