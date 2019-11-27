@@ -65,11 +65,12 @@ public class IpfixCodecTest {
                 IpfixCodec.CK_IPFIX_DEFINITION_PATH, tempFile.getAbsolutePath());
         final Configuration configuration = new Configuration(configMap);
 
-
+        IpfixCodec codec               = new IpfixCodec(configuration,ipfixAggregator);
         final byte[] b = custDefStr.getBytes(StandardCharsets.UTF_8);
         final InetSocketAddress source = new InetSocketAddress(InetAddress.getLocalHost(), 12345);
         final RawMessage rawMessage    = new RawMessage(b, source);
-        IpfixCodec codec               = new IpfixCodec(configuration,ipfixAggregator);
+
+
         final Collection<Message> messages = codec.decodeMessages(rawMessage);
         assertThat(messages).isNotNull();
 
