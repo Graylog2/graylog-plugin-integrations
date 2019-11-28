@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -71,7 +72,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private InformationElementDefinitions infoElementDefs;
 
     @Inject
-    protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws MalformedURLException {
+    protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws IOException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
         final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
@@ -129,6 +130,11 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     @Override
     public CodecAggregator getAggregator() {
         return ipfixAggregator;
+    }
+
+
+    public InformationElementDefinitions getInfoElementDefs() {
+        return infoElementDefs;
     }
 
     @Nullable

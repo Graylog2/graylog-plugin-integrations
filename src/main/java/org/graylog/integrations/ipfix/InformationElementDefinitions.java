@@ -59,6 +59,7 @@ public class InformationElementDefinitions {
                 penToIedsMap.put(enterpriseNumber, iedBuilder.build());
             } catch (IOException e) {
                 LOG.error("Unable to read information element definition file", e);
+
             }
         }
     }

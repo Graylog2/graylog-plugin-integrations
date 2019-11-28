@@ -6,9 +6,15 @@ import io.netty.buffer.Unpooled;
 import io.pkts.Pcap;
 import io.pkts.packet.UDPPacket;
 import io.pkts.protocol.Protocol;
-import org.graylog.integrations.ipfix.*;
+import org.graylog.integrations.ipfix.InformationElementDefinitions;
+import org.graylog.integrations.ipfix.IpfixMessage;
+import org.graylog.integrations.ipfix.IpfixParser;
+import org.graylog.integrations.ipfix.Utils;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
+import org.graylog2.plugin.journal.RawMessage;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +35,8 @@ public class IpfixAggregatorTest {
             Resources.getResource("ipfix-iana-elements.json")
     );
 
-    @Test(expected = InvalidMessageVersion.class)
+    @Ignore("Not ready. Has InvalidIPFixMessageVersion.")
+    @Test
     public void completePacket() throws IOException {
         final ByteBuf packetBytes = Utils.readPacket("templates-data.ipfix");
 
@@ -40,10 +48,11 @@ public class IpfixAggregatorTest {
         assertThat(result.getMessage()).isNotNull();
 
         final IpfixMessage ipfixMessage = new IpfixParser(standardDefinition).parseMessage(result.getMessage());
-        //assertThat(ipfixMessage).isNotNull();
+        assertThat(ipfixMessage).isNotNull();
     }
 
-    @Test(expected = InvalidMessageVersion.class)
+    @Ignore("Not ready. Has InvalidIPFixMessageVersion.")
+    @Test
     public void multipleMessagesTemplateLater() throws IOException {
         final ByteBuf datasetOnlyBytes = Utils.readPacket("dataset-only.ipfix");
         final ByteBuf withTemplatesBytes = Utils.readPacket("templates-data.ipfix");
@@ -57,10 +66,10 @@ public class IpfixAggregatorTest {
         assertThat(resultComplete.getMessage()).isNotNull();
 
         final IpfixMessage ipfixMessage = new IpfixParser(standardDefinition).parseMessage(resultComplete.getMessage());
-        //assertThat(ipfixMessage.flows()).hasSize(4);
+        assertThat(ipfixMessage.flows()).hasSize(4);
     }
 
-
+    @Ignore("Not ready, change the configuration to include custom definition file")
     @Test
     public void dataAndDataTemplate() throws IOException {
 
@@ -82,10 +91,10 @@ public class IpfixAggregatorTest {
                     if (ipfixRawBuf != null) {
                         byte[] bytes = new byte[ipfixRawBuf.readableBytes()];
                         ipfixRawBuf.getBytes(0, bytes);
-                        //final Collection<Message> messages = codec.decodeMessages(new RawMessage(bytes));
-                        //if (messages != null) {
-                        //    messageCount.addAndGet(messages.size());
-                        //}
+                        final Collection<Message> messages = codec.decodeMessages(new RawMessage(bytes));
+                        if (messages != null) {
+                            messageCount.addAndGet(messages.size());
+                        }
                     }
                 }
                 return true;
@@ -93,7 +102,6 @@ public class IpfixAggregatorTest {
         } catch (IOException e) {
             LOG.debug("Cannot process PCAP stream", e);
         }
-
-        //assertThat(messageCount.get()).isEqualTo(4L);
+        assertThat(messageCount.get()).isEqualTo(4L);
     }
 }
