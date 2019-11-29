@@ -15,6 +15,7 @@ import org.graylog.integrations.aws.ClientInitializer;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
+import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog.integrations.aws.resources.requests.CreateRolePermissionRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisHealthCheckRequest;
 import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
@@ -97,12 +98,13 @@ public class KinesisService {
         this.availableCodecs = availableCodecs;
     }
 
-    private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn, String overrideEndpoint) {
+    private KinesisClient createClient(AWSRequest request) {
 
         ClientInitializer.initializeBuilder(kinesisClientBuilder,
-                                            overrideEndpoint,
-                                            Region.of(regionName),
-                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn));
+                                            request.kinesisEndpoint(),
+                                            Region.of(request.region()),
+                                            new AWSAuthProvider(request.region(), request.awsAccessKeyId(),
+                                                                request.awsSecretAccessKey(), request.assumeRoleArn()));
 
         return kinesisClientBuilder.build();
     }
@@ -138,10 +140,7 @@ public class KinesisService {
         LOG.debug("Executing healthCheck");
         LOG.debug("Requesting a list of streams to find out if the indicated stream exists.");
         // Get all the Kinesis streams that exist for a user and region
-        StreamsResponse kinesisStreamNames = getKinesisStreamNames(request.region(),
-                                                                   request.awsAccessKeyId(),
-                                                                   request.awsSecretAccessKey(),
-                                                                   request.assumeRoleArn(), "");
+        StreamsResponse kinesisStreamNames = getKinesisStreamNames(request);
 
         // Check if Kinesis stream exists
         final boolean streamExists = kinesisStreamNames.streams().stream()
@@ -152,8 +151,7 @@ public class KinesisService {
 
         LOG.debug("The stream [{}] exists", request.streamName());
 
-        KinesisClient kinesisClient = createClient(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey(),
-                                                   request.assumeRoleArn(), request.kinesisEndpoint());
+        KinesisClient kinesisClient = createClient(request);
 
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
@@ -177,20 +175,17 @@ public class KinesisService {
     /**
      * Get a list of Kinesis stream names. All available streams will be returned.
      *
-     * @param assumeRoleArn    The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
-     * @param overrideEndpoint
-     * @param regionName       The AWS region to query Kinesis stream names from.
+     * @param request The full AWS request object.
      * @return A list of all available Kinesis streams in the supplied region.
      */
-    public StreamsResponse getKinesisStreamNames(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn, String overrideEndpoint) throws ExecutionException {
+    public StreamsResponse getKinesisStreamNames(AWSRequest request) throws ExecutionException {
 
-        LOG.debug("List Kinesis streams for region [{}]", regionName);
+        LOG.debug("List Kinesis streams for region [{}]", request.region());
 
         // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
         // if AWS API always returns true for hasMoreStreamNames.
-
-        final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey, assumeRoleArn, overrideEndpoint);
+        final KinesisClient kinesisClient = createClient(request);
 
         ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
@@ -225,7 +220,7 @@ public class KinesisService {
         LOG.debug("Kinesis streams queried: [{}]", streamNames);
 
         if (streamNames.isEmpty()) {
-            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s] region.", regionName));
+            throw new BadRequestException(String.format("No Kinesis streams were found in the [%s] region.", request.region()));
         }
 
         return StreamsResponse.create(streamNames, streamNames.size());
@@ -435,11 +430,7 @@ public class KinesisService {
      */
     public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest request) {
         LOG.debug("Creating Kinesis client with the provided credentials.");
-        final KinesisClient kinesisClient = createClient(request.region(),
-                                                         request.awsAccessKeyId(),
-                                                         request.awsSecretAccessKey(),
-                                                         request.assumeRoleArn(),
-                                                         request.kinesisEndpoint());
+        final KinesisClient kinesisClient = createClient(request);
 
         LOG.debug("Creating new Kinesis stream request [{}].", request.streamName());
         final CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
@@ -496,13 +487,6 @@ public class KinesisService {
      * @return role Arn associated with the associated kinesis stream
      */
     public CreateRolePermissionResponse autoKinesisPermissions(CreateRolePermissionRequest request) {
-
-        LOG.debug("Creating the role that will allow CloudWatch to talk to Kinesis");
-        KinesisClient kinesisClient = createClient(request.region(),
-                                                   request.awsAccessKeyId(),
-                                                   request.awsSecretAccessKey(),
-                                                   request.assumeRoleArn(),
-                                                   request.kinesisEndpoint());
 
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {

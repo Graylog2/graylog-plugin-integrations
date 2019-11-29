@@ -109,9 +109,8 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @ApiOperation(value = "Get all available AWS CloudWatch log groups names for the specified region.")
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @NoAuditEvent("This does not change any data")
-    public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl awsRequest) {
-        return cloudWatchService.getLogGroupNames(awsRequest.region(), awsRequest.awsAccessKeyId(), awsRequest.awsSecretAccessKey(),
-                                                  awsRequest.assumeRoleArn(), awsRequest.cloudwatchEndpoint());
+    public LogGroupsResponse getLogGroupNames(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl request) {
+        return cloudWatchService.getLogGroupNames(request);
     }
 
     /**
@@ -124,8 +123,7 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
     @RequiresPermissions(AWSPermissions.AWS_READ)
     @NoAuditEvent("This does not change any data")
     public StreamsResponse getKinesisStreams(@ApiParam(name = "JSON body", required = true) @Valid @NotNull AWSRequestImpl request) throws ExecutionException {
-        return kinesisService.getKinesisStreamNames(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey(),
-                                                    request.assumeRoleArn(), request.kinesisEndpoint());
+        return kinesisService.getKinesisStreamNames(request);
     }
 
     /**

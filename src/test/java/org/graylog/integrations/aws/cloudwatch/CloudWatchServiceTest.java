@@ -1,5 +1,7 @@
 package org.graylog.integrations.aws.cloudwatch;
 
+import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.junit.Before;
@@ -69,7 +71,8 @@ public class CloudWatchServiceTest {
         when(logGroupsIterable.iterator()).thenReturn(responses.iterator());
         when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
 
-        final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(Region.US_EAST_1.id(), "key", "secret", null, "");
+        final AWSRequest awsRequest = AWSRequestImpl.create(Region.US_EAST_1.id(), "key", "secret", null, "", "", "", "");
+        final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(awsRequest);
 
         // Inspect the log groups returned and verify the contents and size.
         assertEquals("The number of groups should be because the two responses " +
@@ -80,6 +83,7 @@ public class CloudWatchServiceTest {
         for (String logGroupName : logGroupsResponse.logGroups()) {
             if (logGroupName.equals("group-1")) {
                 foundGroup = true;
+                break;
             }
         }
         assertTrue(foundGroup);
