@@ -15,6 +15,7 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
 import java.net.URI;
+import java.net.URL;
 
 /**
  * Responsible for initializing and building AWS SDK clients. This logic is centralized in one place to ensure consistency amongst the

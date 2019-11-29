@@ -2,11 +2,10 @@ package org.graylog.integrations.aws.transports;
 
 import com.codahale.metrics.MetricSet;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
@@ -20,6 +19,7 @@ import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.configuration.fields.NumberField;
 import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
+import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
+import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -87,17 +88,23 @@ public class KinesisTransport extends ThrottleableTransport {
     }
 
     @Override
-    public void doLaunch(MessageInput input) {
+    public void doLaunch(MessageInput input) throws MisfireException {
 
         final Region region = Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION)));
         final String key = configuration.getString(CK_ACCESS_KEY);
         final String secret = configuration.getString(CK_SECRET_KEY);
         final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
 
-        final String cloudwatchEndpoint = configuration.getString(AWSInput.CK_CLOUDWATCH_ENDPOINT);
         final String dynamodbEndpoint = configuration.getString(AWSInput.CK_DYNAMODB_ENDPOINT);
+        final String cloudwatchEndpoint = configuration.getString(AWSInput.CK_CLOUDWATCH_ENDPOINT);
         final String iamEndpoint = configuration.getString(AWSInput.CK_IAM_ENDPOINT);
         final String kinesisEndpoint = configuration.getString(AWSInput.CK_KINESIS_ENDPOINT);
+
+        // Validate the endpoints, because the Kinesis client will silently fail if an endpoint is invalid.
+        validateEndpoint(dynamodbEndpoint, "DynamoDB");
+        validateEndpoint(cloudwatchEndpoint, "CloudWatch");
+        validateEndpoint(iamEndpoint, "IAM");
+        validateEndpoint(iamEndpoint, "Kinesis");
 
         this.kinesisConsumer = new KinesisConsumer(
                 nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
@@ -108,6 +115,25 @@ public class KinesisTransport extends ThrottleableTransport {
 
         LOG.debug("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         executor.submit(this.kinesisConsumer);
+    }
+
+    /**
+     * If specified, verify that the specified endpoint is a valid URI.
+     *
+     * @param endpoint     The endpoint URI.
+     * @param endpointName The name of the endpoint. This will be included in the exception message.
+     * @throws MisfireException A {@link MisfireException} will be thrown if the URI is invalid.
+     */
+    private static void validateEndpoint(String endpoint, String endpointName) throws MisfireException {
+        if (StringUtils.isNotEmpty(endpoint)) {
+            try {
+                new URL(endpoint).toURI();
+            } catch (Exception e) {
+                // Re-throw the exception to fail the input start attempt
+                throw new MisfireException(String.format("The specified [%s] Override Endpoint [%s] is invalid.",
+                                                         endpointName, endpoint), e);
+            }
+        }
     }
 
     private Consumer<byte[]> kinesisCallback(final MessageInput input) {
