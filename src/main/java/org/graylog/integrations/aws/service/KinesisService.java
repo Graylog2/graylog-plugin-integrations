@@ -97,22 +97,22 @@ public class KinesisService {
         this.availableCodecs = availableCodecs;
     }
 
-    private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) {
+    private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn, String overrideEndpoint) {
 
         ClientInitializer.initializeBuilder(kinesisClientBuilder,
-                                            "", // TODO: Specify override endpoint;
+                                            overrideEndpoint,
                                             Region.of(regionName),
-                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn) );
+                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn));
 
         return kinesisClientBuilder.build();
     }
 
-    private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn, String region) {
+    private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn, String region, String overrideEndpoint) {
 
         ClientInitializer.initializeBuilder(iamClientBuilder,
-                                            "", // TODO: Specify override endpoint;
+                                            overrideEndpoint,
                                             Region.AWS_GLOBAL,
-                                            new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn) );
+                                            new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn));
 
         // IAM Always uses the Global region. However, the AWSAuthProvider.stsRegion must be that where the resources
         // will be created.
@@ -141,7 +141,7 @@ public class KinesisService {
         StreamsResponse kinesisStreamNames = getKinesisStreamNames(request.region(),
                                                                    request.awsAccessKeyId(),
                                                                    request.awsSecretAccessKey(),
-                                                                   request.assumeRoleArn());
+                                                                   request.assumeRoleArn(), "");
 
         // Check if Kinesis stream exists
         final boolean streamExists = kinesisStreamNames.streams().stream()
@@ -152,8 +152,8 @@ public class KinesisService {
 
         LOG.debug("The stream [{}] exists", request.streamName());
 
-        KinesisClient kinesisClient =
-                createClient(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey(), request.assumeRoleArn());
+        KinesisClient kinesisClient = createClient(request.region(), request.awsAccessKeyId(), request.awsSecretAccessKey(),
+                                                   request.assumeRoleArn(), request.kinesisEndpoint());
 
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
@@ -177,11 +177,12 @@ public class KinesisService {
     /**
      * Get a list of Kinesis stream names. All available streams will be returned.
      *
-     * @param assumeRoleArn The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
-     * @param regionName    The AWS region to query Kinesis stream names from.
+     * @param assumeRoleArn    The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
+     * @param overrideEndpoint
+     * @param regionName       The AWS region to query Kinesis stream names from.
      * @return A list of all available Kinesis streams in the supplied region.
      */
-    public StreamsResponse getKinesisStreamNames(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) throws ExecutionException {
+    public StreamsResponse getKinesisStreamNames(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn, String overrideEndpoint) throws ExecutionException {
 
         LOG.debug("List Kinesis streams for region [{}]", regionName);
 
@@ -189,7 +190,7 @@ public class KinesisService {
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
         // if AWS API always returns true for hasMoreStreamNames.
 
-        final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey, assumeRoleArn);
+        final KinesisClient kinesisClient = createClient(regionName, accessKeyId, secretAccessKey, assumeRoleArn, overrideEndpoint);
 
         ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
@@ -437,7 +438,8 @@ public class KinesisService {
         final KinesisClient kinesisClient = createClient(request.region(),
                                                          request.awsAccessKeyId(),
                                                          request.awsSecretAccessKey(),
-                                                         request.assumeRoleArn());
+                                                         request.assumeRoleArn(),
+                                                         request.kinesisEndpoint());
 
         LOG.debug("Creating new Kinesis stream request [{}].", request.streamName());
         final CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
@@ -499,12 +501,13 @@ public class KinesisService {
         KinesisClient kinesisClient = createClient(request.region(),
                                                    request.awsAccessKeyId(),
                                                    request.awsSecretAccessKey(),
-                                                   request.assumeRoleArn());
+                                                   request.assumeRoleArn(),
+                                                   request.kinesisEndpoint());
 
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
             final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey(),
-                                                        request.assumeRoleArn(), request.region());
+                                                        request.assumeRoleArn(), request.region(), request.iamEndpoint());
             String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
             setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn());

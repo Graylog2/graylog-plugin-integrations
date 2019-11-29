@@ -17,7 +17,8 @@ public class ClientInitializer {
 
     /**
      * Initialize the builder with the appropriate authorization, region, and endpoints.
-     * @param builder Any AWS client builder.
+     *
+     * @param builder  Any AWS client builder.
      * @param endpoint See {@link SdkClientBuilder#endpointOverride(java.net.URI)} javadoc.
      * @param region
      */

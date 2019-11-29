@@ -45,13 +45,13 @@ public class CloudWatchService {
         this.logsClientBuilder = logsClientBuilder;
     }
 
-    private CloudWatchLogsClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) {
+    private CloudWatchLogsClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn, String overrideEndpoint) {
         Preconditions.checkNotNull(regionName, "An AWS region is required.");
 
         ClientInitializer.initializeBuilder(logsClientBuilder,
-                                            "", // TODO: Specify override endpoint;
+                                            overrideEndpoint,
                                             Region.of(regionName),
-                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn) );
+                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn));
 
         return logsClientBuilder.build();
     }
@@ -63,11 +63,12 @@ public class CloudWatchService {
      * @param awsAccessKeyId     The AWS accessKey
      * @param awsSecretAccessKey The AWS secretKey
      * @param assumeRoleArn      The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
+     * @param overrideEndpoint
      * @return A list of log groups in alphabetical order.
      */
-    public LogGroupsResponse getLogGroupNames(String region, String awsAccessKeyId, String awsSecretAccessKey, String assumeRoleArn) {
+    public LogGroupsResponse getLogGroupNames(String region, String awsAccessKeyId, String awsSecretAccessKey, String assumeRoleArn, String overrideEndpoint) {
 
-        final CloudWatchLogsClient cloudWatchLogsClient = createClient(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn);
+        final CloudWatchLogsClient cloudWatchLogsClient = createClient(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn, overrideEndpoint);
         final DescribeLogGroupsRequest describeLogGroupsRequest = DescribeLogGroupsRequest.builder().build();
         final DescribeLogGroupsIterable responses = cloudWatchLogsClient.describeLogGroupsPaginator(describeLogGroupsRequest);
 
@@ -90,7 +91,8 @@ public class CloudWatchService {
         CloudWatchLogsClient cloudWatch = createClient(request.region(),
                                                        request.awsAccessKeyId(),
                                                        request.awsSecretAccessKey(),
-                                                       request.assumeRoleArn());
+                                                       request.assumeRoleArn(),
+                                                       request.cloudwatchEndpoint());
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
                                             .logGroupName(request.logGroupName())
