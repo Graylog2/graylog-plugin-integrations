@@ -44,7 +44,6 @@ public class KinesisConsumer implements Runnable {
     private static final TimeUnit GRACEFUL_SHUTDOWN_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
     private final String kinesisStreamName;
-    private final Region region;
     private final NodeId nodeId;
     private final KinesisTransport transport;
     private final Integer recordBatchSize;
@@ -60,17 +59,14 @@ public class KinesisConsumer implements Runnable {
                     Consumer<byte[]> handleMessageCallback,
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
-                    Region region,
                     int recordBatchSize, AWSRequest request) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
-        Preconditions.checkNotNull(region, "A Region is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
         this.nodeId = requireNonNull(nodeId, "nodeId");
         this.transport = transport;
         this.handleMessageCallback = handleMessageCallback;
         this.kinesisStreamName = requireNonNull(kinesisStreamName, "kinesisStream");
-        this.region = requireNonNull(region, "region");
         this.objectMapper = objectMapper;
         this.awsMessageType = awsMessageType;
         this.recordBatchSize = recordBatchSize;
@@ -82,6 +78,8 @@ public class KinesisConsumer implements Runnable {
         LOG.debug("Starting the Kinesis Consumer.");
         AwsCredentialsProvider credentialsProvider = new AWSAuthProvider(request.region(), request.awsAccessKeyId(),
                                                                          request.awsSecretAccessKey(), request.assumeRoleArn());
+
+        final Region region = Region.of(request.region());
 
         // Create all clients needed for the Kinesis consumer.
         final DynamoDbAsyncClientBuilder dynamoDbClientBuilder = DynamoDbAsyncClient.builder();

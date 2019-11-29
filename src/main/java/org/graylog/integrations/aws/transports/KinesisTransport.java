@@ -7,7 +7,6 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.assistedinject.Assisted;
 import org.apache.commons.lang.StringUtils;
-import org.graylog.integrations.aws.AWSAuthProvider;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
@@ -30,7 +29,6 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 
 import javax.inject.Inject;
@@ -106,7 +104,7 @@ public class KinesisTransport extends ThrottleableTransport {
 
         this.kinesisConsumer = new KinesisConsumer(
                 nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
-                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)), region,
+                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
                 configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
                 AWSRequestImpl.create(region.id(), key, secret, assumeRoleArn, cloudwatchEndpoint,
                                       dynamodbEndpoint, iamEndpoint, kinesisEndpoint));

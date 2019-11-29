@@ -22,7 +22,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
  * Resolves the appropriate AWS authorization provider.
  *
  * If an {@code accessKey} and {@code secretKey} are provided, they will be used explicitly.
- * If not, the default DefaultCredentialsProvider will be used instead. This will resolve the policy
+ * If not, the default DefaultCredentialsProvider will be used instead. This will resolve the role/policy
  * using using Java props, environment variables, EC2 instance roles etc. See the {@link DefaultCredentialsProvider}
  * Javadoc for more information.
  */
@@ -60,7 +60,7 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
 
     /**
      * In order to assume a role, a role must be provided to the AWS STS client a role that has the "sts:AssumeRole"
-     * permission, which allows a role to be assumed.
+     * permission, which provides authorization for a role to be assumed.
      *
      * @param awsCredentials A pre-initialized AwsCredentialsProvider that has a role, which is authorized for the
      *                       "sts:AssumeRole" permission.

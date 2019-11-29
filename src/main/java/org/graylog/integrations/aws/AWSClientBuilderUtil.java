@@ -38,8 +38,7 @@ public class AWSClientBuilderUtil {
         builder.region(region);
         builder.credentialsProvider(credentialsProvider);
 
-        // The endpoint override explicitly overrides the default URL used for all
-        // AWS API communication.
+        // The endpoint override explicitly overrides the default URL used for all AWS API communication.
         if (StringUtils.isNotEmpty(endpoint)) {
             builder.endpointOverride(URI.create(endpoint));
         }
@@ -82,7 +81,7 @@ public class AWSClientBuilderUtil {
     }
 
     /**
-     * Initialize and build the Iam client.
+     * Initialize and build the IAM client.
      *
      * @param clientBuilder The builder, which was supplied through dependency injection.
      * @param request       The full AWSRequest.
