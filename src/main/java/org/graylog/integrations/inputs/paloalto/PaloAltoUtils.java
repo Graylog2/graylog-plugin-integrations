@@ -37,8 +37,7 @@ public class PaloAltoUtils {
     }
 
     /**
-     * Helper for parsing PAN messages from HEX export.
-     */
+     * Helper for parsing PAN messages from HEX export. */
     public static void dataParserTest() throws Exception {
 
         List<String> hexVals = new ArrayList<>();
