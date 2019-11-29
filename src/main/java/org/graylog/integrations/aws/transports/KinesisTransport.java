@@ -99,9 +99,6 @@ public class KinesisTransport extends ThrottleableTransport {
         final String iamEndpoint = configuration.getString(AWSInput.CK_IAM_ENDPOINT);
         final String kinesisEndpoint = configuration.getString(AWSInput.CK_KINESIS_ENDPOINT);
 
-        Preconditions.checkArgument(StringUtils.isNotBlank(key), "An AWS key is required.");
-        Preconditions.checkArgument(StringUtils.isNotBlank(secret), "An AWS secret is required.");
-
         this.kinesisConsumer = new KinesisConsumer(
                 nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
                 AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
