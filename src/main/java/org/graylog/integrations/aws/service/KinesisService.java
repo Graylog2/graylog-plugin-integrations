@@ -11,6 +11,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.graylog.integrations.aws.AWSAuthProvider;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.ClientInitializer;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
@@ -98,19 +99,24 @@ public class KinesisService {
 
     private KinesisClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) {
 
-        return kinesisClientBuilder.region(Region.of(regionName))
-                                   .credentialsProvider(new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn))
-                                   .build();
-    }
+        ClientInitializer.initializeBuilder(kinesisClientBuilder,
+                                            "", // TODO: Specify override endpoint;
+                                            Region.of(regionName),
+                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn) );
 
+        return kinesisClientBuilder.build();
+    }
 
     private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn, String region) {
 
+        ClientInitializer.initializeBuilder(iamClientBuilder,
+                                            "", // TODO: Specify override endpoint;
+                                            Region.AWS_GLOBAL,
+                                            new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn) );
+
         // IAM Always uses the Global region. However, the AWSAuthProvider.stsRegion must be that where the resources
         // will be created.
-        return iamClientBuilder.region(Region.AWS_GLOBAL)
-                               .credentialsProvider(new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn))
-                               .build();
+        return iamClientBuilder.build();
     }
 
     /**

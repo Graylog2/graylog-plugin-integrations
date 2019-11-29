@@ -9,6 +9,7 @@ import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
 import com.google.common.base.Preconditions;
 import org.graylog.integrations.aws.AWSAuthProvider;
+import org.graylog.integrations.aws.ClientInitializer;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
@@ -47,9 +48,12 @@ public class CloudWatchService {
     private CloudWatchLogsClient createClient(String regionName, String accessKeyId, String secretAccessKey, String assumeRoleArn) {
         Preconditions.checkNotNull(regionName, "An AWS region is required.");
 
-        return logsClientBuilder.region(Region.of(regionName))
-                                .credentialsProvider(new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn))
-                                .build();
+        ClientInitializer.initializeBuilder(logsClientBuilder,
+                                            "", // TODO: Specify override endpoint;
+                                            Region.of(regionName),
+                                            new AWSAuthProvider(regionName, accessKeyId, secretAccessKey, assumeRoleArn) );
+
+        return logsClientBuilder.build();
     }
 
     /**

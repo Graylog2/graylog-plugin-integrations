@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
+import org.graylog.integrations.aws.ClientInitializer;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
@@ -81,37 +82,21 @@ public class KinesisConsumer implements Runnable {
         this.request = request;
     }
 
-    /**
-     * Initialize the builder with the appropriate authorization, region, and endpoints.
-     * @param builder Any AWS client builder.
-     * @param endpoint See {@link SdkClientBuilder#endpointOverride(java.net.URI)} javadoc.
-     */
-    private void initializeBuilder(AwsClientBuilder builder, String endpoint) {
-        builder.region(region);
-        builder.credentialsProvider(credentialsProvider);
-
-        // The endpoint override explicitly overrides the default URL used for all
-        // AWS API communication.
-        if (StringUtils.isNotEmpty(endpoint)) {
-            builder.endpointOverride(URI.create(endpoint));
-        }
-    }
-
     public void run() {
 
         LOG.debug("Starting the Kinesis Consumer.");
 
         // Create all clients needed for the Kinesis consumer.
         final DynamoDbAsyncClientBuilder dynamoDbClientBuilder = DynamoDbAsyncClient.builder();
-        initializeBuilder(dynamoDbClientBuilder, request.dynamodbEndpoint());
+        ClientInitializer.initializeBuilder(dynamoDbClientBuilder, request.dynamodbEndpoint(), region, credentialsProvider);
         final DynamoDbAsyncClient dynamoClient = dynamoDbClientBuilder.build();
 
         final CloudWatchAsyncClientBuilder cloudwatchClientBuilder = CloudWatchAsyncClient.builder();
-        initializeBuilder(cloudwatchClientBuilder, request.cloudwatchEndpoint());
+        ClientInitializer.initializeBuilder(cloudwatchClientBuilder, request.cloudwatchEndpoint(), region, credentialsProvider);
         final CloudWatchAsyncClient cloudWatchClient = cloudwatchClientBuilder.build();
 
         final KinesisAsyncClientBuilder kinesisAsyncClientBuilder = KinesisAsyncClient.builder();
-        initializeBuilder(kinesisAsyncClientBuilder, request.kinesisEndpoint());
+        ClientInitializer.initializeBuilder(kinesisAsyncClientBuilder, request.kinesisEndpoint(), region, credentialsProvider);
         final KinesisAsyncClient kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(kinesisAsyncClientBuilder);
 
         final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());
