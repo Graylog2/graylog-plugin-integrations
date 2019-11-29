@@ -8,10 +8,9 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.common.base.Preconditions;
 import org.apache.commons.collections.CollectionUtils;
-import org.graylog.integrations.aws.AWSAuthProvider;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
-import org.graylog.integrations.aws.ClientInitializer;
+import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogEvent;
 import org.graylog.integrations.aws.cloudwatch.CloudWatchLogSubscriptionData;
 import org.graylog.integrations.aws.cloudwatch.KinesisLogEntry;
@@ -34,7 +33,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
@@ -98,29 +96,6 @@ public class KinesisService {
         this.availableCodecs = availableCodecs;
     }
 
-    private KinesisClient createClient(AWSRequest request) {
-
-        ClientInitializer.initializeBuilder(kinesisClientBuilder,
-                                            request.kinesisEndpoint(),
-                                            Region.of(request.region()),
-                                            new AWSAuthProvider(request.region(), request.awsAccessKeyId(),
-                                                                request.awsSecretAccessKey(), request.assumeRoleArn()));
-
-        return kinesisClientBuilder.build();
-    }
-
-    private IamClient createIamClient(String accessKeyId, String secretAccessKey, String assumeRoleArn, String region, String overrideEndpoint) {
-
-        ClientInitializer.initializeBuilder(iamClientBuilder,
-                                            overrideEndpoint,
-                                            Region.AWS_GLOBAL,
-                                            new AWSAuthProvider(region, accessKeyId, secretAccessKey, assumeRoleArn));
-
-        // IAM Always uses the Global region. However, the AWSAuthProvider.stsRegion must be that where the resources
-        // will be created.
-        return iamClientBuilder.build();
-    }
-
     /**
      * The Health Check performs the following actions:
      * <p>
@@ -151,7 +126,7 @@ public class KinesisService {
 
         LOG.debug("The stream [{}] exists", request.streamName());
 
-        KinesisClient kinesisClient = createClient(request);
+        KinesisClient kinesisClient = AWSClientBuilderUtil.buildClient(kinesisClientBuilder, request);
 
         // Retrieve one records from the Kinesis stream
         final List<Record> records = retrieveRecords(request.streamName(), kinesisClient);
@@ -185,7 +160,7 @@ public class KinesisService {
         // KinesisClient.listStreams() is paginated. Use a retryer to loop and stream names (while ListStreamsResponse.hasMoreStreams() is true).
         // The stopAfterAttempt retryer option is an emergency brake to prevent infinite loops
         // if AWS API always returns true for hasMoreStreamNames.
-        final KinesisClient kinesisClient = createClient(request);
+        final KinesisClient kinesisClient = AWSClientBuilderUtil.buildClient(kinesisClientBuilder, request);
 
         ListStreamsRequest streamsRequest = ListStreamsRequest.builder().limit(KINESIS_LIST_STREAMS_LIMIT).build();
         final ListStreamsResponse listStreamsResponse = kinesisClient.listStreams(streamsRequest);
@@ -430,7 +405,7 @@ public class KinesisService {
      */
     public KinesisNewStreamResponse createNewKinesisStream(KinesisNewStreamRequest request) {
         LOG.debug("Creating Kinesis client with the provided credentials.");
-        final KinesisClient kinesisClient = createClient(request);
+        final KinesisClient kinesisClient = AWSClientBuilderUtil.buildClient(kinesisClientBuilder, request);
 
         LOG.debug("Creating new Kinesis stream request [{}].", request.streamName());
         final CreateStreamRequest createStreamRequest = CreateStreamRequest.builder()
@@ -490,8 +465,7 @@ public class KinesisService {
 
         String roleName = String.format(ROLE_NAME_FORMAT, DateTime.now().toString(UNIQUE_ROLE_DATE_FORMAT));
         try {
-            final IamClient iamClient = createIamClient(request.awsAccessKeyId(), request.awsSecretAccessKey(),
-                                                        request.assumeRoleArn(), request.region(), request.iamEndpoint());
+            final IamClient iamClient = AWSClientBuilderUtil.buildClient(iamClientBuilder, request);
             String createRoleResponse = createRoleForKinesisAutoSetup(iamClient, request.region(), roleName);
             LOG.debug(createRoleResponse);
             setPermissionsForKinesisAutoSetupRole(iamClient, roleName, request.streamArn());

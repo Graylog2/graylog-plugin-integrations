@@ -32,8 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sts.StsClient;
-import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
 
 import javax.inject.Inject;
 import java.util.Objects;
@@ -104,26 +102,11 @@ public class KinesisTransport extends ThrottleableTransport {
         final String kinesisEndpoint = configuration.getString(AWSInput.CK_KINESIS_ENDPOINT);
 
         Preconditions.checkArgument(StringUtils.isNotBlank(key), "An AWS key is required.");
-        AwsCredentialsProvider awsCredentialsProvider = new AWSAuthProvider(region.id(), key, secret, assumeRoleArn);
         Preconditions.checkArgument(StringUtils.isNotBlank(secret), "An AWS secret is required.");
 
-        // Assume role ARN functionality only applies to the Kinesis runtime (not to the setup flows).
-        if (StringUtils.isNotBlank(assumeRoleArn)) {
-            StsClient stsClient = StsClient.builder()
-                                           .region(region)
-                                           .credentialsProvider(awsCredentialsProvider).build();
-            String roleSessionName = String.format("API_KEY_%s@ACCOUNT_%s",
-                                                   key,
-                                                   stsClient.getCallerIdentity().account());
-            awsCredentialsProvider = StsAssumeRoleCredentialsProvider.builder()
-                                                                     .stsClient(stsClient)
-                                                                     .refreshRequest(r -> r.roleArn(assumeRoleArn)
-                                                                                           .roleSessionName(roleSessionName)).build();
-        }
         this.kinesisConsumer = new KinesisConsumer(
                 nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
                 AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)), region,
-                awsCredentialsProvider,
                 configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
                 AWSRequestImpl.create(region.id(), key, secret, assumeRoleArn, cloudwatchEndpoint,
                                       dynamodbEndpoint, iamEndpoint, kinesisEndpoint));

@@ -7,9 +7,7 @@ import com.github.rholder.retry.Retryer;
 import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.WaitStrategies;
-import com.google.common.base.Preconditions;
-import org.graylog.integrations.aws.AWSAuthProvider;
-import org.graylog.integrations.aws.ClientInitializer;
+import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog.integrations.aws.resources.requests.CreateLogSubscriptionRequest;
 import org.graylog.integrations.aws.resources.responses.CreateLogSubscriptionResponse;
@@ -17,7 +15,6 @@ import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog2.shared.utilities.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
 import software.amazon.awssdk.services.cloudwatchlogs.model.DescribeLogGroupsRequest;
@@ -46,18 +43,6 @@ public class CloudWatchService {
         this.logsClientBuilder = logsClientBuilder;
     }
 
-    private CloudWatchLogsClient createClient(AWSRequest request) {
-        Preconditions.checkNotNull(request.region(), "An AWS region is required.");
-
-        ClientInitializer.initializeBuilder(logsClientBuilder,
-                                            request.cloudwatchEndpoint(),
-                                            Region.of(request.region()),
-                                            new AWSAuthProvider(request.region(), request.awsAccessKeyId(),
-                                                                request.awsSecretAccessKey(), request.assumeRoleArn()));
-
-        return logsClientBuilder.build();
-    }
-
     /**
      * Returns a list of log groups that exist in CloudWatch.
      *
@@ -66,7 +51,7 @@ public class CloudWatchService {
      */
     public LogGroupsResponse getLogGroupNames(AWSRequest request) {
 
-        final CloudWatchLogsClient cloudWatchLogsClient = createClient(request);
+        final CloudWatchLogsClient cloudWatchLogsClient = AWSClientBuilderUtil.buildClient(logsClientBuilder, request);
         final DescribeLogGroupsRequest describeLogGroupsRequest = DescribeLogGroupsRequest.builder().build();
         final DescribeLogGroupsIterable responses = cloudWatchLogsClient.describeLogGroupsPaginator(describeLogGroupsRequest);
 
@@ -86,7 +71,7 @@ public class CloudWatchService {
     }
 
     public CreateLogSubscriptionResponse addSubscriptionFilter(CreateLogSubscriptionRequest request) {
-        CloudWatchLogsClient cloudWatch = createClient(request);
+        CloudWatchLogsClient cloudWatch = AWSClientBuilderUtil.buildClient(logsClientBuilder, request);
         final PutSubscriptionFilterRequest putSubscriptionFilterRequest =
                 PutSubscriptionFilterRequest.builder()
                                             .logGroupName(request.logGroupName())
