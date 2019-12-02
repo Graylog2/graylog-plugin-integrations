@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { Table } from 'components/graylog';
+import { Icon } from 'components/common';
 
 const Automatic = () => {
   return (
@@ -40,7 +41,7 @@ const Automatic = () => {
       <tfoot>
         <tr>
           <td colSpan="2">
-            <DocumentationNote>For more information, check out the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html" target="_blank" rel="noopener noreferrer">AWS Credential Configuration Documentation <i className="fa fa-external-link fa-sm" /></a></DocumentationNote>
+            <DocumentationNote>For more information, check out the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html" target="_blank" rel="noopener noreferrer">AWS Credential Configuration Documentation <Icon name="external-link" /></a></DocumentationNote>
           </td>
         </tr>
       </tfoot>
