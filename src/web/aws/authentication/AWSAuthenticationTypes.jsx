@@ -7,14 +7,23 @@ import { useTheme } from 'theme/GraylogThemeContext';
 
 import { FormDataContext } from 'aws/context/FormData';
 import { AWS_AUTH_TYPES } from 'aws/common/constants';
+
 import KeySecret from './KeySecret';
-import ARN from './ARN';
 import Automatic from './Automatic';
+import ARN from './ARN';
 
 const AWSAuthenticationTypes = ({ onChange }) => {
   const { colors } = useTheme();
   const { clearField, formData } = useContext(FormDataContext);
-  const defaultAuthTypeValue = formData.awsAuthenticationType ? formData.awsAuthenticationType.value : AWS_AUTH_TYPES.automatic;
+
+  const {
+    awsAuthenticationType,
+    awsCloudWatchAwsSecret,
+    awsCloudWatchAwsKey,
+    awsCloudWatchAssumeARN,
+  } = formData;
+
+  const defaultAuthTypeValue = awsAuthenticationType ? awsAuthenticationType.value : AWS_AUTH_TYPES.automatic;
   const [currentType, setCurrenType] = useState(defaultAuthTypeValue);
 
   useEffect(() => {
@@ -49,24 +58,28 @@ const AWSAuthenticationTypes = ({ onChange }) => {
              onChange={handleTypeChange}
              label="AWS Authentication Type"
              defaultValue={currentType}>
-        {Object.keys(AWS_AUTH_TYPES).map(type => <option value={AWS_AUTH_TYPES[type]} key={`option-${type}`}>{AWS_AUTH_TYPES[type]}</option>)}
+        {Object.keys(AWS_AUTH_TYPES).map(type => (
+          <option value={AWS_AUTH_TYPES[type]}
+                  key={`option-${type}`}>
+            {AWS_AUTH_TYPES[type]}
+          </option>
+        ))}
       </Input>
 
       <AuthWrapper>
         {isType(AWS_AUTH_TYPES.automatic) && <Automatic />}
 
         {isType(AWS_AUTH_TYPES.keysecret) && (
-          <KeySecret awsKey={formData.awsCloudWatchAwsKey}
-                     awsSecret={formData.awsCloudWatchAwsSecret}
+          <KeySecret awsKey={awsCloudWatchAwsKey}
+                     awsSecret={awsCloudWatchAwsSecret}
                      onChange={onChange} />
         )}
       </AuthWrapper>
 
-      <ARN awsARN={formData.awsCloudWatchAssumeARN} onChange={onChange} />
+      <ARN awsARN={awsCloudWatchAssumeARN} onChange={onChange} />
     </>
   );
 };
-
 
 AWSAuthenticationTypes.propTypes = {
   onChange: PropTypes.func.isRequired,
