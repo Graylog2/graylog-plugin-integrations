@@ -206,6 +206,17 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             }
         }
 
-
+        @Override
+        public ConfigurationRequest getRequestedConfiguration() {
+            final ConfigurationRequest configuration = super.getRequestedConfiguration();
+            configuration.addField(
+                    new TextField(CK_IPFIX_DEFINITION_PATH,
+                            "IPFIX field definitions",
+                            "",
+                            "Path to the JSON file containing IPFIX field definitions",
+                            ConfigurationField.Optional.OPTIONAL)
+            );
+            return configuration;
+        }
     }
 }
