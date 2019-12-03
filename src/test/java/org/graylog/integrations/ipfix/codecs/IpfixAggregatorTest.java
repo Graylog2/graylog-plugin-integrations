@@ -15,14 +15,22 @@ import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
 import org.graylog2.plugin.journal.RawMessage;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +42,9 @@ public class IpfixAggregatorTest {
     private InformationElementDefinitions standardDefinition = new InformationElementDefinitions(
             Resources.getResource("ipfix-iana-elements.json")
     );
+
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Ignore("Not ready. Has InvalidIPFixMessageVersion.")
     @Test
@@ -69,12 +80,22 @@ public class IpfixAggregatorTest {
         assertThat(ipfixMessage.flows()).hasSize(4);
     }
 
-    @Ignore("Not ready, change the configuration to include custom definition file.")
     @Test
     public void dataAndDataTemplate() throws IOException {
 
         final IpfixAggregator ipfixAggregator = new IpfixAggregator();
-        final IpfixCodec codec = new IpfixCodec(Configuration.EMPTY_CONFIGURATION, ipfixAggregator);
+        final File tempFile = temporaryFolder.newFile("tempFile.json");
+        //load the custom definition file
+        String custDefStr = "{ \"enterprise_number\": 3054, \"information_elements\": [ { \"element_id\": 110, \"name\": \"l7ApplicationId\", \"data_type\": \"unsigned32\" }, { \"element_id\": 111, \"name\": \"l7ApplicationName\", \"data_type\": \"string\" }, { \"element_id\": 120, \"name\": \"sourceIpCountryCode\", \"data_type\": \"string\" }, { \"element_id\": 121, \"name\": \"sourceIpCountryName\", \"data_type\": \"string\" }, { \"element_id\": 122, \"name\": \"sourceIpRegionCode\", \"data_type\": \"string\" }, { \"element_id\": 123, \"name\": \"sourceIpRegionName\", \"data_type\": \"string\" }, { \"element_id\": 125, \"name\": \"sourceIpCityName\", \"data_type\": \"string\" }, { \"element_id\": 126, \"name\": \"sourceIpLatitude\", \"data_type\": \"float32\" }, { \"element_id\": 127, \"name\": \"sourceIpLongitude\", \"data_type\": \"float32\" }, { \"element_id\": 140, \"name\": \"destinationIpCountryCode\", \"data_type\": \"string\" }, { \"element_id\": 141, \"name\": \"destinationIpCountryName\", \"data_type\": \"string\" }, { \"element_id\": 142, \"name\": \"destinationIpRegionCode\", \"data_type\": \"string\" }, { \"element_id\": 143, \"name\": \"destinationIpRegionName\", \"data_type\": \"string\" }, { \"element_id\": 145, \"name\": \"destinationIpCityName\", \"data_type\": \"string\" }, { \"element_id\": 146, \"name\": \"destinationIpLatitude\", \"data_type\": \"float32\" }, { \"element_id\": 147, \"name\": \"destinationIpLongitude\", \"data_type\": \"float32\" }, { \"element_id\": 160, \"name\": \"osDeviceId\", \"data_type\": \"unsigned8\" }, { \"element_id\": 161, \"name\": \"osDeviceName\", \"data_type\": \"string\" }, { \"element_id\": 162, \"name\": \"browserId\", \"data_type\": \"unsigned8\" }, { \"element_id\": 163, \"name\": \"browserName\", \"data_type\": \"string\" }, { \"element_id\": 176, \"name\": \"reverseOctetDeltaCount\", \"data_type\": \"unsigned64\" }, { \"element_id\": 177, \"name\": \"reversePacketDeltaCount\", \"data_type\": \"unsigned64\" }, { \"element_id\": 178, \"name\": \"sslConnectionEncryptionType\", \"data_type\": \"string\" }, { \"element_id\": 179, \"name\": \"sslEncryptionCipherName\", \"data_type\": \"string\" }, { \"element_id\": 180, \"name\": \"sslEncryptionKeyLength\", \"data_type\": \"unsigned16\" }, { \"element_id\": 182, \"name\": \"userAgent\", \"data_type\": \"string\" }, { \"element_id\": 183, \"name\": \"hostName\", \"data_type\": \"string\" }, { \"element_id\": 184, \"name\": \"uri\", \"data_type\": \"string\" }, { \"element_id\": 185, \"name\": \"dnsText\", \"data_type\": \"string\" }, { \"element_id\": 186, \"name\": \"sourceAsName\", \"data_type\": \"string\" }, { \"element_id\": 187, \"name\": \"destinationAsName\", \"data_type\": \"string\" }, { \"element_id\": 188, \"name\": \"transactionLatency\", \"data_type\": \"unsigned32\" }, { \"element_id\": 189, \"name\": \"dnsQueryHostName\", \"data_type\": \"string\" }, { \"element_id\": 190, \"name\": \"dnsResponseHostName\", \"data_type\": \"string\" }, { \"element_id\": 191, \"name\": \"dnsClasses\", \"data_type\": \"string\" }, { \"element_id\": 192, \"name\": \"threatType\", \"data_type\": \"string\" }, { \"element_id\": 193, \"name\": \"threatIpv4\", \"data_type\": \"ipv4address\" }, { \"element_id\": 194, \"name\": \"threatIpv6\", \"data_type\": \"ipv6address\" }, { \"element_id\": 195, \"name\": \"httpSession\", \"data_type\": \"subtemplatelist\" }, { \"element_id\": 196, \"name\": \"requestTime\", \"data_type\": \"unsigned32\" }, { \"element_id\": 197, \"name\": \"dnsRecord\", \"data_type\": \"subtemplatelist\" }, { \"element_id\": 198, \"name\": \"dnsName\", \"data_type\": \"string\" }, { \"element_id\": 199, \"name\": \"dnsIpv4Address\", \"data_type\": \"ipv4address\" }, { \"element_id\": 200, \"name\": \"dnsIpv6Address\", \"data_type\": \"ipv6address\" }, { \"element_id\": 201, \"name\": \"sni\", \"data_type\": \"string\" }, { \"element_id\": 457, \"name\": \"httpStatusCode\", \"data_type\": \"unsigned16\" }, { \"element_id\": 459, \"name\": \"httpRequestMethod\", \"data_type\": \"string\" }, { \"element_id\": 462, \"name\": \"httpMessageVersion\", \"data_type\": \"string\" } ] }\n";
+        // Create a temporary json file.
+        Files.write(tempFile.toPath(), custDefStr.getBytes(StandardCharsets.UTF_8));
+
+        // load the configMap
+        final HashMap<String, Object> configMap = new HashMap<>();
+        configMap.put(IpfixCodec.CK_IPFIX_DEFINITION_PATH,tempFile.getAbsolutePath());
+        final Configuration configuration = new Configuration(configMap);
+
+        final IpfixCodec codec = new IpfixCodec(configuration, ipfixAggregator);
 
         AtomicInteger messageCount = new AtomicInteger();
         try (InputStream stream = Resources.getResource("data-datatemplate.pcap").openStream()) {

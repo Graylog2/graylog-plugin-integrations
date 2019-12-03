@@ -83,7 +83,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
         final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
-        final String ipFixCustomDefPath = configuration.getString(CK_IPFIX_DEFINITION_PATH);
+        final String ipFixCustomDefPath    = (String) configuration.getSource().get(CK_IPFIX_DEFINITION_PATH);
 
         if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
