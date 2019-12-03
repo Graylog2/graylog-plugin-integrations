@@ -23,11 +23,9 @@ import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Holds the information element definitions for the IANA assigned IPFIX information elements, as well as the
@@ -59,12 +57,11 @@ public class InformationElementDefinitions {
                 penToIedsMap.put(enterpriseNumber, iedBuilder.build());
             } catch (IOException e) {
                 LOG.error("Unable to read information element definition file", e);
-
             }
         }
     }
 
-    Map<Long, Map<Integer, InformationElementDefinition>>  buildPenToIedsMap(JsonNode jsonNode){
+    Map<Long, Map<Integer, InformationElementDefinition>> buildPenToIedsMap(JsonNode jsonNode) {
 
         final long enterpriseNumber = jsonNode.get("enterprise_number").asLong();
         ImmutableMap.Builder<Integer, InformationElementDefinition> iedBuilder = ImmutableMap.builder();
@@ -78,8 +75,6 @@ public class InformationElementDefinitions {
         penToIedsMap.put(enterpriseNumber, iedBuilder.build());
         return penToIedsMap;
     }
-
-
 
     public static InformationElementDefinitions empty() {
         return new InformationElementDefinitions();
