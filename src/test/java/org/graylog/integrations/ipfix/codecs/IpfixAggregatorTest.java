@@ -69,7 +69,7 @@ public class IpfixAggregatorTest {
         assertThat(ipfixMessage.flows()).hasSize(4);
     }
 
-    @Ignore("Not ready, change the configuration to include custom definition file")
+    @Ignore("Not ready, change the configuration to include custom definition file.")
     @Test
     public void dataAndDataTemplate() throws IOException {
 

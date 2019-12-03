@@ -24,13 +24,16 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.Unpooled;
-import org.graylog.integrations.ipfix.*;
+import org.graylog.integrations.ipfix.Flow;
+import org.graylog.integrations.ipfix.InformationElementDefinitions;
+import org.graylog.integrations.ipfix.IpfixException;
+import org.graylog.integrations.ipfix.IpfixJournal;
+import org.graylog.integrations.ipfix.IpfixParser;
+import org.graylog.integrations.ipfix.TemplateRecord;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.ResolvableInetSocketAddress;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
-import org.graylog2.plugin.configuration.fields.ConfigurationField;
-import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.annotations.Codec;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
@@ -50,13 +53,17 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Codec(name = "ipfix", displayName = "IPFIX Codec")
@@ -122,7 +129,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr,
                                               Number srcPort, Number dstPort, long protocol) {
         String message = String.format(Locale.ROOT, "Ipfix [" + srcAddr + "]:" + srcPort + " <> [" + dstAddr + "]:" + dstPort + " " +
-                "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
+                                                    "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
         return message;
     }
 
@@ -131,7 +138,6 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     public CodecAggregator getAggregator() {
         return ipfixAggregator;
     }
-
 
     public InformationElementDefinitions getInfoElementDefs() {
         return infoElementDefs;
@@ -148,24 +154,24 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             final Map<Integer, ByteString> templatesMap = rawIpfix.getTemplatesMap();
 
             final Map<Integer, TemplateRecord> templateRecordMap = Seq.seq(templatesMap)
-                    .map(entry -> entry.map2(byteString -> parser.parseTemplateRecord(Unpooled.wrappedBuffer(byteString.toByteArray()))))
-                    .toMap(Tuple2::v1, Tuple2::v2);
+                                                                      .map(entry -> entry.map2(byteString -> parser.parseTemplateRecord(Unpooled.wrappedBuffer(byteString.toByteArray()))))
+                                                                      .toMap(Tuple2::v1, Tuple2::v2);
 
             return rawIpfix.getDataSetsList().stream()
-                    .map(dataSet -> {
-                        final int templateId = dataSet.getTemplateId();
-                        final ZonedDateTime flowExportTimestamp = ZonedDateTime.ofInstant(Instant.ofEpochSecond(dataSet.getTimestampEpochSeconds()), ZoneOffset.UTC);
-                        final TemplateRecord templateRecord = templateRecordMap.get(templateId);
-                        if (templateRecord == null) {
-                            throw new IpfixException("Missing required template in journal entry for data records: template id " + templateId);
-                        }
-                        final Set<Flow> flows = parser.parseDataSet(templateRecord.informationElements(),
-                                Unpooled.wrappedBuffer(dataSet.getDataRecords().toByteArray()));
-                        return flows.stream()
-                                .map(flow -> formatFlow(flowExportTimestamp, sender, flow));
-                    })
-                    .flatMap(messageStream -> messageStream)
-                    .collect(Collectors.toList());
+                           .map(dataSet -> {
+                               final int templateId = dataSet.getTemplateId();
+                               final ZonedDateTime flowExportTimestamp = ZonedDateTime.ofInstant(Instant.ofEpochSecond(dataSet.getTimestampEpochSeconds()), ZoneOffset.UTC);
+                               final TemplateRecord templateRecord = templateRecordMap.get(templateId);
+                               if (templateRecord == null) {
+                                   throw new IpfixException("Missing required template in journal entry for data records: template id " + templateId);
+                               }
+                               final Set<Flow> flows = parser.parseDataSet(templateRecord.informationElements(),
+                                                                           Unpooled.wrappedBuffer(dataSet.getDataRecords().toByteArray()));
+                               return flows.stream()
+                                           .map(flow -> formatFlow(flowExportTimestamp, sender, flow));
+                           })
+                           .flatMap(messageStream -> messageStream)
+                           .collect(Collectors.toList());
         } catch (InvalidProtocolBufferException e) {
             LOG.error("Unable to parse ipfix journal message", e);
             return Collections.emptyList();

@@ -21,6 +21,7 @@ import java.util.Collection;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+@Ignore("All tests in this class are in development and not yet ready.")
 public class IpfixCodecTest {
 
     @Rule
@@ -35,7 +36,7 @@ public class IpfixCodecTest {
         codec = new IpfixCodec(Configuration.EMPTY_CONFIGURATION, ipfixAggregator);
     }
 
-    @Ignore("Invalid CK_IPFIX_DEFINITION_PATH does not throw IOException,feature not ready")
+    @Ignore("Invalid CK_IPFIX_DEFINITION_PATH does not throw IOException, feature not ready.")
     @Test
     public void constructorFailsIfIPFixDefinitionsPathDoesNotExist() throws Exception {
         final File definitionsFile = temporaryFolder.newFile();
@@ -48,7 +49,7 @@ public class IpfixCodecTest {
                 .withMessageEndingWith("(No such file or directory)");
     }
 
-    @Ignore("Not ready")
+    @Ignore("Not ready.")
     @Test
     public void constructorSucceedsIfIPFixDefinitionsPathIsValidSONFile() throws Exception {
 
@@ -66,8 +67,5 @@ public class IpfixCodecTest {
         final RawMessage rawMessage = new RawMessage(b, source);
         final Collection<Message> messages = codec.decodeMessages(rawMessage);
         assertThat(messages).isNotNull();
-
     }
-
-
 }
