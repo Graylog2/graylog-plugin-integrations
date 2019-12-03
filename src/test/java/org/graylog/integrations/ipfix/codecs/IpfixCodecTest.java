@@ -1,9 +1,7 @@
 package org.graylog.integrations.ipfix.codecs;
 
 import com.google.common.collect.ImmutableMap;
-import org.graylog2.plugin.Message;
 import org.graylog2.plugin.configuration.Configuration;
-import org.graylog2.plugin.journal.RawMessage;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -12,11 +10,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
