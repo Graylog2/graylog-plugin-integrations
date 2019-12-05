@@ -8,8 +8,9 @@ import { FormDataContext } from 'aws/context/FormData';
 import { AdvancedOptionsContext } from 'aws/context/AdvancedOptions';
 import AdditionalFields from 'aws/common/AdditionalFields';
 import ValidatedInput from 'aws/common/ValidatedInput';
+import { SectionTitle, SectionNote } from 'aws/common/sharedStyles';
 
-const INPUT_PATTERN = '$https://(.*)';
+const INPUT_PATTERN = 'https://(.*)';
 const INPUT_MESSAGE = "Domain should begin with 'https://'";
 const INPUT_PLACEHOLDER = 'https://localhost:8000/';
 
@@ -17,12 +18,11 @@ const StyledAdditionalFields = styled(AdditionalFields)`
   margin: 0 0 35px;
 `;
 
-const Title = styled.h3`
-  margin: 18px 0 3px;
+const StyledSectionTitle = styled(SectionTitle)`
+  margin: 12px 0 0;
 `;
 
-const SubTitle = styled.h4`
-  font-style: italic;
+const StyledSectionNote = styled(SectionNote)`
   margin: 0 0 12px;
 `;
 
@@ -45,8 +45,8 @@ const AWSCustomEndpoints = ({ onChange }) => {
                             visible={isAWSCustomEndpointsVisible}
                             onToggle={handleToggle}>
 
-      <Title>Overrides the default AWS API endpoint URL that Graylog communicates with.</Title>
-      <SubTitle>Use this is you are using <ExternalLink href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html">VPC Endpoints</ExternalLink> for AWS services.</SubTitle>
+      <StyledSectionTitle>Overrides the default AWS API endpoint URL that Graylog communicates with.</StyledSectionTitle>
+      <StyledSectionNote>Use this if you are using <ExternalLink href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html">VPC Endpoints</ExternalLink> for AWS services.</StyledSectionNote>
 
       <ValidatedInput id="awsEndpointCloudWatch"
                       type="text"
