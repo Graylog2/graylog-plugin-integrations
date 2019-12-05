@@ -15,7 +15,7 @@ import useFetch from 'aws/common/hooks/useFetch';
 
 import formValidation from 'aws/utils/formValidation';
 import AWSAuthenticationTypes from 'aws/authentication/AWSAuthenticationTypes';
-import AWSEndpointAndARN from 'aws/authentication/AWSEndpointAndARN';
+import AWSCustomEndpoints from 'aws/authentication/AWSCustomEndpoints';
 
 const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
   const { formData } = useContext(FormDataContext);
@@ -116,7 +116,7 @@ const StepAuthorize = ({ onChange, onSubmit, sidebarComponent }) => {
         {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
       </ValidatedInput>
 
-      <AWSEndpointAndARN onChange={onChange} />
+      <AWSCustomEndpoints onChange={onChange} />
     </FormWrap>
   );
 };

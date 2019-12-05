@@ -6,14 +6,14 @@ export const AdvancedOptionsContext = createContext();
 
 export const AdvancedOptionsProvider = ({ children }) => {
   const [isAdvancedOptionsVisible, setAdvancedOptionsVisibility] = useState(false);
-  const [isAWSEndpointAndARNVisible, setAWSEndpointAndARNVisibility] = useState(false);
+  const [isAWSCustomEndpointsVisible, setAWSCustomEndpointsVisibility] = useState(false);
 
   return (
     <AdvancedOptionsContext.Provider value={{
       isAdvancedOptionsVisible,
-      isAWSEndpointAndARNVisible,
+      isAWSCustomEndpointsVisible,
       setAdvancedOptionsVisibility,
-      setAWSEndpointAndARNVisibility,
+      setAWSCustomEndpointsVisibility,
     }}>
       {children}
     </AdvancedOptionsContext.Provider>
