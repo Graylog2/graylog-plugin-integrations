@@ -17,13 +17,12 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
-
 /**
  * Resolves the appropriate AWS authorization provider.
  *
  * If an {@code accessKey} and {@code secretKey} are provided, they will be used explicitly.
  * If not, the default DefaultCredentialsProvider will be used instead. This will resolve the role/policy
- * using using Java props, environment variables, EC2 instance roles etc. See the {@link DefaultCredentialsProvider}
+ * using Java props, environment variables, EC2 instance roles etc. See the {@link DefaultCredentialsProvider}
  * Javadoc for more information.
  */
 public class AWSAuthProvider implements AwsCredentialsProvider {
