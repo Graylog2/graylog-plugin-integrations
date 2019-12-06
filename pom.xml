@@ -33,7 +33,8 @@
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.2.0-SNAPSHOT</graylog.version>
         <aws-java-sdk-2.version>2.7.33</aws-java-sdk-2.version>
-        <aws-kinesis-client.version>2.2.2</aws-kinesis-client.version>
+        <aws-kinesis-client.version>2.2.7</aws-kinesis-client.version>
+        <integrations.protobuf.version>3.11.1</integrations.protobuf.version>
     </properties>
 
     <dependencyManagement>
@@ -93,6 +94,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -114,6 +120,24 @@
             <groupId>com.github.rholder</groupId>
             <artifactId>guava-retrying</artifactId>
             <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.pkts</groupId>
+            <artifactId>pkts-core</artifactId>
+            <version>3.0.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${integrations.protobuf.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.pkts</groupId>
+            <artifactId>pkts-core</artifactId>
+            <version>3.0.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
