@@ -1,64 +1,33 @@
 package org.graylog.integrations.aws.resources.requests;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
-import org.graylog.autovalue.WithBeanGetter;
 
-import javax.annotation.Nullable;
-
-@JsonAutoDetect
 @AutoValue
-@WithBeanGetter
+@JsonDeserialize(builder = KinesisHealthCheckRequest.Builder.class)
 public abstract class KinesisHealthCheckRequest implements AWSRequest {
 
     private static final String STREAM_NAME = "stream_name";
 
-    @JsonProperty(REGION)
-    public abstract String region();
-
-    @JsonProperty(AWS_ACCESS_KEY_ID)
-    public abstract String awsAccessKeyId();
-
-    @JsonProperty(AWS_SECRET_ACCESS_KEY)
-    public abstract String awsSecretAccessKey();
-
-    @Nullable
-    @JsonProperty(ASSUME_ROLE_ARN)
-    public abstract String assumeRoleArn();
-
-    @Nullable
-    @JsonProperty(CLOUDWATCH_ENDPOINT)
-    public abstract String cloudwatchEndpoint();
-
-    @Nullable
-    @JsonProperty(DYNAMODB_ENDPOINT)
-    public abstract String dynamodbEndpoint();
-
-    @Nullable
-    @JsonProperty(IAM_ENDPOINT)
-    public abstract String iamEndpoint();
-
-    @Nullable
-    @JsonProperty(KINESIS_ENDPOINT)
-    public abstract String kinesisEndpoint();
-
     @JsonProperty(STREAM_NAME)
     public abstract String streamName();
 
-    @JsonCreator
-    public static KinesisHealthCheckRequest create(@JsonProperty(REGION) String region,
-                                                   @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
-                                                   @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
-                                                   @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                                   @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
-                                                   @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
-                                                   @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
-                                                   @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint,
-                                                   @JsonProperty(STREAM_NAME) String streamName) {
-        return new AutoValue_KinesisHealthCheckRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
-                                                       cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint,
-                                                       streamName);
+    public static Builder builder() {
+        return Builder.create();
+    }
+
+    @AutoValue.Builder
+    public static abstract class Builder implements AWSRequest.Builder<Builder> {
+        @JsonCreator
+        public static Builder create() {
+            return new AutoValue_KinesisHealthCheckRequest.Builder();
+        }
+
+        @JsonProperty(STREAM_NAME)
+        public abstract Builder streamName(String streamName);
+
+        public abstract KinesisHealthCheckRequest build();
     }
 }

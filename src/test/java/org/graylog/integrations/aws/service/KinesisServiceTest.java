@@ -175,10 +175,9 @@ public class KinesisServiceTest {
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
-        KinesisHealthCheckRequest request = KinesisHealthCheckRequest.create(Region.EU_WEST_1.id(),
-                                                                             "key", "secret",
-                                                                             null, null, null, null, null,
-                                                                             TEST_STREAM_1);
+        KinesisHealthCheckRequest request = KinesisHealthCheckRequest.builder()
+                                                                     .region(Region.EU_WEST_1.id())
+                                                                     .streamName(TEST_STREAM_1).build();
         return kinesisService.healthCheck(request);
     }
 
@@ -287,10 +286,9 @@ public class KinesisServiceTest {
         // Mock out specific KinesisNewStreamRequest to return a response.
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
 
-        final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.create(TEST_REGION,
-                                                                                               "accessKey", "secretKey",
-                                                                                               null, null, null, null, null,
-                                                                                               TEST_STREAM_1);
+        final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.builder()
+                                                                                       .region(Region.EU_WEST_1.id())
+                                                                                       .streamName(TEST_STREAM_1).build();
         // TODO debug the error
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
 

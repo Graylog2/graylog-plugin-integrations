@@ -76,16 +76,17 @@ public class AWSServiceTest {
         when(messageInputFactory.create(isA(InputCreateRequest.class), isA(String.class), isA(String.class))).thenReturn(messageInput);
 
         AWSInputCreateRequest request =
-                AWSInputCreateRequest.create(Region.US_EAST_1.id(),
-                                             "a-key", "a-secret",
-                                             null,null,null,null,null,
-                                             "AWS Input",
-                                             AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString(),
-                                             "a-stream",
-                                             10000,
-                                             false,
-                                             true,
-                                             true);
+                AWSInputCreateRequest.builder().region(Region.US_EAST_1.id())
+                                     .awsAccessKeyId("a-key")
+                                     .awsSecretAccessKey("a-secret")
+                                     .name("AWS Input")
+                                     .awsMessageType(AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString())
+                                     .streamName("a-stream")
+                                     .batchSize(10000)
+                                     .global(false)
+                                     .addFlowLogPrefix(true)
+                                     .throttlingAllowed(true)
+                                     .build();
         awsService.saveInput(request, user);
 
         // Verify that inputService received a valid input to save.

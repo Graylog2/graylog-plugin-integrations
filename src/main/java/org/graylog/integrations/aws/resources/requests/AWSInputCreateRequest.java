@@ -16,21 +16,17 @@
  */
 package org.graylog.integrations.aws.resources.requests;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
-import org.graylog.autovalue.WithBeanGetter;
-
-import javax.annotation.Nullable;
 
 /**
  * This request is used to save a new Kinesis AWS input. Each type of AWS input will use it's own request
  * object due to typically very unique required fields for each.
  */
-@JsonAutoDetect
 @AutoValue
-@WithBeanGetter
+@JsonDeserialize(builder = AWSInputCreateRequest.Builder.class)
 public abstract class AWSInputCreateRequest implements AWSRequest {
 
     private static final String NAME = "name";
@@ -40,35 +36,6 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     private static final String GLOBAL = "global";
     private static final String THROTTLING_ALLOWED = "enable_throttling";
     private static final String ADD_FLOW_LOG_PREFIX = "add_flow_log_prefix";
-
-    @JsonProperty(REGION)
-    public abstract String region();
-
-    @JsonProperty(AWS_ACCESS_KEY_ID)
-    public abstract String awsAccessKeyId();
-
-    @JsonProperty(AWS_SECRET_ACCESS_KEY)
-    public abstract String awsSecretAccessKey();
-
-    @Nullable
-    @JsonProperty(ASSUME_ROLE_ARN)
-    public abstract String assumeRoleArn();
-
-    @Nullable
-    @JsonProperty(CLOUDWATCH_ENDPOINT)
-    public abstract String cloudwatchEndpoint();
-
-    @Nullable
-    @JsonProperty(DYNAMODB_ENDPOINT)
-    public abstract String dynamodbEndpoint();
-
-    @Nullable
-    @JsonProperty(IAM_ENDPOINT)
-    public abstract String iamEndpoint();
-
-    @Nullable
-    @JsonProperty(KINESIS_ENDPOINT)
-    public abstract String kinesisEndpoint();
 
     @JsonProperty(NAME)
     public abstract String name();
@@ -91,25 +58,38 @@ public abstract class AWSInputCreateRequest implements AWSRequest {
     @JsonProperty(ADD_FLOW_LOG_PREFIX)
     public abstract boolean addFlowLogPrefix();
 
-    @JsonCreator
-    public static AWSInputCreateRequest create(@JsonProperty(REGION) String region,
-                                               @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKey,
-                                               @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretKey,
-                                               @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                               @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
-                                               @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
-                                               @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
-                                               @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint,
-                                               @JsonProperty(NAME) String name,
-                                               @JsonProperty(AWS_MESSAGE_TYPE) String awsMessageType,
-                                               @JsonProperty(STREAM_NAME) String streamName,
-                                               @JsonProperty(BATCH_SIZE) int batchSize,
-                                               @JsonProperty(GLOBAL) boolean global,
-                                               @JsonProperty(THROTTLING_ALLOWED) boolean enableThrottling,
-                                               @JsonProperty(ADD_FLOW_LOG_PREFIX) boolean addFlowLogPrefix) {
-        return new AutoValue_AWSInputCreateRequest(region, awsAccessKey, awsSecretKey, assumeRoleArn,
-                                                   cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint,
-                                                   name, awsMessageType, streamName, batchSize, global,
-                                                   enableThrottling, addFlowLogPrefix);
+    public static Builder builder() {
+        return Builder.create();
+    }
+
+    @AutoValue.Builder
+    public static abstract class Builder implements AWSRequest.Builder<Builder> {
+        @JsonCreator
+        public static Builder create() {
+            return new AutoValue_AWSInputCreateRequest.Builder();
+        }
+
+        @JsonProperty(NAME)
+        public abstract Builder name(String name);
+
+        @JsonProperty(AWS_MESSAGE_TYPE)
+        public abstract Builder awsMessageType(String awsMessageType);
+
+        @JsonProperty(STREAM_NAME)
+        public abstract Builder streamName(String streamName);
+
+        @JsonProperty(BATCH_SIZE)
+        public abstract Builder batchSize(int batchSize);
+
+        @JsonProperty(GLOBAL)
+        public abstract Builder global(boolean global);
+
+        @JsonProperty(THROTTLING_ALLOWED)
+        public abstract Builder throttlingAllowed(boolean throttlingAllowed);
+
+        @JsonProperty(ADD_FLOW_LOG_PREFIX)
+        public abstract Builder addFlowLogPrefix(boolean addFlowLogPrefix);
+
+        public abstract AWSInputCreateRequest build();
     }
 }
