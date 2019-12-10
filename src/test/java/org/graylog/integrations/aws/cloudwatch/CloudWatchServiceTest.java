@@ -71,7 +71,7 @@ public class CloudWatchServiceTest {
         when(logGroupsIterable.iterator()).thenReturn(responses.iterator());
         when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
 
-        final AWSRequest awsRequest = AWSRequestImpl.create(Region.US_EAST_1.id(), "key", "secret", null, "", "", "", "");
+        final AWSRequest awsRequest = AWSRequestImpl.builder().region(Region.US_EAST_1.id()).build();
         final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(awsRequest);
 
         // Inspect the log groups returned and verify the contents and size.

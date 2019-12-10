@@ -195,7 +195,7 @@ public class KinesisServiceTest {
                                                .hasMoreStreams(false).build());
 
 
-        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.create(TEST_REGION, "accessKey", "secretKey", null, "", "", "", ""));
+        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder().region(TEST_REGION).build());
         assertEquals(2, streamsResponse.total());
         assertEquals(2, streamsResponse.streams().size());
 
@@ -215,7 +215,7 @@ public class KinesisServiceTest {
                                                .streamNames(TWO_TEST_STREAMS)
                                                .hasMoreStreams(false).build()); // Indicate no more streams.
 
-        streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.create(TEST_REGION, "accessKey", "secretKey", null, "", "", "", ""));
+        streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder().region(TEST_REGION).build());
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, streamsResponse.total());
