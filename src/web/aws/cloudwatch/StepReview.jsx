@@ -30,7 +30,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
   const {
     awsAuthenticationType,
     awsCloudWatchAddFlowLogPrefix = { value: undefined },
-    awsCloudWatchAssumeARN,
+    awsCloudWatchAssumeARN = { value: undefined },
     awsCloudWatchAwsKey = { value: undefined },
     awsCloudWatchAwsRegion,
     awsCloudWatchBatchSize,
@@ -163,10 +163,10 @@ const StepReview = ({ onSubmit, onEditClick }) => {
             <strong>Record Batch Size</strong>
             <span>
               {
-                    awsCloudWatchBatchSize.value
-                      ? awsCloudWatchBatchSize.value
-                      : <Default value={awsCloudWatchBatchSize.defaultValue} />
-                  }
+                awsCloudWatchBatchSize.value
+                  ? awsCloudWatchBatchSize.value
+                  : <Default value={awsCloudWatchBatchSize.defaultValue} />
+              }
             </span>
           </li>
           <li>

@@ -22,10 +22,6 @@ const Label = ({ label, error }) => {
 const ValidatedInput = ({ className, help, onChange, id, label, fieldData, type, ...restProps }) => {
   const { dirty, error, value } = fieldData;
 
-  const handleChange = (event) => {
-    onChange(event, { dirty: true });
-  };
-
   const checkValidity = (event) => {
     if (dirty) {
       const errorOutput = formValidation.checkInputValidity(event.target);
@@ -38,7 +34,7 @@ const ValidatedInput = ({ className, help, onChange, id, label, fieldData, type,
     <Input {...restProps}
            id={id}
            type={type}
-           onChange={handleChange}
+           onChange={onChange}
            onBlur={checkValidity}
            className={className}
            bsStyle={(error && dirty && 'error') || undefined}

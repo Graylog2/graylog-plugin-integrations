@@ -151,22 +151,31 @@ public class KinesisSetupResourceTest {
 
         // Stream
         final KinesisNewStreamRequest request =
-                KinesisNewStreamRequest.create(REGION, KEY, SECRET, null, null, null, null, null, STREAM_NAME);
+                KinesisNewStreamRequest.builder()
+                                       .region(Region.EU_WEST_1.id())
+                                       .streamName(STREAM_NAME).build();
         final KinesisNewStreamResponse streamResponse = setupResource.createNewKinesisStream(request);
         assertEquals(STREAM_NAME, streamResponse.streamName());
         assertEquals(STREAM_ARN, streamResponse.streamArn());
 
         // Policy
         final CreateRolePermissionRequest policyRequest =
-                CreateRolePermissionRequest.create(REGION, KEY, SECRET, null, null, null, null, null,
-                                                   streamResponse.streamName(), streamResponse.streamArn());
+                CreateRolePermissionRequest.builder()
+                                           .region(REGION)
+                                           .streamName(streamResponse.streamName())
+                                           .streamArn(streamResponse.streamArn()).build();
         final CreateRolePermissionResponse policyResponse = setupResource.autoKinesisPermissions(policyRequest);
         assertEquals(ROLE_ARN, policyResponse.roleArn());
 
         // Subscription
         final CreateLogSubscriptionRequest subscriptionRequest =
-                CreateLogSubscriptionRequest.create(REGION, KEY, SECRET, null, null, null, null, null, "log-group-name", "filter-name",
-                                                    "filter-pattern", streamResponse.streamArn(), policyResponse.roleArn());
+                CreateLogSubscriptionRequest.builder()
+                                            .region(REGION)
+                                            .logGroupName("log-group-name")
+                                            .filterName("filter-name")
+                                            .filterPattern("filter-pattern")
+                                            .destinationStreamArn(streamResponse.streamArn())
+                                            .roleArn(policyResponse.roleArn()).build();
         final CreateLogSubscriptionResponse subscriptionResponse = setupResource.createSubscription(subscriptionRequest);
         subscriptionResponse.result();
         assertEquals("Success. The subscription filter [filter-name] was added for the CloudWatch log group [log-group-name].",

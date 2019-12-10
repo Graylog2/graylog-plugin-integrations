@@ -1,16 +1,14 @@
 package org.graylog.integrations.aws.resources.requests;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
 
-import javax.annotation.Nullable;
-
-@JsonAutoDetect
 @AutoValue
 @WithBeanGetter
+@JsonDeserialize(builder = CreateLogSubscriptionRequest.Builder.class)
 public abstract class CreateLogSubscriptionRequest implements AWSRequest {
 
     private static final String LOG_GROUP_NAME = "log_group_name";
@@ -19,39 +17,8 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     private static final String DESTINATION_STREAM_ARN = "destination_stream_arn";
     private static final String ROLE_ARN = "role_arn";
 
-    @JsonProperty(REGION)
-    public abstract String region();
-
-    @JsonProperty(AWS_ACCESS_KEY_ID)
-    public abstract String awsAccessKeyId();
-
-    @JsonProperty(AWS_SECRET_ACCESS_KEY)
-    public abstract String awsSecretAccessKey();
-
-    @Nullable
-    @JsonProperty(ASSUME_ROLE_ARN)
-    public abstract String assumeRoleArn();
-
-    @Nullable
-    @JsonProperty(CLOUDWATCH_ENDPOINT)
-    public abstract String cloudwatchEndpoint();
-
-    @Nullable
-    @JsonProperty(DYNAMODB_ENDPOINT)
-    public abstract String dynamodbEndpoint();
-
-    @Nullable
-    @JsonProperty(IAM_ENDPOINT)
-    public abstract String iamEndpoint();
-
-    @Nullable
-    @JsonProperty(KINESIS_ENDPOINT)
-    public abstract String kinesisEndpoint();
-
     /**
      * {@see <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/SubscriptionFilters.html">CloudWatch Subscription Filter</a>},
-     *
-     * @return
      */
     @JsonProperty(LOG_GROUP_NAME)
     public abstract String logGroupName();
@@ -68,22 +35,32 @@ public abstract class CreateLogSubscriptionRequest implements AWSRequest {
     @JsonProperty(ROLE_ARN)
     public abstract String roleArn();
 
-    @JsonCreator
-    public static CreateLogSubscriptionRequest create(@JsonProperty(REGION) String region,
-                                                      @JsonProperty(AWS_ACCESS_KEY_ID) String awsAccessKeyId,
-                                                      @JsonProperty(AWS_SECRET_ACCESS_KEY) String awsSecretAccessKey,
-                                                      @JsonProperty(ASSUME_ROLE_ARN) String assumeRoleArn,
-                                                      @JsonProperty(CLOUDWATCH_ENDPOINT) String cloudwatchEndpoint,
-                                                      @JsonProperty(DYNAMODB_ENDPOINT) String dynamodbEndpoint,
-                                                      @JsonProperty(IAM_ENDPOINT) String iamEndpoint,
-                                                      @JsonProperty(KINESIS_ENDPOINT) String kinesisEndpoint,
-                                                      @JsonProperty(LOG_GROUP_NAME) String getLogGroupName,
-                                                      @JsonProperty(FILTER_NAME) String filterName,
-                                                      @JsonProperty(FILTER_PATTERN) String filterPattern,
-                                                      @JsonProperty(DESTINATION_STREAM_ARN) String destinationStreamArn,
-                                                      @JsonProperty(ROLE_ARN) String roleArn) {
-        return new AutoValue_CreateLogSubscriptionRequest(region, awsAccessKeyId, awsSecretAccessKey, assumeRoleArn,
-                                                          cloudwatchEndpoint, dynamodbEndpoint, iamEndpoint, kinesisEndpoint,
-                                                          getLogGroupName, filterName, filterPattern, destinationStreamArn, roleArn);
+    public static Builder builder() {
+        return Builder.create();
+    }
+
+    @AutoValue.Builder
+    public static abstract class Builder implements AWSRequest.Builder<Builder> {
+        @JsonCreator
+        public static Builder create() {
+            return new AutoValue_CreateLogSubscriptionRequest.Builder();
+        }
+
+        @JsonProperty(LOG_GROUP_NAME)
+        public abstract Builder logGroupName(String logGroupName);
+
+        @JsonProperty(FILTER_NAME)
+        public abstract Builder filterName(String filterName);
+
+        @JsonProperty(FILTER_PATTERN)
+        public abstract Builder filterPattern(String filterPattern);
+
+        @JsonProperty(DESTINATION_STREAM_ARN)
+        public abstract Builder destinationStreamArn(String destinationStreamArn);
+
+        @JsonProperty(ROLE_ARN)
+        public abstract Builder roleArn(String roleArn);
+
+        public abstract CreateLogSubscriptionRequest build();
     }
 }

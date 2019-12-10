@@ -106,12 +106,22 @@ public class KinesisTransport extends ThrottleableTransport {
         validateEndpoint(iamEndpoint, "IAM");
         validateEndpoint(iamEndpoint, "Kinesis");
 
-        this.kinesisConsumer = new KinesisConsumer(
-                nodeId, this, objectMapper, kinesisCallback(input), configuration.getString(CK_KINESIS_STREAM_NAME),
-                AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE)),
-                configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE),
-                AWSRequestImpl.create(region.id(), key, secret, assumeRoleArn, cloudwatchEndpoint,
-                                      dynamodbEndpoint, iamEndpoint, kinesisEndpoint));
+        final AWSRequestImpl awsRequest = AWSRequestImpl.builder()
+                                                        .region(region.id())
+                                                        .awsAccessKeyId(key)
+                                                        .awsSecretAccessKey(secret)
+                                                        .assumeRoleArn(assumeRoleArn)
+                                                        .cloudwatchEndpoint(cloudwatchEndpoint)
+                                                        .dynamodbEndpoint(dynamodbEndpoint)
+                                                        .iamEndpoint(iamEndpoint)
+                                                        .kinesisEndpoint(kinesisEndpoint).build();
+
+        final int batchSize = configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        final String streamName = configuration.getString(CK_KINESIS_STREAM_NAME);
+        final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE));
+
+        this.kinesisConsumer = new KinesisConsumer(nodeId, this, objectMapper, kinesisCallback(input),
+                                                   streamName, awsMessageType, batchSize, awsRequest);
 
         LOG.debug("Starting Kinesis reader thread for input [{}/{}]", input.getName(), input.getId());
         executor.submit(this.kinesisConsumer);
