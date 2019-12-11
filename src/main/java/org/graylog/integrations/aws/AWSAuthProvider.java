@@ -50,7 +50,7 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
         // Apply the Assume Role ARN Authorization if specified. All AWSCredentialsProviders support this.
         if (!isNullOrEmpty(assumeRoleArn) && !isNullOrEmpty(stsRegion)) {
             LOG.debug("Creating cross account assume role credentials");
-            return applyStsCredentialsProvider(awsCredentials, stsRegion, assumeRoleArn, accessKey)
+            return buildStsCredentialsProvider(awsCredentials, stsRegion, assumeRoleArn, accessKey)
                     .resolveCredentials();
         }
 
@@ -58,11 +58,12 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
     }
 
     /**
-     * In order to assume a role, a role must be provided to the AWS STS client a role that has the "sts:AssumeRole"
+     * Build a new AwsCredentialsProvider instance which will assume the indicated role.
+     *
+     * Note: In order to assume a role, a role must be provided to the AWS STS client a role that has the "sts:AssumeRole"
      * permission, which provides authorization for a role to be assumed.
-     * @return A new AwsCredentialsProvider instance which will assume the indicated role.
      */
-    private AwsCredentialsProvider applyStsCredentialsProvider(AwsCredentialsProvider awsCredentials, String stsRegion,
+    private AwsCredentialsProvider buildStsCredentialsProvider(AwsCredentialsProvider awsCredentials, String stsRegion,
                                                                String assumeRoleArn, @Nullable String accessKey) {
 
         StsClient stsClient = StsClient.builder().region(Region.of(stsRegion)).credentialsProvider(awsCredentials).build();
