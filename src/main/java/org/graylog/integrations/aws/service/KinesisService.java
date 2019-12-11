@@ -445,13 +445,12 @@ public class KinesisService {
                                                    streamArn,
                                                    responseMessage);
         } catch (Exception e) {
-
             final String specificError = ExceptionUtils.formatMessageCause(e);
             final String responseMessage = String.format("Attempt to create [%s] new Kinesis stream " +
                                                          "with [%d] shards failed due to the following exception: [%s]",
                                                          request.streamName(), SHARD_COUNT,
                                                          specificError);
-            LOG.error(responseMessage);
+            LOG.error(responseMessage, e);
             throw new BadRequestException(responseMessage, e);
         }
     }
