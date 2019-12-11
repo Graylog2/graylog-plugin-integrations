@@ -43,12 +43,6 @@ public class CloudWatchService {
         this.logsClientBuilder = logsClientBuilder;
     }
 
-    /**
-     * Returns a list of log groups that exist in CloudWatch.
-     *
-     * @param request The full AWS request object.
-     * @return A list of log groups in alphabetical order.
-     */
     public LogGroupsResponse getLogGroupNames(AWSRequest request) {
 
         final CloudWatchLogsClient cloudWatchLogsClient = AWSClientBuilderUtil.buildClient(logsClientBuilder, request);

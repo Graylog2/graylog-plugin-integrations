@@ -38,6 +38,7 @@ import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -427,7 +428,7 @@ public class KinesisService {
                     return null; // Give up on request.
                 }
                 streamDescription = kinesisClient
-                        .describeStream(r -> r.streamName(request.streamName()))
+                        .describeStream(DescribeStreamRequest.builder().streamName(request.streamName()).build())
                         .streamDescription();
                 if (seconds > 300) {
                     final String responseMessage = String.format("Fail. Stream [%s] has failed to become active " +

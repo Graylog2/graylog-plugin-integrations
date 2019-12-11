@@ -100,9 +100,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return awsService.getPermissions();
     }
 
-    /**
-     * Get all available AWS CloudWatch log groups names for the specified region.
-     */
     @POST
     @Timed
     @Path("/cloudwatch/log_groups")
@@ -113,9 +110,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return cloudWatchService.getLogGroupNames(request);
     }
 
-    /**
-     * Get all available Kinesis streams for the specified region.
-     */
     @POST
     @Timed
     @Path("/kinesis/streams")
@@ -126,9 +120,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return kinesisService.getKinesisStreamNames(request);
     }
 
-    /**
-     * Perform an AWS HealthCheck
-     */
     @POST
     @Timed
     @Path("/kinesis/health_check")
@@ -144,9 +135,6 @@ public class AWSResource extends AbstractInputsResource implements PluginRestRes
         return Response.accepted().entity(response).build();
     }
 
-    /**
-     * Create a new AWS input.
-     */
     @POST
     @Timed
     @Path("/inputs")

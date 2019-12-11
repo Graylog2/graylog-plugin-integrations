@@ -72,8 +72,8 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
         // to help with auditing and debugging.
         final String roleSessionName;
         if (accessKey != null) {
-             roleSessionName = String.format("ACCESS_KEY_%s@ACCOUNT_%s", accessKey,
-                                                   stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
+            roleSessionName = String.format("ACCESS_KEY_%s@ACCOUNT_%s", accessKey,
+                                            stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
         } else {
             roleSessionName = String.format("ACCOUNT_%s",
                                             stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());

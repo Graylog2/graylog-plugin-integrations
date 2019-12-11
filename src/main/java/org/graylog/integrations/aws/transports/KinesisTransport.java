@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
+import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.service.AWSService;
 import org.graylog2.plugin.LocalMetricRegistry;
@@ -106,15 +107,17 @@ public class KinesisTransport extends ThrottleableTransport {
         validateEndpoint(iamEndpoint, "IAM");
         validateEndpoint(iamEndpoint, "Kinesis");
 
-        final AWSRequestImpl awsRequest = AWSRequestImpl.builder()
-                                                        .region(region.id())
-                                                        .awsAccessKeyId(key)
-                                                        .awsSecretAccessKey(secret)
-                                                        .assumeRoleArn(assumeRoleArn)
-                                                        .cloudwatchEndpoint(cloudwatchEndpoint)
-                                                        .dynamodbEndpoint(dynamodbEndpoint)
-                                                        .iamEndpoint(iamEndpoint)
-                                                        .kinesisEndpoint(kinesisEndpoint).build();
+        // Creating and passing an AWSRequest here is not ideal (since it's a web request object), but at least the
+        // builder can be used for all of the required request fields. Perhaps this can be improved later.
+        final AWSRequest awsRequest = AWSRequestImpl.builder()
+                                                    .region(region.id())
+                                                    .awsAccessKeyId(key)
+                                                    .awsSecretAccessKey(secret)
+                                                    .assumeRoleArn(assumeRoleArn)
+                                                    .cloudwatchEndpoint(cloudwatchEndpoint)
+                                                    .dynamodbEndpoint(dynamodbEndpoint)
+                                                    .iamEndpoint(iamEndpoint)
+                                                    .kinesisEndpoint(kinesisEndpoint).build();
 
         final int batchSize = configuration.getInt(CK_KINESIS_RECORD_BATCH_SIZE, DEFAULT_BATCH_SIZE);
         final String streamName = configuration.getString(CK_KINESIS_STREAM_NAME);

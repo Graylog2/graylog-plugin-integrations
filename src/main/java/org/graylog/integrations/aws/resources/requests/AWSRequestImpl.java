@@ -1,13 +1,9 @@
 package org.graylog.integrations.aws.resources.requests;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import org.graylog.autovalue.WithBeanGetter;
-
-import javax.annotation.Nullable;
 
 /**
  * A common implementation on AWSRequest, which can be used for any AWS request that just needs region and credentials.

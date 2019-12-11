@@ -15,7 +15,6 @@ import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -29,6 +28,8 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsRequest;
 import software.amazon.awssdk.services.kinesis.model.GetRecordsResponse;
 import software.amazon.awssdk.services.kinesis.model.GetShardIteratorRequest;
@@ -39,6 +40,8 @@ import software.amazon.awssdk.services.kinesis.model.ListStreamsRequest;
 import software.amazon.awssdk.services.kinesis.model.ListStreamsResponse;
 import software.amazon.awssdk.services.kinesis.model.Record;
 import software.amazon.awssdk.services.kinesis.model.Shard;
+import software.amazon.awssdk.services.kinesis.model.StreamDescription;
+import software.amazon.awssdk.services.kinesis.model.StreamStatus;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -282,7 +285,6 @@ public class KinesisServiceTest {
         assertEquals(fakeRecordsList.size(), 10);
     }
 
-    @Ignore("Test ignored as this method is still being implemented.")
     @Test
     public void testCreateNewKinesisStream() {
 
@@ -293,6 +295,12 @@ public class KinesisServiceTest {
 
         // Mock out specific KinesisNewStreamRequest to return a response.
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
+        when(kinesisClient.describeStream(isA(DescribeStreamRequest.class)))
+                .thenReturn(DescribeStreamResponse.builder().streamDescription(StreamDescription.builder()
+                                                                                                .streamName(TEST_STREAM_1)
+                                                                                                .streamStatus(StreamStatus.ACTIVE)
+                                                                                                .streamARN(STREAM_ARN)
+                                                                                                .build()).build());
 
         final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.builder()
                                                                                        .region(Region.EU_WEST_1.id())
@@ -303,14 +311,8 @@ public class KinesisServiceTest {
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
 
         // Check the values are whats expected.
-        final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "] was created with ["
-                                        + SHARD_COUNT + "] shards with the following stream ARN [" + STREAM_ARN + "].";
-        assertEquals(response.result(), expectedResponse);
+        final String expectedResponse = "Success. The new stream [" + TEST_STREAM_1 + "/" + STREAM_ARN + "] was created with [1] shard.";
+        assertEquals(expectedResponse, response.result());
         assertEquals(SHARD_COUNT, 1);
-    }
-
-    @Test
-    public void uniqueRoleName() {
-        assertEquals(1, 1);
     }
 }

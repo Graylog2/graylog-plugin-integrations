@@ -43,9 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Service for all AWS CloudWatch business logic and SDK usages.
- */
 public class AWSService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AWSService.class);
