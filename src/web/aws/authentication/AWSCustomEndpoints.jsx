@@ -46,7 +46,7 @@ const AWSCustomEndpoints = ({ onChange }) => {
                             onToggle={handleToggle}>
 
       <StyledSectionTitle>Overrides the default AWS API endpoint URL that Graylog communicates with.</StyledSectionTitle>
-      <StyledSectionNote>Use this if you are using <ExternalLink href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html">VPC Endpoints</ExternalLink> for AWS services.</StyledSectionNote>
+      <StyledSectionNote>Only specify these if you are using <ExternalLink href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-endpoints.html">VPC Endpoints</ExternalLink> for AWS services.</StyledSectionNote>
 
       <ValidatedInput id="awsEndpointCloudWatch"
                       type="text"
