@@ -177,6 +177,8 @@ public class KinesisServiceTest {
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.builder()
                                                                      .region(Region.EU_WEST_1.id())
+                                                                     .awsAccessKeyId("a-key")
+                                                                     .awsSecretAccessKey("a-secret")
                                                                      .streamName(TEST_STREAM_1).build();
         return kinesisService.healthCheck(request);
     }
@@ -195,7 +197,10 @@ public class KinesisServiceTest {
                                                .hasMoreStreams(false).build());
 
 
-        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder().region(TEST_REGION).build());
+        StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder()
+                                                                                             .region(TEST_REGION)
+                                                                                             .awsAccessKeyId("a-key")
+                                                                                             .awsSecretAccessKey("a-secret").build());
         assertEquals(2, streamsResponse.total());
         assertEquals(2, streamsResponse.streams().size());
 
@@ -215,7 +220,10 @@ public class KinesisServiceTest {
                                                .streamNames(TWO_TEST_STREAMS)
                                                .hasMoreStreams(false).build()); // Indicate no more streams.
 
-        streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder().region(TEST_REGION).build());
+        streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder()
+                                                                             .region(TEST_REGION)
+                                                                             .awsAccessKeyId("a-key")
+                                                                             .awsSecretAccessKey("a-secret").build());
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, streamsResponse.total());
@@ -288,6 +296,8 @@ public class KinesisServiceTest {
 
         final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.builder()
                                                                                        .region(Region.EU_WEST_1.id())
+                                                                                       .awsAccessKeyId("a-key")
+                                                                                       .awsSecretAccessKey("a-secret")
                                                                                        .streamName(TEST_STREAM_1).build();
         // TODO debug the error
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);

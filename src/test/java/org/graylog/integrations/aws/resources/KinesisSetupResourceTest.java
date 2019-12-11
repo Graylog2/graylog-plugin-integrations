@@ -101,7 +101,7 @@ public class KinesisSetupResourceTest {
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
         // Set up services.
         cloudWatchService = new CloudWatchService(logsClientBuilder);
@@ -153,6 +153,8 @@ public class KinesisSetupResourceTest {
         final KinesisNewStreamRequest request =
                 KinesisNewStreamRequest.builder()
                                        .region(Region.EU_WEST_1.id())
+                                       .awsAccessKeyId("a-key")
+                                       .awsSecretAccessKey("a-secret")
                                        .streamName(STREAM_NAME).build();
         final KinesisNewStreamResponse streamResponse = setupResource.createNewKinesisStream(request);
         assertEquals(STREAM_NAME, streamResponse.streamName());
@@ -162,6 +164,8 @@ public class KinesisSetupResourceTest {
         final CreateRolePermissionRequest policyRequest =
                 CreateRolePermissionRequest.builder()
                                            .region(REGION)
+                                           .awsAccessKeyId("a-key")
+                                           .awsSecretAccessKey("a-secret")
                                            .streamName(streamResponse.streamName())
                                            .streamArn(streamResponse.streamArn()).build();
         final CreateRolePermissionResponse policyResponse = setupResource.autoKinesisPermissions(policyRequest);
@@ -171,6 +175,8 @@ public class KinesisSetupResourceTest {
         final CreateLogSubscriptionRequest subscriptionRequest =
                 CreateLogSubscriptionRequest.builder()
                                             .region(REGION)
+                                            .awsAccessKeyId("a-key")
+                                            .awsSecretAccessKey("a-secret")
                                             .logGroupName("log-group-name")
                                             .filterName("filter-name")
                                             .filterPattern("filter-pattern")
