@@ -60,12 +60,6 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
     /**
      * In order to assume a role, a role must be provided to the AWS STS client a role that has the "sts:AssumeRole"
      * permission, which provides authorization for a role to be assumed.
-     *
-     * @param awsCredentials A pre-initialized AwsCredentialsProvider that has a role, which is authorized for the
-     *                       "sts:AssumeRole" permission.
-     * @param stsRegion      The desired AWS region.
-     * @param assumeRoleArn  The ARN for the role to assume eg. arn:aws:iam::account-number:role/role-name
-     * @param accessKey      The AWS access key if specified.
      * @return A new AwsCredentialsProvider instance which will assume the indicated role.
      */
     private AwsCredentialsProvider applyStsCredentialsProvider(AwsCredentialsProvider awsCredentials, String stsRegion,
@@ -75,9 +69,15 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
 
         // The custom roleSessionName is extra metadata, which will be logged in AWS CloudTrail with each request
         // to help with auditing and debugging.
-        String roleSessionName = String.format("ACCESS_KEY_%s@ACCOUNT_%s",
-                                               accessKey != null ? accessKey : "NONE", // Use "NONE" when access key not provided.
-                                               stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
+        final String roleSessionName;
+        if (accessKey != null) {
+             roleSessionName = String.format("ACCESS_KEY_%s@ACCOUNT_%s", accessKey,
+                                                   stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
+        } else {
+            roleSessionName = String.format("ACCOUNT_%s",
+                                            stsClient.getCallerIdentity(GetCallerIdentityRequest.builder().build()).account());
+        }
+
         LOG.debug("Cross account role session name: " + roleSessionName);
         return StsAssumeRoleCredentialsProvider.builder().refreshRequest(AssumeRoleRequest.builder()
                                                                                           .roleSessionName(roleSessionName)
