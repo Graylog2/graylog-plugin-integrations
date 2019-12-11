@@ -32,6 +32,7 @@ import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.CreateStreamResponse;
+import software.amazon.awssdk.services.kinesis.model.DescribeStreamRequest;
 import software.amazon.awssdk.services.kinesis.model.DescribeStreamResponse;
 import software.amazon.awssdk.services.kinesis.model.StreamDescription;
 import software.amazon.awssdk.services.kinesis.model.StreamStatus;
@@ -126,12 +127,12 @@ public class KinesisSetupResourceTest {
         // Stream AWS request mocks
         when(kinesisClient.createStream(isA(CreateStreamRequest.class)))
                 .thenReturn(CreateStreamResponse.builder().build());
-        when(kinesisClient.describeStream(isA(Consumer.class)))
-                .thenReturn(DescribeStreamResponse.builder()
-                                                  .streamDescription(StreamDescription.builder()
-                                                                                      .streamARN(STREAM_ARN)
-                                                                                      .streamStatus(StreamStatus.ACTIVE)
-                                                                                      .build()).build());
+        when(kinesisClient.describeStream(isA(DescribeStreamRequest.class)))
+                .thenReturn(DescribeStreamResponse.builder().streamDescription(StreamDescription.builder()
+                                                                                                .streamName(STREAM_NAME)
+                                                                                                .streamStatus(StreamStatus.ACTIVE)
+                                                                                                .streamARN(STREAM_ARN)
+                                                                                                .build()).build());
 
         // Policy AWS request mocks
         when(iamClient.createRole(isA(Consumer.class)))
@@ -153,8 +154,8 @@ public class KinesisSetupResourceTest {
         final KinesisNewStreamRequest request =
                 KinesisNewStreamRequest.builder()
                                        .region(Region.EU_WEST_1.id())
-                                       .awsAccessKeyId("a-key")
-                                       .awsSecretAccessKey("a-secret")
+                                       .awsAccessKeyId(KEY)
+                                       .awsSecretAccessKey(SECRET)
                                        .streamName(STREAM_NAME).build();
         final KinesisNewStreamResponse streamResponse = setupResource.createNewKinesisStream(request);
         assertEquals(STREAM_NAME, streamResponse.streamName());
@@ -164,8 +165,8 @@ public class KinesisSetupResourceTest {
         final CreateRolePermissionRequest policyRequest =
                 CreateRolePermissionRequest.builder()
                                            .region(REGION)
-                                           .awsAccessKeyId("a-key")
-                                           .awsSecretAccessKey("a-secret")
+                                           .awsAccessKeyId(KEY)
+                                           .awsSecretAccessKey(SECRET)
                                            .streamName(streamResponse.streamName())
                                            .streamArn(streamResponse.streamArn()).build();
         final CreateRolePermissionResponse policyResponse = setupResource.autoKinesisPermissions(policyRequest);
@@ -175,8 +176,8 @@ public class KinesisSetupResourceTest {
         final CreateLogSubscriptionRequest subscriptionRequest =
                 CreateLogSubscriptionRequest.builder()
                                             .region(REGION)
-                                            .awsAccessKeyId("a-key")
-                                            .awsSecretAccessKey("a-secret")
+                                            .awsAccessKeyId(KEY)
+                                            .awsSecretAccessKey(SECRET)
                                             .logGroupName("log-group-name")
                                             .filterName("filter-name")
                                             .filterPattern("filter-pattern")
