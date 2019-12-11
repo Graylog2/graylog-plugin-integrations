@@ -12,7 +12,7 @@ import { SectionTitle, SectionNote } from 'aws/common/sharedStyles';
 
 const INPUT_PATTERN = 'https://(.*)';
 const INPUT_MESSAGE = "Domain should begin with 'https://'";
-const INPUT_PLACEHOLDER = 'https://localhost:8000/';
+const INPUT_PLACEHOLDER = 'https://vpce-1234.service.region.vpce.amazonaws.com/';
 
 const StyledAdditionalFields = styled(AdditionalFields)`
   margin: 0 0 35px;
