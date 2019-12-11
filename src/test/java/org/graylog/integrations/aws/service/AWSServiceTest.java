@@ -105,7 +105,6 @@ public class AWSServiceTest {
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
         assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
-        assertEquals("AWS Input", input.configuration().get(MessageInput.FIELD_TITLE));
         assertEquals("a-stream", input.configuration().get(KinesisTransport.CK_KINESIS_STREAM_NAME));
         assertEquals(10000, input.configuration().get(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE));
     }
