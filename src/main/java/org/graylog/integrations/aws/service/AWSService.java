@@ -235,7 +235,6 @@ public class AWSService {
         // Transpose the SaveAWSInputRequest to the needed InputCreateRequest
         final HashMap<String, Object> configuration = new HashMap<>();
         configuration.put(AWSCodec.CK_AWS_MESSAGE_TYPE, request.awsMessageType());
-        configuration.put(AWSInput.CK_TITLE, request.name()); // TODO: Should name and title be the same?
         configuration.put(AWSInput.CK_GLOBAL, request.global());
         configuration.put(ThrottleableTransport.CK_THROTTLING_ALLOWED, request.throttlingAllowed());
         configuration.put(AWSCodec.CK_FLOW_LOG_PREFIX, request.addFlowLogPrefix());
