@@ -137,7 +137,7 @@ public class KinesisTransport extends ThrottleableTransport {
      * @param endpointName The name of the endpoint. This will be included in the exception message.
      * @throws MisfireException A {@link MisfireException} will be thrown if the URI is invalid.
      */
-    private static void validateEndpoint(String endpoint, String endpointName) throws MisfireException {
+    static void validateEndpoint(String endpoint, String endpointName) throws MisfireException {
         if (StringUtils.isNotEmpty(endpoint)) {
             try {
                 new URL(endpoint).toURI();
