@@ -32,8 +32,8 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>3.2.0-SNAPSHOT</graylog.version>
-        <aws-java-sdk-2.version>2.7.33</aws-java-sdk-2.version>
-        <aws-kinesis-client.version>2.2.7</aws-kinesis-client.version>
+        <aws-java-sdk-2.version>2.10.26</aws-java-sdk-2.version>
+        <aws-kinesis-client.version>2.2.6</aws-kinesis-client.version>
         <integrations.protobuf.version>3.11.1</integrations.protobuf.version>
     </properties>
 
