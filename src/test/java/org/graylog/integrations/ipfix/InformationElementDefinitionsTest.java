@@ -12,10 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class InformationElementDefinitionsTest {
 
@@ -40,6 +43,32 @@ public class InformationElementDefinitionsTest {
         Map map = definitions.buildPenToIedsMap(custDefJsonNode);
         // enterprise number holds the key
         assertEquals(map.size(), 2);
+    }
+
+
+    @Test
+    public void buildBasicListPenToIedsMap() throws IOException {
+        //load the custom definition file with basicList dataType
+        String custDefStr = "{ \"enterprise_number\": 3054, \"information_elements\": " +
+                "[ " +
+                "{ \"element_id\": 110, \"name\": \"l7ApplicationId\", \"data_type\": \"unsigned32\" }, " +
+                "{ \"element_id\": 111, \"name\": \"l7ApplicationName\", \"data_type\": \"string\" }, " +
+                "{ \"element_id\": 194, \"name\": \"threatIpv6\", \"data_type\": \"ipv6address\" }, " +
+                //"{ \"element_id\": 195, \"name\": \"httpSession\", \"data_type\": \"subtemplatelist\" }, " +
+                " { \"element_id\": 484, \"name\": \"bgpSourceCommunityList\", \"data_type\": \"basiclist\" } " +
+                "] }\n";
+
+        // Create a temporary json file.
+        final File tempFile = tempFolder.newFile("tempFile.json");
+        // Write customDefString to it.
+        FileUtils.writeStringToFile(tempFile, custDefStr, StandardCharsets.UTF_8);
+
+        final URL customIPFixDefURL = Paths.get(tempFile.toString()).toUri().toURL();
+        InformationElementDefinitions infoElementDefs = new InformationElementDefinitions(customIPFixDefURL);
+
+        //id 484 is basicList
+        InformationElementDefinition infoElement = infoElementDefs.getDefinition(484, 3054);
+        assertNotNull(infoElement);
     }
 
     @Test
