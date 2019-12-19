@@ -68,6 +68,12 @@ public class IpfixParserTest {
                 .extracting(ShallowDataSet::templateId).containsExactly(256);
     }
 
+    @Ignore("Feature not ready.")
+    @Test
+    public void validateBasicListDataType() throws Exception {
+        fail("Yet to be Implemented");
+    }
+
     //@Ignore("Missing ied for private enterprise number 3054 failure.")
     @Test
     public void parseDataSet() throws IOException {
