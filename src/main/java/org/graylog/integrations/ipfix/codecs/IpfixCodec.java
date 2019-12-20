@@ -34,6 +34,8 @@ import org.graylog2.plugin.Message;
 import org.graylog2.plugin.ResolvableInetSocketAddress;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.annotations.Codec;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
@@ -215,13 +217,14 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest configuration = super.getRequestedConfiguration();
-            /*configuration.addField(
+            configuration.addField(
                     new TextField(CK_IPFIX_DEFINITION_PATH,
                             "IPFIX field definitions",
                             "",
                             "Path to the JSON file containing IPFIX field definitions",
                             ConfigurationField.Optional.OPTIONAL)
-            );*/
+            );
+            // adding a new line
             return configuration;
         }
     }
