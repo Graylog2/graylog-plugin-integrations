@@ -17,7 +17,6 @@
 package org.graylog.integrations.ipfix.codecs;
 
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.inject.assistedinject.Assisted;
@@ -71,8 +70,8 @@ import java.util.stream.Collectors;
 @Codec(name = "ipfix", displayName = "IPFIX Codec")
 public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
-    @VisibleForTesting
-    static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
+
+    public static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
 
     private static final Logger LOG = LoggerFactory.getLogger(IpfixCodec.class);
 
@@ -85,7 +84,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
         final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
-        final String ipFixCustomDefPath    = (String) configuration.getSource().get(CK_IPFIX_DEFINITION_PATH);
+        final String ipFixCustomDefPath    = configuration.getString(CK_IPFIX_DEFINITION_PATH);
 
         if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
