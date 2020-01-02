@@ -16,7 +16,6 @@
  */
 package org.graylog.integrations.ipfix.codecs;
 
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -34,6 +33,8 @@ import org.graylog2.plugin.Message;
 import org.graylog2.plugin.ResolvableInetSocketAddress;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+import org.graylog2.plugin.configuration.fields.ListField;
 import org.graylog2.plugin.inputs.annotations.Codec;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
@@ -61,6 +62,7 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -75,20 +77,21 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private static final Logger LOG = LoggerFactory.getLogger(IpfixCodec.class);
 
     private final IpfixAggregator ipfixAggregator;
-    private final IpfixParser parser;
+    private IpfixParser parser;
     private InformationElementDefinitions infoElementDefs;
 
     @Inject
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws IOException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-        final URL standardIPFixDefTemplate = Resources.getResource("ipfix-iana-elements.json");
-        final String ipFixCustomDefPath    = (String) configuration.getSource().get(CK_IPFIX_DEFINITION_PATH);
+        final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, "ipfix-iana-elements.json");
+        final List<String> ipFixCustomDefPath = configuration.getList(CK_IPFIX_DEFINITION_PATH);
 
-        if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
+        if (ipFixCustomDefPath == null || ipFixCustomDefPath.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            final URL customIPFixDefURL = Paths.get(ipFixCustomDefPath).toUri().toURL();
+            // TODO change hardcoded index value
+            final URL customIPFixDefURL = Paths.get(ipFixCustomDefPath.get(0)).toUri().toURL();
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, customIPFixDefURL);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
@@ -215,13 +218,15 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         @Override
         public ConfigurationRequest getRequestedConfiguration() {
             final ConfigurationRequest configuration = super.getRequestedConfiguration();
-            /*configuration.addField(
-                    new TextField(CK_IPFIX_DEFINITION_PATH,
-                            "IPFIX field definitions",
-                            "",
-                            "Path to the JSON file containing IPFIX field definitions",
-                            ConfigurationField.Optional.OPTIONAL)
-            );*/
+            configuration.addField(
+                    new ListField(CK_IPFIX_DEFINITION_PATH,
+                                  "IPFIX field definitions",
+                                  Collections.emptyList(),
+                                  Collections.emptyMap(),
+                                  "JSON file containing IPFIX field definitions",
+                                  ConfigurationField.Optional.OPTIONAL,
+                                  ListField.Attribute.ALLOW_CREATE)
+            );
             return configuration;
         }
     }
