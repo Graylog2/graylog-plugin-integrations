@@ -82,7 +82,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws IOException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-        //standard ipfix definition file is loaded from the classpath and is mandatory,we don't check for null or empty
+        // Standard IPFIX definition file is loaded from the classpath and is mandatory. We don't check for null or empty.
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
         final String ipFixCustomDefPath = (String) configuration.getSource().get(CK_IPFIX_DEFINITION_PATH);
         if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
