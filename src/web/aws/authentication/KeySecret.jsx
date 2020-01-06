@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import ValidatedInput from 'aws/common/ValidatedInput';
-import MaskedInput from 'aws/common/MaskedInput';
+import ValidatedInput from 'common/ValidatedInput';
+import MaskedInput from 'common/MaskedInput';
 
 const KeySecret = ({ onChange, awsKey, awsSecret }) => {
   return (

@@ -2,11 +2,11 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import FormWrap from '../../common/FormWrap';
-import AdditionalFields from '../../common/AdditionalFields';
-import { renderOptions } from '../../common/Options';
-import ValidatedInput from '../../common/ValidatedInput';
-import { KINESIS_LOG_TYPES } from '../../common/constants';
+import FormWrap from 'common/FormWrap';
+import AdditionalFields from 'common/AdditionalFields';
+import { renderOptions } from 'common/Options';
+import ValidatedInput from 'common/ValidatedInput';
+import { KINESIS_LOG_TYPES } from 'common/constants';
 
 import { FormDataContext } from '../context/FormData';
 

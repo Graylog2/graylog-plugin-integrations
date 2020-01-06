@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import PageHeader from 'components/common/PageHeader';
 
+import { AdvancedOptionsProvider } from './context/AdvancedOptions';
 import { SidebarProvider } from './context/Sidebar';
 import { FormDataProvider } from './context/FormData';
 import { StepsProvider } from './context/Steps';

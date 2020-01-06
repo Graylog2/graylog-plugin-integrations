@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { ApiRoutes } from '../../common/Routes';
-import useFetch from '../../common/hooks/useFetch';
+import { ApiRoutes } from 'common/Routes';
+import useFetch from 'common/hooks/useFetch';
 
 import { FormDataContext } from '../context/FormData';
 

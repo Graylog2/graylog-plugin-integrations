@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import AWSAuthenticationTypes from 'aws/authentication/AWSAuthenticationTypes';
 import AWSCustomEndpoints from 'aws/authentication/AWSCustomEndpoints';
-import { AWS_AUTH_TYPES } from 'aws/common/constants';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
@@ -16,6 +15,7 @@ import Permissions from '../common/Permissions';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 import useFetch from '../common/hooks/useFetch';
+import { AWS_AUTH_TYPES } from '../common/constants';
 
 import formValidation from '../utils/formValidation';
 

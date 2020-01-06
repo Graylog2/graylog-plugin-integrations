@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 import { Table } from 'components/graylog';
 import { Icon } from 'components/common';
-import { SectionTitle, SectionNote } from 'aws/common/sharedStyles';
+import { SectionTitle, SectionNote } from 'aws-cloudwatch/auto-setup-steps/sharedStyles';
 
 const StyledTable = styled(Table)`
   margin: 0;

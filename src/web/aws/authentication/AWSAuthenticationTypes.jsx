@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { Input } from 'components/bootstrap';
 import { useTheme } from 'theme/GraylogThemeContext';
 
-import { FormDataContext } from 'aws/context/FormData';
-import { AWS_AUTH_TYPES } from 'aws/common/constants';
+import { FormDataContext } from 'aws-cloudwatch/context/FormData';
+import { AWS_AUTH_TYPES } from 'common/constants';
 
 import KeySecret from './KeySecret';
 import Automatic from './Automatic';

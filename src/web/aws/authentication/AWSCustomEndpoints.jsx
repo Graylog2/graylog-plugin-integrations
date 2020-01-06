@@ -4,11 +4,11 @@ import styled from 'styled-components';
 
 import { ExternalLink } from 'components/common';
 
-import { FormDataContext } from 'aws/context/FormData';
-import { AdvancedOptionsContext } from 'aws/context/AdvancedOptions';
-import AdditionalFields from 'aws/common/AdditionalFields';
-import ValidatedInput from 'aws/common/ValidatedInput';
-import { SectionTitle, SectionNote } from 'aws/common/sharedStyles';
+import { FormDataContext } from 'aws-cloudwatch/context/FormData';
+import { AdvancedOptionsContext } from 'aws-cloudwatch/context/AdvancedOptions';
+import { SectionTitle, SectionNote } from 'aws-cloudwatch/auto-setup-steps/sharedStyles';
+import ValidatedInput from 'common/ValidatedInput';
+import AdditionalFields from 'common/AdditionalFields';
 
 const INPUT_PATTERN = 'https://(.*)';
 const INPUT_MESSAGE = "Domain should begin with 'https://'";
