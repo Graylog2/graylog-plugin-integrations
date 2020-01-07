@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Button, Modal } from 'components/graylog';
+import { Alert, Button, Modal } from 'react-bootstrap';
 
 import Agree from './Agree';
 import KinesisSetupSteps from './KinesisSetupSteps';

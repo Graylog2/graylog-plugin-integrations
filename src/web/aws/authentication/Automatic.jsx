@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
+import { Table } from 'react-bootstrap';
 
-import { Table } from 'components/graylog';
 import { Icon } from 'components/common';
 import { SectionTitle, SectionNote } from 'aws-cloudwatch/auto-setup-steps/sharedStyles';
 
