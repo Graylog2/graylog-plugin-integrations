@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { Icon } from 'components/common';
-
 import ValidatedInput from './ValidatedInput';
 
 const MaskedInput = ({ className, label, ...props }) => {
@@ -12,7 +10,7 @@ const MaskedInput = ({ className, label, ...props }) => {
     <LabelWrapper>
       {label}
       <ToggleMask onClick={() => setMasked(!masked)} ariaDescription={`Toggle ${label} field input`}>
-        <Icon name={masked ? 'eye-slash' : 'eye'} />
+        <i className={`fa fa-${masked ? 'eye-slash' : 'eye'}`} />
       </ToggleMask>
     </LabelWrapper>
   );

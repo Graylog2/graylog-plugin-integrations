@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-import { Icon } from 'components/common';
-
 const AdditionalFields = ({ children, className, onToggle, title, visible }) => {
   const [fieldsVisible, setFieldsVisible] = useState(visible);
 
@@ -15,7 +13,7 @@ const AdditionalFields = ({ children, className, onToggle, title, visible }) => 
   return (
     <div className={className}>
       <ToggleAdditionalFields onClick={handleToggle} type="button">
-        {title} <Icon name={fieldsVisible ? 'angle-down' : 'angle-right'} fixedWidth />
+        {title} <i className={`fa fa-${fieldsVisible ? 'angle-down' : 'angle-right'} fa-fw`} />
       </ToggleAdditionalFields>
 
       <AdditionalFieldsContent visible={fieldsVisible}>

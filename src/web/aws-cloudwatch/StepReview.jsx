@@ -5,7 +5,6 @@ import { Link } from 'react-router';
 
 import Routes from 'routing/Routes';
 import { Input } from 'components/bootstrap';
-import { Icon } from 'components/common';
 
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
@@ -157,7 +156,7 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           </li>
           <li>
             <strong>Global Input</strong>
-            <span><Icon name={globalInputEnabled ? 'check' : 'times'} /></span>
+            <span><i className={`fa fa-${globalInputEnabled ? 'check' : 'times'}`} /></span>
           </li>
           <li>
             <strong>Record Batch Size</strong>
@@ -171,11 +170,11 @@ const StepReview = ({ onSubmit, onEditClick }) => {
           </li>
           <li>
             <strong>Enable Throttling</strong>
-            <span><Icon name={throttleEnabled ? 'check' : 'times'} /></span>
+            <span><i className={`fa fa-${throttleEnabled ? 'check' : 'times'}`} /></span>
           </li>
           <li>
             <strong>Add Flow Log prefix to field names</strong>
-            <span><Icon name={addPrefix ? 'check' : 'times'} /></span>
+            <span><i className={`fa fa-${addPrefix ? 'check' : 'times'}`} /></span>
           </li>
         </ReviewItems>
 

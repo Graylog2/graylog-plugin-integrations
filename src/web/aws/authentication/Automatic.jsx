@@ -2,7 +2,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { Table } from 'react-bootstrap';
 
-import { Icon } from 'components/common';
 import { SectionTitle, SectionNote } from 'aws-cloudwatch/auto-setup-steps/sharedStyles';
 
 const StyledTable = styled(Table)`
@@ -47,7 +46,7 @@ const Automatic = () => {
         <tr>
           <td colSpan="2">
             <SectionNote>
-              For more information, check out the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html" target="_blank" rel="noopener noreferrer">AWS Credential Configuration Documentation <Icon name="external-link" /></a>
+              For more information, check out the <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html" target="_blank" rel="noopener noreferrer">AWS Credential Configuration Documentation <i className="fa fa-external-link" /></a>
             </SectionNote>
           </td>
         </tr>
