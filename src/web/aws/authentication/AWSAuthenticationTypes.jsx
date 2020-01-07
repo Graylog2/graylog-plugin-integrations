@@ -1,9 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
-import { useTheme } from 'theme/GraylogThemeContext';
 
 import { FormDataContext } from 'aws-cloudwatch/context/FormData';
 import { AWS_AUTH_TYPES } from 'common/constants';
@@ -12,8 +11,13 @@ import KeySecret from './KeySecret';
 import Automatic from './Automatic';
 import ARN from './ARN';
 
+const AuthWrapper = styled.div`
+margin: 0 0 21px 9px;
+padding: 3px 0 3px 21px;
+border-left: 3px solid #DCE1E5;
+`;
+
 const AWSAuthenticationTypes = ({ onChange }) => {
-  const { colors } = useTheme();
   const { clearField, formData } = useContext(FormDataContext);
 
   const {
@@ -29,12 +33,6 @@ const AWSAuthenticationTypes = ({ onChange }) => {
   useEffect(() => {
     onChange({ target: { name: 'awsAuthenticationType', value: defaultAuthTypeValue } });
   }, []);
-
-  const AuthWrapper = useCallback(styled.div`
-    margin: 0 0 21px 9px;
-    padding: 3px 0 3px 21px;
-    border-left: 3px solid ${colors.secondary.tre};
-  `, []);
 
   const isType = (type) => {
     return currentType === type;
