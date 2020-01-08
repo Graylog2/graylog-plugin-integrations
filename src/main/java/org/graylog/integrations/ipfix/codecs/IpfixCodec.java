@@ -117,11 +117,11 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         if (customDefFile.isDirectory()) {
             String message = "The specified path is a folder. Please specify the full path to the file.";
             LOG.debug(message);
-            throw new IpfixException("An error occurred due to the following error [" + message+"]");
+            throw new IpfixException("An error occurred due to the following error [" + message + "]");
         } else if (!customDefFile.exists()) {
             String message = "The specified file [%s] does not exist.";
             LOG.debug(message);
-            throw new IpfixException("An error occurred due to the following error [" + message+"]");
+            throw new IpfixException("An error occurred due to the following error [" + message + "]");
         }
         return true;
     }
