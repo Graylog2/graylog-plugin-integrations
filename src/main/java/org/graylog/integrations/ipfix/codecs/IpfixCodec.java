@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URL;
@@ -60,9 +61,11 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -85,14 +88,26 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws IOException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-        // Standard IPFIX definition file is loaded from the classpath and is mandatory. We don't check for null or empty.
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
-        final String ipFixCustomDefPath = (String) configuration.getSource().get(CK_IPFIX_DEFINITION_PATH);
-        if (ipFixCustomDefPath == null || ipFixCustomDefPath.trim().isEmpty()) {
+        final List<String> customDefFilePathList = configuration.getList(CK_IPFIX_DEFINITION_PATH);
+        List<URL> validFilePathsList = new ArrayList<>();
+
+        if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            final URL customIPFixDefURL = Paths.get(ipFixCustomDefPath).toUri().toURL();
-            infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, customIPFixDefURL);
+            // TODO improve logic as needed and throw an error if file is not valid
+            for (String filePaths : customDefFilePathList) {
+                int index = 0;
+                File file = new File(customDefFilePathList.get(index));
+                if (validateFilePath(file)) {
+                    URL customDefURL = Paths.get(file.toURI()).toUri().toURL();
+                    validFilePathsList.add(customDefURL);
+                }
+            }
+            // TODO change hardcoded value
+            if (validFilePathsList.size() == 1) {
+                infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, validFilePathsList.get(0));
+            }
         }
         this.parser = new IpfixParser(this.infoElementDefs);
     }
