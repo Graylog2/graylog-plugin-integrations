@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations.ipfix.codecs;
 
+import autovalue.shaded.com.google$.common.annotations.$VisibleForTesting;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -73,7 +74,8 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     @VisibleForTesting
     static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
     private static final Logger LOG = LoggerFactory.getLogger(IpfixCodec.class);
-    private static final String IPFIX_STANDARD_DEFINITION = "/ipfix-iana-elements.json";
+    @$VisibleForTesting
+    static final String IPFIX_STANDARD_DEFINITION = "/ipfix-iana-elements.json";
 
     private final IpfixAggregator ipfixAggregator;
     private final IpfixParser parser;
