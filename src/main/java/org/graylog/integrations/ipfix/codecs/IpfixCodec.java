@@ -1,16 +1,16 @@
 /**
  * This file is part of Graylog.
- * <p>
+ *
  * Graylog is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p>
+ *
  * Graylog is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * <p>
+ *
  * You should have received a copy of the GNU General Public License
  * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -95,6 +95,20 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, customIPFixDefURL);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
+    }
+
+    public boolean validateFilePath(File customDefFile) throws IpfixException {
+
+        if (customDefFile.isDirectory()) {
+            String message = "The specified path is a folder. Please specify the full path to the file.";
+            LOG.debug(message);
+            throw new IpfixException("An error occurred due to the following error [" + message+"]");
+        } else if (!customDefFile.exists()) {
+            String message = "The specified file [%s] does not exist.";
+            LOG.debug(message);
+            throw new IpfixException("An error occurred due to the following error [" + message+"]");
+        }
+        return true;
     }
 
     /**
