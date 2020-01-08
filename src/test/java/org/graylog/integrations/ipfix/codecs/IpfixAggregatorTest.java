@@ -78,6 +78,7 @@ public class IpfixAggregatorTest {
         assertThat(ipfixMessage.flows()).hasSize(4);
     }
 
+    @Ignore("Not ready.")
     @Test
     public void dataAndDataTemplate() throws IOException {
 
