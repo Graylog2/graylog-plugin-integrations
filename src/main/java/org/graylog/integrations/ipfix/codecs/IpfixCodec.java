@@ -94,17 +94,18 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
         final List<String> customDefFilePathList = configuration.getList(CK_IPFIX_DEFINITION_PATH);
-        List<URL> validFilePathsList = new ArrayList<>();
+        List<URL> filePaths = new ArrayList<>();
 
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            validFilePathsList.add(standardIPFixDefTemplate);
+            validateFilePath(customDefFilePathList);
+            filePaths.add(standardIPFixDefTemplate);
             for (String filePath : customDefFilePathList) {
                 URL customDefURL = convertToURL(filePath);
-                validFilePathsList.add(customDefURL);
+                filePaths.add(customDefURL);
             }
-            URL[] urls = convertToArray(validFilePathsList);
+            URL[] urls = convertToArray(filePaths);
             infoElementDefs = new InformationElementDefinitions(urls);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
@@ -117,6 +118,13 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     URL[] convertToArray(List<URL> urls) {
         URL[] urlArray = new URL[urls.size()];
         return urls.toArray(urlArray);
+    }
+
+    void validateFilePath(List<String> customDefFilePathList) throws IpfixException {
+        for (String filePath : customDefFilePathList) {
+            File file = new File(filePath);
+            validateFilePath(file);
+        }
     }
 
     public void validateFilePath(File customDefFile) throws IpfixException {
