@@ -102,7 +102,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             validateFilePath(customDefFilePathList);
             filePaths.add(standardIPFixDefTemplate);
             for (String filePath : customDefFilePathList) {
-                URL customDefURL = convertToURL(filePath);
+                URL customDefURL = convertToURL(filePath.trim());
                 filePaths.add(customDefURL);
             }
             URL[] urls = convertToArray(filePaths);
@@ -122,7 +122,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
     void validateFilePath(List<String> customDefFilePathList) throws IpfixException {
         for (String filePath : customDefFilePathList) {
-            File file = new File(filePath);
+            File file = new File(filePath.trim());
             validateFilePath(file);
         }
     }
