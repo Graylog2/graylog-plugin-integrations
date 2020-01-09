@@ -99,28 +99,28 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            validateFilePath(customDefFilePathList);
+            errOnInvalidFilePath(customDefFilePathList);
             filePaths.add(standardIPFixDefTemplate);
             for (String filePath : customDefFilePathList) {
-                URL customDefURL = convertToURL(filePath.trim());
+                URL customDefURL = url(filePath.trim());
                 filePaths.add(customDefURL);
             }
-            URL[] urls = convertToArray(filePaths);
+            URL[] urls = array(filePaths);
             infoElementDefs = new InformationElementDefinitions(urls);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
     }
 
-    URL convertToURL(String s) throws MalformedURLException {
+    URL url(String s) throws MalformedURLException {
         return Paths.get(s).toUri().toURL();
     }
 
-    URL[] convertToArray(List<URL> urls) {
+    URL[] array(List<URL> urls) {
         URL[] urlArray = new URL[urls.size()];
         return urls.toArray(urlArray);
     }
 
-    void validateFilePath(List<String> customDefFilePathList) throws IpfixException {
+    void errOnInvalidFilePath(List<String> customDefFilePathList) throws IpfixException {
         for (String filePath : customDefFilePathList) {
             File file = new File(filePath.trim());
             validateFilePath(file);
