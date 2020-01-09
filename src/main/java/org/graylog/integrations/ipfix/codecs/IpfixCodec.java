@@ -56,6 +56,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -95,25 +96,27 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            // TODO improve logic as needed and throw an error if file is not valid
-            for (String filePaths : customDefFilePathList) {
-                int index = 0;
-                File file = new File(customDefFilePathList.get(index));
-                if (validateFilePath(file)) {
-                    URL customDefURL = Paths.get(file.toURI()).toUri().toURL();
-                    validFilePathsList.add(customDefURL);
-                }
+            validFilePathsList.add(standardIPFixDefTemplate);
+            for (String filePath : customDefFilePathList) {
+                URL customDefURL = convertToURL(filePath);
+                validFilePathsList.add(customDefURL);
             }
-            // TODO change hardcoded value
-            if (validFilePathsList.size() == 1) {
-                infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate, validFilePathsList.get(0));
-            }
+            URL[] urls = convertToArray(validFilePathsList);
+            infoElementDefs = new InformationElementDefinitions(urls);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
     }
 
-    public boolean validateFilePath(File customDefFile) throws IpfixException {
+    URL convertToURL(String s) throws MalformedURLException {
+        return Paths.get(s).toUri().toURL();
+    }
 
+    URL[] convertToArray(List<URL> urls) {
+        URL[] urlArray = new URL[urls.size()];
+        return urls.toArray(urlArray);
+    }
+
+    public void validateFilePath(File customDefFile) throws IpfixException {
         if (customDefFile.isDirectory()) {
             String message = "The specified path is a folder. Please specify the full path to the file.";
             LOG.debug(message);
@@ -123,7 +126,6 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
             LOG.debug(message);
             throw new IpfixException("An error occurred due to the following error [" + message + "]");
         }
-        return true;
     }
 
     /**
