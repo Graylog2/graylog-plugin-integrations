@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-
 import styled from 'styled-components';
 
 import ValidatedInput from './ValidatedInput';
 
-const MaskedInput = ({ label, ...props }) => {
+const MaskedInput = ({ className, label, ...props }) => {
   const [masked, setMasked] = useState(true);
   const toggleLabel = (
     <LabelWrapper>
@@ -17,7 +16,7 @@ const MaskedInput = ({ label, ...props }) => {
   );
 
   return (
-    <ValidatedInput {...props} type={masked ? 'password' : 'text'} label={toggleLabel} />
+    <ValidatedInput {...props} type={masked ? 'password' : 'text'} label={toggleLabel} formGroupClassName={className} />
   );
 };
 
@@ -26,6 +25,11 @@ MaskedInput.propTypes = {
     PropTypes.string,
     PropTypes.node,
   ]).isRequired,
+  className: PropTypes.string,
+};
+
+MaskedInput.defaultProps = {
+  className: undefined,
 };
 
 const LabelWrapper = styled.span`

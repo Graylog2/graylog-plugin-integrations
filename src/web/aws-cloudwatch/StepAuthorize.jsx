@@ -2,17 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
+import AWSAuthenticationTypes from 'aws/authentication/AWSAuthenticationTypes';
+import AWSCustomEndpoints from 'aws/authentication/AWSCustomEndpoints';
+
 import { FormDataContext } from './context/FormData';
 import { ApiContext } from './context/Api';
 import { SidebarContext } from './context/Sidebar';
 
 import ValidatedInput from '../common/ValidatedInput';
-import MaskedInput from '../common/MaskedInput';
 import FormWrap from '../common/FormWrap';
 import Permissions from '../common/Permissions';
 import { renderOptions } from '../common/Options';
 import { ApiRoutes } from '../common/Routes';
 import useFetch from '../common/hooks/useFetch';
+import { AWS_AUTH_TYPES } from '../common/constants';
 
 import formValidation from '../utils/formValidation';
 
@@ -70,68 +73,49 @@ const StepAuthorize = ({ onChange, onSubmit }) => {
     };
   }, []);
 
+  const authType = formData.awsAuthenticationType && formData.awsAuthenticationType.value;
+  const isFormValid = formValidation.isFormValid([
+    'awsCloudWatchName',
+    'awsCloudWatchAwsRegion',
+    ...authType !== AWS_AUTH_TYPES.automatic ? ['awsCloudWatchAwsKey', 'awsCloudWatchAwsSecret'] : [],
+  ], formData);
+
   return (
-    <>
-      <FormWrap onSubmit={handleSubmit}
-                buttonContent="Authorize &amp; Choose Stream"
-                loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
-                disabled={formValidation.isFormValid([
-                  'awsCloudWatchName',
-                  'awsCloudWatchAwsKey',
-                  'awsCloudWatchAwsSecret',
-                  'awsCloudWatchAwsRegion',
-                ], formData)}
-                error={formError}
-                title="Create Input &amp; Authorize AWS"
-                description="This integration allows Graylog to read messages directly from a Kinesis stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">
+    <FormWrap onSubmit={handleSubmit}
+              buttonContent="Authorize &amp; Choose Stream"
+              loading={fetchRegionsStatus.loading || fetchStreamsStatus.loading}
+              disabled={isFormValid}
+              error={formError}
+              title="Create Input &amp; Authorize AWS"
+              description="This integration allows Graylog to read messages directly from a Kinesis stream. CloudWatch messages can optionally be forwarded to Kinesis via CloudWatch subscriptions and then read by Graylog.">
 
-        {/* Fighting AutoComplete Forms */}
-        <DisappearingInput id="name" type="text" />
-        <DisappearingInput id="password" type="password" />
-        {/* Continue on, Nothing to See Here */}
+      <DisappearingInput id="name" type="text" />
+      <DisappearingInput id="password" type="password" />
 
-        <ValidatedInput id="awsCloudWatchName"
-                        type="text"
-                        fieldData={formData.awsCloudWatchName}
-                        onChange={onChange}
-                        placeholder="Kinesis Input Name"
-                        label="Name"
-                        autoComplete="off"
-                        required />
+      <ValidatedInput id="awsCloudWatchName"
+                      type="text"
+                      fieldData={formData.awsCloudWatchName}
+                      onChange={onChange}
+                      placeholder="Graylog Input Name"
+                      label="Graylog Input Name"
+                      autoComplete="off"
+                      required />
 
-        <ValidatedInput id="awsCloudWatchAwsKey"
-                        type="text"
-                        label="AWS Access Key"
-                        placeholder="AK****************"
-                        onChange={onChange}
-                        fieldData={formData.awsCloudWatchAwsKey}
-                        autoComplete="off"
-                        maxLength="512"
-                        help='Your AWS Key should be a 20-character long, alphanumeric string that starts with the letters "AK".'
-                        required />
+      <AWSAuthenticationTypes onChange={onChange} />
 
-        <MaskedInput id="awsCloudWatchAwsSecret"
-                     label="AWS Secret Key"
-                     placeholder="***********"
-                     onChange={onChange}
-                     fieldData={formData.awsCloudWatchAwsSecret}
-                     autoComplete="off"
-                     maxLength="512"
-                     help="Your AWS Secret is usually a 40-character long, base-64 encoded string."
-                     required />
+      <ValidatedInput id="awsCloudWatchAwsRegion"
+                      type="select"
+                      fieldData={formData.awsCloudWatchAwsRegion}
+                      onChange={onChange}
+                      label="AWS Region"
+                      help="The AWS Region your service is running in."
+                      disabled={fetchRegionsStatus.loading}
+                      required>
+        {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
+      </ValidatedInput>
 
-        <ValidatedInput id="awsCloudWatchAwsRegion"
-                        type="select"
-                        fieldData={formData.awsCloudWatchAwsRegion}
-                        onChange={onChange}
-                        label="AWS Region"
-                        help="The AWS Region where Kinesis is running."
-                        disabled={fetchRegionsStatus.loading}
-                        required>
-          {renderOptions(availableRegions, 'Choose AWS Region', fetchRegionsStatus.loading)}
-        </ValidatedInput>
-      </FormWrap>
-    </>
+      <AWSCustomEndpoints onChange={onChange} />
+    </FormWrap>
   );
 };
 

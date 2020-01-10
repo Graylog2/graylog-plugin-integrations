@@ -3,8 +3,8 @@ import { useContext, useEffect, useState } from 'react';
 import URLUtils from 'util/URLUtils';
 import fetch from 'logic/rest/FetchProvider';
 
-import { FormDataContext } from '../../aws-cloudwatch/context/FormData';
-import { awsAuth } from '../../aws-cloudwatch/context/default_settings';
+import { FormDataContext } from 'aws-cloudwatch/context/FormData';
+import { awsAuth } from 'aws-cloudwatch/context/default_settings';
 
 /* useFetch Custom Hook
 
@@ -65,12 +65,25 @@ const useFetch = (url, setHook = () => {}, method = 'GET', options = {}) => {
       if (isFetchable && !data) {
         setLoading(true);
 
+        const {
+          awsCloudWatchAssumeARN = { value: undefined },
+          awsEndpointCloudWatch = { value: undefined },
+          awsEndpointIAM = { value: undefined },
+          awsEndpointDynamoDB = { value: undefined },
+          awsEndpointKinesis = { value: undefined },
+        } = formData;
+
         if (method === 'GET') {
           fetcher = fetch(method, qualifiedURL);
         } else {
           fetcher = fetch(method, qualifiedURL, {
             aws_access_key_id: key,
             aws_secret_access_key: secret,
+            assume_role_arn: awsCloudWatchAssumeARN.value,
+            cloudwatch_endpoint: awsEndpointCloudWatch.value,
+            dynamodb_endpoint: awsEndpointDynamoDB.value,
+            iam_endpoint: awsEndpointIAM.value,
+            kinesis_endpoint: awsEndpointKinesis.value,
             ...options,
           });
         }

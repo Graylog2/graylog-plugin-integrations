@@ -13,7 +13,7 @@ const AdditionalFields = ({ children, className, onToggle, title, visible }) => 
   return (
     <div className={className}>
       <ToggleAdditionalFields onClick={handleToggle} type="button">
-        {title} <i className="fa fa-angle-right fa-sm" />
+        {title} <i className={`fa fa-${fieldsVisible ? 'angle-down' : 'angle-right'} fa-fw`} />
       </ToggleAdditionalFields>
 
       <AdditionalFieldsContent visible={fieldsVisible}>

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Modal, Panel } from 'react-bootstrap';
+import { Button, Modal, Panel } from 'react-bootstrap';
 
 import FormAdvancedOptions from './FormAdvancedOptions';
 import { FormDataContext } from './context/FormData';
@@ -14,7 +14,6 @@ import ValidatedInput from '../common/ValidatedInput';
 import Routes, { ApiRoutes } from '../common/Routes';
 import { renderOptions } from '../common/Options';
 import formValidation from '../utils/formValidation';
-
 
 const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
   const { formData } = useContext(FormDataContext);
@@ -45,14 +44,13 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
           </p>
         </AutoSetupContent>
 
-        <button onClick={() => {
+        <Button onClick={() => {
           clearSidebar();
           toggleSetup();
         }}
-                type="button"
-                className="btn btn-default">
+                type="button">
           Setup Kinesis Automatically
-        </button>
+        </Button>
       </Panel>,
     );
   }, []);

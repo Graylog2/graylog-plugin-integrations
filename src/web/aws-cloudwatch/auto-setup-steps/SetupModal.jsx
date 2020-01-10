@@ -44,9 +44,9 @@ const SetupModal = ({ onSubmit, onCancel, groupName, streamName }) => {
       <Modal.Footer>
         {agreed
           ? (
-            <Button onClick={success ? onSubmit : onCancel}
+            <Button bsStyle="success"
+                    onClick={success ? onSubmit : onCancel}
                     type="button"
-                    className={`btn btn-${success ? 'success' : 'default'}`}
                     disabled={!error && !success}>
               {buttonText}
             </Button>
@@ -54,13 +54,12 @@ const SetupModal = ({ onSubmit, onCancel, groupName, streamName }) => {
           : (
             <>
               <Button onClick={onCancel}
-                      type="button"
-                      className="btn btn-default">
+                      type="button">
                 Cancel
               </Button>
               <Button onClick={() => (setAgreed(true))}
                       type="button"
-                      className="btn btn-success">
+                      bsStyle="success">
                 I Agree! Create these AWS resources now.
               </Button>
             </>

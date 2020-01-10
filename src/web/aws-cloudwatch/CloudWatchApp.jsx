@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import PageHeader from 'components/common/PageHeader';
 
+import { AdvancedOptionsProvider } from './context/AdvancedOptions';
 import { SidebarProvider } from './context/Sidebar';
 import { FormDataProvider } from './context/FormData';
 import { StepsProvider } from './context/Steps';
@@ -15,11 +16,13 @@ const CloudWatchApp = ({ params: { step }, route }) => {
       <StepsProvider>
         <FormDataProvider>
           <SidebarProvider>
-            <PageHeader title="AWS Integrations">
-              <span>This feature retrieves log messages from various AWS sources.</span>
-            </PageHeader>
+            <AdvancedOptionsProvider>
+              <PageHeader title="AWS Integrations">
+                <span>This feature retrieves log messages from various AWS sources.</span>
+              </PageHeader>
 
-            <CloudWatch wizardStep={step} route={route} />
+              <CloudWatch wizardStep={step} route={route} />
+            </AdvancedOptionsProvider>
           </SidebarProvider>
         </FormDataProvider>
       </StepsProvider>
