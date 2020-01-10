@@ -80,7 +80,6 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
     @VisibleForTesting
     static final String IPFIX_STANDARD_DEFINITION = "/ipfix-iana-elements.json";
-
     private final IpfixAggregator ipfixAggregator;
     private final IpfixParser parser;
     private InformationElementDefinitions infoElementDefs;
@@ -97,13 +96,13 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
-            errOnInvalidFilePath(customDefFilePathList);
+            checkValidFilePath(customDefFilePathList);
             filePaths.add(standardIPFixDefTemplate);
             for (String filePath : customDefFilePathList) {
                 URL customDefURL = url(filePath.trim());
                 filePaths.add(customDefURL);
             }
-            URL[] urls = array(filePaths);
+            URL[] urls = convertToArray(filePaths);
             infoElementDefs = new InformationElementDefinitions(urls);
         }
         this.parser = new IpfixParser(this.infoElementDefs);
@@ -113,12 +112,12 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         return Paths.get(s).toUri().toURL();
     }
 
-    URL[] array(List<URL> urls) {
+    URL[] convertToArray(List<URL> urls) {
         URL[] urlArray = new URL[urls.size()];
         return urls.toArray(urlArray);
     }
 
-    void errOnInvalidFilePath(List<String> customDefFilePathList) throws IpfixException {
+    void checkValidFilePath(List<String> customDefFilePathList) throws IpfixException {
         for (String filePath : customDefFilePathList) {
             File file = new File(filePath.trim());
             validateFilePath(file);
