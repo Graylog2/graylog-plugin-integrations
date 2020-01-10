@@ -16,7 +16,6 @@
  */
 package org.graylog.integrations.ipfix.codecs;
 
-import autovalue.shaded.com.google$.common.annotations.$VisibleForTesting;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -79,9 +78,8 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     static final String CK_IPFIX_DEFINITION_PATH = "ipfix_definition_path";
     private static final Logger LOG = LoggerFactory.getLogger(IpfixCodec.class);
 
-    @$VisibleForTesting
+    @VisibleForTesting
     static final String IPFIX_STANDARD_DEFINITION = "/ipfix-iana-elements.json";
-
 
     private final IpfixAggregator ipfixAggregator;
     private final IpfixParser parser;
@@ -94,7 +92,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
 
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
         final List<String> customDefFilePathList = configuration.getList(CK_IPFIX_DEFINITION_PATH);
-        List<URL> filePaths = new ArrayList<>();
+        final List<URL> filePaths = new ArrayList<>();
 
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
@@ -130,12 +128,10 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     public void validateFilePath(File customDefFile) throws IpfixException {
         if (customDefFile.isDirectory()) {
             String message = "The specified path is a folder. Please specify the full path to the file.";
-            LOG.debug(message);
-            throw new IpfixException("An error occurred due to the following error [" + message + "]");
+            throw new IpfixException(message);
         } else if (!customDefFile.exists()) {
-            String message = "The specified file [%s] does not exist.";
-            LOG.debug(message);
-            throw new IpfixException("An error occurred due to the following error [" + message + "]");
+            String message = "The specified file does not exist.";
+            throw new IpfixException(message);
         }
     }
 
@@ -174,7 +170,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     private static String createMessageString(long packetCount, long octetCount, String srcAddr, String dstAddr,
                                               Number srcPort, Number dstPort, long protocol) {
         String message = String.format(Locale.ROOT, "Ipfix [" + srcAddr + "]:" + srcPort + " <> [" + dstAddr + "]:" + dstPort + " " +
-                "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
+                                                    "proto:" + protocol + " pkts:" + packetCount + " bytes:" + octetCount);
         return message;
     }
 
@@ -265,7 +261,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
                                   "IPFIX field definitions",
                                   Collections.emptyList(),
                                   Collections.emptyMap(),
-                                  "JSON file containing IPFIX field definitions",
+                                  "JSON file containing IPFIX field definitions.",
                                   ConfigurationField.Optional.OPTIONAL,
                                   ListField.Attribute.ALLOW_CREATE)
             );

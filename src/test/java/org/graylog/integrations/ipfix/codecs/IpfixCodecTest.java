@@ -58,13 +58,13 @@ public class IpfixCodecTest {
 
 
     @Test
-    public void buildIPFixWithStandardAndCustomDefinition() throws MalformedURLException,Exception{
-        //Assume these comma seperated files exist in the path
+    public void buildIPFixWithStandardAndCustomDefinition() throws MalformedURLException, Exception {
+        // Assume these comma seperated files exist in the path
         String expectedValue = "/home/helium/workspace/config/test.json,/home/helium/workspace/config/test1.json";
         List<String> urls = Arrays.asList(expectedValue.split(","));
         assertThat(urls.size()).isEqualTo(2);
 
-        //Add the standard definition files
+        // Add the standard definition files
         List<URL> urlList = new ArrayList<>();
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IpfixCodec.IPFIX_STANDARD_DEFINITION);
         urlList.add(standardIPFixDefTemplate);
@@ -74,13 +74,13 @@ public class IpfixCodecTest {
             URL convertToURL = convertToURL(url);
             urlList.add(convertToURL);
         }
-        //Validate URLList has 3 elements
+        // Validate URLList has 3 elements
         urlList.stream().forEach(System.out::println);
         assertThat(urlList.toArray().length).isEqualTo(3);
 
         URL[] urlArray = new URL[urlList.size()];
         urlArray = urlList.toArray(urlArray);
-        //construct ied with 3 files. One standard and 2 Optional
+        // construct ied with 3 files. One standard and 2 Optional
         InformationElementDefinitions ieds = new InformationElementDefinitions(urlArray);
         assertNotNull(ieds);
 
