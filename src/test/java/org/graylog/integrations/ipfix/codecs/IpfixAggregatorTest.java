@@ -27,8 +27,10 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,7 +80,6 @@ public class IpfixAggregatorTest {
         assertThat(ipfixMessage.flows()).hasSize(4);
     }
 
-    @Ignore("Not ready.")
     @Test
     public void dataAndDataTemplate() throws IOException {
 
@@ -139,7 +140,9 @@ public class IpfixAggregatorTest {
 
         // load the configMap
         final HashMap<String, Object> configMap = new HashMap<>();
-        configMap.put(IpfixCodec.CK_IPFIX_DEFINITION_PATH, tempFile.getAbsolutePath());
+        List<String> expectedValue = Arrays.asList(tempFile.getAbsolutePath());
+        configMap.put(IpfixCodec.CK_IPFIX_DEFINITION_PATH, expectedValue);
+
         final Configuration configuration = new Configuration(configMap);
 
         final IpfixCodec codec = new IpfixCodec(configuration, ipfixAggregator);
