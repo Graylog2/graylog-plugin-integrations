@@ -92,10 +92,7 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
         final List<String> customDefFilePathList = configuration.getList(CK_IPFIX_DEFINITION_PATH);
         final List<URL> filePaths = new ArrayList<>();
-
-        //infoElementDefs = Builder.build(InformationElementDefinitions.class)
-                             //.standardDef(standardIPFixDefTemplate)
-                             //.customDef(customDefFilePathList)
+       
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
