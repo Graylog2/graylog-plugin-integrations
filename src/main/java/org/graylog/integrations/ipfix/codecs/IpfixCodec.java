@@ -88,11 +88,9 @@ public class IpfixCodec extends AbstractCodec implements MultiMessageCodec {
     protected IpfixCodec(@Assisted Configuration configuration, IpfixAggregator ipfixAggregator) throws IOException {
         super(configuration);
         this.ipfixAggregator = ipfixAggregator;
-
         final URL standardIPFixDefTemplate = Resources.getResource(IpfixCodec.class, IPFIX_STANDARD_DEFINITION);
         final List<String> customDefFilePathList = configuration.getList(CK_IPFIX_DEFINITION_PATH);
         final List<URL> filePaths = new ArrayList<>();
-       
         if (customDefFilePathList == null || customDefFilePathList.isEmpty()) {
             infoElementDefs = new InformationElementDefinitions(standardIPFixDefTemplate);
         } else {
