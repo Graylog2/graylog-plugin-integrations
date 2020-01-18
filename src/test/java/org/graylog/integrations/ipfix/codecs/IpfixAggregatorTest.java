@@ -148,7 +148,7 @@ public class IpfixAggregatorTest {
         final IpfixCodec codec = new IpfixCodec(configuration, ipfixAggregator);
 
         AtomicInteger messageCount = new AtomicInteger();
-        try (InputStream stream = Resources.getResource("data-datatemplate.pcap").openStream()) {
+        try (InputStream stream = Resources.getResource("ixflow.pcap").openStream()) {
             final Pcap pcap = Pcap.openStream(stream);
             pcap.loop(packet -> {
                 if (packet.hasProtocol(Protocol.UDP)) {
