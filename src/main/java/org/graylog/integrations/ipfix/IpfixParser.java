@@ -488,6 +488,12 @@ public class IpfixParser {
                         }
                         fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochSecond(seconds, fraction), ZoneOffset.UTC));
                         break;
+                    case SUBTEMPLATELIST:
+                        // TODO resolve the remaining elements
+                        if (informationElement.length() == 65535) {
+                            int length = getVarLength(setContent);
+                        }
+                        break;
                 }
             }
             flowBuilder.add(Flow.create(fields.build()));
