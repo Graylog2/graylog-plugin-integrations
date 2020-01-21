@@ -3,7 +3,6 @@ package org.graylog.integrations.ipfix;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import io.netty.buffer.ByteBuf;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -265,7 +264,7 @@ public class IpfixParserTest {
         );
     }
 
-    @Ignore("Test is incomplete. Not a valid IPFIX version: 54467")
+
     @Test
     public void parseSubTemplateListTest() throws IOException {
 
@@ -283,7 +282,7 @@ public class IpfixParserTest {
         assertThat(ipfixMessage).isNotNull();
 
         final ImmutableList<TemplateRecord> templateRecords = ipfixMessage.templateRecords();
-        assertThat(templateRecords).hasSize(2);
+        assertThat(templateRecords).hasSize(4);
 
         final TemplateRecord firstTemplate = templateRecords.get(0);
         //assertThat(firstTemplate.templateId()).isEqualTo(256);
