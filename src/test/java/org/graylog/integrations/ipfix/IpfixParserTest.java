@@ -3,7 +3,6 @@ package org.graylog.integrations.ipfix;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import io.netty.buffer.ByteBuf;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -40,6 +39,21 @@ public class IpfixParserTest {
         assertThat(description.referencedTemplateIds()).contains(256);
         assertThat(description.declaredTemplateIds()).contains(256, 257);
         assertThat(description.declaredOptionsTemplateIds()).contains(258);
+    }
+
+    @Test
+    public void shallowParsePacketMultilist() throws IOException {
+        ByteBuf packet = Utils.readPacket("ixia-multilist.ipfix");
+        InformationElementDefinitions definitions = new InformationElementDefinitions(
+                Resources.getResource("ipfix-iana-elements.json"),
+                Resources.getResource("ixia-ied.json")
+        );
+        final IpfixParser.MessageDescription description = new IpfixParser(definitions).shallowParseMessage(packet);
+
+        assertThat(description).isNotNull();
+        // this also refers to template id 257, but because we don't have the data-template set for 256 we don't know that
+        // there is a multilist element which then refers to 257 (we'd have to parse the data set first to know that)
+        assertThat(description.referencedTemplateIds()).contains(256);
     }
 
     @Test

@@ -16,12 +16,7 @@
  */
 package org.graylog.integrations.ipfix;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.primitives.Longs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -78,7 +73,6 @@ public class IpfixParser {
      */
     public MessageDescription shallowParseMessage(ByteBuf packet) {
         final ByteBuf buffer = packet.readSlice(MessageHeader.LENGTH);
-        LOG.debug("Attempting a shallow parse on message. [{}]", ByteBufUtil.prettyHexDump(buffer));
         LOG.debug("Shallow parse header\n{}", ByteBufUtil.prettyHexDump(buffer));
         final MessageHeader header = parseMessageHeader(buffer);
         final MessageDescription messageDescription = new MessageDescription(header);
@@ -278,7 +272,7 @@ public class IpfixParser {
                     } else {
                         throw new IpfixException("Missing template for data set using template id " + setId + ". Cannot parse data set.");
                     }
-                    final Set<Flow> flows = parseDataSet(informationElements, setContent);
+                    final Set<Flow> flows = parseDataSet(informationElements, templates, setContent);
                     builder.addAllFlows(flows);
                     break;
             }
@@ -319,7 +313,18 @@ public class IpfixParser {
         return b.build();
     }
 
-    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, ByteBuf setContent) {
+    /**
+     * Parses a data set into its individual flows, based on the informationElements from the template ID the data set specified.
+     * <p>
+     * In order to be able to parse subtemplateList and subtemplateMultilist information elements, the entire templateMap is also passed in.
+     * Unfortunately it is not possible to determine which templates lists refer to without actually parsing the data first.
+     *
+     * @param informationElements the field information from the template used by this data set
+     * @param templateMap map from template id to its information elements, used for subtemplateLists
+     * @param setContent the data set bytes to parse
+     * @return collection of parsed flows
+     */
+    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, Map<Integer, TemplateRecord> templateMap, ByteBuf setContent) {
         ImmutableSet.Builder<Flow> flowBuilder = ImmutableSet.builder();
         while (setContent.isReadable()) {
             final ImmutableMap.Builder<String, Object> fields = ImmutableMap.builder();
@@ -488,6 +493,75 @@ public class IpfixParser {
                         }
                         fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochSecond(seconds, fraction), ZoneOffset.UTC));
                         break;
+                    case BASICLIST: {
+                        // TODO add to field somehow
+                        final short semantic = setContent.readUnsignedByte();
+                        final InformationElement element = parseInformationElement(setContent);
+                        InformationElementDefinition def = infoElemDefs.getDefinition(element.id(), element.enterpriseNumber());
+                        if (def == null) {
+                            LOG.error("Unable to find information element definition in basicList: id {} PEN {}, this is a bug, cannot parse packet.", element.id(), element.enterpriseNumber());
+                            break;
+                        } else {
+                            LOG.warn("Skipping basicList data ({} bytes)", informationElement.length());
+                            // informationElement.length is the declared length of the list (from the template), not the list element's datatype width!
+                            ByteBuf listBuf = setContent.readSlice(informationElement.length());
+                            while (listBuf.isReadable()) {
+                                // simply discard the bytes for now
+                                listBuf.skipBytes(element.length());
+                            }
+                        }
+                        break;
+                    }
+                    case SUBTEMPLATELIST: {
+                        // there are three possibilities here (compare https://tools.ietf.org/html/rfc6313#section-4.5.2):
+                        //  1. the data set's template has an explicit length
+                        //  2. the length is < 255 encoded as 1 byte, in variable length format (not recommended)
+                        //  3. the length is encoded as 3 bytes, in variable length format (recommended per RFC 6313)
+                        /* encoding format in this case is according to Figure 5:
+                            0                   1                   2                   3
+                            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                           |   Semantic    |         Template ID           |     ...       |
+                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                           |                subTemplateList Content    ...                 |
+                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                           |                              ...                              |
+                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                          Semantic is one of:
+                            * 0xFF - undefined
+                            * 0x00 - noneOf
+                            * 0x01 - exactlyOneOf
+                            * 0x02 - oneOrMoreOf
+                            * 0x03 - allOf
+                            * 0x04 - ordered
+                         */
+                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
+                        // adjust length for semantic + templateId
+                        length -= 3;
+                        LOG.debug("Remaining data buffer:\n{}", ByteBufUtil.prettyHexDump(setContent));
+                        // TODO add to field somehow
+                        final short semantic = setContent.readUnsignedByte();
+                        final int templateId = setContent.readUnsignedShort();
+                        final TemplateRecord templateRecord = templateMap.get(templateId);
+                        if (templateRecord == null) {
+                            LOG.error("Unable to parse subtemplateList, because we don't have the template for it: {}, skipping data ({} bytes)", templateId, length);
+                            setContent.skipBytes(length);
+                            break;
+                        }
+                        ByteBuf listContent = setContent.readSlice(length);
+                        // if this is not readable, it's an empty list
+                        if (listContent.isReadable()) {
+                            // TODO read subtemplate flows:
+                            // Set<Flow> flows = parseDataSet(templateRecord.informationElements(), templateMap, listContent);
+                        }
+                        break;
+                    }
+                    case SUBTEMPLATEMULTILIST: {
+                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
+                        setContent.skipBytes(length);
+                        LOG.warn("subtemplateMultilist support is not implemented, skipping data ({} bytes)", length);
+                        break;
+                    }
                 }
             }
             flowBuilder.add(Flow.create(fields.build()));

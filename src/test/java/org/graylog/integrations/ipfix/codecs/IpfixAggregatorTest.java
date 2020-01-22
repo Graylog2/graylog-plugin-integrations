@@ -1,11 +1,13 @@
 package org.graylog.integrations.ipfix.codecs;
 
+import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.pkts.Pcap;
 import io.pkts.packet.UDPPacket;
 import io.pkts.protocol.Protocol;
+import org.assertj.core.util.Lists;
 import org.graylog.integrations.ipfix.InformationElementDefinitions;
 import org.graylog.integrations.ipfix.IpfixMessage;
 import org.graylog.integrations.ipfix.IpfixParser;
@@ -27,13 +29,11 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class IpfixAggregatorTest {
     private static final Logger LOG = LoggerFactory.getLogger(IpfixAggregatorTest.class);
@@ -175,4 +175,44 @@ public class IpfixAggregatorTest {
         }
         assertThat(messageCount.get()).isEqualTo(4L);
     }
+
+    @Test
+    public void ixFlowTest() throws IOException {
+        final IpfixAggregator ipfixAggregator = new IpfixAggregator();
+        final File filePath = new File(Resources.getResource("ixia-ied.json").getFile());
+        final Map<String, Object> configMap = Maps.newHashMap();
+        configMap.put(IpfixCodec.CK_IPFIX_DEFINITION_PATH, Collections.singletonList(filePath.getAbsolutePath()));
+        final IpfixCodec codec = new IpfixCodec(new Configuration(configMap), ipfixAggregator);
+        final Collection<Message> messages = Lists.newArrayList();
+
+        // ixflow.pcap contains 4 packets, the first has the data templates and option tempates
+        // followed by three data sets. two sets have subtemplateList data, the third has only empty lists for domain information
+        try (InputStream stream = Resources.getResource("ixflow.pcap").openStream()) {
+            final Pcap pcap = Pcap.openStream(stream);
+            pcap.loop(packet -> {
+                if (packet.hasProtocol(Protocol.UDP)) {
+                    final UDPPacket udp = (UDPPacket) packet.getPacket(Protocol.UDP);
+                    final InetSocketAddress source = new InetSocketAddress(udp.getParentPacket().getSourceIP(), udp.getSourcePort());
+                    byte[] payload = new byte[udp.getPayload().getReadableBytes()];
+                    udp.getPayload().getBytes(payload);
+                    final ByteBuf buf = Unpooled.wrappedBuffer(payload);
+                    final CodecAggregator.Result result = ipfixAggregator.addChunk(buf, source);
+                    final ByteBuf ipfixRawBuf = result.getMessage();
+                    if (ipfixRawBuf != null) {
+                        byte[] bytes = new byte[ipfixRawBuf.readableBytes()];
+                        ipfixRawBuf.getBytes(0, bytes);
+                        messages.addAll(Objects.requireNonNull(codec.decodeMessages(new RawMessage(bytes))));
+                    }
+                }
+                return true;
+            });
+        } catch (IOException e) {
+            fail("Cannot process PCAP stream");
+        }
+
+        assertThat(messages).isNotEmpty();
+
+    }
+
+
 }
