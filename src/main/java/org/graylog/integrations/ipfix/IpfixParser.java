@@ -500,19 +500,19 @@ public class IpfixParser {
                         break;
                     case BASICLIST: {
                         // TODO add to field somehow
-                        final short semantic = setContent.readUnsignedByte();
-                        final InformationElement element = parseInformationElement(setContent);
+                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
+                        ByteBuf listBuffer = setContent.readSlice(length);
+                        final short semantic = listBuffer.readUnsignedByte();
+                        final InformationElement element = parseInformationElement(listBuffer);
                         InformationElementDefinition def = infoElemDefs.getDefinition(element.id(), element.enterpriseNumber());
                         if (def == null) {
                             LOG.error("Unable to find information element definition in basicList: id {} PEN {}, this is a bug, cannot parse packet.", element.id(), element.enterpriseNumber());
                             break;
                         } else {
                             LOG.warn("Skipping basicList data ({} bytes)", informationElement.length());
-                            // informationElement.length is the declared length of the list (from the template), not the list element's datatype width!
-                            ByteBuf listBuf = setContent.readSlice(informationElement.length());
-                            while (listBuf.isReadable()) {
+                            while (listBuffer.isReadable()) {
                                 // simply discard the bytes for now
-                                listBuf.skipBytes(element.length());
+                                listBuffer.skipBytes(element.length());
                             }
                         }
                         break;
