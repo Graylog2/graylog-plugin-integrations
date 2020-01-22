@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A Graylog specific IPFIX parser.
@@ -555,10 +556,11 @@ public class IpfixParser {
                         }
                         ByteBuf listContent = setContent.readSlice(length);
                         // if this is not readable, it's an empty list
+                        ImmutableList.Builder<Flow> flows = ImmutableList.builder();
                         if (listContent.isReadable()) {
-                            // TODO read subtemplate flows:
-                            // Set<Flow> flows = parseDataSet(templateRecord.informationElements(), templateMap, listContent);
+                            flows.addAll(parseDataSet(templateRecord.informationElements(), templateMap, listContent));
                         }
+                        fields.put(desc.fieldName(), flows.build().stream().map(Flow::fields).collect(Collectors.toList()));
                         break;
                     }
                     case SUBTEMPLATEMULTILIST: {

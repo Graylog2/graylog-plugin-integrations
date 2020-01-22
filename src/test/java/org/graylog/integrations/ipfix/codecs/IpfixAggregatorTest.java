@@ -183,9 +183,9 @@ public class IpfixAggregatorTest {
         final Map<String, Object> configMap = Maps.newHashMap();
         configMap.put(IpfixCodec.CK_IPFIX_DEFINITION_PATH, Collections.singletonList(filePath.getAbsolutePath()));
         final IpfixCodec codec = new IpfixCodec(new Configuration(configMap), ipfixAggregator);
-        final Collection<Message> messages = Lists.newArrayList();
+        final List<Message> messages = Lists.newArrayList();
 
-        // ixflow.pcap contains 4 packets, the first has the data templates and option tempates
+        // ixflow.pcap contains 4 packets, the first has the data templates and option templates
         // followed by three data sets. two sets have subtemplateList data, the third has only empty lists for domain information
         try (InputStream stream = Resources.getResource("ixflow.pcap").openStream()) {
             final Pcap pcap = Pcap.openStream(stream);
@@ -210,7 +210,9 @@ public class IpfixAggregatorTest {
             fail("Cannot process PCAP stream");
         }
 
-        assertThat(messages).isNotEmpty();
+        assertThat(messages).hasSize(3);
+        assertThat(messages.get(0).hasField("httpSession")).isTrue();
+        assertThat(messages.get(0).hasField("dnsRecord")).isTrue();
 
     }
 
