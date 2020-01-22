@@ -155,34 +155,18 @@ public class IpfixAggregatorTest {
 
         assertThat(messages).hasSize(3);
         assertThat(messages.get(0).getFields())
-                .hasEntrySatisfying("httpSession", value -> {
-                    assertThat(value).asList().hasSize(0);
-                })
-                .hasEntrySatisfying("dnsRecord", value -> {
-                    assertThat(value).asList().hasSize(1).first().isInstanceOf(Map.class);
-                    Map<String, Object> fields = ((List<Map<String, Object>>) value).get(0);
-                    assertThat(fields.get("dnsIpv4Address")).isEqualTo("1.2.0.2");
-                    assertThat(fields.get("dnsIpv6Address")).isEqualTo("0:0:0:0:0:0:0:0");
-                    assertThat(fields.get("dnsName")).isEqualTo("server-1020002.example.int.");
-                });
+                .doesNotContainKey("httpSession")
+                .containsEntry("dnsRecord_0_dnsIpv4Address", "1.2.0.2")
+                .containsEntry("dnsRecord_0_dnsIpv6Address", "0:0:0:0:0:0:0:0")
+                .containsEntry("dnsRecord_0_dnsName", "server-1020002.example.int.");
         assertThat(messages.get(1).getFields())
-                .hasEntrySatisfying("httpSession", value -> {
-                    assertThat(value).asList().hasSize(0);
-                })
-                .hasEntrySatisfying("dnsRecord", value -> {
-                    assertThat(value).asList().hasSize(1).first().isInstanceOf(Map.class);
-                    Map<String, Object> fields = ((List<Map<String, Object>>) value).get(0);
-                    assertThat(fields.get("dnsIpv4Address")).isEqualTo("1.2.14.73");
-                    assertThat(fields.get("dnsIpv6Address")).isEqualTo("0:0:0:0:0:0:0:0");
-                    assertThat(fields.get("dnsName")).isEqualTo("server-1020e49.example.int.");
-                });
+                .doesNotContainKey("httpSession")
+                .containsEntry("dnsRecord_0_dnsIpv4Address", "1.2.14.73")
+                .containsEntry("dnsRecord_0_dnsIpv6Address", "0:0:0:0:0:0:0:0")
+                .containsEntry("dnsRecord_0_dnsName", "server-1020e49.example.int.");
         assertThat(messages.get(2).getFields())
-                .hasEntrySatisfying("httpSession", value -> {
-                    assertThat(value).asList().hasSize(0);
-                })
-                .hasEntrySatisfying("dnsRecord", value -> {
-                    assertThat(value).asList().hasSize(0);
-                });
+                .doesNotContainKey("httpSession")
+                .doesNotContainKey("dnsRecord");
 
     }
 
