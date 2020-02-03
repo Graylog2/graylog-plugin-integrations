@@ -11,9 +11,8 @@ import { SidebarContext } from 'aws/context/Sidebar';
 import useFetch from 'aws/common/hooks/useFetch';
 import FormWrap from 'aws/common/FormWrap';
 import ValidatedInput from 'aws/common/ValidatedInput';
-import { ApiRoutes } from 'aws/common/Routes';
+import { ApiRoutes, DocsRoutes } from 'aws/common/Routes';
 import { renderOptions } from 'aws/common/Options';
-
 import formValidation from 'aws/utils/formValidation';
 
 import FormAdvancedOptions from '../FormAdvancedOptions';
@@ -97,7 +96,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                     </p>
                     <p>
                       Please select the stream you would like to read messages from, or follow the&nbsp;
-                      <a href="https://docs.graylog.org/en/latest/pages/integrations/inputs/aws_kinesis_cloudwatch_input.html"> AWS Kinesis/CloudWatch Input </a>
+                        <a href={DocsRoutes.INTEGRATIONS.AWS.INPUT}> AWS Kinesis/CloudWatch Input </a>
                          documentation for more details on this set up.
                     </p>
                   </>
