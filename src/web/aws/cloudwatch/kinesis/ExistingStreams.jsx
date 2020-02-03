@@ -96,9 +96,9 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                       Below is a list of all Kinesis streams found within the specified AWS account.
                     </p>
                     <p>
-                      Please select the stream you would like to read messages from, or follow the directions set up&nbsp;
-                      <a href={Routes.INTEGRATIONS.AWS.CLOUDWATCH.step('kinesis-setup')}>CloudWatch Log Subscription</a>,
-                      which can forward messages into a new Kinesis stream.
+                      Please select the stream you would like to read messages from, or follow the&nbsp;
+                      <a href="https://docs.graylog.org/en/latest/pages/integrations/inputs/aws_kinesis_cloudwatch_input.html"> AWS Kinesis/CloudWatch Input </a>
+                         documentation for more details on this set up.
                     </p>
                   </>
                 )}>
