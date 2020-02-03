@@ -97,7 +97,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                     </p>
                     <p>
                       Please select the stream you would like to read messages from, or follow the&nbsp;
-                        <DocumentationLink page={DocsRoutes.INTEGRATIONS.AWS.INPUT} text="AWS Kinesis/CloudWatch Input" />
+                      <DocumentationLink page={DocsRoutes.INTEGRATIONS.AWS.INPUT} text="AWS Kinesis/CloudWatch Input" />
                          documentation for more details on this set up.
                     </p>
                   </>
