@@ -28,33 +28,17 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class AWSAuthProvider implements AwsCredentialsProvider {
     private static final Logger LOG = LoggerFactory.getLogger(AWSAuthProvider.class);
 
-    private AwsCredentials credentials;
+    private final String stsRegion;
+    private final String accessKey;
+    private final String secretKey;
+    private final String assumeRoleArn;
 
-    public AWSAuthProvider(@Nullable String stsRegion, @Nullable String accessKey, @Nullable String secretKey, @Nullable String assumeRoleArn) {
-        this.credentials = this.resolveAuthentication(accessKey, secretKey, stsRegion, assumeRoleArn);
-    }
-
-    private AwsCredentials resolveAuthentication(@Nullable String accessKey,
-                                                 @Nullable String secretKey,
-                                                 @Nullable String stsRegion,
-                                                 @Nullable String assumeRoleArn) {
-        AwsCredentialsProvider awsCredentials;
-        if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
-            LOG.debug("Using explicitly provided key and secret.");
-            awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
-        } else {
-            LOG.debug("Using default authorization provider chain.");
-            awsCredentials = DefaultCredentialsProvider.create();
-        }
-
-        // Apply the Assume Role ARN Authorization if specified. All AWSCredentialsProviders support this.
-        if (!isNullOrEmpty(assumeRoleArn) && !isNullOrEmpty(stsRegion)) {
-            LOG.debug("Creating cross account assume role credentials");
-            return buildStsCredentialsProvider(awsCredentials, stsRegion, assumeRoleArn, accessKey)
-                    .resolveCredentials();
-        }
-
-        return awsCredentials.resolveCredentials();
+    public AWSAuthProvider(@Nullable String stsRegion, @Nullable String accessKey,
+                           @Nullable String secretKey, @Nullable String assumeRoleArn) {
+        this.stsRegion = stsRegion;
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.assumeRoleArn = assumeRoleArn;
     }
 
     /**
@@ -90,6 +74,22 @@ public class AWSAuthProvider implements AwsCredentialsProvider {
 
     @Override
     public AwsCredentials resolveCredentials() {
-        return credentials;
+
+        AwsCredentialsProvider awsCredentials;
+        if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
+            LOG.debug("Using explicitly provided key and secret.");
+            awsCredentials = StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
+        } else {
+            LOG.debug("Using default authorization provider chain.");
+            awsCredentials = DefaultCredentialsProvider.create();
+        }
+
+        // Apply the Assume Role ARN Authorization if specified. All AWSCredentialsProviders support this.
+        if (!isNullOrEmpty(assumeRoleArn) && !isNullOrEmpty(stsRegion)) {
+            LOG.debug("Creating cross account assume role credentials");
+            return buildStsCredentialsProvider(awsCredentials, stsRegion, assumeRoleArn, accessKey).resolveCredentials();
+        }
+
+        return awsCredentials.resolveCredentials();
     }
 }
