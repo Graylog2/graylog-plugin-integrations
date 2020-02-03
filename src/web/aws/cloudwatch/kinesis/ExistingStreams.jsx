@@ -14,6 +14,7 @@ import ValidatedInput from 'aws/common/ValidatedInput';
 import { ApiRoutes, DocsRoutes } from 'aws/common/Routes';
 import { renderOptions } from 'aws/common/Options';
 import formValidation from 'aws/utils/formValidation';
+import DocumentationLink from 'components/support/DocumentationLink';
 
 import FormAdvancedOptions from '../FormAdvancedOptions';
 
@@ -96,7 +97,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                     </p>
                     <p>
                       Please select the stream you would like to read messages from, or follow the&nbsp;
-                      <a href={DocsRoutes.INTEGRATIONS.AWS.INPUT}> AWS Kinesis/CloudWatch Input </a>
+                        <DocumentationLink page={DocsRoutes.INTEGRATIONS.AWS.INPUT} text="AWS Kinesis/CloudWatch Input" />
                          documentation for more details on this set up.
                     </p>
                   </>
