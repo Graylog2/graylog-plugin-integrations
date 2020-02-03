@@ -35,10 +35,10 @@ const ApiRoutes = {
 
 const DocsRoutes = {
   INTEGRATIONS: {
-    AWS:{
+    AWS: {
       INPUT: 'https://docs.graylog.org/en/latest/pages/integrations/inputs/aws_kinesis_cloudwatch_input.html#aws-kinesis-cloudwatch-input'
-    },
-  },
+    }
+  }
 };
 
 export default Routes;
