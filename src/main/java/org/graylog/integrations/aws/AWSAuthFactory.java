@@ -19,9 +19,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class AWSAuthFactory {
     private static final Logger LOG = LoggerFactory.getLogger(AWSAuthFactory.class);
 
-    private AWSAuthFactory() {
-    }
-
     /**
      * Resolves the appropriate AWS authorization provider based on the input.
      *
@@ -30,10 +27,10 @@ public class AWSAuthFactory {
      * using Java props, environment variables, EC2 instance roles etc. See the {@link DefaultCredentialsProvider}
      * Javadoc for more information.
      */
-    public static AwsCredentialsProvider getAuthProvider(@Nullable String accessKey,
-                                                         @Nullable String secretKey,
-                                                         @Nullable String stsRegion,
-                                                         @Nullable String assumeRoleArn) {
+    public static AwsCredentialsProvider create(@Nullable String accessKey,
+                                                @Nullable String secretKey,
+                                                @Nullable String stsRegion,
+                                                @Nullable String assumeRoleArn) {
         AwsCredentialsProvider awsCredentials;
         if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
             LOG.debug("Using explicitly provided key and secret.");

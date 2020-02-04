@@ -76,8 +76,8 @@ public class KinesisConsumer implements Runnable {
     public void run() {
 
         LOG.debug("Starting the Kinesis Consumer.");
-        AwsCredentialsProvider credentialsProvider = AWSAuthFactory.getAuthProvider(request.region(), request.awsAccessKeyId(),
-                                                                                    request.awsSecretAccessKey(), request.assumeRoleArn());
+        AwsCredentialsProvider credentialsProvider = AWSAuthFactory.create(request.region(), request.awsAccessKeyId(),
+                                                                           request.awsSecretAccessKey(), request.assumeRoleArn());
 
         final Region region = Region.of(request.region());
 
