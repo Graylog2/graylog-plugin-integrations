@@ -31,9 +31,9 @@ public class AWSAuthFactory {
      * Javadoc for more information.
      */
     public static AwsCredentialsProvider getAuthProvider(@Nullable String accessKey,
-                                                  @Nullable String secretKey,
-                                                  @Nullable String stsRegion,
-                                                  @Nullable String assumeRoleArn) {
+                                                         @Nullable String secretKey,
+                                                         @Nullable String stsRegion,
+                                                         @Nullable String assumeRoleArn) {
         AwsCredentialsProvider awsCredentials;
         if (!isNullOrEmpty(accessKey) && !isNullOrEmpty(secretKey)) {
             LOG.debug("Using explicitly provided key and secret.");
@@ -59,7 +59,7 @@ public class AWSAuthFactory {
      * permission, which provides authorization for a role to be assumed.
      */
     private static AwsCredentialsProvider buildStsCredentialsProvider(AwsCredentialsProvider awsCredentials, String stsRegion,
-                                                               String assumeRoleArn, @Nullable String accessKey) {
+                                                                      String assumeRoleArn, @Nullable String accessKey) {
 
         StsClient stsClient = StsClient.builder().region(Region.of(stsRegion)).credentialsProvider(awsCredentials).build();
 
