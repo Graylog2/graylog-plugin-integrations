@@ -1,16 +1,16 @@
 /**
  * This file is part of Graylog.
- *
+ * <p>
  * Graylog is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Graylog is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,6 +31,9 @@ import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog.integrations.ipfix.codecs.IpfixCodec;
 import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
+import org.graylog.integrations.okta.OktaCodec;
+import org.graylog.integrations.okta.OktaInput;
+import org.graylog.integrations.okta.OktaTransport;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
@@ -54,7 +57,7 @@ public class IntegrationsModule extends PluginModule {
 
     /**
      * Returns all configuration beans required by this plugin.
-     *
+     * <p>
      * Implementing this method is optional. The default method returns an empty {@link Set}.
      */
     @Override
@@ -84,6 +87,11 @@ public class IntegrationsModule extends PluginModule {
          */
 
         addAuditEventTypes(IntegrationsAuditEventTypes.class);
+
+        //OKTA
+        addMessageInput(OktaInput.class);
+        addCodec(OktaCodec.NAME, OktaCodec.class);
+        addTransport(OktaTransport.NAME, OktaTransport.class);
 
         // IPFIX
         addMessageInput(IpfixUdpInput.class);
