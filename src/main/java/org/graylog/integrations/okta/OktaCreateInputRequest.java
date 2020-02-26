@@ -28,10 +28,7 @@ public abstract class OktaCreateInputRequest implements OktaRequest {
 
     private static final String OKTA_NAME = "name";
     private static final String OKTA_MESSAGE_TYPE = "okta_input_type";
-    private static final String BATCH_SIZE = "batch_size";
     private static final String GLOBAL = "global";
-    private static final String THROTTLING_ALLOWED = "enable_throttling";
-    private static final String ADD_SYSTEM_LOG_PREFIX = "add_system_log_prefix";
 
     @JsonProperty(OKTA_NAME)
     public abstract String name();
@@ -39,17 +36,8 @@ public abstract class OktaCreateInputRequest implements OktaRequest {
     @JsonProperty(OKTA_MESSAGE_TYPE)
     public abstract String oktaMessageType();
 
-    @JsonProperty(BATCH_SIZE)
-    public abstract int batchSize();
-
     @JsonProperty(GLOBAL)
     public abstract boolean global();
-
-    @JsonProperty(THROTTLING_ALLOWED)
-    public abstract boolean throttlingAllowed();
-
-    @JsonProperty(ADD_SYSTEM_LOG_PREFIX)
-    public abstract boolean addFlowLogPrefix();
 
     public static Builder builder() {
         return Builder.create();
@@ -66,12 +54,12 @@ public abstract class OktaCreateInputRequest implements OktaRequest {
                 }
 
                 @Override
-                public Builder oktaDomain(String oktaDomain) {
+                public Builder domain(String domain) {
                     return null;
                 }
 
                 @Override
-                public Builder oktaApiKey(String oktaApiKey) {
+                public Builder apiKey(String apiKey) {
                     return null;
                 }
 
@@ -81,22 +69,7 @@ public abstract class OktaCreateInputRequest implements OktaRequest {
                 }
 
                 @Override
-                public Builder batchSize(int batchSize) {
-                    return null;
-                }
-
-                @Override
                 public Builder global(boolean global) {
-                    return null;
-                }
-
-                @Override
-                public Builder throttlingAllowed(boolean throttlingAllowed) {
-                    return null;
-                }
-
-                @Override
-                public Builder addFlowLogPrefix(boolean addFlowLogPrefix) {
                     return null;
                 }
 
@@ -113,17 +86,10 @@ public abstract class OktaCreateInputRequest implements OktaRequest {
         @JsonProperty(OKTA_MESSAGE_TYPE)
         public abstract Builder oktaMessageType(String oktaMessageType);
 
-        @JsonProperty(BATCH_SIZE)
-        public abstract Builder batchSize(int batchSize);
 
         @JsonProperty(GLOBAL)
         public abstract Builder global(boolean global);
 
-        @JsonProperty(THROTTLING_ALLOWED)
-        public abstract Builder throttlingAllowed(boolean throttlingAllowed);
-
-        @JsonProperty(ADD_SYSTEM_LOG_PREFIX)
-        public abstract Builder addFlowLogPrefix(boolean addFlowLogPrefix);
 
         public abstract OktaCreateInputRequest builder();
     }

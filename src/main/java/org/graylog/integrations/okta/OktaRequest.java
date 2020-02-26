@@ -16,12 +16,11 @@ public interface OktaRequest {
 
     @Nullable
     @JsonProperty(OKTA_DOMAIN)
-    String oktaDomain();
+    String domain();
 
     @Nullable
     @JsonProperty(OKTA_API_KEY)
-    String oktaApiKey();
-
+    String apiKey();
 
     interface Builder<SELF> {
 
@@ -29,10 +28,9 @@ public interface OktaRequest {
         SELF name(String okta);
 
         @JsonProperty(OKTA_DOMAIN)
-        SELF oktaDomain(String oktaDomain);
+        SELF domain(String domain);
 
         @JsonProperty(OKTA_API_KEY)
-        SELF oktaApiKey(String oktaApiKey);
-
+        SELF apiKey(String apiKey);
     }
 }
