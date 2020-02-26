@@ -3,51 +3,64 @@ package org.graylog.integrations.okta;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
 import org.graylog2.shared.inputs.MessageInputFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 
 @Api(value = "Okta", description = "Okta Integrations")
-@Path("/Okta")
-@RequiresAuthentication
+@Path("/okta")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class OktaResource extends AbstractInputsResource implements PluginRestResource {
 
+    public OktaService oktaService;
+
+    OkHttpClient client = new OkHttpClient().newBuilder().build();
+    // TODO delete logger
+    private static final Logger LOG = LoggerFactory.getLogger(OktaCodec.class);
+
     @Inject
-    public OktaResource(MessageInputFactory messageInputFactory) {
+    public OktaResource(OktaService oktaService, MessageInputFactory messageInputFactory) throws IOException {
         super(messageInputFactory.getAvailableInputs());
+        this.oktaService = oktaService;
     }
 
     @GET
     @Timed
-    @Path("/inputs")
-    @ApiOperation(value = "Create a new Okta input.")
-    public OktaResponse create(@ApiParam(name = "JSON body", required = true)
-                               @Valid @NotNull OktaRequest saveRequest) throws Exception {
-        // TODO create input
-        return null;
-    }
+    @Path("/logs")
+    @ApiOperation(value = "Pull Okta System Logs", response = okhttp3.Response.class)
+    public OktaResponse syslogs() throws Exception {
+        // TODO add apiparam for hardcoded values
+        String url = "https://company.okta.com/api/v1/logs";
+        String apiKey = "SSWS ";
+        LOG.info(url);
+        LOG.info(apiKey);
 
-    @POST
-    @Timed
-    @Path("/system_logs")
-    @ApiOperation(value = "Pull Okta System Logs.")
-    public OktaResponse getSystemLogs(@ApiParam(name = "JSON body", required = true)
-                                      @Valid @NotNull OktaRequestImpl saveRequest) throws Exception {
-        // TODO get system logs
-        return null;
+        // TODO move method into OktaService.getSystemLogs
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                                                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .method("GET", null)
+                .addHeader("Accept", "application/json")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", apiKey)
+                .build();
+
+        okhttp3.Response response = client.newCall(request).execute();
+        OktaResponse oktaResponse = OktaResponse.create(response.body().string());
+        return oktaResponse;
     }
 }
