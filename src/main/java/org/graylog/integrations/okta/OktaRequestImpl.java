@@ -25,12 +25,12 @@ public abstract class OktaRequestImpl implements OktaRequest {
                 }
 
                 @Override
-                public Builder oktaDomain(String oktaDomain) {
+                public Builder domain(String domain) {
                     return null;
                 }
 
                 @Override
-                public Builder oktaApiKey(String oktaApiKey) {
+                public Builder apiKey(String apiKey) {
                     return null;
                 }
 
