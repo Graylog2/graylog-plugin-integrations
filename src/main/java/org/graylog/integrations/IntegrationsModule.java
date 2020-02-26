@@ -34,6 +34,7 @@ import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
 import org.graylog.integrations.okta.OktaCodec;
 import org.graylog.integrations.okta.OktaInput;
 import org.graylog.integrations.okta.OktaTransport;
+import org.graylog.integrations.okta.OktaResource;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
@@ -92,6 +93,7 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(OktaInput.class);
         addCodec(OktaCodec.NAME, OktaCodec.class);
         addTransport(OktaTransport.NAME, OktaTransport.class);
+        addRestResource(OktaResource.class);
 
         // IPFIX
         addMessageInput(IpfixUdpInput.class);
