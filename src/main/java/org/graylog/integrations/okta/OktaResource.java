@@ -8,7 +8,6 @@ import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
 import org.graylog2.shared.inputs.MessageInputFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 @Api(value = "Okta", description = "Okta Integrations")
 @Path("/okta")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class OktaResource extends AbstractInputsResource implements PluginRestResource {
 
     public OktaService oktaService;
@@ -31,7 +29,7 @@ public class OktaResource extends AbstractInputsResource implements PluginRestRe
     @GET
     @Timed
     @Path("/logs")
-    @ApiOperation(value = "Pull Okta System Logs", response = okhttp3.Response.class)
+    @ApiOperation(value = "Pull Okta System Logs", response = OktaResponse.class)
     public OktaResponse syslogs() throws Exception {
         // TODO add apiparam for hardcoded values
         String domain = "https://company.okta.com/api/v1/logs";
