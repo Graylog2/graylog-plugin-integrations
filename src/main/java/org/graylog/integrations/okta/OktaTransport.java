@@ -7,7 +7,6 @@ import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.inputs.MessageInput;
-import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import org.graylog2.plugin.inputs.codecs.CodecAggregator;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 
+// TODO determine if ThrottleableTransport is the most suitable transport to extend/use
 public class OktaTransport extends ThrottleableTransport {
     private static final Logger LOG = LoggerFactory.getLogger(OktaTransport.class);
     public static final String NAME = "okta-transport";
@@ -33,14 +33,13 @@ public class OktaTransport extends ThrottleableTransport {
 
     @Inject
     public OktaTransport(@Assisted Configuration configuration,
-                         EventBus serverEventBus,
-                         LocalMetricRegistry localRegistry) {
+                         EventBus serverEventBus) {
         super(serverEventBus, configuration);
         this.configuration = configuration;
     }
 
     @Override
-    public void doLaunch(MessageInput input) throws MisfireException {
+    public void doLaunch(MessageInput input) {
         // TODO implement proper launch method
     }
 
