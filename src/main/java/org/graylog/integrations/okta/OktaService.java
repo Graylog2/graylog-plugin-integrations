@@ -31,10 +31,11 @@ public class OktaService {
         this.objectMapper = objectMapper;
     }
 
-    public OktaResponse getSystemLogs(String url, String apiKey) throws IOException {
+    public OktaResponse getSystemLogs(String domain, String apiKey) throws IOException {
+        // TODO check if client is suitable
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         Request request = new Request.Builder()
-                .url(url)
+                .url(domain)
                 .method("GET", null)
                 .addHeader("Accept", "application/json")
                 .addHeader("Content-Type", "application/json")
