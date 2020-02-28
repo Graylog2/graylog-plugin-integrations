@@ -16,46 +16,33 @@
  */
 package org.graylog.integrations.okta;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.graylog2.inputs.InputService;
-import org.graylog2.plugin.system.NodeId;
-import org.graylog2.shared.inputs.MessageInputFactory;
 
 import java.io.IOException;
 
 public class OktaService {
 
-    private final InputService inputService;
-    private final MessageInputFactory messageInputFactory;
-    private final NodeId nodeId;
-    private final ObjectMapper objectMapper;
-
     @Inject
-    public OktaService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId,
-                       ObjectMapper objectMapper) {
+    public OktaService() {
 
-        this.inputService = inputService;
-        this.messageInputFactory = messageInputFactory;
-        this.nodeId = nodeId;
-        this.objectMapper = objectMapper;
     }
 
     public OktaResponse getSystemLogs(String domain, String apiKey) throws IOException {
-        // TODO check if client is suitable
+        // TODO change client to OkHttpClientProvider & improve call
+        String url = "https://" + domain + "/api/v1/logs?since=2017-10-01T00:00:00.000Z";
+        String key = "SSWS " + apiKey;
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         Request request = new Request.Builder()
-                .url(domain)
+                .url(url)
                 .method("GET", null)
                 .addHeader("Accept", "application/json")
                 .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", apiKey)
+                .addHeader("Authorization", key)
                 .build();
 
         okhttp3.Response response = client.newCall(request).execute();
-        OktaResponse oktaResponse = OktaResponse.create(response.body().string());
-        return oktaResponse;
+        return OktaResponse.create(response.body().string());
     }
 }
