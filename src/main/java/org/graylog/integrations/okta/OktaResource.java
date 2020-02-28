@@ -19,14 +19,17 @@ package org.graylog.integrations.okta;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.graylog2.plugin.rest.PluginRestResource;
 import org.graylog2.rest.resources.system.inputs.AbstractInputsResource;
 import org.graylog2.shared.inputs.MessageInputFactory;
 
 import javax.inject.Inject;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 @Api(value = "Okta", description = "Okta Integrations")
@@ -46,10 +49,10 @@ public class OktaResource extends AbstractInputsResource implements PluginRestRe
     @Timed
     @Path("/logs")
     @ApiOperation(value = "Pull Okta System Logs", response = OktaResponse.class)
-    public OktaResponse syslogs() throws Exception {
-        // TODO add apiparam for hardcoded values
-        String domain = "https://company.okta.com/api/v1/logs";
-        String apiKey = "SSWS ";
+    public OktaResponse syslogs(@ApiParam(name = "domain", value = "The domain name where the system logs are located.", required = true)
+                                    @QueryParam("domain") @DefaultValue("company.okta.com") String domain,
+                                @ApiParam(name = "apiKey", value = "The API token key", required = true)
+                                    @QueryParam("apiKey") @DefaultValue("SSW apiKey") String apiKey) throws Exception {
 
         return oktaService.getSystemLogs(domain, apiKey);
     }
