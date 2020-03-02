@@ -12,4 +12,3 @@ node
 build
 build.config.js.sample
 /cache/
-src/web/aws/common/awsKeySecret.js
