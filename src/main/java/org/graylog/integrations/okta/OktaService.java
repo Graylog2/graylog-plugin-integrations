@@ -29,9 +29,10 @@ public class OktaService {
 
     }
 
-    public OktaResponse getSystemLogs(String domain, String apiKey) throws IOException {
-        // TODO change client to OkHttpClientProvider & improve call
-        String url = "https://" + domain + "/api/v1/logs?since=2017-10-01T00:00:00.000Z";
+    public OktaResponse getSystemLogs(String domain, String apiKey, String since, String until, String after,
+                                      String filter, String q, String sortOrder, int limit) throws IOException {
+        String url = buildQuery(domain, since, until, after, filter, q, sortOrder, limit);
+
         String key = "SSWS " + apiKey;
         OkHttpClient client = new OkHttpClient().newBuilder().build();
         Request request = new Request.Builder()
@@ -41,8 +42,32 @@ public class OktaService {
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", key)
                 .build();
-
         okhttp3.Response response = client.newCall(request).execute();
         return OktaResponse.create(response.body().string());
+    }
+
+    public String buildQuery(String domain, String since, String until, String after, String filter, String q, String sortOrder, int limit) {
+
+        String query = "?";
+        if(since!=null){
+            query+= "since=" + since;
+        }
+        if(until!=null){
+            query+="&until=" + until;
+        }
+        if(after!=null){
+            query+="&after=" + after;
+        }
+        if(filter!=null){
+            query+="&filter=" + filter;
+        }
+        if(q!=null){
+            query+="&q=" + q;
+        }
+        if(sortOrder!=null){
+            query+="&sortOrder=" + sortOrder;
+        }
+        query+= "&limit=" + limit;
+        return "https://" + domain + "/api/v1/logs" + query;
     }
 }
