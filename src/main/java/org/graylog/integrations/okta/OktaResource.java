@@ -49,11 +49,25 @@ public class OktaResource extends AbstractInputsResource implements PluginRestRe
     @Timed
     @Path("/logs")
     @ApiOperation(value = "Pull Okta System Logs", response = OktaResponse.class)
-    public OktaResponse syslogs(@ApiParam(name = "domain", value = "The domain name where the system logs are located.", required = true)
+    public OktaResponse syslogs(@ApiParam(name = "domain", value = "Domain of logs location", required = true)
                                     @QueryParam("domain") @DefaultValue("company.okta.com") String domain,
-                                @ApiParam(name = "apiKey", value = "The API token key", required = true)
-                                    @QueryParam("apiKey") @DefaultValue("SSW apiKey") String apiKey) throws Exception {
+                                @ApiParam(name = "apiKey", value = "API token key", required = true)
+                                    @QueryParam("apiKey") String apiKey,
+                                @ApiParam(name = "since", value = "Lower time bound of the logs", required = true)
+                                    @QueryParam("since") @DefaultValue("2017-10-01T00:00:00.000Z") String since,
+                                @ApiParam(name = "until", value = "Upper time bound of the logs")
+                                    @QueryParam("until") String until,
+                                @ApiParam(name = "after", value = "Retrieves next page of results")
+                                    @QueryParam("after") String after,
+                                @ApiParam(name = "filter", value = "Filter Expression for results")
+                                    @QueryParam("filter") String filter,
+                                @ApiParam(name = "q", value = "Filters log events by keywords")
+                                    @QueryParam("q") String q,
+                                @ApiParam(name = "sortOrder", value = "Orders events by published")
+                                    @QueryParam("sortOrder") String sortOrder,
+                                @ApiParam(name = "limit", value = "Number of returned results")
+                                    @QueryParam("limit") @DefaultValue("1") int limit) throws Exception {
 
-        return oktaService.getSystemLogs(domain, apiKey);
+        return oktaService.getSystemLogs(domain, apiKey, since, until, after, filter, q, sortOrder, limit);
     }
 }
