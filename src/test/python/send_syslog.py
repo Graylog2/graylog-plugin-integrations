@@ -19,20 +19,23 @@ from datetime import datetime
 
 
 class SyslogSender(object):
-    def __init__(self, server: str = 'localhost', port: int = 514) -> None:
+    def __init__(self, server: str = 'localhost', port: int = 514, use_udp: bool = False) -> None:
         self.socket = None
         self.server = server
         self.port = port
         self.clientname = socket.gethostname()
+        self.protocol = socket.SOCK_STREAM
+        if use_udp:
+            self.protocol = socket.SOCK_DGRAM
 
     def connect(self) -> bool:
         if self.socket == None:
-            address_info = socket.getaddrinfo(self.server, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            address_info = socket.getaddrinfo(self.server, self.port, socket.AF_UNSPEC, self.protocol)
             if address_info == None:
                 return False
 
             for (address_family, socket_type, protocol, canon_name, socket_address) in address_info:
-                self.socket = socket.socket(address_family, socket.SOCK_STREAM)
+                self.socket = socket.socket(address_family, self.protocol)
                 if self.socket == None:
                     return False
                 try:
@@ -66,13 +69,11 @@ class SyslogSender(object):
                 self.close()
 
 
-def send_single_message(server, port, message):
-    client = SyslogSender(server, port)
+def send_single_message(client, message):
     client.send(message)
 
 
-def send_messages_from_file(server, port, file):
-    client = SyslogSender(server, port)
+def send_messages_from_file(client, file):
     input_file = open(file, 'r')
     for line in input_file:
         client.send(line)
@@ -86,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--server', help='The syslog server (defaults to "localhost")', default='localhost',
                         type=str)
     parser.add_argument('-p', '--port', help='The syslog port (defaults to 514)', default=514, type=int)
+    parser.add_argument('-u', '--udp', help='Send message using UDP rather than TCP', action='store_true')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-m', '--message',
                        help="The message to be sent (may need to be surrounded by 'single quotes' if it contains spaces)",
@@ -93,13 +95,11 @@ if __name__ == "__main__":
     group.add_argument('-f', '--file', help='A newline-delimited file of messages to be sent', type=str)
     args = parser.parse_args()
 
-    if args.server:
-        server = args.server
-    if args.port:
-        port = args.port
+    client = SyslogSender(args.server, args.port, args.udp)
+
     if args.message:
-        send_single_message(args.server, args.port, args.message)
+        send_single_message(client, args.message)
     elif args.file:
-        send_messages_from_file(args.server, args.port, args.file)
+        send_messages_from_file(client, args.file)
     else:
         parser.print_help()
