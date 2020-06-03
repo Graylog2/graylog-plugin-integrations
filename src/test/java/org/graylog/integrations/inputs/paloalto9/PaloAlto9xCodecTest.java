@@ -23,7 +23,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,7 +32,7 @@ public class PaloAlto9xCodecTest {
     private static final String TEST_SOURCE = "Test Source";
     private static final DateTime TEST_DATE_TIME = DateTime.now();
     private static final String TEST_RAW_MESSAGE = "Foo,Bar,Baz";
-    private static final ImmutableList<String> TEST_FIELD_LIST = ImmutableList.of("Foo", "Bar", "Baz");
+    private static final ImmutableList<String> TEST_FIELD_LIST = ImmutableList.of("Foo", "Bar", "Baz", "Three", "Four", "GLOBALPROTECT");
     private static final ImmutableMap<String,Object> TEST_FIELD_MAP = ImmutableMap.of("field_one", "value_one",
             "field_two", "value_two",
             "field_three", Long.valueOf(3L));
