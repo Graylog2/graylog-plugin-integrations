@@ -22,9 +22,6 @@ import org.graylog2.plugin.journal.RawMessage;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldTemplate.create;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.LONG;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.STRING;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -55,6 +52,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
         
         assertThat(out.getField(EventFields.EVENT_CREATED), is("2020/05/26 04:11:09"));
         assertThat(out.getField(HostFields.HOST_ID), is("007000000018919"));
@@ -91,6 +89,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
 
         assertThat(out.getField(EventFields.EVENT_CREATED), is("2020/05/31 17:19:44"));
         assertThat(out.getField(HostFields.HOST_ID), is("0007SE00209"));
@@ -125,6 +124,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
 
         assertThat(out.getField(EventFields.EVENT_RECEIVED_TIME), is("2020/04/01 10:49:35"));
         assertThat(out.getField(HostFields.HOST_ID), is("015351000040055"));
@@ -172,6 +172,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
 
         assertThat(out.getField(EventFields.EVENT_CREATED), is("2020/03/18 04:03:19"));
         assertThat(out.getField(EventFields.EVENT_OBSERVER_UID), nullValue());
@@ -211,6 +212,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
         
         assertThat(out.getField(EventFields.EVENT_CREATED), is("2020/03/19 10:12:57"));
         assertThat(out.getField(HostFields.HOST_ID), is("007000016479"));
@@ -244,6 +246,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
 
         // Field 0 is FUTURE USE
         assertThat(out.getField(EventFields.EVENT_RECEIVED_TIME), is("2020/05/19 07:37:27"));
@@ -352,6 +355,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out, notNullValue());
         assertThat(out.getField(Message.FIELD_FULL_MESSAGE), is(rawMessage));
         assertThat(out.getField(Message.FIELD_MESSAGE), is(log));
+        assertThat(out.getField(EventFields.EVENT_SOURCE_PRODUCT), is("PAN"));
 
         // Field 0 is FUTURE USE
         assertThat(out.getField(EventFields.EVENT_RECEIVED_TIME), is("2020/05/19 07:34:54"));
