@@ -85,6 +85,10 @@ public class InformationElementDefinitions {
         if (penMapping == null) {
             throw new IpfixException("Missing information element definitions for private enterprise number " + enterpriseNumber);
         }
-        return penMapping.get(id);
+        final InformationElementDefinition definition = penMapping.get(id);
+        if (definition == null) {
+            throw new IpfixException("Missing information element definition for id " + id + " and enterprise number " + enterpriseNumber);
+        }
+        return definition;
     }
 }

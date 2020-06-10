@@ -16,12 +16,7 @@
  */
 package org.graylog.integrations.ipfix;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.primitives.Longs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -326,12 +321,12 @@ public class IpfixParser {
      *
      * @param informationElements the field information from the template used by this data set
      * @param templateMap map from template id to its information elements, used for subtemplateLists
-     * @param setContent the data set bytes to parse
+     * @param dataSet the data set bytes to parse
      * @return collection of parsed flows
      */
-    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, Map<Integer, TemplateRecord> templateMap, ByteBuf setContent) {
+    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, Map<Integer, TemplateRecord> templateMap, ByteBuf dataSet) {
         ImmutableSet.Builder<Flow> flowBuilder = ImmutableSet.builder();
-        while (setContent.isReadable()) {
+        while (dataSet.isReadable()) {
             final ImmutableMap.Builder<String, Object> fields = ImmutableMap.builder();
             for (InformationElement informationElement : informationElements) {
                 InformationElementDefinition desc = infoElemDefs.getDefinition(informationElement.id(), informationElement.enterpriseNumber());
@@ -344,16 +339,16 @@ public class IpfixParser {
                         long unsignedValue;
                         switch (informationElement.length()) {
                             case 1:
-                                unsignedValue = setContent.readUnsignedByte();
+                                unsignedValue = dataSet.readUnsignedByte();
                                 break;
                             case 2:
-                                unsignedValue = setContent.readUnsignedShort();
+                                unsignedValue = dataSet.readUnsignedShort();
                                 break;
                             case 3:
-                                unsignedValue = setContent.readUnsignedMedium();
+                                unsignedValue = dataSet.readUnsignedMedium();
                                 break;
                             case 4:
-                                unsignedValue = setContent.readUnsignedInt();
+                                unsignedValue = dataSet.readUnsignedInt();
                                 break;
                             case 5:
                             case 6:
@@ -361,7 +356,7 @@ public class IpfixParser {
                             case 8:
                                 byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
                                 int firstIndex = 8 - informationElement.length();
-                                setContent.readBytes(bytesBigEndian, firstIndex, informationElement.length());
+                                dataSet.readBytes(bytesBigEndian, firstIndex, informationElement.length());
                                 unsignedValue = Longs.fromByteArray(bytesBigEndian);
                                 break;
                             default:
@@ -376,16 +371,16 @@ public class IpfixParser {
                         long signedValue;
                         switch (informationElement.length()) {
                             case 1:
-                                signedValue = setContent.readByte();
+                                signedValue = dataSet.readByte();
                                 break;
                             case 2:
-                                signedValue = setContent.readShort();
+                                signedValue = dataSet.readShort();
                                 break;
                             case 3:
-                                signedValue = setContent.readMedium();
+                                signedValue = dataSet.readMedium();
                                 break;
                             case 4:
-                                signedValue = setContent.readUnsignedInt();
+                                signedValue = dataSet.readUnsignedInt();
                                 break;
                             case 5:
                             case 6:
@@ -393,7 +388,7 @@ public class IpfixParser {
                             case 8:
                                 byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
                                 int firstIndex = 8 - informationElement.length() - 1;
-                                setContent.readBytes(bytesBigEndian, firstIndex, informationElement.length());
+                                dataSet.readBytes(bytesBigEndian, firstIndex, informationElement.length());
                                 signedValue = Longs.fromByteArray(bytesBigEndian);
                                 break;
                             default:
@@ -406,10 +401,10 @@ public class IpfixParser {
                         double floatValue;
                         switch (informationElement.length()) {
                             case 4:
-                                floatValue = setContent.readFloat();
+                                floatValue = dataSet.readFloat();
                                 break;
                             case 8:
-                                floatValue = setContent.readDouble();
+                                floatValue = dataSet.readDouble();
                                 break;
                             default:
                                 throw new IpfixException("Unexpected length for float value: " + informationElement.length());
@@ -419,7 +414,7 @@ public class IpfixParser {
                     // the remaining types aren't subject to reduced-size encoding
                     case MACADDRESS:
                         byte[] macBytes = new byte[6];
-                        setContent.readBytes(macBytes);
+                        dataSet.readBytes(macBytes);
                         fields.put(desc.fieldName(),
                                    String.format(Locale.ROOT, "%02x:%02x:%02x:%02x:%02x:%02x",
                                                  macBytes[0], macBytes[1], macBytes[2], macBytes[3], macBytes[4], macBytes[5]));
@@ -427,7 +422,7 @@ public class IpfixParser {
                         break;
                     case IPV4ADDRESS:
                         byte[] ipv4Bytes = new byte[4];
-                        setContent.readBytes(ipv4Bytes);
+                        dataSet.readBytes(ipv4Bytes);
                         try {
                             fields.put(desc.fieldName(), InetAddress.getByAddress(ipv4Bytes).getHostAddress());
                         } catch (UnknownHostException e) {
@@ -436,7 +431,7 @@ public class IpfixParser {
                         break;
                     case IPV6ADDRESS:
                         byte[] ipv6Bytes = new byte[16];
-                        setContent.readBytes(ipv6Bytes);
+                        dataSet.readBytes(ipv6Bytes);
                         try {
                             fields.put(desc.fieldName(), InetAddress.getByAddress(ipv6Bytes).getHostAddress());
                         } catch (UnknownHostException e) {
@@ -444,7 +439,7 @@ public class IpfixParser {
                         }
                         break;
                     case BOOLEAN:
-                        final byte booleanByte = setContent.readByte();
+                        final byte booleanByte = dataSet.readByte();
                         switch (booleanByte) {
                             case 1:
                                 fields.put(desc.fieldName(), true);
@@ -460,11 +455,11 @@ public class IpfixParser {
                         final CharSequence charSequence;
                         if (informationElement.length() == 65535) {
                             // variable length element, parse accordingly
-                            int length = getVarLength(setContent);
-                            charSequence = setContent.readCharSequence(length, StandardCharsets.UTF_8);
+                            int length = getVarLength(dataSet);
+                            charSequence = dataSet.readCharSequence(length, StandardCharsets.UTF_8);
                         } else {
                             // fixed length element, just read the string from the buffer
-                            charSequence = setContent.readCharSequence(informationElement.length(), StandardCharsets.UTF_8);
+                            charSequence = dataSet.readCharSequence(informationElement.length(), StandardCharsets.UTF_8);
                         }
 
                         fields.put(desc.fieldName(), String.valueOf(charSequence).replace("\0", ""));
@@ -472,26 +467,26 @@ public class IpfixParser {
                     case OCTETARRAY:
                         final byte[] octetArray;
                         if (informationElement.length() == 65535) {
-                            int length = getVarLength(setContent);
+                            int length = getVarLength(dataSet);
                             octetArray = new byte[length];
                         } else {
                             octetArray = new byte[informationElement.length()];
                         }
-                        setContent.readBytes(octetArray);
+                        dataSet.readBytes(octetArray);
                         fields.put(desc.fieldName(), Hex.encodeHexString(octetArray));
                         break;
                     case DATETIMESECONDS:
-                        final long dateTimeSeconds = setContent.readUnsignedInt();
+                        final long dateTimeSeconds = dataSet.readUnsignedInt();
                         fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochSecond(dateTimeSeconds), ZoneOffset.UTC));
                         break;
                     case DATETIMEMILLISECONDS:
-                        final long dateTimeMills = setContent.readLong();
+                        final long dateTimeMills = dataSet.readLong();
                         fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeMills), ZoneOffset.UTC));
                         break;
                     case DATETIMEMICROSECONDS:
                     case DATETIMENANOSECONDS:
-                        final long seconds = setContent.readUnsignedInt();
-                        long fraction = setContent.readUnsignedInt();
+                        final long seconds = dataSet.readUnsignedInt();
+                        long fraction = dataSet.readUnsignedInt();
                         if (desc.dataType() == InformationElementDefinition.DataType.DATETIMEMICROSECONDS) {
                             // bottom 11 bits must be cleared for micros to ensure the precision is correct (RFC 7011 Sec 6.1.9)
                             fraction = fraction & ~0x7FF;
@@ -500,8 +495,8 @@ public class IpfixParser {
                         break;
                     case BASICLIST: {
                         // TODO add to field somehow
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
-                        ByteBuf listBuffer = setContent.readSlice(length);
+                        int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
+                        ByteBuf listBuffer = dataSet.readSlice(length);
                         final short semantic = listBuffer.readUnsignedByte();
                         final InformationElement element = parseInformationElement(listBuffer);
                         InformationElementDefinition def = infoElemDefs.getDefinition(element.id(), element.enterpriseNumber());
@@ -540,20 +535,20 @@ public class IpfixParser {
                             * 0x03 - allOf
                             * 0x04 - ordered
                          */
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
+                        int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
                         // adjust length for semantic + templateId
                         length -= 3;
-                        LOG.debug("Remaining data buffer:\n{}", ByteBufUtil.prettyHexDump(setContent));
+                        LOG.debug("Remaining data buffer:\n{}", ByteBufUtil.prettyHexDump(dataSet));
                         // TODO add to field somehow
-                        final short semantic = setContent.readUnsignedByte();
-                        final int templateId = setContent.readUnsignedShort();
+                        final short semantic = dataSet.readUnsignedByte();
+                        final int templateId = dataSet.readUnsignedShort();
                         final TemplateRecord templateRecord = templateMap.get(templateId);
                         if (templateRecord == null) {
                             LOG.error("Unable to parse subtemplateList, because we don't have the template for it: {}, skipping data ({} bytes)", templateId, length);
-                            setContent.skipBytes(length);
+                            dataSet.skipBytes(length);
                             break;
                         }
-                        final ByteBuf listContent = setContent.readSlice(length);
+                        final ByteBuf listContent = dataSet.readSlice(length);
                         // if this is not readable, it's an empty list
                         final ImmutableList.Builder<Flow> flowsBuilder = ImmutableList.builder();
                         if (listContent.isReadable()) {
@@ -570,8 +565,8 @@ public class IpfixParser {
                         break;
                     }
                     case SUBTEMPLATEMULTILIST: {
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
-                        setContent.skipBytes(length);
+                        int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
+                        dataSet.skipBytes(length);
                         LOG.warn("subtemplateMultilist support is not implemented, skipping data ({} bytes)", length);
                         break;
                     }
