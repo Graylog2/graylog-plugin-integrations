@@ -71,7 +71,7 @@ class SocketSender(object):
                 self.close()
 
 class DelayValue(argparse.Action):
-    def __call__(self, parser, namespace, values, options_string=None):
+    def __call__(self, parser, namespace, values, option_string=None):
         if not 0 <= values <= 1000:
             raise argparse.ArgumentError(self, "Invalid delay setting, value must be between 0-1000")
         setattr(namespace, self.dest, values)
