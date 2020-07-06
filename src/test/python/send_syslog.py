@@ -82,7 +82,7 @@ def send_single_message(client, message):
     client.close()
 
 
-def send_messages_from_file(client, file, delay, lines, csv: bool = False):
+def send_messages_from_file(client, file, delay, lines, csv):
     input_file = open(file, 'r')
     
     # For CSV files, skip first line
@@ -99,7 +99,6 @@ def send_messages_from_file(client, file, delay, lines, csv: bool = False):
         client.send(line)
         time.sleep(delay * 0.001)
         replay_line_count += 1
-        print ( 'line [%s]: [%s]' % ( replay_line_count, line ), file=sys.stderr )
         if replay_line_count == lines: break
 
     input_file.close()
