@@ -82,10 +82,16 @@ def send_single_message(client, message):
     client.close()
 
 
-def send_messages_from_file(client, file, delay):
+def send_messages_from_file(client, file, delay, lines, csv: bool = False):
     input_file = open(file, 'r')
-    # Track the number of lines
+    
+    # For CSV files, skip first line
+    if csv:
+        next(input_file)
+
+    # Track the number of lines sent
     replay_line_count = 0
+
     # Track the time to send
     timer_start = time.perf_counter()
 
@@ -93,6 +99,8 @@ def send_messages_from_file(client, file, delay):
         client.send(line)
         time.sleep(delay * 0.001)
         replay_line_count += 1
+        print ( 'line [%s]: [%s]' % ( replay_line_count, line ), file=sys.stderr )
+        if replay_line_count == lines: break
 
     input_file.close()
     client.close()
@@ -111,6 +119,8 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--port', help='The syslog port (defaults to 514)', default=514, type=int)
     parser.add_argument('-u', '--udp', help='Send message using UDP rather than TCP', action='store_true')
     parser.add_argument('-d', '--delay', help='Add a delay in milliseconds [0-1000] after sending each line of a file', default=0, metavar="[0-1000]", type=int, action=DelayValue)
+    parser.add_argument('-l', '--lines', help='Limit number of lines to transmit (0 = no limit)', default=0, type=int)
+    parser.add_argument('-c', '--csv', help='When sending CSV file this option will skip the first line', action='store_true')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-m', '--message',
                        help="The message to be sent (may need to be surrounded by 'single quotes' if it contains spaces)",
@@ -123,6 +133,6 @@ if __name__ == "__main__":
     if args.message:
         send_single_message(client, args.message)
     elif args.file:
-        send_messages_from_file(client, args.file, args.delay)
+        send_messages_from_file(client, args.file, args.delay, args.lines, args.csv)
     else:
         parser.print_help()
