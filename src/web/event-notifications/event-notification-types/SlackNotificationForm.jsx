@@ -4,6 +4,9 @@ import lodash from 'lodash';
 
 import { Input } from 'components/bootstrap';
 import FormsUtils from 'util/FormsUtils';
+import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
+import { ColorPickerPopover } from 'components/common';
+import ColorLabel from 'components/sidecars/common/ColorLabel';
 
 class SlackNotificationForm extends React.Component {
     static propTypes = {
@@ -38,6 +41,20 @@ class SlackNotificationForm extends React.Component {
                  value={config.color || ''}
                  onChange={this.handleChange}
                  required />
+          <FormGroup controlId="color">
+            <ControlLabel>Configuration color</ControlLabel>
+            <div>
+              <ColorLabel color={config.color || ''} />
+              <div style={{ display: 'inline-block', marginLeft: 15 }}>
+                <ColorPickerPopover id="notification-color"
+                                    name="color"
+                                    placement="right"
+                                    triggerNode={<Button bsSize="xsmall">Change color</Button>}
+                                    onChange={this.handleChange} />
+              </div>
+            </div>
+            <HelpBlock>Choose a color to use for this configuration.</HelpBlock>
+          </FormGroup>
           <Input id="notification-webhookUrl"
                  name="webhook_url"
                  label="Webhook URL"
