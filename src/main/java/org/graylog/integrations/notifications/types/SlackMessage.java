@@ -32,15 +32,15 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class SlackMessage {
 
-	private final String color;
-	private final String iconEmoji;
-	private final String iconUrl;
-	private final String userName;
-	private final String channel;
-	private final boolean linkNames;
-	private final String message;
+	private String color;
+	private String iconEmoji;
+	private String iconUrl;
+	private String userName;
+	private String channel;
+	private boolean linkNames;
+	private String message;
 	private String customMessage;
-	private List<String> backlogItemMessages;
+	private List<String> backlogItemMessages = new ArrayList<>();
 
 	public SlackMessage(
 			String color,
@@ -62,6 +62,10 @@ public class SlackMessage {
 		this.message = message;
 		this.customMessage = customMessage;
 		this.backlogItemMessages = backlogItemMessages;
+	}
+
+	public SlackMessage(String message){
+		this.message = message;
 	}
 
 	public String getJsonString() {

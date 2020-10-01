@@ -136,12 +136,12 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 			return new AutoValue_SlackEventNotificationConfig.Builder()
 					.type(TYPE_NAME)
 					.color("#ff0500")
-					.webhookUrl("https://hooks.slack.com/services/xxxx/xxxx/tRr8")
+					.webhookUrl("https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx")
 					.channel("slacktest2")
 					.customMessage("hello World")
 					.backlogItemMessage("this is a back log item message")
-					.notifyChannel(false)
-					.linkNames(false);
+					.notifyChannel(true)
+					.linkNames(true);
 		}
 
 		@JsonProperty(FIELD_COLOR)

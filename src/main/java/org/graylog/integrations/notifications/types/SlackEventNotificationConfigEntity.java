@@ -82,9 +82,9 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 
 		@JsonCreator
 		public static Builder create() {
-			/*return new AutoValue_SlackEventNotificationConfigEntity.Builder()
-					.type(TYPE_NAME);*/
-			return null;
+			return new AutoValue_SlackEventNotificationConfigEntity.Builder()
+					.type(TYPE_NAME);
+
 		}
 
 		@JsonProperty(SlackEventNotificationConfig.FIELD_COLOR)
