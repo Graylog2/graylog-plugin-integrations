@@ -45,13 +45,7 @@ class SlackNotificationForm extends React.Component {
             <ControlLabel>Configuration color</ControlLabel>
             <div>
               <ColorLabel color={config.color || ''} />
-              <div style={{ display: 'inline-block', marginLeft: 15 }}>
-                <ColorPickerPopover id="notification-color"
-                                    name="color"
-                                    placement="right"
-                                    triggerNode={<Button bsSize="xsmall">Change color</Button>}
-                                    onChange={this.handleChange} />
-              </div>
+
             </div>
             <HelpBlock>Choose a color to use for this configuration.</HelpBlock>
           </FormGroup>

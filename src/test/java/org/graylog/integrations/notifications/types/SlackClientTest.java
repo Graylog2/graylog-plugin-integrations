@@ -3,7 +3,6 @@ package org.graylog.integrations.notifications.types;
 import org.junit.Before;
 import org.junit.Test;
 
-//https://hooks.slack.com/services/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
 
 public class SlackClientTest {
 
