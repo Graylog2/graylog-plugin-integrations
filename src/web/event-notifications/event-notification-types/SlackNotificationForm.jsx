@@ -22,6 +22,11 @@ class SlackNotificationForm extends React.Component {
       onChange(nextConfig);
     };
 
+    handleColorChange = (color, _, hidePopover) => {
+      console.log(color);
+      hidePopover();
+    };
+
     handleChange = (event) => {
       const { name } = event.target;
       this.propagateChange(name, FormsUtils.getValueFromInput(event.target));
@@ -32,20 +37,18 @@ class SlackNotificationForm extends React.Component {
 
       return (
         <>
-          <Input id="notification-color"
-                 name="color"
-                 label="Custom Message Color"
-                 type="text"
-                 bsStyle={validation.errors.color ? 'error' : null}
-                 help={lodash.get(validation, 'errors.color[0]', 'Color to use for Slack message')}
-                 value={config.color || ''}
-                 onChange={this.handleChange}
-                 required />
+
           <FormGroup controlId="color">
             <ControlLabel>Configuration color</ControlLabel>
             <div>
               <ColorLabel color={config.color || ''} />
-
+              <div style={{ display: 'inline-block', marginLeft: 15 }}>
+                <ColorPickerPopover id="notification-color"
+                                    name="color"
+                                    placement="right"
+                                    triggerNode={<Button bsSize="xsmall">Change color</Button>}
+                                    onChange={this.handleColorChange} />
+              </div>
             </div>
             <HelpBlock>Choose a color to use for this configuration.</HelpBlock>
           </FormGroup>
