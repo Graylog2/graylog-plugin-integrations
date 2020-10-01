@@ -54,6 +54,7 @@ public class SlackEventNotification implements EventNotification {
         SlackEventNotification create();
 	}
 
+
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
 	private final EventNotificationService notificationCallbackService;
