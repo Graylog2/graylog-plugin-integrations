@@ -31,6 +31,7 @@ import org.graylog2.contentpacks.EntityDescriptorIds;
 import org.graylog2.contentpacks.model.entities.references.ValueReference;
 import org.graylog2.plugin.rest.ValidationResult;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
 
 @AutoValue
@@ -38,6 +39,9 @@ import javax.validation.constraints.NotBlank;
 @JsonDeserialize(builder = SlackEventNotificationConfig.Builder.class)
 public abstract class SlackEventNotificationConfig implements EventNotificationConfig {
 	public static final String TYPE_NAME = "slack-notification-v1";
+
+
+	//there are 8 properties with default values and scroll down to line 133 to see them.
 
 	static final String FIELD_COLOR = "color";
 	static final String FIELD_WEBHOOK_URL = "webhook_url";
@@ -50,6 +54,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	static final String FIELD_ICON_URL = "icon_url";
 	static final String FIELD_ICON_EMOJI = "icon_emoji";
 	static final String FIELD_GRAYLOG_URL = "graylog_url";
+
 
 
     // TODO: 9/8/20
@@ -77,6 +82,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	public abstract String backlogItemMessage();
 
 	@JsonProperty(FIELD_USER_NAME)
+	@Nullable
 	public abstract String userName();
 
 	@JsonProperty(FIELD_NOTIFY_CHANNEL)
@@ -86,15 +92,19 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	public abstract boolean linkNames();
 
 	@JsonProperty(FIELD_ICON_URL)
+	@Nullable
 	public abstract String iconUrl();
 
 	@JsonProperty(FIELD_ICON_EMOJI)
+	@Nullable
 	public abstract String iconEmoji();
 
 	@JsonProperty(FIELD_GRAYLOG_URL)
+	@Nullable
 	public abstract String graylogUrl();
 
 	@JsonProperty(FIELD_PROXY)
+	@Nullable
 	public abstract String proxy();
 
 	@Override
@@ -110,15 +120,28 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@Override
 	@JsonIgnore
 	public ValidationResult validate() {
-		return new ValidationResult();
+		ValidationResult validation =  new ValidationResult();
+		return validation;
 	}
 
 	@AutoValue.Builder
 	public static abstract class Builder implements EventNotificationConfig.Builder<SlackEventNotificationConfig.Builder> {
 		@JsonCreator
 		public static SlackEventNotificationConfig.Builder create() {
+
+			// these are the default values for each of the property
+			// I didn't want to create a 8 properties with default values
+			// in this class.if you want to change these default values
+			// please change it here.
 			return new AutoValue_SlackEventNotificationConfig.Builder()
-					.type(TYPE_NAME);
+					.type(TYPE_NAME)
+					.color("#ff0500")
+					.webhookUrl("https://hooks.slack.com/services/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")
+					.channel("slacktest2")
+					.customMessage("hello World")
+					.backlogItemMessage("this is a back log item message")
+					.notifyChannel(false)
+					.linkNames(false);
 		}
 
 		@JsonProperty(FIELD_COLOR)
