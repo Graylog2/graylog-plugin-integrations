@@ -23,8 +23,8 @@ class SlackNotificationForm extends React.Component {
     };
 
     handleColorChange = (color, _, hidePopover) => {
-      console.log(color);
       hidePopover();
+      this.propagateChange('color', color);
     };
 
     handleChange = (event) => {
@@ -41,10 +41,11 @@ class SlackNotificationForm extends React.Component {
           <FormGroup controlId="color">
             <ControlLabel>Configuration color</ControlLabel>
             <div>
-              <ColorLabel color={config.color || ''} />
+              <ColorLabel color={config.color || '#f06292'} />
               <div style={{ display: 'inline-block', marginLeft: 15 }}>
-                <ColorPickerPopover id="notification-color"
+                <ColorPickerPopover id="color"
                                     name="color"
+                                    color={config.color || '#f06292'}
                                     placement="right"
                                     triggerNode={<Button bsSize="xsmall">Change color</Button>}
                                     onChange={this.handleColorChange} />
