@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations;
 
+import okhttp3.OkHttpClient;
 import org.graylog.events.notifications.EventNotificationConfig;
 import org.graylog.integrations.audit.IntegrationsAuditEventTypes;
 import org.graylog.integrations.aws.AWSPermissions;
@@ -39,6 +40,7 @@ import org.graylog.integrations.notifications.types.SlackEventNotification;
 import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
+import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
@@ -126,5 +128,6 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+        bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class).asEagerSingleton();
     }
 }

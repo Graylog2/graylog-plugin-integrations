@@ -18,6 +18,8 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
+import com.github.joschi.jadconfig.util.Duration;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.events.notifications.EventNotification;
 import org.graylog.events.notifications.EventNotificationContext;
@@ -35,11 +37,13 @@ import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.graylog2.streams.StreamService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,6 +67,7 @@ public class SlackEventNotification implements EventNotification {
 	private final NotificationService notificationService;
 	private final ObjectMapper objectMapper;
 	private final NodeId nodeId;
+	private final OkHttpClientProvider okHttpClientProvider;
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -70,6 +75,7 @@ public class SlackEventNotification implements EventNotification {
                                   Engine templateEngine,
                                   NotificationService notificationService,
                                   ObjectMapper objectMapper,
+								  OkHttpClientProvider okHttpClientProvider,
                                   NodeId nodeId) {
 		this.notificationCallbackService = notificationCallbackService;
 		this.streamService = streamService;
@@ -77,7 +83,7 @@ public class SlackEventNotification implements EventNotification {
 		this.notificationService = notificationService;
 		this.objectMapper = objectMapper;
 		this.nodeId = nodeId;
-
+		this.okHttpClientProvider = okHttpClientProvider;
 
 	}
 
@@ -86,11 +92,11 @@ public class SlackEventNotification implements EventNotification {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
 		// TODO: 9/8/20  - use this.slackClient
         //
-        SlackClient slackClient = new SlackClient(config);
+        SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
-			slackClient.send(slackMessage);
+			slackClient.send_with_okhttp(slackMessage);
 		} catch (Exception e) {
 			String exceptionDetail = e.toString();
 			if (e.getCause() != null) {
@@ -274,4 +280,6 @@ public class SlackEventNotification implements EventNotification {
 				.url(Optional.ofNullable(streamUrl).orElse(UNKNOWN_VALUE))
 				.build();
 	}
+
+
 }

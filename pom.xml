@@ -132,6 +132,13 @@
             <version>${integrations.protobuf.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>3.14.6</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
