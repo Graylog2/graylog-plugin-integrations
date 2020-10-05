@@ -57,11 +57,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
 
 
-    // TODO: 9/8/20
-	//See my comment in the SlackClient. We should use the pre-configured okhttp client so we automatically get
-    // the correct proxy configuration.
-    // The proxy setting can be removed once we switched to okhttp.
-	static final String FIELD_PROXY = "proxy";
+
 
 	@JsonProperty(FIELD_COLOR)
 	@NotBlank
@@ -102,10 +98,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@JsonProperty(FIELD_GRAYLOG_URL)
 	@Nullable
 	public abstract String graylogUrl();
-
-	@JsonProperty(FIELD_PROXY)
-	@Nullable
-	public abstract String proxy();
 
 	@Override
 	@JsonIgnore
@@ -177,9 +169,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		@JsonProperty(FIELD_GRAYLOG_URL)
 		public abstract SlackEventNotificationConfig.Builder graylogUrl(String graylogUrl);
 
-		@JsonProperty(FIELD_PROXY)
-		public abstract SlackEventNotificationConfig.Builder proxy(String proxy);
-
 		public abstract SlackEventNotificationConfig build();
 	}
 
@@ -197,7 +186,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 				.iconUrl(ValueReference.of(iconUrl()))
 				.iconEmoji(ValueReference.of(iconEmoji()))
 				.graylogUrl(ValueReference.of(graylogUrl()))
-				.proxy(ValueReference.of(proxy()))
 				.build();
 	}
 }
