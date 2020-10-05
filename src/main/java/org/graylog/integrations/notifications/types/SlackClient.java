@@ -52,7 +52,7 @@ public class SlackClient {
 	@Inject
     public SlackClient(SlackEventNotificationConfig configuration) {
         this.webhookUrl = configuration.webhookUrl();
-        this.proxyURL = configuration.proxy();
+        this.proxyURL = null;//configuration.proxy();
 		httpClient = new OkHttpClient();
     }
 

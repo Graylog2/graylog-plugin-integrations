@@ -68,8 +68,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 	@JsonProperty(SlackEventNotificationConfig.FIELD_GRAYLOG_URL)
 	public abstract ValueReference graylogUrl();
 
-	@JsonProperty(SlackEventNotificationConfig.FIELD_PROXY)
-	public abstract ValueReference proxy();
 
 	public static Builder builder() {
 		return Builder.create();
@@ -120,8 +118,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 		@JsonProperty(SlackEventNotificationConfig.FIELD_GRAYLOG_URL)
 		public abstract Builder graylogUrl(ValueReference graylogUrl);
 
-		@JsonProperty(SlackEventNotificationConfig.FIELD_PROXY)
-		public abstract Builder proxy(ValueReference proxy);
 
 		public abstract SlackEventNotificationConfigEntity build();
 	}
@@ -140,7 +136,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 				.iconUrl(iconUrl().asString(parameters))
 				.iconEmoji(iconEmoji().asString(parameters))
 				.graylogUrl(graylogUrl().asString(parameters))
-				.proxy(proxy().asString(parameters))
 				.build();
 	}
 }
