@@ -20,7 +20,9 @@ class SlackNotificationForm extends React.Component {
       webhook_url: '',
       channel: '#channel',
       custom_message: ''
+      // eslint-disable-next-line no-template-curly-in-string
             + 'Message: ${event.message}\n'
+      // eslint-disable-next-line no-template-curly-in-string
             + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
             + 'Streams: ${streams}\n'
             + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
