@@ -15,6 +15,33 @@ class SlackNotificationForm extends React.Component {
       onChange: PropTypes.func.isRequired,
     };
 
+    static defaultConfig = {
+      color: '#FF0000',
+      webhook_url: '',
+      channel: '#channel',
+      custom_message: ''
+            + 'Message: ${event.message}\n'
+            + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
+            + 'Streams: ${streams}\n'
+            + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
+            + '\n'
+            + '##########\n'
+            + '\n'
+            + '${if backlog}Last messages accounting for this alert:\n'
+            + '${foreach backlog item}${item.message}\n'
+            + '\n'
+            + '${end}${else}<No backlog>\n'
+            + '${end}',
+      backlog_item_message: '${backlog_item.message}',
+      user_name: 'Graylog',
+      notify_channel: false,
+      link_names: false,
+      icon_url: '',
+      icon_emoji: '',
+      graylog_url: '',
+
+    };
+
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
       const nextConfig = lodash.cloneDeep(config);
@@ -134,14 +161,6 @@ class SlackNotificationForm extends React.Component {
                  bsStyle={validation.errors.graylog_url ? 'error' : null}
                  help={lodash.get(validation, 'errors.graylog_url[0]', 'URL to your Graylog web interface. Used to build links in alarm notification')}
                  value={config.graylog_url || ''}
-                 onChange={this.handleChange} />
-          <Input id="notification-proxy"
-                 name="proxy"
-                 label="Proxy (optional)"
-                 type="text"
-                 bsStyle={validation.errors.proxy ? 'error' : null}
-                 help={lodash.get(validation, 'errors.proxy[0]', 'Please insert the proxy information in the follwoing format: <ProxyAddress>:<Port>')}
-                 value={config.proxy || ''}
                  onChange={this.handleChange} />
         </>
       );
