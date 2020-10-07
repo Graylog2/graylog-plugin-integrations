@@ -19,11 +19,10 @@ class SlackNotificationForm extends React.Component {
       color: '#FF0000',
       webhook_url: '',
       channel: '#channel',
+      /* eslint-disable no-template-curly-in-string */
       custom_message: ''
-      // eslint-disable-next-line no-template-curly-in-string
-            + 'Message: ${event.message}\n'
-      // eslint-disable-next-line no-template-curly-in-string
-            + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
+             + 'Message: ${event.message}\n'
+             + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
             + 'Streams: ${streams}\n'
             + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
             + '\n'
@@ -35,6 +34,7 @@ class SlackNotificationForm extends React.Component {
             + '${end}${else}<No backlog>\n'
             + '${end}',
       backlog_item_message: '${backlog_item.message}',
+      /* eslint-enable no-template-curly-in-string */
       user_name: 'Graylog',
       notify_channel: false,
       link_names: false,
