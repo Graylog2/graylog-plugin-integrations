@@ -23,16 +23,16 @@ class SlackNotificationForm extends React.Component {
       custom_message: ''
              + 'Message: ${event.message}\n'
              + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
-            + 'Streams: ${streams}\n'
-            + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
-            + '\n'
-            + '##########\n'
-            + '\n'
-            + '${if backlog}Last messages accounting for this alert:\n'
-            + '${foreach backlog item}${item.message}\n'
-            + '\n'
-            + '${end}${else}<No backlog>\n'
-            + '${end}',
+             + 'Streams: ${streams}\n'
+             + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
+             + '\n'
+             + '##########\n'
+             + '\n'
+             + '${if backlog}Last messages accounting for this alert:\n'
+             + '${foreach backlog item}${item.message}\n'
+             + '\n'
+             + '${end}${else}<No backlog>\n'
+             + '${end}',
       backlog_item_message: '${backlog_item.message}',
       /* eslint-enable no-template-curly-in-string */
       user_name: 'Graylog',
