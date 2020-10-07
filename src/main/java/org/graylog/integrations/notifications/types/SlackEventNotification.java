@@ -53,6 +53,7 @@ public class SlackEventNotification implements EventNotification {
 
 	private static final String UNKNOWN_VALUE = "<unknown>";
 
+
 	public interface Factory extends EventNotification.Factory {
 		@Override
         SlackEventNotification create();
@@ -131,6 +132,7 @@ public class SlackEventNotification implements EventNotification {
 		boolean hasBacklogItemTemplate = !isNullOrEmpty(backlogItemTemplate);
 		if(hasBacklogItemTemplate) {
 			backlogItemMessages = buildBacklogItemMessages(ctx, config, backlogItemTemplate);
+			LOG.info("The size of backlog Item Messages "+backlogItemMessages.size());
 		}
 
 		return new SlackMessage(
@@ -180,7 +182,9 @@ public class SlackEventNotification implements EventNotification {
 				.map(backlogItem -> {
 					Map<String, Object> model = getBacklogItemModel(ctx, config, backlogItem);
 					try {
-						return templateEngine.transform(template, model);
+						String str =  templateEngine.transform(template, model);
+						LOG.info("String build a backlog item message="+str);
+						return str;
 					} catch (Exception e) {
 						LOG.error("Exception during templating", e);
 						return e.toString();
