@@ -64,14 +64,11 @@ class SlackNotificationSummary extends React.Component {
               <td>Graylog URL</td>
               <td>{notification.config.graylog_url}</td>
             </tr>
-            <tr>
-              <td>Proxy</td>
-              <td>{notification.config.proxy}</td>
-            </tr>
-          </>
+           </>
         </CommonNotificationSummary>
       );
     }
 }
 
 export default SlackNotificationSummary;
+
