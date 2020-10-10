@@ -21,10 +21,7 @@ import com.floreysoft.jmte.Engine;
 import com.github.joschi.jadconfig.util.Duration;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
-import org.graylog.events.notifications.EventNotification;
-import org.graylog.events.notifications.EventNotificationContext;
-import org.graylog.events.notifications.EventNotificationService;
-import org.graylog.events.notifications.PermanentEventNotificationException;
+import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
 import org.graylog.integrations.notifications.modeldata.BacklogItemModelData;
@@ -204,24 +201,9 @@ public class SlackEventNotification implements EventNotification {
 				.map(stream -> buildStreamWithUrl(stream, ctx, config))
 				.collect(Collectors.toList());
 
-		// TODO: 9/8/20
-        /**
-         *
-         It looks like we are duplicating a lot of code from EventNotificationModelData in the CustomMessageModelData
-         and BacklogItemModelData value objects to expose some more attributes to the slack message template.
-         Both objects then get converted into a Map<String, Object> immediately. wink
 
-         How about using the regular EventNotificationModelData,
-         convert that into a Map<String, Object> and then manually add the additional attributes we need?
-         That way we would save a lot of duplicated code.
-
-         Also, if we add additional attributes here that would also be useful for all notifications,
-         we can think about extending EventNotificationModelData.
-         */
-
-		CustomMessageModelData modelData = CustomMessageModelData.builder()
-				.eventDefinition(definitionDto)
-				.eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
+		EventNotificationModelData modelData = EventNotificationModelData.builder()
+								 			  .eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
 				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
 				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
 				.eventDefinitionDescription(definitionDto.map(EventDefinitionDto::description).orElse(UNKNOWN_VALUE))
@@ -229,13 +211,17 @@ public class SlackEventNotification implements EventNotification {
 				.jobTriggerId(ctx.jobTrigger().map(JobTriggerDto::id).orElse(UNKNOWN_VALUE))
 				.event(ctx.event())
 				.backlog(backlog)
-				.backlogSize(backlog.size())
-				.graylogUrl(isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl())
-				.streams(streams)
 				.build();
 
-		return objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+		LOG.debug(modelData.toString());
+
+		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+		objectMap.put("event_definition",definitionDto);
+		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
+		objectMap.put("streams",streams);
+		return objectMap;
 	}
+
 
 	private Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
