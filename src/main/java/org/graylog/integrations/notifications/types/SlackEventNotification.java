@@ -25,7 +25,6 @@ import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
 import org.graylog.integrations.notifications.modeldata.BacklogItemModelData;
-import org.graylog.integrations.notifications.modeldata.CustomMessageModelData;
 import org.graylog.integrations.notifications.modeldata.StreamModelData;
 import org.graylog.scheduler.JobTriggerDto;
 import org.graylog2.jackson.TypeReferences;
