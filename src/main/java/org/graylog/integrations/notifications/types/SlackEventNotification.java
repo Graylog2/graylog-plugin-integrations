@@ -30,7 +30,9 @@ import org.graylog.scheduler.JobTriggerDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
+import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
@@ -48,6 +50,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 public class SlackEventNotification implements EventNotification {
 
 	private static final String UNKNOWN_VALUE = "<unknown>";
+	private static final boolean DEV_PROFILE = true;
 
 
 	public interface Factory extends EventNotification.Factory {
@@ -58,13 +61,18 @@ public class SlackEventNotification implements EventNotification {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
-	private final EventNotificationService notificationCallbackService;
-	private final StreamService streamService;
-	private final Engine templateEngine;
-	private final NotificationService notificationService;
-	private final ObjectMapper objectMapper;
-	private final NodeId nodeId;
-	private final OkHttpClientProvider okHttpClientProvider;
+	EventNotificationService notificationCallbackService = null;
+	StreamService streamService = null;
+	Engine templateEngine = null;
+	NotificationService notificationService = null;
+	ObjectMapper objectMapper = null;
+	NodeId nodeId = null;
+	OkHttpClientProvider okHttpClientProvider = null;
+
+	public SlackEventNotification() {
+
+	}
+
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -111,7 +119,7 @@ public class SlackEventNotification implements EventNotification {
 		}
 	}
 
-	private SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
+	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		//Note: Link names if notify channel or else the channel tag will be plain text.
 		boolean linkNames = config.linkNames() || config.notifyChannel();
 		String message = buildDefaultMessage(ctx, config);
@@ -143,7 +151,7 @@ public class SlackEventNotification implements EventNotification {
 				backlogItemMessages);
 	}
 
-	private String buildDefaultMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
+	String buildDefaultMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String title = buildMessageTitle(ctx, config);
 
 		// Build custom message
@@ -162,7 +170,7 @@ public class SlackEventNotification implements EventNotification {
 		}
 	}
 
-	private String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
+	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
@@ -173,7 +181,7 @@ public class SlackEventNotification implements EventNotification {
 		}
 	}
 
-	private List<String> buildBacklogItemMessages(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
+	List<String> buildBacklogItemMessages(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
 		return getAlarmBacklog(ctx).stream()
 				.map(backlogItem -> {
 					Map<String, Object> model = getBacklogItemModel(ctx, config, backlogItem);
@@ -188,11 +196,18 @@ public class SlackEventNotification implements EventNotification {
 				}).collect(Collectors.toList());
 	}
 
-	private List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
-		return notificationCallbackService.getBacklogForEvent(ctx);
+	List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
+		if(DEV_PROFILE == false)
+			return notificationCallbackService.getBacklogForEvent(ctx);
+
+		Message msg = new Message("pallavi","geetham1", Tools.nowUTC());
+		MessageSummary summary = new MessageSummary("1",msg);
+		ArrayList<MessageSummary> summaries = new ArrayList<>();
+		summaries.add(summary);
+		return summaries;
 	}
 
-	private Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
+	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
 
 		List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
@@ -222,7 +237,7 @@ public class SlackEventNotification implements EventNotification {
 	}
 
 
-	private Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
+	Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
 
 		List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
@@ -247,7 +262,7 @@ public class SlackEventNotification implements EventNotification {
 		return objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
 	}
 
-	private StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
+	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String graylogUrl = config.graylogUrl();
 		String streamUrl = null;
 		if(!isNullOrEmpty(graylogUrl)) {
