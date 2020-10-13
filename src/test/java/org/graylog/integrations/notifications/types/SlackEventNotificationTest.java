@@ -26,6 +26,7 @@ public class SlackEventNotificationTest {
                 .backlogItemMessage("this is a backlog item message(పల్లవి)")
                 .build();
         slackEventNotificationConfig.validate();
+        //todo: make method `getDummyContext` public
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp");
         //todo : research how to create a new insatnce of SlackEventNotification without a mock
         slackEventNotification = new SlackEventNotification();
