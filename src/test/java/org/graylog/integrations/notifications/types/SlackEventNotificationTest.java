@@ -1,10 +1,7 @@
 package org.graylog.integrations.notifications.types;
 
 import com.floreysoft.jmte.Engine;
-import com.github.joschi.jadconfig.util.Duration;
 import com.google.common.collect.ImmutableList;
-import okhttp3.OkHttpClient;
-import okhttp3.mockwebserver.MockWebServer;
 import org.bson.types.ObjectId;
 import org.graylog.events.notifications.*;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
@@ -16,20 +13,16 @@ import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URI;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,27 +32,26 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SlackEventNotificationTest extends SlackClientTest {
 
+    @Mock
+    NodeId mockNodeId;
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
-    @Mock
-    NodeId mockNodeId;
-
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
 
         slackEventNotificationConfig = new AutoValue_SlackEventNotificationConfig.Builder()
-                                       .notifyChannel(true)
-                                       .type(SlackEventNotificationConfig.TYPE_NAME)
-                                       .color("#FF2052")
-                                       .webhookUrl("a webhook url")
-                                       .channel("#general")
-                                       .customMessage("a custom message")
-                                       .backlogItemMessage("this is a backlog item message")
-                                       .linkNames(true)
-                                       .graylogUrl("http://localhost:8080")
-                                       .build();
+                .notifyChannel(true)
+                .type(SlackEventNotificationConfig.TYPE_NAME)
+                .color("#FF2052")
+                .webhookUrl("a webhook url")
+                .channel("#general")
+                .customMessage("a custom message")
+                .backlogItemMessage("this is a backlog item message")
+                .linkNames(true)
+                .graylogUrl("http://localhost:8080")
+                .build();
 
         slackEventNotificationConfig.validate();
         //todo: make method `getDummyContext` public
@@ -79,7 +71,7 @@ public class SlackEventNotificationTest extends SlackClientTest {
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                 Engine.createEngine(),
-                mockNotificationService,clientProvider(),mockNodeId);
+                mockNotificationService, clientProvider(), mockNodeId);
 
     }
 
@@ -108,7 +100,7 @@ public class SlackEventNotificationTest extends SlackClientTest {
 
     @Test
     public void buildDefaultMessage() {
-        String message =  slackEventNotification.buildDefaultMessage(eventNotificationContext,slackEventNotificationConfig);
+        String message = slackEventNotification.buildDefaultMessage(eventNotificationContext, slackEventNotificationConfig);
         assertThat(message).isNotBlank();
         assertThat(message).isNotEmpty();
         assertThat(message).isNotNull();
@@ -118,8 +110,8 @@ public class SlackEventNotificationTest extends SlackClientTest {
 
     @Test
     public void getAlarmBacklog() {
-        List<MessageSummary> messageSummaries =  slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        messageSummaries.forEach(e->System.out.println(e.getRawMessage()));
+        List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
+        messageSummaries.forEach(e -> System.out.println(e.getRawMessage()));
         assertThat(messageSummaries.size()).isEqualTo(2);
     }
 
@@ -138,15 +130,9 @@ public class SlackEventNotificationTest extends SlackClientTest {
         when(stream.getId()).thenReturn(streamId.toHexString());
         when(stream.getTitle()).thenReturn("title");
         when(stream.getDescription()).thenReturn("description");
-        slackEventNotification.buildStreamWithUrl(stream,eventNotificationContext,slackEventNotificationConfig);
+        slackEventNotification.buildStreamWithUrl(stream, eventNotificationContext, slackEventNotificationConfig);
     }
 
-    //todo:task1
-    @Test
-    public void getStreamUrl() {
-    }
-
-    //todo:task2
     @Test(expected = PermanentEventNotificationException.class)
     public void execute() throws PermanentEventNotificationException {
         slackEventNotification.execute(eventNotificationContext);
