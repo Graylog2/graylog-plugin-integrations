@@ -35,7 +35,13 @@ public class SlackClientTest {
         //slackClient = new SlackClient(slackEventNotificationConfig);
 
 
+        final OkHttpClient client = getOkHttpClient();
 
+        okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
+
+    }
+
+     OkHttpClient getOkHttpClient() {
         final OkHttpClient client = client(server.url("/").uri());
         assertThat(client.proxySelector().select(URI.create("http://127.0.0.1/")))
                 .hasSize(1)
@@ -45,9 +51,7 @@ public class SlackClientTest {
                 .hasSize(1)
                 .first()
                 .matches(proxy -> proxy.equals(server.toProxyAddress()));
-
-        okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
-
+        return client;
     }
 
     @Ignore("To be deprecated.")
@@ -70,7 +74,7 @@ public class SlackClientTest {
         okHttpSlackClient.send_with_okhttp(message);
     }
 
-    private OkHttpClient client(URI proxyURI) {
+     OkHttpClient client(URI proxyURI) {
         final OkHttpClientProvider provider = new OkHttpClientProvider(
                 Duration.milliseconds(100L),
                 Duration.milliseconds(100L),
@@ -79,5 +83,16 @@ public class SlackClientTest {
                 null);
 
         return provider.get();
+    }
+
+    OkHttpClientProvider clientProvider() {
+        final OkHttpClientProvider provider = new OkHttpClientProvider(
+                Duration.milliseconds(100L),
+                Duration.milliseconds(100L),
+                Duration.milliseconds(100L),
+                server.url("/").uri(),
+                null);
+
+        return provider;
     }
 }

@@ -18,6 +18,7 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
@@ -40,7 +41,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.repeat;
 import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
 
 public class SlackEventNotification implements EventNotification {
 
@@ -62,12 +65,18 @@ public class SlackEventNotification implements EventNotification {
 	NodeId nodeId ;
 	OkHttpClientProvider okHttpClientProvider ;
 
-	public SlackEventNotification(EventNotificationService notificationService,
+	public SlackEventNotification(EventNotificationService notificationCallbackService,
 								  ObjectMapper objectMapper,
-								  Engine templateEngine){
-		this.notificationCallbackService = notificationService;
-		this.objectMapper = objectMapper;
-		this.templateEngine = templateEngine;
+								  Engine templateEngine,
+								  NotificationService notificationService,
+								  OkHttpClientProvider okHttpClientProvider,
+								  NodeId nodeId){
+		this.notificationCallbackService = notificationCallbackService;
+		this.objectMapper = requireNonNull(objectMapper);
+		this.templateEngine = requireNonNull(templateEngine);
+		this.okHttpClientProvider = requireNonNull(okHttpClientProvider);
+		this.notificationService = requireNonNull(notificationService);
+		this.nodeId = requireNonNull(nodeId);
 
 	}
 
@@ -103,6 +112,7 @@ public class SlackEventNotification implements EventNotification {
 			if (e.getCause() != null) {
 				exceptionDetail += " (" + e.getCause() + ")";
 			}
+
 
 			final Notification systemNotification = notificationService.buildNow()
 					.addNode(nodeId.toString())
