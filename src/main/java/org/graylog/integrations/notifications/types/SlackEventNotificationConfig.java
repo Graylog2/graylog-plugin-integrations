@@ -55,8 +55,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
 
 
-
-
 	@JsonProperty(FIELD_COLOR)
 	@NotBlank
 	public abstract String color();
@@ -130,8 +128,8 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 					.channel("slacktest2")
 					.customMessage("hello World")
 					.backlogItemMessage("this is a back log item message")
-					.notifyChannel(true)
-					.linkNames(true);
+					.notifyChannel(false)
+					.linkNames(false);
 		}
 
 		@JsonProperty(FIELD_COLOR)

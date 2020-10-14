@@ -18,13 +18,10 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
-import com.github.joschi.jadconfig.util.Duration;
-import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
-import org.graylog.integrations.notifications.modeldata.BacklogItemModelData;
 import org.graylog.integrations.notifications.modeldata.StreamModelData;
 import org.graylog.scheduler.JobTriggerDto;
 import org.graylog2.jackson.TypeReferences;
@@ -42,16 +39,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.isNull;
+import static org.mockito.Mockito.mock;
 
 public class SlackEventNotification implements EventNotification {
 
 	private static final String UNKNOWN_VALUE = "<unknown>";
+	//this needs to be changed to false eventually
 	private static final boolean DEV_PROFILE = true;
 
 
@@ -64,17 +62,19 @@ public class SlackEventNotification implements EventNotification {
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
 	EventNotificationService notificationCallbackService = null;
-	StreamService streamService = null;
-	Engine templateEngine = null;
-	NotificationService notificationService = null;
-	ObjectMapper objectMapper = null;
-	NodeId nodeId = null;
-	OkHttpClientProvider okHttpClientProvider = null;
+	StreamService streamService ;
+	Engine templateEngine ;
+	NotificationService notificationService ;
+	ObjectMapper objectMapper ;
+	NodeId nodeId ;
+	OkHttpClientProvider okHttpClientProvider ;
+
 
 	public SlackEventNotification() {
 		objectMapper = new ObjectMapperProvider().get();
+		templateEngine = Engine.createEngine();
+		streamService  = mock(StreamService.class);
 	}
-
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -138,7 +138,7 @@ public class SlackEventNotification implements EventNotification {
 		boolean hasBacklogItemTemplate = !isNullOrEmpty(backlogItemTemplate);
 		if(hasBacklogItemTemplate) {
 			backlogItemMessages = buildBacklogItemMessages(ctx, config, backlogItemTemplate);
-			LOG.info("The size of backlog Item Messages "+backlogItemMessages.size());
+			LOG.debug("The size of backlog Item Messages "+backlogItemMessages.size());
 		}
 
 		return new SlackMessage(
@@ -213,7 +213,7 @@ public class SlackEventNotification implements EventNotification {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
 		EventNotificationModelData modelData = EventNotificationModelData.builder()
 								 			  .eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
-				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
+				.eventDefinitionType(config.type())
 				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
 				.eventDefinitionDescription(definitionDto.map(EventDefinitionDto::description).orElse(UNKNOWN_VALUE))
 				.jobDefinitionId(ctx.jobTrigger().map(JobTriggerDto::jobDefinitionId).orElse(UNKNOWN_VALUE))
@@ -222,13 +222,12 @@ public class SlackEventNotification implements EventNotification {
 				.backlog(backlog)
 				.build();
 
-		System.out.println(modelData.toString());
+		LOG.debug("the custom message model data is {}",modelData.toString());
 
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
-
 		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
 
-		//todo: what happens with eventdefinition in pipeline rules, what are it attributes ?
+		//Q:what is the purpose of the eventdefinition in pipeline rules, what are it attributes ?
 		//
 		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
 
@@ -247,13 +246,13 @@ public class SlackEventNotification implements EventNotification {
 	Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
 
-		List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
-				.stream()
-				.map(stream -> buildStreamWithUrl(stream, ctx, config))
-				.collect(Collectors.toList());
+		ArrayList<MessageSummary> summaries = new ArrayList<>();
+		if (backlogItem != null) {
+			summaries.add(backlogItem);
+		}
 
-		BacklogItemModelData modelData = BacklogItemModelData.builder()
-				.eventDefinition(definitionDto)
+		EventNotificationModelData modelData = EventNotificationModelData.builder()
+				//.eventDefinition(definitionDto)
 				.eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
 				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
 				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
@@ -261,17 +260,28 @@ public class SlackEventNotification implements EventNotification {
 				.jobDefinitionId(ctx.jobTrigger().map(JobTriggerDto::jobDefinitionId).orElse(UNKNOWN_VALUE))
 				.jobTriggerId(ctx.jobTrigger().map(JobTriggerDto::id).orElse(UNKNOWN_VALUE))
 				.event(ctx.event())
-				.backlogItem(backlogItem)
-				.graylogUrl(isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl())
-				.streams(streams)
+				.backlog( (summaries.size() > 0) ? summaries : null )
+				//.backlogItem(backlogItem)
+				//.graylogUrl(isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl())
+				//.streams(streams)
 				.build();
 
-		return objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+
+		if(streamService != null) {
+			List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
+					.stream()
+					.map(stream -> buildStreamWithUrl(stream, ctx, config))
+					.collect(Collectors.toList());
+			objectMap.put("streams",isNull(streams) ? UNKNOWN_VALUE : streams);
+		}
+		return objectMap;
 	}
 
 	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String graylogUrl = config.graylogUrl();
 		String streamUrl = null;
+		System.out.println(stream.getId());
 		if(!isNullOrEmpty(graylogUrl)) {
 			streamUrl = StringUtils.appendIfMissing(graylogUrl, "/") + "streams/" + stream.getId() + "/search";
 
