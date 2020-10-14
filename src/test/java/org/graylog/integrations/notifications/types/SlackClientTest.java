@@ -32,11 +32,7 @@ public class SlackClientTest {
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .build();
         slackEventNotificationConfig.validate();
-        //slackClient = new SlackClient(slackEventNotificationConfig);
-
-
         final OkHttpClient client = getOkHttpClient();
-
         okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
 
     }
