@@ -27,12 +27,9 @@ import org.graylog.scheduler.JobTriggerDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
-import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
-import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
-import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.graylog2.streams.StreamService;
 import org.slf4j.Logger;
@@ -44,14 +41,10 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.isNull;
-import static org.mockito.Mockito.mock;
 
 public class SlackEventNotification implements EventNotification {
 
 	private static final String UNKNOWN_VALUE = "<unknown>";
-	//this needs to be changed to false eventually
-	private static final boolean DEV_PROFILE = true;
-
 
 	public interface Factory extends EventNotification.Factory {
 		@Override
@@ -61,7 +54,7 @@ public class SlackEventNotification implements EventNotification {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
-	EventNotificationService notificationCallbackService = null;
+	EventNotificationService notificationCallbackService;
 	StreamService streamService ;
 	Engine templateEngine ;
 	NotificationService notificationService ;
@@ -69,12 +62,15 @@ public class SlackEventNotification implements EventNotification {
 	NodeId nodeId ;
 	OkHttpClientProvider okHttpClientProvider ;
 
+	public SlackEventNotification(EventNotificationService notificationService,
+								  ObjectMapper objectMapper,
+								  Engine templateEngine){
+		this.notificationCallbackService = notificationService;
+		this.objectMapper = objectMapper;
+		this.templateEngine = templateEngine;
 
-	public SlackEventNotification() {
-		objectMapper = new ObjectMapperProvider().get();
-		templateEngine = Engine.createEngine();
-		streamService  = mock(StreamService.class);
 	}
+
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -97,9 +93,7 @@ public class SlackEventNotification implements EventNotification {
 	@Override
 	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		// TODO: 9/8/20  - use this.slackClient
-        //
-        SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
+		SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
@@ -199,14 +193,7 @@ public class SlackEventNotification implements EventNotification {
 	}
 
 	List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
-		if(DEV_PROFILE == false)
-			return notificationCallbackService.getBacklogForEvent(ctx);
-
-		Message msg = new Message("pallavi","geetham1", Tools.nowUTC());
-		MessageSummary summary = new MessageSummary("1",msg);
-		ArrayList<MessageSummary> summaries = new ArrayList<>();
-		summaries.add(summary);
-		return summaries;
+		return notificationCallbackService.getBacklogForEvent(ctx);
 	}
 
 	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
@@ -281,17 +268,8 @@ public class SlackEventNotification implements EventNotification {
 	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String graylogUrl = config.graylogUrl();
 		String streamUrl = null;
-		System.out.println(stream.getId());
 		if(!isNullOrEmpty(graylogUrl)) {
-			streamUrl = StringUtils.appendIfMissing(graylogUrl, "/") + "streams/" + stream.getId() + "/search";
-
-			if(ctx.eventDefinition().isPresent()) {
-				EventDefinitionDto eventDefinitionDto = ctx.eventDefinition().get();
-				if(eventDefinitionDto.config() instanceof AggregationEventProcessorConfig) {
-					String query = ((AggregationEventProcessorConfig) eventDefinitionDto.config()).query();
-					streamUrl += "?q=" + query;
-				}
-			}
+			streamUrl = getStreamUrl(stream, ctx, graylogUrl);
 		}
 
 		return StreamModelData.builder()
@@ -300,6 +278,23 @@ public class SlackEventNotification implements EventNotification {
 				.description(stream.getDescription())
 				.url(Optional.ofNullable(streamUrl).orElse(UNKNOWN_VALUE))
 				.build();
+	}
+
+	String getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
+		String streamUrl;
+		streamUrl = StringUtils.appendIfMissing(graylogUrl, "/") + "streams/" + stream.getId() + "/search";
+
+		if(ctx.eventDefinition().isPresent()) {
+			EventDefinitionDto eventDefinitionDto = ctx.eventDefinition().get();
+			if(eventDefinitionDto.config() instanceof AggregationEventProcessorConfig) {
+				String query = ((AggregationEventProcessorConfig) eventDefinitionDto.config()).query();
+				if(StringUtils.isNotEmpty(query)) {
+					streamUrl += "?q=" + query;
+					LOG.debug("the q = {} ",query);
+				}
+			}
+		}
+		return streamUrl;
 	}
 
 

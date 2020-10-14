@@ -1,31 +1,21 @@
 package org.graylog.integrations.notifications.types;
 
+import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import org.bson.types.ObjectId;
-import org.graylog.events.notifications.EventNotificationContext;
-import org.graylog.events.notifications.NotificationDto;
-import org.graylog.events.notifications.NotificationTestData;
+import org.graylog.events.notifications.*;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
-import org.graylog.integrations.notifications.modeldata.StreamModelData;
-import org.graylog2.database.NotFoundException;
+import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
-import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.streams.Stream;
-import org.graylog2.streams.StreamImpl;
-import org.graylog2.streams.StreamService;
-import org.graylog2.streams.StreamServiceImpl;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -36,7 +26,6 @@ public class SlackEventNotificationTest {
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
-
 
 
     @Before
@@ -57,8 +46,15 @@ public class SlackEventNotificationTest {
         slackEventNotificationConfig.validate();
         //todo: make method `getDummyContext` public
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp");
-        //todo : research how to create a new insatnce of SlackEventNotification without a mock
-        slackEventNotification = new SlackEventNotification();
+
+        final ImmutableList<MessageSummary> messageSummaries = ImmutableList.of(
+                new MessageSummary("graylog_1", new Message("Test message 1", "source1", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC))),
+                new MessageSummary("graylog_2", new Message("Test message 2", "source2", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)))
+        );
+        EventNotificationService notificationCallbackService = mock(EventNotificationService.class);
+        when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
+        slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(), Engine.createEngine());
+
 
     }
 
@@ -95,13 +91,13 @@ public class SlackEventNotificationTest {
         assertThat(message).isNotNull();
         assertThat(message).contains("@channel");
         assertThat(message.getBytes().length).isEqualTo(117);
-        assertThat(message);
     }
 
     @Test
     public void getAlarmBacklog() {
         List<MessageSummary> messageSummaries =  slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        assertThat(messageSummaries.size()).isEqualTo(1);
+        messageSummaries.forEach(e->System.out.println(e.getRawMessage()));
+        assertThat(messageSummaries.size()).isEqualTo(2);
     }
 
     @Test
@@ -120,5 +116,15 @@ public class SlackEventNotificationTest {
         when(stream.getTitle()).thenReturn("title");
         when(stream.getDescription()).thenReturn("description");
         slackEventNotification.buildStreamWithUrl(stream,eventNotificationContext,slackEventNotificationConfig);
+    }
+
+    //todo:task1
+    @Test
+    public void getStreamUrl() {
+    }
+
+    //todo:task2
+    @Test
+    public void execute() {
     }
 }
