@@ -35,6 +35,7 @@ import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.graylog2.streams.StreamService;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Objects.isNull;
 
 public class SlackEventNotification implements EventNotification {
 
@@ -70,7 +72,7 @@ public class SlackEventNotification implements EventNotification {
 	OkHttpClientProvider okHttpClientProvider = null;
 
 	public SlackEventNotification() {
-
+		objectMapper = new ObjectMapperProvider().get();
 	}
 
 
@@ -209,13 +211,6 @@ public class SlackEventNotification implements EventNotification {
 
 	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
-
-		List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
-				.stream()
-				.map(stream -> buildStreamWithUrl(stream, ctx, config))
-				.collect(Collectors.toList());
-
-
 		EventNotificationModelData modelData = EventNotificationModelData.builder()
 								 			  .eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
 				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
@@ -227,12 +222,24 @@ public class SlackEventNotification implements EventNotification {
 				.backlog(backlog)
 				.build();
 
-		LOG.debug(modelData.toString());
+		System.out.println(modelData.toString());
 
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
-		objectMap.put("event_definition",definitionDto);
+
 		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
-		objectMap.put("streams",streams);
+
+		//todo: what happens with eventdefinition in pipeline rules, what are it attributes ?
+		//
+		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
+
+		if(streamService != null) {
+			List<StreamModelData> streams  = streamService.loadByIds(ctx.event().sourceStreams())
+					.stream()
+					.map(stream -> buildStreamWithUrl(stream, ctx, config))
+					.collect(Collectors.toList());
+			objectMap.put("streams",isNull(streams) ? UNKNOWN_VALUE : streams);
+		}
+
 		return objectMap;
 	}
 

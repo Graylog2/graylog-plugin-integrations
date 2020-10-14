@@ -10,7 +10,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,9 +25,8 @@ public class SlackEventNotificationTest {
 
     @Before
     public void setUp() {
-        slackEventNotificationConfig = SlackEventNotificationConfig.builder()
-                .backlogItemMessage("this is a backlog item message(పల్లవి)")
-                .build();
+        slackEventNotificationConfig = AutoValue_SlackEventNotificationConfig.builder().build();
+
         slackEventNotificationConfig.validate();
         //todo: make method `getDummyContext` public
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp");
@@ -76,5 +78,10 @@ public class SlackEventNotificationTest {
 
     @Test
     public void getCustomMessageModel() {
+        List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
+        Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig, messageSummaries);
+        customMessageModel.forEach((k, v) -> System.out.println((k + ":" + v)));
+        assertThat(customMessageModel).isNotNull();
+        assertThat(customMessageModel.get("event_definition_type")).isEqualTo("slack-notification-v1");
     }
 }
