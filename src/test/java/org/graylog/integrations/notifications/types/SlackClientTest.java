@@ -18,27 +18,22 @@ import java.net.URISyntaxException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SlackClientTest {
+public class SlackClientTest extends SlackPluginTestFixture {
 
-    //todo needs to be deprectaed
-    private SlackClient slackClient;
-    private final MockWebServer server = new MockWebServer();
     private SlackClient okHttpSlackClient;
+    private MockWebServer server;
+
+    public SlackClientTest() throws IOException {
+    }
 
 
     @Before
-    public void setUp() throws URISyntaxException, IOException {
-        server.start();
+    public void setUp() {
+        server= getServer();
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .build();
         slackEventNotificationConfig.validate();
         final OkHttpClient client = getOkHttpClient();
-        okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
-
-    }
-
-     OkHttpClient getOkHttpClient() {
-        final OkHttpClient client = client(server.url("/").uri());
         assertThat(client.proxySelector().select(URI.create("http://127.0.0.1/")))
                 .hasSize(1)
                 .first()
@@ -47,21 +42,13 @@ public class SlackClientTest {
                 .hasSize(1)
                 .first()
                 .matches(proxy -> proxy.equals(server.toProxyAddress()));
-        return client;
-    }
+        okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
 
-    @Ignore("To be deprecated.")
-    @Test(expected = SlackClient.SlackClientException.class)
-    public void send_message_with_invalid_webhookurl() throws SlackClient.SlackClientException {
-        //to be deprecated.
-        SlackMessage message = new SlackMessage("Es war einmal, inmitten eines dichten Waldes, ein kleines Haus");
-        slackClient.send(message);
     }
 
     @After
     public void tearDown() throws IOException {
         server.shutdown();
-        slackClient = null;
     }
 
     @Test(expected = SlackClient.SlackClientException.class)
@@ -70,25 +57,5 @@ public class SlackClientTest {
         okHttpSlackClient.send_with_okhttp(message);
     }
 
-     OkHttpClient client(URI proxyURI) {
-        final OkHttpClientProvider provider = new OkHttpClientProvider(
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                proxyURI,
-                null);
 
-        return provider.get();
-    }
-
-    OkHttpClientProvider clientProvider() {
-        final OkHttpClientProvider provider = new OkHttpClientProvider(
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                server.url("/").uri(),
-                null);
-
-        return provider;
-    }
 }
