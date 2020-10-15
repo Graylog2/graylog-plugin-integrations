@@ -30,13 +30,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SlackEventNotificationTest extends SlackClientTest {
+public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Mock
     NodeId mockNodeId;
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
+
+    public SlackEventNotificationTest() throws IOException {
+    }
 
     @Before
     public void setUp() {
