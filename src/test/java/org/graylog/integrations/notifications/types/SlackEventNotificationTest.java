@@ -23,7 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -74,7 +76,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                 Engine.createEngine(),
-                mockNotificationService, clientProvider(), mockNodeId);
+                mockNotificationService, getOkHttpClientProvider(), mockNodeId);
 
     }
 

@@ -6,8 +6,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URI;
+
 
 public abstract class SlackPluginTestFixture {
 
@@ -22,22 +21,12 @@ public abstract class SlackPluginTestFixture {
     }
 
     OkHttpClient getOkHttpClient() {
-        final OkHttpClient client = client(server.url("/").uri());
+
+        final OkHttpClient client = getOkHttpClientProvider().get();
         return client;
     }
 
-    OkHttpClient client(URI proxyURI) {
-        final OkHttpClientProvider provider = new OkHttpClientProvider(
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                Duration.milliseconds(100L),
-                proxyURI,
-                null);
-
-        return provider.get();
-    }
-
-    OkHttpClientProvider clientProvider() {
+    OkHttpClientProvider getOkHttpClientProvider() {
         final OkHttpClientProvider provider = new OkHttpClientProvider(
                 Duration.milliseconds(100L),
                 Duration.milliseconds(100L),
@@ -47,6 +36,8 @@ public abstract class SlackPluginTestFixture {
 
         return provider;
     }
+
+
 
 
 }
