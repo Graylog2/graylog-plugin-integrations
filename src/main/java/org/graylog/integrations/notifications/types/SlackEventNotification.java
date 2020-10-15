@@ -41,7 +41,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.base.Strings.repeat;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
@@ -58,46 +57,30 @@ public class SlackEventNotification implements EventNotification {
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
 	EventNotificationService notificationCallbackService;
-	StreamService streamService ;
+	Optional<StreamService> streamService ;
 	Engine templateEngine ;
 	NotificationService notificationService ;
 	ObjectMapper objectMapper ;
 	NodeId nodeId ;
 	OkHttpClientProvider okHttpClientProvider ;
 
+	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
 								  ObjectMapper objectMapper,
 								  Engine templateEngine,
 								  NotificationService notificationService,
 								  OkHttpClientProvider okHttpClientProvider,
-								  NodeId nodeId){
+								  NodeId nodeId, StreamService streamService){
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
 		this.templateEngine = requireNonNull(templateEngine);
 		this.okHttpClientProvider = requireNonNull(okHttpClientProvider);
 		this.notificationService = requireNonNull(notificationService);
 		this.nodeId = requireNonNull(nodeId);
+		this.streamService = Optional.ofNullable(streamService);
 
 	}
 
-
-	@Inject
-	public SlackEventNotification(EventNotificationService notificationCallbackService,
-                                  StreamService streamService,
-                                  Engine templateEngine,
-                                  NotificationService notificationService,
-                                  ObjectMapper objectMapper,
-								  OkHttpClientProvider okHttpClientProvider,
-                                  NodeId nodeId) {
-		this.notificationCallbackService = notificationCallbackService;
-		this.streamService = streamService;
-		this.templateEngine = templateEngine;
-		this.notificationService = notificationService;
-		this.objectMapper = objectMapper;
-		this.nodeId = nodeId;
-		this.okHttpClientProvider = okHttpClientProvider;
-
-	}
 
 	@Override
 	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
@@ -220,26 +203,31 @@ public class SlackEventNotification implements EventNotification {
 				.build();
 
 		LOG.debug("the custom message model data is {}",modelData.toString());
-
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
 		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
-
 		//Q:what is the purpose of the eventdefinition in pipeline rules, what are it attributes ?
 		//
 		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
-
-		if(streamService != null) {
-			List<StreamModelData> streams  = streamService.loadByIds(ctx.event().sourceStreams())
-					.stream()
-					.map(stream -> buildStreamWithUrl(stream, ctx, config))
-					.collect(Collectors.toList());
-			objectMap.put("streams",isNull(streams) ? UNKNOWN_VALUE : streams);
-		}
-
+		streamService.ifPresent(theStream -> getObjectMap(ctx, config, objectMap));
 		return objectMap;
 	}
 
+	private void getObjectMap(EventNotificationContext ctx, SlackEventNotificationConfig config, Map<String, Object> objectMap) {
+		List<StreamModelData> streams = streamService.get().loadByIds(ctx.event().sourceStreams())
+				.stream()
+				.map(stream -> buildStreamWithUrl(stream, ctx, config))
+				.collect(Collectors.toList());
+		objectMap.put("streams", isNull(streams) ? UNKNOWN_VALUE : streams);
+	}
 
+
+	/**
+	 * Not sure whats this method does, be happy, if we can delete this method.
+	 * @param ctx
+	 * @param config
+	 * @param backlogItem
+	 * @return
+	 */
 	Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
 		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
 
@@ -249,7 +237,6 @@ public class SlackEventNotification implements EventNotification {
 		}
 
 		EventNotificationModelData modelData = EventNotificationModelData.builder()
-				//.eventDefinition(definitionDto)
 				.eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
 				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
 				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
@@ -258,20 +245,15 @@ public class SlackEventNotification implements EventNotification {
 				.jobTriggerId(ctx.jobTrigger().map(JobTriggerDto::id).orElse(UNKNOWN_VALUE))
 				.event(ctx.event())
 				.backlog( (summaries.size() > 0) ? summaries : null )
-				//.backlogItem(backlogItem)
-				//.graylogUrl(isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl())
-				//.streams(streams)
 				.build();
 
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+		streamService.ifPresent(theStream -> getObjectMap(ctx, config, objectMap));
 
-		if(streamService != null) {
-			List<StreamModelData> streams = streamService.loadByIds(ctx.event().sourceStreams())
-					.stream()
-					.map(stream -> buildStreamWithUrl(stream, ctx, config))
-					.collect(Collectors.toList());
-			objectMap.put("streams",isNull(streams) ? UNKNOWN_VALUE : streams);
-		}
+		objectMap.put("backlog_item", isNull(backlogItem) ? UNKNOWN_VALUE:backlogItem);
+		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
+		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
+
 		return objectMap;
 	}
 
@@ -290,6 +272,7 @@ public class SlackEventNotification implements EventNotification {
 				.build();
 	}
 
+	//todo: this methods needs refactoring, too many if statements
 	String getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
 		String streamUrl;
 		streamUrl = StringUtils.appendIfMissing(graylogUrl, "/") + "streams/" + stream.getId() + "/search";
