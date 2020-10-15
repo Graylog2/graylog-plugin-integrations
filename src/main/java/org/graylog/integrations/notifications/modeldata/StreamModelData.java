@@ -18,6 +18,9 @@ package org.graylog.integrations.notifications.modeldata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
+import org.graylog2.plugin.configuration.fields.ConfigurationField;
+
+import java.util.Optional;
 
 @AutoValue
 public abstract class StreamModelData {
@@ -31,7 +34,7 @@ public abstract class StreamModelData {
 	public abstract String description();
 
 	@JsonProperty("url")
-	public abstract String url();
+	public abstract Optional<String> url();
 
 	public static Builder builder() {
 		return new AutoValue_StreamModelData.Builder();
@@ -48,7 +51,7 @@ public abstract class StreamModelData {
 
 		public abstract Builder description(String description);
 
-		public abstract Builder url(String url);
+		public abstract Builder url(Optional<String> url);
 
 		public abstract StreamModelData build();
 	}

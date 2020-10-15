@@ -18,7 +18,6 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
-import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
@@ -259,35 +258,37 @@ public class SlackEventNotification implements EventNotification {
 
 	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String graylogUrl = config.graylogUrl();
-		String streamUrl = null;
-		if(!isNullOrEmpty(graylogUrl)) {
-			streamUrl = getStreamUrl(stream, ctx, graylogUrl);
-		}
+		Optional<String> streamUrl  = getStreamUrl(stream, ctx, graylogUrl);
+		LOG.debug("streamUrl is {}",streamUrl);
 
 		return StreamModelData.builder()
 				.id(stream.getId())
 				.title(stream.getTitle())
 				.description(stream.getDescription())
-				.url(Optional.ofNullable(streamUrl).orElse(UNKNOWN_VALUE))
+				.url(Optional.ofNullable(streamUrl).orElse(Optional.of(UNKNOWN_VALUE)))
 				.build();
 	}
 
 	//todo: this methods needs refactoring, too many if statements
-	String getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
-		String streamUrl;
-		streamUrl = StringUtils.appendIfMissing(graylogUrl, "/") + "streams/" + stream.getId() + "/search";
+	Optional<String> getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
+		Optional<String> streamUrl = Optional.ofNullable(graylogUrl).filter(s -> !s.isEmpty());
+		streamUrl.ifPresent(str -> str.concat("streams/" + stream.getId() + "/search"));
 
 		if(ctx.eventDefinition().isPresent()) {
 			EventDefinitionDto eventDefinitionDto = ctx.eventDefinition().get();
 			if(eventDefinitionDto.config() instanceof AggregationEventProcessorConfig) {
 				String query = ((AggregationEventProcessorConfig) eventDefinitionDto.config()).query();
 				if(StringUtils.isNotEmpty(query)) {
-					streamUrl += "?q=" + query;
+					streamUrl.ifPresent(s -> s.concat("?q=" +query));
 					LOG.debug("the q = {} ",query);
 				}
 			}
 		}
 		return streamUrl;
+	}
+
+	private String getGraylogUrl(String graylogUrl) {
+		return StringUtils.appendIfMissing(graylogUrl, "/");
 	}
 
 
