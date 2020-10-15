@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import org.bson.types.ObjectId;
 import org.graylog.events.notifications.*;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
+import org.graylog.integrations.notifications.modeldata.StreamModelData;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
@@ -46,20 +47,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     @Before
     public void setUp() {
 
-        slackEventNotificationConfig = new AutoValue_SlackEventNotificationConfig.Builder()
-                .notifyChannel(true)
-                .type(SlackEventNotificationConfig.TYPE_NAME)
-                .color("#FF2052")
-                .webhookUrl("a webhook url")
-                .channel("#general")
-                .customMessage("a custom message")
-                .backlogItemMessage("this is a backlog item message")
-                .linkNames(true)
-                .graylogUrl("http://localhost:8080")
-                .build();
-
-        slackEventNotificationConfig.validate();
-        //todo: make method `getDummyContext` public
+        setSlackEventNotificationConfig();
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(slackEventNotificationConfig).build();
 
 
@@ -78,6 +66,21 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
                                                             Engine.createEngine(),
                                                             mockNotificationService, getOkHttpClientProvider(), mockNodeId,null);
 
+    }
+
+    private void setSlackEventNotificationConfig() {
+        slackEventNotificationConfig = new AutoValue_SlackEventNotificationConfig.Builder()
+                .notifyChannel(true)
+                .type(SlackEventNotificationConfig.TYPE_NAME)
+                .color("#FF2052")
+                .webhookUrl("a webhook url")
+                .channel("#general")
+                .customMessage("a custom message")
+                .backlogItemMessage("this is a backlog item message")
+                .linkNames(true)
+                .graylogUrl("http://localhost:8080")
+                .build();
+        slackEventNotificationConfig.validate();
     }
 
     private NotificationDto getHttpNotification() {
@@ -135,11 +138,17 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         when(stream.getId()).thenReturn(streamId.toHexString());
         when(stream.getTitle()).thenReturn("title");
         when(stream.getDescription()).thenReturn("description");
-        slackEventNotification.buildStreamWithUrl(stream, eventNotificationContext, slackEventNotificationConfig);
+        SlackEventNotificationConfig slackEventNotificationConfig = mock(SlackEventNotificationConfig.class);
+        when(slackEventNotificationConfig.graylogUrl()).thenReturn(null);
+        StreamModelData modelData = slackEventNotification.buildStreamWithUrl(stream, eventNotificationContext, slackEventNotificationConfig);
+        assertThat(modelData).isNotNull();
+        System.out.println(modelData.url());
     }
 
     @Test(expected = PermanentEventNotificationException.class)
     public void execute() throws PermanentEventNotificationException {
         slackEventNotification.execute(eventNotificationContext);
     }
+
+
 }
