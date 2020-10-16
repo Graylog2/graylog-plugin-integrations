@@ -269,26 +269,23 @@ public class SlackEventNotification implements EventNotification {
 				.build();
 	}
 
-	//todo: this methods needs refactoring, too many if statements
 	Optional<String> getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
-		Optional<String> streamUrl = Optional.ofNullable(graylogUrl).filter(s -> !s.isEmpty());
-		streamUrl.ifPresent(str -> str.concat("streams/" + stream.getId() + "/search"));
-
-		if(ctx.eventDefinition().isPresent()) {
-			EventDefinitionDto eventDefinitionDto = ctx.eventDefinition().get();
-			if(eventDefinitionDto.config() instanceof AggregationEventProcessorConfig) {
-				String query = ((AggregationEventProcessorConfig) eventDefinitionDto.config()).query();
-				if(StringUtils.isNotEmpty(query)) {
-					streamUrl.ifPresent(s -> s.concat("?q=" +query));
-					LOG.debug("the q = {} ",query);
-				}
+		StringBuffer streamUrl = new StringBuffer();
+		if (!graylogUrl.isEmpty()) {
+			streamUrl.append(graylogUrl)
+					.append("streams/")
+					.append(stream.getId())
+					.append("/search");
+			if (ctx.eventDefinition().isPresent()
+					&& ctx.eventDefinition().get().config() instanceof AggregationEventProcessorConfig
+					&& !((AggregationEventProcessorConfig) ctx.eventDefinition().get().config()).query().isEmpty()) {
+					AggregationEventProcessorConfig conf = (AggregationEventProcessorConfig) ctx.eventDefinition().get().config();
+					streamUrl.append("?q=")
+					.append(conf.query());
 			}
+			return Optional.of(streamUrl.toString());
 		}
-		return streamUrl;
-	}
-
-	private String getGraylogUrl(String graylogUrl) {
-		return StringUtils.appendIfMissing(graylogUrl, "/");
+		return Optional.empty();
 	}
 
 
