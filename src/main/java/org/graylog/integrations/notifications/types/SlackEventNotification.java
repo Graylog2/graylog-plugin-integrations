@@ -19,6 +19,7 @@ package org.graylog.integrations.notifications.types;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.directory.api.util.Strings;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
@@ -55,13 +56,13 @@ public class SlackEventNotification implements EventNotification {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
-	EventNotificationService notificationCallbackService;
-	Optional<StreamService> streamService ;
-	Engine templateEngine ;
-	NotificationService notificationService ;
-	ObjectMapper objectMapper ;
-	NodeId nodeId ;
-	OkHttpClientProvider okHttpClientProvider ;
+	private final EventNotificationService notificationCallbackService;
+	private final Optional<StreamService> streamService ;
+	private final Engine templateEngine ;
+	private final NotificationService notificationService ;
+	private final ObjectMapper objectMapper ;
+	private final NodeId nodeId ;
+	private final OkHttpClientProvider okHttpClientProvider ;
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -269,9 +270,11 @@ public class SlackEventNotification implements EventNotification {
 				.build();
 	}
 
+
+
 	Optional<String> getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
 		StringBuffer streamUrl = new StringBuffer();
-		if (!graylogUrl.isEmpty()) {
+		if (Strings.isEmpty(graylogUrl)) {
 			streamUrl.append(graylogUrl)
 					.append("streams/")
 					.append(stream.getId())
