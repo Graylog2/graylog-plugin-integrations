@@ -18,7 +18,6 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.directory.api.util.Strings;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
@@ -63,6 +62,7 @@ public class SlackEventNotification implements EventNotification {
 	private final ObjectMapper objectMapper ;
 	private final NodeId nodeId ;
 	private final OkHttpClientProvider okHttpClientProvider ;
+
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -220,7 +220,6 @@ public class SlackEventNotification implements EventNotification {
 		objectMap.put("streams", isNull(streams) ? UNKNOWN_VALUE : streams);
 	}
 
-
 	/**
 	 * Not sure whats this method does, be happy, if we can delete this method.
 	 * @param ctx
@@ -269,7 +268,6 @@ public class SlackEventNotification implements EventNotification {
 				.url(Optional.ofNullable(streamUrl).orElse(Optional.of(UNKNOWN_VALUE)))
 				.build();
 	}
-
 
 
 	Optional<String> getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
