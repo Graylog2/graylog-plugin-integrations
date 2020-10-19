@@ -115,8 +115,7 @@ public class SlackEventNotification implements EventNotification {
 
 		String customMessage = null;
 		String template = config.customMessage();
-		boolean hasTemplate = !isNullOrEmpty(template);
-		if (hasTemplate) {
+		if (!isNullOrEmpty(template)) {
 			customMessage = buildCustomMessage(ctx, config, template);
 		}
 
