@@ -46,7 +46,7 @@ class SlackNotificationSummary extends React.Component {
             </tr>
             <tr>
               <td>Link Names</td>
-              <td>{notification.config.link_names}</td>
+              <td>{notification.config.link_names ? 'Yes' : 'No'}</td>
             </tr>
             <tr>
               <td>Icon URL</td>
