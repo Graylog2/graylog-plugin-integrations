@@ -129,8 +129,8 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
 
-    @Test(expected = PermanentEventNotificationException.class)
-    public void execute() throws PermanentEventNotificationException {
+    @Test
+    public void execute()  {
         slackEventNotification.execute(eventNotificationContext);
     }
 

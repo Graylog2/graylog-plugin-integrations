@@ -76,7 +76,7 @@ public class SlackEventNotification implements EventNotification {
 
 
 	@Override
-	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
+	public void execute(EventNotificationContext ctx)  {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
 		final SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
 
@@ -95,10 +95,11 @@ public class SlackEventNotification implements EventNotification {
 					.addType(Notification.Type.GENERIC)
 					.addSeverity(Notification.Severity.NORMAL)
 					.addDetail("exception", exceptionDetail);
+
 			notificationService.publishIfFirst(systemNotification);
 
-			throw new PermanentEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
 		}
+
 	}
 
 	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
