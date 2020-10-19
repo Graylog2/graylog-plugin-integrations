@@ -42,7 +42,7 @@ class SlackNotificationSummary extends React.Component {
             </tr>
             <tr>
               <td>Notify Channel</td>
-              <td>{notification.config.notify_channel}</td>
+              <td>{notification.config.notify_channel ? 'Yes' : 'No'}</td>
             </tr>
             <tr>
               <td>Link Names</td>
