@@ -31,7 +31,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.*;
+
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
@@ -56,14 +61,13 @@ public class SlackEventNotification implements EventNotification {
 	private final NodeId nodeId ;
 	private final OkHttpClientProvider okHttpClientProvider ;
 
-
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
 								  ObjectMapper objectMapper,
 								  Engine templateEngine,
 								  NotificationService notificationService,
 								  OkHttpClientProvider okHttpClientProvider,
-								  NodeId nodeId, StreamService streamService){
+								  NodeId nodeId, StreamService streamService,SlackClient client){
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
 		this.templateEngine = requireNonNull(templateEngine);
@@ -78,7 +82,7 @@ public class SlackEventNotification implements EventNotification {
 	@Override
 	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
+		final SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
