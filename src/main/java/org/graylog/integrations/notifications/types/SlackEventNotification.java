@@ -167,17 +167,7 @@ public class SlackEventNotification implements EventNotification {
 	}
 
 	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
-		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
-		EventNotificationModelData modelData = EventNotificationModelData.builder()
-								 			  .eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
-				.eventDefinitionType(config.type())
-				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
-				.eventDefinitionDescription(definitionDto.map(EventDefinitionDto::description).orElse(UNKNOWN_VALUE))
-				.jobDefinitionId(ctx.jobTrigger().map(JobTriggerDto::jobDefinitionId).orElse(UNKNOWN_VALUE))
-				.jobTriggerId(ctx.jobTrigger().map(JobTriggerDto::id).orElse(UNKNOWN_VALUE))
-				.event(ctx.event())
-				.backlog(backlog)
-				.build();
+		EventNotificationModelData modelData = EventNotificationModelData.of(ctx, backlog);
 
 		LOG.debug("the custom message model data is {}",modelData.toString());
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
