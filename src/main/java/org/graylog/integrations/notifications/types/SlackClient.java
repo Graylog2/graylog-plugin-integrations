@@ -55,11 +55,6 @@ public class SlackClient {
 		this.httpClient = httpClient;
 	}
 
-    // TODO: 9/8/20
-    //We usually use okhttp for all HTTP connections so I think we should inject an OkHttpClient instance here
-    // and use that instead of the Java core HTTP client.
-    //This also has the benefit of automatic proxy configuration based on the settings in graylog.conf so the user
-    // doesn't need to configure the proxy server in the slack notification settings.
     public void send_with_okhttp(SlackMessage message) throws SlackClientException {
 
 		final Request request = new Request.Builder()
