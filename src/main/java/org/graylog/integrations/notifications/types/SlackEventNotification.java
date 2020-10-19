@@ -89,7 +89,7 @@ public class SlackEventNotification implements EventNotification {
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
-			slackClient.send_with_okhttp(slackMessage);
+			slackClient.send(slackMessage);
 		} catch (Exception e) {
 			String exceptionDetail = e.toString();
 			if (e.getCause() != null) {
@@ -172,47 +172,10 @@ public class SlackEventNotification implements EventNotification {
 		LOG.debug("the custom message model data is {}",modelData.toString());
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
 		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
-		//Q:what is the purpose of the eventdefinition in pipeline rules, what are it attributes ?
-		//
-		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
-		streamService.ifPresent(theStream -> getObjectMap(ctx, config, objectMap));
 		return objectMap;
 	}
 
 
-
-	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
-		String graylogUrl = config.graylogUrl();
-		Optional<String> streamUrl  = getStreamUrl(stream, ctx, graylogUrl);
-		LOG.debug("streamUrl is {}",streamUrl);
-
-		return StreamModelData.builder()
-				.id(stream.getId())
-				.title(stream.getTitle())
-				.description(stream.getDescription())
-				.url(Optional.ofNullable(streamUrl).orElse(Optional.of(UNKNOWN_VALUE)))
-				.build();
-	}
-
-
-	Optional<String> getStreamUrl(Stream stream, EventNotificationContext ctx, String graylogUrl) {
-		StringBuffer streamUrl = new StringBuffer();
-		if (Strings.isEmpty(graylogUrl)) {
-			streamUrl.append(graylogUrl)
-					.append("streams/")
-					.append(stream.getId())
-					.append("/search");
-			if (ctx.eventDefinition().isPresent()
-					&& ctx.eventDefinition().get().config() instanceof AggregationEventProcessorConfig
-					&& !((AggregationEventProcessorConfig) ctx.eventDefinition().get().config()).query().isEmpty()) {
-					AggregationEventProcessorConfig conf = (AggregationEventProcessorConfig) ctx.eventDefinition().get().config();
-					streamUrl.append("?q=")
-					.append(conf.query());
-			}
-			return Optional.of(streamUrl.toString());
-		}
-		return Optional.empty();
-	}
 
 
 }

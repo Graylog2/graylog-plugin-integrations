@@ -17,26 +17,14 @@
 package org.graylog.integrations.notifications.types;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.joschi.jadconfig.util.Duration;
-import com.google.common.collect.ImmutableList;
+
 import okhttp3.*;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.graylog.events.notifications.*;
-import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
-import org.graylog2.plugin.MessageSummary;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -45,7 +33,6 @@ public class SlackClient {
 	private static final Logger LOG = LoggerFactory.getLogger(SlackClient.class);
 
 	private final String webhookUrl;
-	private String proxyURL;
 	private final OkHttpClient httpClient;
 
 
@@ -55,7 +42,7 @@ public class SlackClient {
 		this.httpClient = httpClient;
 	}
 
-    public void send_with_okhttp(SlackMessage message) throws SlackClientException {
+    public void send(SlackMessage message) throws SlackClientException {
 
 		final Request request = new Request.Builder()
 				.url(webhookUrl)

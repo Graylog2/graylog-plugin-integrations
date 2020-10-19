@@ -50,7 +50,7 @@ public class SlackClientTest extends SlackPluginTestFixture {
     @Test(expected = SlackClient.SlackClientException.class)
     public void send_message_with_okhttpclient_and_invalid_webhookurl() throws SlackClient.SlackClientException {
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        okHttpSlackClient.send_with_okhttp(message);
+        okHttpSlackClient.send(message);
     }
 
 

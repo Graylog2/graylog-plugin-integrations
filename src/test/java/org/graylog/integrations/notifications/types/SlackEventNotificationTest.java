@@ -131,19 +131,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         assertThat(customMessageModel.get("event_definition_type")).isEqualTo("slack-notification-v1");
     }
 
-    @Test
-    public void buildStreamWithUrl() {
-        final ObjectId streamId = new ObjectId("5628f4503b0c5756a8eebc4d");
-        final Stream stream = mock(Stream.class);
-        when(stream.getId()).thenReturn(streamId.toHexString());
-        when(stream.getTitle()).thenReturn("title");
-        when(stream.getDescription()).thenReturn("description");
-        SlackEventNotificationConfig slackEventNotificationConfig = mock(SlackEventNotificationConfig.class);
-        when(slackEventNotificationConfig.graylogUrl()).thenReturn(null);
-        StreamModelData modelData = slackEventNotification.buildStreamWithUrl(stream, eventNotificationContext, slackEventNotificationConfig);
-        assertThat(modelData).isNotNull();
-        System.out.println(modelData.url());
-    }
 
     @Test(expected = PermanentEventNotificationException.class)
     public void execute() throws PermanentEventNotificationException {
