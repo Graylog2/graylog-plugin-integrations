@@ -120,14 +120,6 @@ public class SlackEventNotification implements EventNotification {
 			customMessage = buildCustomMessage(ctx, config, template);
 		}
 
-		List<String> backlogItemMessages = Collections.emptyList();
-		String backlogItemTemplate = config.backlogItemMessage();
-		boolean hasBacklogItemTemplate = !isNullOrEmpty(backlogItemTemplate);
-		if(hasBacklogItemTemplate) {
-			backlogItemMessages = buildBacklogItemMessages(ctx, config, backlogItemTemplate);
-			LOG.debug("The size of backlog Item Messages "+backlogItemMessages.size());
-		}
-
 		return new SlackMessage(
 				config.color(),
 				config.iconEmoji(),
@@ -136,8 +128,8 @@ public class SlackEventNotification implements EventNotification {
 				config.channel(),
 				linkNames,
 				message,
-				customMessage,
-				backlogItemMessages);
+				customMessage
+				);
 	}
 
 	String buildDefaultMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
@@ -170,20 +162,6 @@ public class SlackEventNotification implements EventNotification {
 		}
 	}
 
-	List<String> buildBacklogItemMessages(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
-		return getAlarmBacklog(ctx).stream()
-				.map(backlogItem -> {
-					Map<String, Object> model = getBacklogItemModel(ctx, config, backlogItem);
-					try {
-						String str =  templateEngine.transform(template, model);
-						LOG.info("String build a backlog item message="+str);
-						return str;
-					} catch (Exception e) {
-						LOG.error("Exception during templating", e);
-						return e.toString();
-					}
-				}).collect(Collectors.toList());
-	}
 
 	List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
 		return notificationCallbackService.getBacklogForEvent(ctx);
@@ -220,41 +198,6 @@ public class SlackEventNotification implements EventNotification {
 		objectMap.put("streams", isNull(streams) ? UNKNOWN_VALUE : streams);
 	}
 
-	/**
-	 * Not sure whats this method does, be happy, if we can delete this method.
-	 * @param ctx
-	 * @param config
-	 * @param backlogItem
-	 * @return
-	 */
-	Map<String, Object> getBacklogItemModel(EventNotificationContext ctx, SlackEventNotificationConfig config, MessageSummary backlogItem) {
-		Optional<EventDefinitionDto> definitionDto = ctx.eventDefinition();
-
-		ArrayList<MessageSummary> summaries = new ArrayList<>();
-		if (backlogItem != null) {
-			summaries.add(backlogItem);
-		}
-
-		EventNotificationModelData modelData = EventNotificationModelData.builder()
-				.eventDefinitionId(definitionDto.map(EventDefinitionDto::id).orElse(UNKNOWN_VALUE))
-				.eventDefinitionType(definitionDto.map(d -> d.config().type()).orElse(UNKNOWN_VALUE))
-				.eventDefinitionTitle(definitionDto.map(EventDefinitionDto::title).orElse(UNKNOWN_VALUE))
-				.eventDefinitionDescription(definitionDto.map(EventDefinitionDto::description).orElse(UNKNOWN_VALUE))
-				.jobDefinitionId(ctx.jobTrigger().map(JobTriggerDto::jobDefinitionId).orElse(UNKNOWN_VALUE))
-				.jobTriggerId(ctx.jobTrigger().map(JobTriggerDto::id).orElse(UNKNOWN_VALUE))
-				.event(ctx.event())
-				.backlog( (summaries.size() > 0) ? summaries : null )
-				.build();
-
-		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
-		streamService.ifPresent(theStream -> getObjectMap(ctx, config, objectMap));
-
-		objectMap.put("backlog_item", isNull(backlogItem) ? UNKNOWN_VALUE:backlogItem);
-		objectMap.put("event_definition", isNull(definitionDto) ? UNKNOWN_VALUE:definitionDto);
-		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
-
-		return objectMap;
-	}
 
 	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
 		String graylogUrl = config.graylogUrl();

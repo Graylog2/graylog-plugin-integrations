@@ -34,7 +34,6 @@ class SlackNotificationForm extends React.Component {
              + '\n'
              + '${end}${else}<No backlog>\n'
              + '${end}',
-      backlog_item_message: '${backlog_item.message}',
       /* eslint-enable no-template-curly-in-string */
       user_name: 'Graylog',
       notify_channel: false,
@@ -108,14 +107,6 @@ class SlackNotificationForm extends React.Component {
                  bsStyle={validation.errors.custom_message ? 'error' : null}
                  help={lodash.get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. The following properties are available for template building: "event_definition", "event", "backlog", "backlog_size", "streams", "graylog_url". See http://docs.graylog.org/en/3.1/pages/streams/alerts.html for more details.')}
                  value={config.custom_message || ''}
-                 onChange={this.handleChange} />
-          <Input id="notification-backlogItemMessage"
-                 name="backlog_item_message"
-                 label="Backlog Item Message (optional)"
-                 type="textarea"
-                 bsStyle={validation.errors.backlog_item_message ? 'error' : null}
-                 help={lodash.get(validation, 'errors.backlog_item_message[0]', 'Template that is added as attachment to the slack message for each backlog item. The following properties are available for template building: "event_definition", "event", "backlog_item", "streams", "graylog_url". See http://docs.graylog.org/en/3.1/pages/streams/alerts.html for more details. Slack recommends to have no more than 20 attachments and throws an error when attempting to include more than 100. So don\'t use a too high backlog items number. Also consider that other parts of the slack notification may use attachments!')}
-                 value={config.backlog_item_message || ''}
                  onChange={this.handleChange} />
           <Input id="notification-userName"
                  name="user_name"

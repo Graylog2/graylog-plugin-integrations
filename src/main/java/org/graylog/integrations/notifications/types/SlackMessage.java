@@ -40,7 +40,6 @@ public class SlackMessage {
 	private boolean linkNames;
 	private String message;
 	private String customMessage;
-	private List<String> backlogItemMessages = new ArrayList<>();
 
 	public SlackMessage(
 			String color,
@@ -50,8 +49,8 @@ public class SlackMessage {
 			String channel,
 			boolean linkNames,
 			String message,
-			String customMessage,
-			List<String> backlogItemMessages
+			String customMessage
+
 	) {
 		this.color = color;
 		this.iconEmoji = iconEmoji;
@@ -61,7 +60,7 @@ public class SlackMessage {
 		this.linkNames = linkNames;
 		this.message = message;
 		this.customMessage = customMessage;
-		this.backlogItemMessages = backlogItemMessages;
+
 	}
 
 	public SlackMessage(String message){
@@ -97,19 +96,6 @@ public class SlackMessage {
 					null
 			);
 			attachments.add(attachment);
-		}
-
-		for (String backlogItemMessage : backlogItemMessages) {
-			if(!isNullOrEmpty(backlogItemMessage)) {
-				final Attachment attachment = new Attachment(
-						color,
-						backlogItemMessage,
-						"Backlog Item Message",
-						null,
-						null
-				);
-				attachments.add(attachment);
-			}
 		}
 
 		if (!attachments.isEmpty()) {
