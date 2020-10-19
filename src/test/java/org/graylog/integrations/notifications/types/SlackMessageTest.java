@@ -31,8 +31,8 @@ public class SlackMessageTest {
     }
 
     private List<String> getUserNames(String expected) throws IOException {
-        final byte[] bytes1 = expected.getBytes();
-        JsonNode jsonNode1 = new ObjectMapper().readTree(bytes1);
-        return jsonNode1.findValuesAsText("username");
+        final byte[] bytes = expected.getBytes();
+        JsonNode jsonNode = new ObjectMapper().readTree(bytes);
+        return jsonNode.findValuesAsText("username");
     }
 }
