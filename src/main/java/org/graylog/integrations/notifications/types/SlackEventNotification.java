@@ -26,7 +26,6 @@ import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
-import org.graylog2.streams.StreamService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
+
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
@@ -54,7 +53,6 @@ public class SlackEventNotification implements EventNotification {
 	private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
 
 	private final EventNotificationService notificationCallbackService;
-	private final Optional<StreamService> streamService ;
 	private final Engine templateEngine ;
 	private final NotificationService notificationService ;
 	private final ObjectMapper objectMapper ;
@@ -67,15 +65,13 @@ public class SlackEventNotification implements EventNotification {
 								  Engine templateEngine,
 								  NotificationService notificationService,
 								  OkHttpClientProvider okHttpClientProvider,
-								  NodeId nodeId, StreamService streamService,SlackClient client){
+								  NodeId nodeId){
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
 		this.templateEngine = requireNonNull(templateEngine);
 		this.okHttpClientProvider = requireNonNull(okHttpClientProvider);
 		this.notificationService = requireNonNull(notificationService);
 		this.nodeId = requireNonNull(nodeId);
-		this.streamService = Optional.ofNullable(streamService);
-
 	}
 
 
@@ -171,8 +167,6 @@ public class SlackEventNotification implements EventNotification {
 		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
 		return objectMap;
 	}
-
-
 
 
 }
