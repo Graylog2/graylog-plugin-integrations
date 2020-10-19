@@ -16,7 +16,10 @@
  */
 package org.graylog.integrations.notifications.types;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import org.graylog.events.contentpack.entities.EventNotificationConfigEntity;
@@ -32,7 +35,6 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
 
 @AutoValue
-@JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeName(SlackEventNotificationConfig.TYPE_NAME)
 @JsonDeserialize(builder = SlackEventNotificationConfig.Builder.class)
 public abstract class SlackEventNotificationConfig implements EventNotificationConfig {
