@@ -18,17 +18,12 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
-import org.apache.directory.api.util.Strings;
 import org.graylog.events.notifications.*;
 import org.graylog.events.processor.EventDefinitionDto;
-import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
-import org.graylog.integrations.notifications.modeldata.StreamModelData;
-import org.graylog.scheduler.JobTriggerDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
-import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.graylog2.streams.StreamService;
@@ -37,10 +32,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 public class SlackEventNotification implements EventNotification {

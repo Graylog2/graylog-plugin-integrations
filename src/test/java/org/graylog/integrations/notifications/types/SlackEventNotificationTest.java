@@ -2,16 +2,13 @@ package org.graylog.integrations.notifications.types;
 
 import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
-import org.bson.types.ObjectId;
 import org.graylog.events.notifications.*;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
-import org.graylog.integrations.notifications.modeldata.StreamModelData;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
-import org.graylog2.plugin.streams.Stream;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
