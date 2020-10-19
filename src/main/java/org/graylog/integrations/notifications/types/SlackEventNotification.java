@@ -189,13 +189,6 @@ public class SlackEventNotification implements EventNotification {
 		return objectMap;
 	}
 
-	private void getObjectMap(EventNotificationContext ctx, SlackEventNotificationConfig config, Map<String, Object> objectMap) {
-		List<StreamModelData> streams = streamService.get().loadByIds(ctx.event().sourceStreams())
-				.stream()
-				.map(stream -> buildStreamWithUrl(stream, ctx, config))
-				.collect(Collectors.toList());
-		objectMap.put("streams", isNull(streams) ? UNKNOWN_VALUE : streams);
-	}
 
 
 	StreamModelData buildStreamWithUrl(Stream stream, EventNotificationContext ctx, SlackEventNotificationConfig config) {
