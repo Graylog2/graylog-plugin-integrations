@@ -37,10 +37,6 @@ class SlackNotificationSummary extends React.Component {
               <td>{notification.config.custom_message}</td>
             </tr>
             <tr>
-              <td>Backlog Item Message</td>
-              <td>{notification.config.backlog_item_message}</td>
-            </tr>
-            <tr>
               <td>User Name</td>
               <td>{notification.config.user_name}</td>
             </tr>
@@ -71,4 +67,3 @@ class SlackNotificationSummary extends React.Component {
 }
 
 export default SlackNotificationSummary;
-
