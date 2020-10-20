@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import lodash from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 import { Input } from 'components/bootstrap';
 import FormsUtils from 'util/FormsUtils';
@@ -57,7 +57,7 @@ class SlackNotificationForm extends React.Component {
 
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
-      const nextConfig = lodash.cloneDeep(config);
+      const nextConfig = cloneDeep(config);
       nextConfig[key] = value;
       onChange(nextConfig);
     };
