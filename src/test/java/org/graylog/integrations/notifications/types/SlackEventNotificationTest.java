@@ -129,7 +129,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
         Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig, messageSummaries);
         assertThat(customMessageModel).isNotNull();
-        assertThat(customMessageModel.get("event_definition_type")).isEqualTo("slack-notification-v1");
+        assertThat(customMessageModel.get("event_definition_type")).isEqualTo("test-dummy-v1");
     }
 
 
