@@ -145,5 +145,9 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Test
     public void buildCustomMessage() {
+       String s =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"${thisDoesNotExist}");
+       assertThat(s).isEmpty();
+       String expectedCustomMessage =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"test");
+       assertThat(expectedCustomMessage).isNotEmpty();
     }
 }
