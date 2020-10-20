@@ -40,9 +40,6 @@ import javax.validation.constraints.NotBlank;
 public abstract class SlackEventNotificationConfig implements EventNotificationConfig {
 	public static final String TYPE_NAME = "slack-notification-v1";
 
-
-	//there are 8 properties with default values and scroll down to line 133 to see them.
-
 	static final String FIELD_COLOR = "color";
 	static final String FIELD_WEBHOOK_URL = "webhook_url";
 	static final String FIELD_CHANNEL = "channel";
@@ -114,10 +111,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		@JsonCreator
 		public static SlackEventNotificationConfig.Builder create() {
 
-			// these are the default values for each of the property
-			// I didn't want to create a 8 properties with default values
-			// in this class.if you want to change these default values
-			// please change it here.
 			return new AutoValue_SlackEventNotificationConfig.Builder()
 					.type(TYPE_NAME)
 					.color("#ff0500")
