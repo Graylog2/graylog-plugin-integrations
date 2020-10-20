@@ -21,26 +21,37 @@ class SlackNotificationForm extends React.Component {
       channel: '#channel',
       /* eslint-disable no-template-curly-in-string */
       custom_message: ''
-             + 'Message: ${event.message}\n'
-             + '${if event.timerange_start}Timerange: ${event.timerange_start} to ${event.timerange_end}${end}\n'
-             + 'Streams: ${streams}\n'
-             + '${foreach event.fields field}  ${field.key}: ${field.value}${end}\n'
-             + '${if graylog_url}Graylog URL: ${graylog_url}\n${end}'
-             + '\n'
-             + '##########\n'
-             + '\n'
-             + '${if backlog}Last messages accounting for this alert:\n'
-             + '${foreach backlog message}${message}\n'
-             + '\n'
-             + '${end}${else}<No backlog>\n'
-             + '${end}',
+                      + '--- [Event Definition] ---------------------------\n'
+                      + 'Title:       ${event_definition_title}\n'
+                      + 'Type:        ${event_definition_type}\n'
+                      + '--- [Event] --------------------------------------'
+                      + 'Timestamp:            ${event.timestamp}'
+                      + 'Message:              ${event.message}'
+                      + 'Source:               ${event.source}'
+                      + 'Key:                  ${event.key}'
+                      + 'Priority:             ${event.priority}'
+                      + ' Alert:                ${event.alert}'
+                      + 'Timestamp Processing: ${event.timestamp}'
+                      + 'Timerange Start:      ${event.timerange_start}'
+                      + 'Timerange End:        ${event.timerange_end}'
+                      + 'Event Fields:'
+                      + '${foreach event.fields field}'
+                      + '${field.key}: ${field.value}'
+                      + '${end}'
+                      + '${if backlog}'
+                      + '--- [Backlog] ------------------------------------'
+                      + 'Last messages accounting for this alert:'
+                      + '${foreach backlog message}'
+                      + '${message.id} -${message.timestamp} - ${message.source}'
+                      + '${message.message}'
+                      + '${end}${else}<No backlog>\n'
+                      + '${end}',
       /* eslint-enable no-template-curly-in-string */
       user_name: 'Graylog',
       notify_channel: false,
       link_names: false,
       icon_url: '',
       icon_emoji: '',
-      graylog_url: '',
 
     };
 
@@ -147,14 +158,6 @@ class SlackNotificationForm extends React.Component {
                  bsStyle={validation.errors.icon_emoji ? 'error' : null}
                  help={lodash.get(validation, 'errors.icon_emoji[0]', 'Emoji to use as the icon for this message (overrides Icon URL)')}
                  value={config.icon_emoji || ''}
-                 onChange={this.handleChange} />
-          <Input id="notification-graylogUrl"
-                 name="graylog_url"
-                 label="Graylog URL (optional)"
-                 type="text"
-                 bsStyle={validation.errors.graylog_url ? 'error' : null}
-                 help={lodash.get(validation, 'errors.graylog_url[0]', 'URL to your Graylog web interface. Used to build links in alarm notification')}
-                 value={config.graylog_url || ''}
                  onChange={this.handleChange} />
         </>
       );
