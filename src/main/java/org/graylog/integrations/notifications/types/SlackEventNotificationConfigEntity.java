@@ -47,9 +47,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 	@JsonProperty(SlackEventNotificationConfig.FIELD_CUSTOM_MESSAGE)
 	public abstract ValueReference customMessage();
 
-	@JsonProperty(SlackEventNotificationConfig.FIELD_BACKLOG_ITEM_MESSAGE)
-	public abstract ValueReference backlogItemMessage();
-
 	@JsonProperty(SlackEventNotificationConfig.FIELD_USER_NAME)
 	public abstract ValueReference userName();
 
@@ -92,9 +89,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 		@JsonProperty(SlackEventNotificationConfig.FIELD_CUSTOM_MESSAGE)
 		public abstract Builder customMessage(ValueReference customMessage);
 
-		@JsonProperty(SlackEventNotificationConfig.FIELD_BACKLOG_ITEM_MESSAGE)
-		public abstract Builder backlogItemMessage(ValueReference backlogItemMessage);
-
 		@JsonProperty(SlackEventNotificationConfig.FIELD_USER_NAME)
 		public abstract Builder userName(ValueReference userName);
 
@@ -120,7 +114,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 				.webhookUrl(webhookUrl().asString(parameters))
 				.channel(channel().asString(parameters))
 				.customMessage(customMessage().asString(parameters))
-				.backlogItemMessage(backlogItemMessage().asString(parameters))
 				.userName(userName().asString(parameters))
 				.notifyChannel(notifyChannel().asBoolean(parameters))
 				.linkNames(linkNames().asBoolean(parameters))

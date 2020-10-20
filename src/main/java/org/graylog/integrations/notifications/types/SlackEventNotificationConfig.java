@@ -44,7 +44,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	static final String FIELD_WEBHOOK_URL = "webhook_url";
 	static final String FIELD_CHANNEL = "channel";
 	static final String FIELD_CUSTOM_MESSAGE = "custom_message";
-	static final String FIELD_BACKLOG_ITEM_MESSAGE = "backlog_item_message";
 	static final String FIELD_USER_NAME = "user_name";
 	static final String FIELD_NOTIFY_CHANNEL = "notify_channel";
 	static final String FIELD_LINK_NAMES = "link_names";
@@ -66,9 +65,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
 	@JsonProperty(FIELD_CUSTOM_MESSAGE)
 	public abstract String customMessage();
-
-	@JsonProperty(FIELD_BACKLOG_ITEM_MESSAGE)
-	public abstract String backlogItemMessage();
 
 	@JsonProperty(FIELD_USER_NAME)
 	@Nullable
@@ -117,7 +113,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 					.webhookUrl("https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx")
 					.channel("slacktest2")
 					.customMessage("hello World")
-					.backlogItemMessage("this is a back log item message")
 					.notifyChannel(false)
 					.linkNames(false);
 		}
@@ -133,9 +128,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
 		@JsonProperty(FIELD_CUSTOM_MESSAGE)
 		public abstract SlackEventNotificationConfig.Builder customMessage(String customMessage);
-
-		@JsonProperty(FIELD_BACKLOG_ITEM_MESSAGE)
-		public abstract SlackEventNotificationConfig.Builder backlogItemMessage(String backlogItemMessage);
 
 		@JsonProperty(FIELD_USER_NAME)
 		public abstract SlackEventNotificationConfig.Builder userName(String userName);
@@ -163,7 +155,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 				.webhookUrl(ValueReference.of(webhookUrl()))
 				.channel(ValueReference.of(channel()))
 				.customMessage(ValueReference.of(customMessage()))
-				.backlogItemMessage(ValueReference.of(backlogItemMessage()))
 				.userName(ValueReference.of(userName()))
 				.notifyChannel(ValueReference.of(notifyChannel()))
 				.linkNames(ValueReference.of(linkNames()))
