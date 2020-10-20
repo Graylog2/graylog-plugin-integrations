@@ -73,7 +73,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
                 .webhookUrl("a webhook url")
                 .channel("#general")
                 .customMessage("a custom message")
-                .backlogItemMessage("this is a backlog item message")
                 .linkNames(true)
                 .build();
         slackEventNotificationConfig.validate();
@@ -144,4 +143,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
 
+    @Test
+    public void buildCustomMessage() {
+    }
 }
