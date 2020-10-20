@@ -57,7 +57,7 @@ class SlackNotificationForm extends React.Component {
 
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
-      const nextConfig = lodash.cloneDeep(config);
+      const nextConfig = cloneDeep(config);
       nextConfig[key] = value;
       onChange(nextConfig);
     };
