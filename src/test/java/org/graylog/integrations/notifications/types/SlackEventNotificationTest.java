@@ -92,11 +92,10 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Test
     public void createSlackMessage() throws IOException {
+       String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
        SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
-       String expected  = message.getJsonString();
-       System.out.println(expected);
-        List<String> type = getJsonNodeFieldValue(expected,"type");
-        System.out.println(type);
+       String actual  = message.getJsonString();
+       assertThat(actual).isEqualTo(expected);
 
     }
 
