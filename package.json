@@ -8,15 +8,10 @@
   },
   "scripts": {
     "build": "webpack",
-    "lint": "eslint --ext js,jsx src/web",
-    "lint:path": "eslint --ext js,jsx",
+    "lint": "eslint --ext js,jsx src/web --config ../graylog2-server/graylog2-web-interface/.eslintrc.json",
+    "lint:path": "eslint --ext js,jsx --config ../graylog2-server/graylog2-web-interface/.eslintrc.json",
     "test": "jest",
     "flow-check": "flow check"
-  },
-  "eslintConfig": {
-    "extends": [
-      "../graylog2-server/graylog2-web-interface/.eslintrc.json"
-    ]
   },
   "keywords": [
     "graylog"

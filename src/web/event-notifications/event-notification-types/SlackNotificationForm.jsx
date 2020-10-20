@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import cloneDeep from 'lodash/cloneDeep';
+import lodash from 'lodash';
 
 import { Input } from 'components/bootstrap';
 import FormsUtils from 'util/FormsUtils';
@@ -30,7 +30,7 @@ class SlackNotificationForm extends React.Component {
                       + 'Source:               ${event.source}\n'
                       + 'Key:                  ${event.key}\n'
                       + 'Priority:             ${event.priority}\n'
-                      + ' Alert:                ${event.alert}\n'
+                      + 'Alert:                ${event.alert}\n'
                       + 'Timestamp Processing: ${event.timestamp}\n'
                       + 'Timerange Start:      ${event.timerange_start}\n'
                       + 'Timerange End:        ${event.timerange_end}\n'
@@ -44,7 +44,7 @@ class SlackNotificationForm extends React.Component {
                       + '${foreach backlog message}\n'
                       + '${message.timestamp}  ::  ${message.source}  ::  ${message.message}\n'
                       + '${message.message}\n'
-                      + '${end}${else}<No backlog>\n'
+                      + '${end}'
                       + '${end}\n',
       /* eslint-enable no-template-curly-in-string */
       user_name: 'Graylog',
@@ -57,7 +57,7 @@ class SlackNotificationForm extends React.Component {
 
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
-      const nextConfig = cloneDeep(config);
+      const nextConfig = lodash.cloneDeep(config);
       nextConfig[key] = value;
       onChange(nextConfig);
     };

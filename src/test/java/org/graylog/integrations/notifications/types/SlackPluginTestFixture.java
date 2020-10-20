@@ -46,9 +46,4 @@ public abstract class SlackPluginTestFixture {
         return jsonNode.findValuesAsText(fieldName);
     }
 
-
-
-
-
-
 }
