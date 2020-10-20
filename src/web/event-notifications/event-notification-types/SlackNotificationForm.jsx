@@ -81,7 +81,7 @@ class SlackNotificationForm extends React.Component {
           <FormGroup controlId="color">
             <ControlLabel>Configuration color</ControlLabel>
             <div>
-              <ColorLabel color={config.color || '#f06292'} />
+              <ColorLabel color={config.color} />
               <div style={{ display: 'inline-block', marginLeft: 15 }}>
                 <ColorPickerPopover id="color"
                                     name="color"
