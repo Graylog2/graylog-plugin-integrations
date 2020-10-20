@@ -22,7 +22,7 @@ class SlackNotificationSummary extends React.Component {
           <>
             <tr>
               <td>Color</td>
-              <td>{notification.config.color}</td>
+              <td>{notification?.config?.color}</td>
             </tr>
             <tr>
               <td>Webhook URL</td>
