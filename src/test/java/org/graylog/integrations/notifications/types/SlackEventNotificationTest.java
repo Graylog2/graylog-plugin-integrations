@@ -75,7 +75,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
                 .customMessage("a custom message")
                 .backlogItemMessage("this is a backlog item message")
                 .linkNames(true)
-                .graylogUrl("http://localhost:8080")
                 .build();
         slackEventNotificationConfig.validate();
     }
@@ -92,8 +91,13 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
     @Test
-    public void createSlackMessage() {
-        slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
+    public void createSlackMessage() throws IOException {
+       SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
+       String expected  = message.getJsonString();
+       System.out.println(expected);
+        List<String> type = getJsonNodeFieldValue(expected,"type");
+        System.out.println(type);
+
     }
 
     @After
@@ -110,7 +114,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         assertThat(message).isNotEmpty();
         assertThat(message).isNotNull();
         assertThat(message).contains("@channel");
-        assertThat(message.getBytes().length).isEqualTo(117);
+        assertThat(message.getBytes().length).isEqualTo(95);
     }
 
     @Test

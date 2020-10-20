@@ -53,8 +53,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	static final String FIELD_LINK_NAMES = "link_names";
 	static final String FIELD_ICON_URL = "icon_url";
 	static final String FIELD_ICON_EMOJI = "icon_emoji";
-	static final String FIELD_GRAYLOG_URL = "graylog_url";
-
 
 
 	@JsonProperty(FIELD_COLOR)
@@ -93,9 +91,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@Nullable
 	public abstract String iconEmoji();
 
-	@JsonProperty(FIELD_GRAYLOG_URL)
-	@Nullable
-	public abstract String graylogUrl();
 
 	@Override
 	@JsonIgnore
@@ -164,8 +159,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		@JsonProperty(FIELD_ICON_EMOJI)
 		public abstract SlackEventNotificationConfig.Builder iconEmoji(String iconEmoji);
 
-		@JsonProperty(FIELD_GRAYLOG_URL)
-		public abstract SlackEventNotificationConfig.Builder graylogUrl(String graylogUrl);
 
 		public abstract SlackEventNotificationConfig build();
 	}
@@ -183,7 +176,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 				.linkNames(ValueReference.of(linkNames()))
 				.iconUrl(ValueReference.of(iconUrl()))
 				.iconEmoji(ValueReference.of(iconEmoji()))
-				.graylogUrl(ValueReference.of(graylogUrl()))
 				.build();
 	}
 }

@@ -65,10 +65,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 	@JsonProperty(SlackEventNotificationConfig.FIELD_ICON_EMOJI)
 	public abstract ValueReference iconEmoji();
 
-	@JsonProperty(SlackEventNotificationConfig.FIELD_GRAYLOG_URL)
-	public abstract ValueReference graylogUrl();
-
-
 	public static Builder builder() {
 		return Builder.create();
 	}
@@ -114,10 +110,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 		@JsonProperty(SlackEventNotificationConfig.FIELD_ICON_EMOJI)
 		public abstract Builder iconEmoji(ValueReference iconEmoji);
 
-		@JsonProperty(SlackEventNotificationConfig.FIELD_GRAYLOG_URL)
-		public abstract Builder graylogUrl(ValueReference graylogUrl);
-
-
 		public abstract SlackEventNotificationConfigEntity build();
 	}
 
@@ -134,7 +126,6 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
 				.linkNames(linkNames().asBoolean(parameters))
 				.iconUrl(iconUrl().asString(parameters))
 				.iconEmoji(iconEmoji().asString(parameters))
-				.graylogUrl(graylogUrl().asString(parameters))
 				.build();
 	}
 }

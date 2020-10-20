@@ -126,7 +126,7 @@ public class SlackEventNotification implements EventNotification {
 	}
 
 	String buildDefaultMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
-		String title = buildMessageTitle(ctx, config);
+		String title = buildMessageTitle(ctx);
 
 		// Build custom message
 		String audience = config.notifyChannel() ? "@channel " : "";
@@ -134,14 +134,9 @@ public class SlackEventNotification implements EventNotification {
 		return String.format(Locale.ROOT,"%s*Alert %s* triggered:\n> %s \n", audience, title, description);
 	}
 
-	private String buildMessageTitle(EventNotificationContext ctx, SlackEventNotificationConfig config) {
-		String graylogUrl = config.graylogUrl();
+	private String buildMessageTitle(EventNotificationContext ctx) {
 		String eventDefinitionName = ctx.eventDefinition().map(EventDefinitionDto::title).orElse("Unnamed");
-		if(!isNullOrEmpty(graylogUrl)) {
-			return "<" + graylogUrl + "|" + eventDefinitionName + ">";
-		} else {
-			return "_" + eventDefinitionName + "_";
-		}
+		return "_" + eventDefinitionName + "_";
 	}
 
 	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
@@ -165,7 +160,7 @@ public class SlackEventNotification implements EventNotification {
 
 		LOG.debug("the custom message model data is {}",modelData.toString());
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
-		objectMap.put("graylog_url",isNullOrEmpty(config.graylogUrl()) ? UNKNOWN_VALUE : config.graylogUrl());
+		objectMap.put("type",config.type());
 		return objectMap;
 	}
 
