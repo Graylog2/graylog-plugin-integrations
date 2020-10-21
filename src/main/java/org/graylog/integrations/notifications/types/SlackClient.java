@@ -19,6 +19,8 @@ package org.graylog.integrations.notifications.types;
 
 
 import okhttp3.*;
+import org.graylog.events.notifications.PermanentEventNotificationException;
+import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,7 @@ public class SlackClient {
 		this.httpClient = httpClient;
 	}
 
-    public void send(SlackMessage message,String webhookUrl) throws SlackClientException {
+    public void send(SlackMessage message,String webhookUrl) throws TemporaryEventNotificationException {
 
 		final Request request = new Request.Builder()
 				.url(webhookUrl)
@@ -54,25 +56,15 @@ public class SlackClient {
 
 		try (final Response r = httpClient.newCall(request).execute()) {
 			if (!r.isSuccessful()) {
-				throw new SlackClientException(
+				throw new TemporaryEventNotificationException(
 						"Expected successful HTTP response [2xx] but got [" + r.code() + "]. " + webhookUrl);
 			}
 		} catch (IOException e) {
-			throw new SlackClientException("exception" +e);
+			throw new TemporaryEventNotificationException("exception" +e);
 		}
     }
 
 
 
-	public static class SlackClientException extends Exception {
 
-		public SlackClientException(String msg) {
-			super(msg);
-		}
-
-		public SlackClientException(String msg, Throwable cause) {
-			super(msg, cause);
-		}
-
-	}
 }

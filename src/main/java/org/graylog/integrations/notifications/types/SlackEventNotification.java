@@ -74,7 +74,7 @@ public class SlackEventNotification implements EventNotification {
 
 
 	@Override
-	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
+	public void execute(EventNotificationContext ctx) throws TemporaryEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
 
 		try {
@@ -88,14 +88,13 @@ public class SlackEventNotification implements EventNotification {
 					.addDetail("exception", e.toString());
 
 			notificationService.publishIfFirst(systemNotification);
-
-			throw new PermanentEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
+			throw new TemporaryEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
 
 		}
 
 	}
 
-	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws PermanentEventNotificationException {
+	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws TemporaryEventNotificationException {
 		//Note: Link names if notify channel or else the channel tag will be plain text.
 		boolean linkNames = config.linkNames() || config.notifyChannel();
 		String message = buildDefaultMessage(ctx, config);
@@ -132,7 +131,7 @@ public class SlackEventNotification implements EventNotification {
 		return "_" + eventDefinitionName + "_";
 	}
 
-	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
+	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws TemporaryEventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
@@ -140,7 +139,7 @@ public class SlackEventNotification implements EventNotification {
 			return templateEngine.transform(template, model);
 		} catch (Exception e) {
 			LOG.error("Exception during templating", e);
-			throw new PermanentEventNotificationException(e.toString(),e.getCause());
+			throw new TemporaryEventNotificationException(e.toString(),e.getCause());
 		}
 	}
 

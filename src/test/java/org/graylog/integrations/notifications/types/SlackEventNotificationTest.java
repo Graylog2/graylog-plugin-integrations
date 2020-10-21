@@ -140,15 +140,15 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
 
-    @Test (expected = PermanentEventNotificationException.class)
-    public void execute() throws PermanentEventNotificationException {
+    @Test (expected = TemporaryEventNotificationException.class)
+    public void execute() throws TemporaryEventNotificationException {
        //has an invalid webhook url
        slackEventNotification.execute(eventNotificationContext);
     }
 
 
     @Test
-    public void buildCustomMessage() throws EventNotificationException {
+    public void buildCustomMessage() throws TemporaryEventNotificationException {
        String s =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"${thisDoesnotExist}");
        assertThat(s).isEmpty();
        String expectedCustomMessage =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"test");
@@ -156,7 +156,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     }
 
-    @Test(expected = PermanentEventNotificationException.class)
+    @Test(expected = TemporaryEventNotificationException.class)
     public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
         slackEventNotificationConfig = buildInvalidTemplate();
         slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"Title:       ${does't exist}");

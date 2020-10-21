@@ -2,6 +2,7 @@ package org.graylog.integrations.notifications.types;
 
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockWebServer;
+import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,8 +46,8 @@ public class SlackClientTest extends SlackPluginTestFixture {
         server.shutdown();
     }
 
-    @Test(expected = SlackClient.SlackClientException.class)
-    public void send_message_with_okhttpclient_and_invalid_webhookurl() throws SlackClient.SlackClientException {
+    @Test(expected = TemporaryEventNotificationException.class)
+    public void send_message_with_okhttpclient_and_invalid_webhookurl() throws TemporaryEventNotificationException {
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .build();
