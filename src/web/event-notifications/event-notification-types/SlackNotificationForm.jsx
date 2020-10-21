@@ -116,7 +116,7 @@ class SlackNotificationForm extends React.Component {
                  label="Custom Message (optional)"
                  type="textarea"
                  bsStyle={validation.errors.custom_message ? 'error' : null}
-                 help={lodash.get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. The following properties are available for template building: "event_definition", "event", "backlog", "backlog_size", "streams", "graylog_url". See http://docs.graylog.org/en/3.1/pages/streams/alerts.html for more details.')}
+                 help={lodash.get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. See https://docs.graylog.org/en/latest/pages/alerts.html#data-available-to-notifications for more details.')}
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
           <Input id="notification-userName"

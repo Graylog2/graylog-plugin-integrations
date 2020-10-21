@@ -99,7 +99,7 @@ public class SlackEventNotification implements EventNotification {
 
 	}
 
-	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) {
+	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws EventNotificationException {
 		//Note: Link names if notify channel or else the channel tag will be plain text.
 		boolean linkNames = config.linkNames() || config.notifyChannel();
 		String message = buildDefaultMessage(ctx, config);
@@ -136,14 +136,15 @@ public class SlackEventNotification implements EventNotification {
 		return "_" + eventDefinitionName + "_";
 	}
 
-	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) {
+	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws EventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
+			LOG.debug("template = {} model = {}" ,template, model);
 			return templateEngine.transform(template, model);
 		} catch (Exception e) {
 			LOG.error("Exception during templating", e);
-			return e.toString();
+			throw new EventNotificationException(e.toString(),e.getCause());
 		}
 	}
 

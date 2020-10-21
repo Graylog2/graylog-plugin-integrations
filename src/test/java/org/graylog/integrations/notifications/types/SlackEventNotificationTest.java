@@ -2,10 +2,7 @@ package org.graylog.integrations.notifications.types;
 
 import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
-import org.graylog.events.notifications.EventNotificationContext;
-import org.graylog.events.notifications.EventNotificationService;
-import org.graylog.events.notifications.NotificationDto;
-import org.graylog.events.notifications.NotificationTestData;
+import org.graylog.events.notifications.*;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationImpl;
@@ -96,7 +93,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
     @Test
-    public void createSlackMessage() throws IOException {
+    public void createSlackMessage() throws IOException, EventNotificationException {
        String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
        SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
        String actual  = message.getJsonString();
@@ -150,10 +147,23 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
 
     @Test
-    public void buildCustomMessage() {
-       String s =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"${thisDoesNotExist}");
+    public void buildCustomMessage() throws EventNotificationException {
+       String s =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"${thisDoesnotExist}");
        assertThat(s).isEmpty();
        String expectedCustomMessage =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"test");
        assertThat(expectedCustomMessage).isNotEmpty();
+
+    }
+
+    @Test(expected = EventNotificationException.class)
+    public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
+        slackEventNotificationConfig = buildInvalidTemplate();
+        slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"Title:       ${does't exist}");
+    }
+
+    SlackEventNotificationConfig buildInvalidTemplate() {
+        SlackEventNotificationConfig.Builder builder = new AutoValue_SlackEventNotificationConfig.Builder().create();
+        builder.customMessage("Title");
+        return builder.build();
     }
 }
