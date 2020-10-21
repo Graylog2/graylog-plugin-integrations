@@ -33,6 +33,8 @@ import org.graylog.integrations.inputs.paloalto9.PaloAlto9xInput;
 import org.graylog.integrations.ipfix.codecs.IpfixCodec;
 import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
+import org.graylog.integrations.pagerduty.PagerDutyNotification;
+import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
@@ -115,5 +117,12 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+
+        // Pager Duty Notification
+        addNotificationType(
+                PagerDutyNotificationConfig.TYPE_NAME,
+                PagerDutyNotificationConfig.class,
+                PagerDutyNotification.class,
+                PagerDutyNotification.Factory.class);
     }
 }
