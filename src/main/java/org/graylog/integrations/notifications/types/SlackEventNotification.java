@@ -74,32 +74,28 @@ public class SlackEventNotification implements EventNotification {
 
 
 	@Override
-	public void execute(EventNotificationContext ctx)  {
+	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
 			slackClient.send(slackMessage,config.webhookUrl());
 		} catch (Exception e) {
-			String exceptionDetail = e.toString();
-			if (e.getCause() != null) {
-				exceptionDetail += " (" + e.getCause() + ")";
-			}
-
-
 			final Notification systemNotification = notificationService.buildNow()
 					.addNode(nodeId.toString())
 					.addType(Notification.Type.GENERIC)
 					.addSeverity(Notification.Severity.NORMAL)
-					.addDetail("exception", exceptionDetail);
+					.addDetail("exception", e.toString());
 
 			notificationService.publishIfFirst(systemNotification);
+
+			throw new PermanentEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
 
 		}
 
 	}
 
-	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws EventNotificationException {
+	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws PermanentEventNotificationException {
 		//Note: Link names if notify channel or else the channel tag will be plain text.
 		boolean linkNames = config.linkNames() || config.notifyChannel();
 		String message = buildDefaultMessage(ctx, config);
@@ -136,7 +132,7 @@ public class SlackEventNotification implements EventNotification {
 		return "_" + eventDefinitionName + "_";
 	}
 
-	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws EventNotificationException {
+	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
@@ -144,7 +140,7 @@ public class SlackEventNotification implements EventNotification {
 			return templateEngine.transform(template, model);
 		} catch (Exception e) {
 			LOG.error("Exception during templating", e);
-			throw new EventNotificationException(e.toString(),e.getCause());
+			throw new PermanentEventNotificationException(e.toString(),e.getCause());
 		}
 	}
 
