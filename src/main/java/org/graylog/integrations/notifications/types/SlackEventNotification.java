@@ -57,7 +57,6 @@ public class SlackEventNotification implements EventNotification {
 	private final NotificationService notificationService ;
 	private final ObjectMapper objectMapper ;
 	private final NodeId nodeId ;
-	private final OkHttpClientProvider okHttpClientProvider ;
 	private final SlackClient slackClient;
 
 	@Inject
@@ -70,7 +69,6 @@ public class SlackEventNotification implements EventNotification {
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
 		this.templateEngine = requireNonNull(templateEngine);
-		this.okHttpClientProvider = requireNonNull(okHttpClientProvider);
 		this.notificationService = requireNonNull(notificationService);
 		this.nodeId = requireNonNull(nodeId);
 		this.slackClient = requireNonNull(slackCLient);

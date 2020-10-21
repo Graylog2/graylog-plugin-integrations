@@ -144,7 +144,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Test
     public void execute()  {
-        slackEventNotification.execute(eventNotificationContext);
+       slackEventNotification.execute(eventNotificationContext);
     }
 
 
