@@ -64,7 +64,6 @@ public class SlackEventNotification implements EventNotification {
 								  ObjectMapper objectMapper,
 								  Engine templateEngine,
 								  NotificationService notificationService,
-								  OkHttpClientProvider okHttpClientProvider,
 								  NodeId nodeId, SlackClient slackCLient){
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
