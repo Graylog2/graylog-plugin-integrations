@@ -58,6 +58,7 @@ public class SlackEventNotification implements EventNotification {
 	private final ObjectMapper objectMapper ;
 	private final NodeId nodeId ;
 	private final OkHttpClientProvider okHttpClientProvider ;
+	private final SlackClient slackClient;
 
 	@Inject
 	public SlackEventNotification(EventNotificationService notificationCallbackService,
@@ -65,20 +66,20 @@ public class SlackEventNotification implements EventNotification {
 								  Engine templateEngine,
 								  NotificationService notificationService,
 								  OkHttpClientProvider okHttpClientProvider,
-								  NodeId nodeId){
+								  NodeId nodeId, SlackClient slackCLient){
 		this.notificationCallbackService = notificationCallbackService;
 		this.objectMapper = requireNonNull(objectMapper);
 		this.templateEngine = requireNonNull(templateEngine);
 		this.okHttpClientProvider = requireNonNull(okHttpClientProvider);
 		this.notificationService = requireNonNull(notificationService);
 		this.nodeId = requireNonNull(nodeId);
+		this.slackClient = requireNonNull(slackCLient);
 	}
 
 
 	@Override
 	public void execute(EventNotificationContext ctx)  {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		final SlackClient slackClient = new SlackClient(okHttpClientProvider.get());
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);

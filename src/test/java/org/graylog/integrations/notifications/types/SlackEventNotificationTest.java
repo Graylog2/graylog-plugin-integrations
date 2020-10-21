@@ -62,9 +62,11 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         Notification notification = new NotificationImpl();
         when(mockNotificationService.buildNow()).thenReturn(notification);
 
+        SlackClient slackClient = new SlackClient(getOkHttpClient());
+
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                                                             Engine.createEngine(),
-                                                            mockNotificationService, getOkHttpClientProvider(), mockNodeId);
+                                                            mockNotificationService, getOkHttpClientProvider(), mockNodeId,slackClient);
 
     }
 
