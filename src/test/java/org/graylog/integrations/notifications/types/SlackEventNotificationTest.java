@@ -2,7 +2,10 @@ package org.graylog.integrations.notifications.types;
 
 import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
-import org.graylog.events.notifications.*;
+import org.graylog.events.notifications.EventNotificationContext;
+import org.graylog.events.notifications.EventNotificationService;
+import org.graylog.events.notifications.NotificationDto;
+import org.graylog.events.notifications.NotificationTestData;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationImpl;
