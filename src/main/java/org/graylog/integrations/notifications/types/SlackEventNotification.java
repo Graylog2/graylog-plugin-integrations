@@ -78,11 +78,11 @@ public class SlackEventNotification implements EventNotification {
 	@Override
 	public void execute(EventNotificationContext ctx)  {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		final SlackClient slackClient = new SlackClient(config,okHttpClientProvider.get());
+		final SlackClient slackClient = new SlackClient(okHttpClientProvider.get());
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
-			slackClient.send(slackMessage);
+			slackClient.send(slackMessage,config.webhookUrl());
 		} catch (Exception e) {
 			String exceptionDetail = e.toString();
 			if (e.getCause() != null) {

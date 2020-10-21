@@ -31,18 +31,15 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class SlackClient {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SlackClient.class);
-
-	private final String webhookUrl;
 	private final OkHttpClient httpClient;
 
 
 
-	public SlackClient(SlackEventNotificationConfig configuration, OkHttpClient httpClient) {
-		this.webhookUrl = configuration.webhookUrl();
+	public SlackClient(OkHttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
-    public void send(SlackMessage message) throws SlackClientException {
+    public void send(SlackMessage message,String webhookUrl) throws SlackClientException {
 
 		final Request request = new Request.Builder()
 				.url(webhookUrl)

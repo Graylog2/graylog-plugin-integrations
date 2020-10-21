@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SlackClientTest extends SlackPluginTestFixture {
 
     private SlackClient okHttpSlackClient;
+
     private MockWebServer server;
 
     public SlackClientTest() throws IOException {
@@ -26,9 +27,6 @@ public class SlackClientTest extends SlackPluginTestFixture {
     @Before
     public void setUp() {
         server= getServer();
-        SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
-                .build();
-        slackEventNotificationConfig.validate();
         final OkHttpClient client = getOkHttpClient();
         assertThat(client.proxySelector().select(URI.create("http://127.0.0.1/")))
                 .hasSize(1)
@@ -38,7 +36,7 @@ public class SlackClientTest extends SlackPluginTestFixture {
                 .hasSize(1)
                 .first()
                 .matches(proxy -> proxy.equals(server.toProxyAddress()));
-        okHttpSlackClient = new SlackClient(slackEventNotificationConfig,client);
+        okHttpSlackClient = new SlackClient(client);
 
     }
 
@@ -50,7 +48,10 @@ public class SlackClientTest extends SlackPluginTestFixture {
     @Test(expected = SlackClient.SlackClientException.class)
     public void send_message_with_okhttpclient_and_invalid_webhookurl() throws SlackClient.SlackClientException {
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        okHttpSlackClient.send(message);
+        SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
+                .build();
+        slackEventNotificationConfig.validate();
+        okHttpSlackClient.send(message,slackEventNotificationConfig.webhookUrl());
     }
 
 
