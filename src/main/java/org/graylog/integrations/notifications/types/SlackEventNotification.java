@@ -25,7 +25,6 @@ import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.system.NodeId;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
