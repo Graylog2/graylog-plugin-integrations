@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import lodash from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 
 import { Input } from 'components/bootstrap';
 import FormsUtils from 'util/FormsUtils';
@@ -57,7 +58,7 @@ class SlackNotificationForm extends React.Component {
 
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
-      const nextConfig = lodash.cloneDeep(config);
+      const nextConfig = cloneDeep(config);
       nextConfig[key] = value;
       onChange(nextConfig);
     };
@@ -98,7 +99,7 @@ class SlackNotificationForm extends React.Component {
                  label="Webhook URL"
                  type="text"
                  bsStyle={validation.errors.webhook_url ? 'error' : null}
-                 help={lodash.get(validation, 'errors.webhook_url[0]', 'Slack "Incoming Webhook" URL')}
+                 help={get(validation, 'errors.webhook_url[0]', 'Slack "Incoming Webhook" URL')}
                  value={config.webhook_url || ''}
                  onChange={this.handleChange}
                  required />
@@ -107,7 +108,7 @@ class SlackNotificationForm extends React.Component {
                  label="Channel"
                  type="text"
                  bsStyle={validation.errors.channel ? 'error' : null}
-                 help={lodash.get(validation, 'errors.channel[0]', 'Name of Slack #channel or @user for a direct message')}
+                 help={get(validation, 'errors.channel[0]', 'Name of Slack #channel or @user for a direct message')}
                  value={config.channel || ''}
                  onChange={this.handleChange}
                  required />
@@ -116,7 +117,7 @@ class SlackNotificationForm extends React.Component {
                  label="Custom Message (optional)"
                  type="textarea"
                  bsStyle={validation.errors.custom_message ? 'error' : null}
-                 help={lodash.get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. See https://docs.graylog.org/en/latest/pages/alerts.html#data-available-to-notifications for more details.')}
+                 help={get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. See https://docs.graylog.org/en/latest/pages/alerts.html#data-available-to-notifications for more details.')}
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
           <Input id="notification-userName"
@@ -124,7 +125,7 @@ class SlackNotificationForm extends React.Component {
                  label="User Name (optional)"
                  type="text"
                  bsStyle={validation.errors.user_name ? 'error' : null}
-                 help={lodash.get(validation, 'errors.user_name[0]', 'User name of the sender in Slack')}
+                 help={get(validation, 'errors.user_name[0]', 'User name of the sender in Slack')}
                  value={config.user_name || ''}
                  onChange={this.handleChange} />
           <Input id="notification-notifyChannel"
@@ -132,7 +133,7 @@ class SlackNotificationForm extends React.Component {
                  label="Notify Channel (optional)"
                  type="checkbox"
                  bsStyle={validation.errors.notify_channel ? 'error' : null}
-                 help={lodash.get(validation, 'errors.notify_channel[0]', 'Notify all users in channel by adding @channel to the message')}
+                 help={get(validation, 'errors.notify_channel[0]', 'Notify all users in channel by adding @channel to the message')}
                  checked={config.notify_channel || ''}
                  onChange={this.handleChange} />
           <Input id="notification-linkNames"
@@ -140,7 +141,7 @@ class SlackNotificationForm extends React.Component {
                  label="Link Names (optional)"
                  type="checkbox"
                  bsStyle={validation.errors.link_names ? 'error' : null}
-                 help={lodash.get(validation, 'errors.link_names[0]', 'Find and link channel names and user names')}
+                 help={get(validation, 'errors.link_names[0]', 'Find and link channel names and user names')}
                  checked={config.link_names || ''}
                  onChange={this.handleChange} />
           <Input id="notification-iconUrl"
@@ -148,7 +149,7 @@ class SlackNotificationForm extends React.Component {
                  label="Icon URL (optional)"
                  type="text"
                  bsStyle={validation.errors.icon_url ? 'error' : null}
-                 help={lodash.get(validation, 'errors.icon_url[0]', 'Image to use as the icon for this message')}
+                 help={get(validation, 'errors.icon_url[0]', 'Image to use as the icon for this message')}
                  value={config.icon_url || ''}
                  onChange={this.handleChange} />
           <Input id="notification-iconEmoji"
@@ -156,7 +157,7 @@ class SlackNotificationForm extends React.Component {
                  label="Icon Emoji (optional)"
                  type="text"
                  bsStyle={validation.errors.icon_emoji ? 'error' : null}
-                 help={lodash.get(validation, 'errors.icon_emoji[0]', 'Emoji to use as the icon for this message (overrides Icon URL)')}
+                 help={get(validation, 'errors.icon_emoji[0]', 'Emoji to use as the icon for this message (overrides Icon URL)')}
                  value={config.icon_emoji || ''}
                  onChange={this.handleChange} />
         </>
