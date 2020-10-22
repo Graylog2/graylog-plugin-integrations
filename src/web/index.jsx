@@ -6,10 +6,10 @@ import Routes from 'aws/common/Routes';
 
 import AWSInputConfiguration from './aws/AWSInputConfiguration';
 import AWSCloudWatchApp from './aws/cloudwatch/CloudWatchApp';
+import PagerDutyNotificationForm from './pager-duty/PagerDutyNotificationForm';
+import PagerDutyNotificationSummary from './pager-duty/PagerDutyNotificationSummary';
 
 import packageJson from '../../package.json';
-import PagerDutyNotificationForm from "./pager-duty/PagerDutyNotificationForm";
-import PagerDutyNotificationSummary from "./pager-duty/PagerDutyNotificationSummary";
 
 const manifest = new PluginManifest(packageJson, {
   routes: [
