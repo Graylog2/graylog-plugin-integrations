@@ -85,7 +85,7 @@ public class SlackEventNotification implements EventNotification {
 		ValidationResult  result = config.validate();
 
 		if(result.getErrors().size() > 0){
-			throw new PermanentEventNotificationException("Please fix the configuration errors, listed below");
+			throw new PermanentEventNotificationException("Please verify your webhook URL");
 		}
 
 		try {

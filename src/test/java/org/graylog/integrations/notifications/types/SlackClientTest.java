@@ -49,7 +49,7 @@ public class SlackClientTest extends SlackPluginTestFixture {
         server.shutdown();
     }
 
-    @Test(expected = TemporaryEventNotificationException.class)
+    @Test(expected = PermanentEventNotificationException.class)
     public void send_message_with_okhttpclient_and_invalid_webhookurl() throws TemporaryEventNotificationException, PermanentEventNotificationException {
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
