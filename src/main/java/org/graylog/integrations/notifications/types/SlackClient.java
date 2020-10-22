@@ -43,7 +43,14 @@ public class SlackClient {
 		this.httpClient = httpClient;
 	}
 
-    public void send(SlackMessage message,String webhookUrl) throws TemporaryEventNotificationException {
+	/**
+	 *
+	 * @param message
+	 * @param webhookUrl
+	 * @throws TemporaryEventNotificationException - thrown for network or timeout type issues
+	 * @throws PermanentEventNotificationException - thrown with bad webhook url, authentication error type issues
+	 */
+    public void send(SlackMessage message,String webhookUrl) throws TemporaryEventNotificationException,PermanentEventNotificationException  {
 
 		final Request request = new Request.Builder()
 				.url(webhookUrl)
@@ -56,10 +63,12 @@ public class SlackClient {
 
 		try (final Response r = httpClient.newCall(request).execute()) {
 			if (!r.isSuccessful()) {
-				throw new TemporaryEventNotificationException(
+				//ideally this should not happen and the user is expected to fill the
+				//right configuration , while setting up a notification
+				throw new PermanentEventNotificationException(
 						"Expected successful HTTP response [2xx] but got [" + r.code() + "]. " + webhookUrl);
 			}
-		} catch (IOException e) {
+		} catch (IOException  e) {
 			throw new TemporaryEventNotificationException("exception" +e);
 		}
     }

@@ -10,6 +10,9 @@ import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 
 class SlackNotificationForm extends React.Component {
+
+
+
     static propTypes = {
       config: PropTypes.object.isRequired,
       validation: PropTypes.object.isRequired,

@@ -33,6 +33,8 @@ import org.graylog2.plugin.rest.ValidationResult;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @AutoValue
 @JsonTypeName(SlackEventNotificationConfig.TYPE_NAME)
@@ -99,7 +101,13 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@JsonIgnore
 	public ValidationResult validate() {
 		ValidationResult validation =  new ValidationResult();
+		final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
+		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+		final Matcher matcher = pattern.matcher(webhookUrl());
+		if(matcher.find() == false)
+			validation.addError(FIELD_WEBHOOK_URL,"please specify a valid webhook url");
 		return validation;
+
 	}
 
 	@AutoValue.Builder

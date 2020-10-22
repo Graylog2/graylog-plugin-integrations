@@ -56,9 +56,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
         NotificationService mockNotificationService = mock(NotificationService.class);
-        Notification notification = new NotificationImpl();
-        when(mockNotificationService.buildNow()).thenReturn(notification);
-
         SlackClient slackClient = new SlackClient(getOkHttpClient());
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
@@ -140,15 +137,15 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
 
-    @Test (expected = TemporaryEventNotificationException.class)
-    public void execute() throws TemporaryEventNotificationException {
+    @Test (expected = PermanentEventNotificationException.class)
+    public void execute() throws TemporaryEventNotificationException, PermanentEventNotificationException {
        //has an invalid webhook url
        slackEventNotification.execute(eventNotificationContext);
     }
 
 
     @Test
-    public void buildCustomMessage() throws TemporaryEventNotificationException {
+    public void buildCustomMessage() throws PermanentEventNotificationException {
        String s =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"${thisDoesnotExist}");
        assertThat(s).isEmpty();
        String expectedCustomMessage =  slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"test");
@@ -156,7 +153,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     }
 
-    @Test(expected = TemporaryEventNotificationException.class)
+    @Test(expected = PermanentEventNotificationException.class)
     public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
         slackEventNotificationConfig = buildInvalidTemplate();
         slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"Title:       ${does't exist}");

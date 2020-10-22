@@ -24,6 +24,7 @@ import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
+import org.graylog2.plugin.rest.ValidationResult;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,10 +73,20 @@ public class SlackEventNotification implements EventNotification {
 		this.slackClient = requireNonNull(slackCLient);
 	}
 
-
+	/**
+	 *
+	 * @param ctx
+	 * @throws PermanentEventNotificationException is thrown with bad webhook url, authentication error type issues
+	 * @throws TemporaryEventNotificationException is thrown for network or timeout type issues
+	 */
 	@Override
-	public void execute(EventNotificationContext ctx) throws TemporaryEventNotificationException {
+	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException,TemporaryEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
+		ValidationResult  result = config.validate();
+
+		if(result.getErrors().size() > 0){
+			throw new PermanentEventNotificationException("Please fix the configuration errors, listed below");
+		}
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
@@ -94,7 +105,14 @@ public class SlackEventNotification implements EventNotification {
 
 	}
 
-	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws TemporaryEventNotificationException {
+	/**
+	 *
+	 * @param ctx
+	 * @param config
+	 * @return
+	 * @throws PermanentEventNotificationException - throws this exception when the custom message template is invalid
+	 */
+	SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws PermanentEventNotificationException {
 		//Note: Link names if notify channel or else the channel tag will be plain text.
 		boolean linkNames = config.linkNames() || config.notifyChannel();
 		String message = buildDefaultMessage(ctx, config);
@@ -131,7 +149,7 @@ public class SlackEventNotification implements EventNotification {
 		return "_" + eventDefinitionName + "_";
 	}
 
-	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws TemporaryEventNotificationException {
+	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
@@ -139,7 +157,7 @@ public class SlackEventNotification implements EventNotification {
 			return templateEngine.transform(template, model);
 		} catch (Exception e) {
 			LOG.error("Exception during templating", e);
-			throw new TemporaryEventNotificationException(e.toString(),e.getCause());
+			throw new PermanentEventNotificationException(e.toString(),e.getCause());
 		}
 	}
 
