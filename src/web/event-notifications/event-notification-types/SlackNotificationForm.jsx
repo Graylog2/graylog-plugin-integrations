@@ -4,18 +4,39 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 
 import { Input } from 'components/bootstrap';
-import FormsUtils from 'util/FormsUtils';
+import { getValueFromInput } from 'util/FormsUtils';
 import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
 import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 
 class SlackNotificationForm extends React.Component {
-
-
-
     static propTypes = {
-      config: PropTypes.object.isRequired,
-      validation: PropTypes.object.isRequired,
+      config: PropTypes.shape({
+        color: PropTypes.string,
+        webhook_url: PropTypes.string,
+        channel: PropTypes.string,
+        link_names: PropTypes.string,
+        icon_url: PropTypes.string,
+        icon_emoji: PropTypes.string,
+        user_name: PropTypes.string,
+        notify_channel: PropTypes.string,
+        custom_message: PropTypes.string,
+      }).isRequired,
+      validation: PropTypes.shape({
+        failed: PropTypes.bool.isRequired,
+        errors: PropTypes.shape({
+          webhook_url: PropTypes.arrayOf(PropTypes.string),
+          channel: PropTypes.arrayOf(PropTypes.string),
+          color: PropTypes.arrayOf(PropTypes.string),
+          link_names: PropTypes.string,
+          icon_url: PropTypes.string,
+          icon_emoji: PropTypes.string,
+          user_name: PropTypes.string,
+          notify_channel: PropTypes.string,
+          custom_message: PropTypes.string,
+        }),
+        error_context: PropTypes.object,
+      }).isRequired,
       onChange: PropTypes.func.isRequired,
     };
 
@@ -73,7 +94,7 @@ class SlackNotificationForm extends React.Component {
 
     handleChange = (event) => {
       const { name } = event.target;
-      this.propagateChange(name, FormsUtils.getValueFromInput(event.target));
+      this.propagateChange(name, getValueFromInput(event.target));
     };
 
     render() {
