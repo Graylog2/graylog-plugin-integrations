@@ -8,8 +8,24 @@ import FormsUtils from 'util/FormsUtils';
 
 class PagerDutyNotificationForm extends React.Component {
     static propTypes = {
-        config: PropTypes.shape.isRequired,
-        validation: PropTypes.shape.isRequired,
+        config: PropTypes.shape({
+            client_name: PropTypes.string,
+            client_url: PropTypes.string,
+            custom_incident: PropTypes.bool,
+            key_prefix: PropTypes.string,
+            routing_key: PropTypes.string,
+        }).isRequired,
+        validation: PropTypes.shape({
+            failed: PropTypes.bool.isRequired,
+            errors: PropTypes.shape({
+                client_name: PropTypes.arrayOf(PropTypes.string),
+                client_url: PropTypes.arrayOf(PropTypes.string),
+                custom_incident: PropTypes.arrayOf(PropTypes.string),
+                key_prefix: PropTypes.arrayOf(PropTypes.string),
+                routing_key: PropTypes.arrayOf(PropTypes.string),
+            }),
+            error_context: PropTypes.object,
+        }).isRequired,
         onChange: PropTypes.func.isRequired,
     };
 

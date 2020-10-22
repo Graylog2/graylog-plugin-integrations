@@ -23,14 +23,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.events.event.EventDto;
 import org.graylog.events.notifications.EventNotificationContext;
+import org.graylog.events.notifications.EventNotificationModelData;
+import org.graylog.events.notifications.EventNotificationService;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog.events.processor.aggregation.AggregationEventProcessorConfig;
 import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog.integrations.pagerduty.dto.Link;
 import org.graylog.integrations.pagerduty.dto.PagerDutyMessage;
+import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.streams.Stream;
 import org.graylog2.streams.StreamService;
 
@@ -47,31 +52,31 @@ import javax.inject.Inject;
  */
 class MessageFactory {
     private static final List<String> PAGER_DUTY_PRIORITIES = Arrays.asList("info", "warning", "critical");
+
     private final StreamService streamService;
+    private final EventNotificationService eventNotificationService;
 
     @Inject
-    MessageFactory(StreamService streamService) {
+    MessageFactory(StreamService streamService, EventNotificationService eventNotificationService) {
         this.streamService = streamService;
+        this.eventNotificationService = eventNotificationService;
     }
 
-    PagerDutyMessage createTriggerMessage(EventNotificationContext ctx) {
-        final EventDto event = ctx.event();
+    public PagerDutyMessage createTriggerMessage(EventNotificationContext ctx) {
+        final ImmutableList<MessageSummary> backlog = eventNotificationService.getBacklogForEvent(ctx);
+        final EventNotificationModelData modelData = EventNotificationModelData.of(ctx, backlog);
         final PagerDutyNotificationConfig config = (PagerDutyNotificationConfig) ctx.notificationConfig();
-        String eventTitle = "Undefined";
+
+        String eventTitle = modelData.eventDefinitionTitle();
         String eventPriority = PAGER_DUTY_PRIORITIES.get(0);
-
-        if (ctx.eventDefinition().isPresent()) {
-            eventTitle = ctx.eventDefinition().get().title();
-
-            int priority = ctx.eventDefinition().get().priority() - 1;
-            if (priority >= 0 && priority <= 2) {
-                eventPriority = PAGER_DUTY_PRIORITIES.get(priority);
-            }
+        int priority = ctx.eventDefinition().get().priority() - 1;
+        if (priority >= 0 && priority <= 2) {
+            eventPriority = PAGER_DUTY_PRIORITIES.get(priority);
         }
 
         List<Link> streamLinks =
                 streamService
-                        .loadByIds(event.sourceStreams())
+                        .loadByIds(modelData.event().sourceStreams())
                         .stream()
                         .map(stream -> buildStreamWithUrl(stream, ctx, config))
                         .collect(Collectors.toList());
@@ -79,17 +84,17 @@ class MessageFactory {
         String dedupKey = "";
         if (config.customIncident()) {
             dedupKey = String.format(
-                    "%s/%s/%s", config.keyPrefix(), event.sourceStreams(), eventTitle);
+                    "%s/%s/%s", config.keyPrefix(), modelData.event().sourceStreams(), eventTitle);
         }
 
 
         Map<String, String> payload = new HashMap<String, String>();
-        payload.put("summary", event.message());
-        payload.put("source", "Graylog:" + event.sourceStreams());
+        payload.put("summary", modelData.event().message());
+        payload.put("source", "Graylog:" + modelData.event().sourceStreams());
         payload.put("severity", eventPriority);
-        payload.put("timestamp", event.eventTimestamp().toString());
+        payload.put("timestamp", modelData.event().eventTimestamp().toString());
         payload.put("component", "GraylogAlerts");
-        payload.put("group", event.sourceStreams().toString());
+        payload.put("group", modelData.event().sourceStreams().toString());
         payload.put("class", "alerts");
 
         return new PagerDutyMessage(
