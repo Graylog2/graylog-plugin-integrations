@@ -101,11 +101,18 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@JsonIgnore
 	public ValidationResult validate() {
 		ValidationResult validation =  new ValidationResult();
+
 		final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
 		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 		final Matcher matcher = pattern.matcher(webhookUrl());
-		if(matcher.find() == false)
-			validation.addError(FIELD_WEBHOOK_URL,"please specify a valid webhook url");
+
+		if (channel().isEmpty()) {
+			validation.addError(FIELD_CHANNEL, "Channel cannot be empty.");
+		}
+
+		if(matcher.find() == false) {
+			validation.addError(FIELD_WEBHOOK_URL, "please specify a valid webhook url");
+		}
 		return validation;
 
 	}
