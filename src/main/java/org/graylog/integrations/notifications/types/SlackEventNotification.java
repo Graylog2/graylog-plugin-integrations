@@ -18,7 +18,12 @@ package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
-import org.graylog.events.notifications.*;
+import org.graylog.events.notifications.EventNotification;
+import org.graylog.events.notifications.EventNotificationContext;
+import org.graylog.events.notifications.EventNotificationModelData;
+import org.graylog.events.notifications.EventNotificationService;
+import org.graylog.events.notifications.PermanentEventNotificationException;
+import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
