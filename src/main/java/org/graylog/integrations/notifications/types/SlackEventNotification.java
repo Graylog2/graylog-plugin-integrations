@@ -161,7 +161,7 @@ public class SlackEventNotification implements EventNotification {
 			LOG.debug("template = {} model = {}" ,template, model);
 			return templateEngine.transform(template, model);
 		} catch (Exception e) {
-			LOG.error("Exception during templating", e);
+			LOG.error("Exception during templating [{}]", e.toString());
 			throw new PermanentEventNotificationException(e.toString(),e.getCause());
 		}
 	}
