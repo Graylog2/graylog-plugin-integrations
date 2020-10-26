@@ -53,7 +53,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     @Before
     public void setUp() {
 
-        setSlackEventNotificationConfig();
+        given_a_bad_event_notificationConfig();
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(slackEventNotificationConfig).build();
 
 
@@ -71,12 +71,12 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     }
 
-    private void setSlackEventNotificationConfig() {
+    private void given_a_bad_event_notificationConfig() {
         slackEventNotificationConfig = new AutoValue_SlackEventNotificationConfig.Builder()
                 .notifyChannel(true)
                 .type(SlackEventNotificationConfig.TYPE_NAME)
                 .color("#FF2052")
-                .webhookUrl("a webhook url")
+                .webhookUrl("axzzzz")
                 .channel("#general")
                 .customMessage("a custom message")
                 .linkNames(true)
@@ -143,7 +143,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
 
     @Test (expected = PermanentEventNotificationException.class)
-    public void execute() throws TemporaryEventNotificationException, PermanentEventNotificationException {
+    public void execute_with_invalid_webhook_url() throws TemporaryEventNotificationException, PermanentEventNotificationException {
        //has an invalid webhook url
        slackEventNotification.execute(eventNotificationContext);
     }

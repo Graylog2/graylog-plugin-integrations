@@ -88,9 +88,10 @@ public class SlackEventNotification implements EventNotification {
 	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException,TemporaryEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
 		ValidationResult  result = config.validate();
+		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
 
-		if(result.getErrors().size() > 0){
-			throw new PermanentEventNotificationException("Please verify your webhook URL");
+		if(result.failed()){
+			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
 		}
 
 		try {
