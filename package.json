@@ -8,7 +8,10 @@
   },
   "scripts": {
     "build": "webpack",
-    "lint": "eslint --ext js,jsx src"
+    "lint": "eslint --ext js,jsx src/web --config ../graylog2-server/graylog2-web-interface/.eslintrc.json",
+    "lint:path": "eslint --ext js,jsx --config ../graylog2-server/graylog2-web-interface/.eslintrc.json",
+    "test": "jest",
+    "flow-check": "flow check"
   },
   "keywords": [
     "graylog"
@@ -18,7 +21,5 @@
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
   "private": true,
-  "devDependencies": {
-    "eslint-loader": "^1.6.3"
-  }
+  "devDependencies": {}
 }
