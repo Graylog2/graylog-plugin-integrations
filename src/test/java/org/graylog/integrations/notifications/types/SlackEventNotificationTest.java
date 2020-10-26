@@ -30,25 +30,26 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SlackEventNotificationTest {
+public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
-    @Mock 
-    EventNotificationService mockEventNotificationService;
-    @Mock
-	ObjectMapper mockObjectMapper;
-	@Mock
-	Engine mockTemplateEngine;
-	@Mock
-	NotificationService mockNotificationService;
     @Mock
     NodeId mockNodeId;
-	@Mock
-	SlackClient mockSlackCLient;
+
+    @Mock
+    NotificationService mockNotificationService;
+
+    @Mock
+    SlackClient slackClient;
+
+    @Mock
+    EventNotificationService notificationCallbackService;
 
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
+    public SlackEventNotificationTest() throws IOException {
+    }
 
     @Before
     public void setUp() {
@@ -61,11 +62,8 @@ public class SlackEventNotificationTest {
                 new MessageSummary("graylog_1", new Message("Test message 1", "source1", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC))),
                 new MessageSummary("graylog_2", new Message("Test message 2", "source2", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)))
         );
-        EventNotificationService notificationCallbackService = mock(EventNotificationService.class);
-        when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
-        NotificationService mockNotificationService = mock(NotificationService.class);
-        SlackClient slackClient = mock(SlackClient.class);
+        when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                                                             Engine.createEngine(),
