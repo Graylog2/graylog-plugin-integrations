@@ -26,7 +26,6 @@ import java.util.Map;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -97,7 +96,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     }
 
     @Test
-    public void createSlackMessage() throws IOException, EventNotificationException {
+    public void createSlackMessage() throws EventNotificationException {
        String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
        SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
        String actual  = message.getJsonString();
