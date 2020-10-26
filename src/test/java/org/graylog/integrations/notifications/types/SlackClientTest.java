@@ -1,13 +1,16 @@
 package org.graylog.integrations.notifications.types;
 
+import com.github.joschi.jadconfig.util.Duration;
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockWebServer;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog2.plugin.rest.ValidationResult;
+import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 
 
 import java.io.IOException;
@@ -18,29 +21,16 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SlackClientTest extends SlackPluginTestFixture {
+public class SlackClientTest {
 
     private SlackClient okHttpSlackClient;
 
-    private MockWebServer server;
-
-    public SlackClientTest() throws IOException {
-    }
-
+    private final MockWebServer server = new MockWebServer();
 
     @Before
-    public void setUp() {
-        server= getServer();
-        final OkHttpClient client = getOkHttpClient();
-        assertThat(client.proxySelector().select(URI.create("http://127.0.0.1/")))
-                .hasSize(1)
-                .first()
-                .matches(proxy -> proxy.type() == Proxy.Type.DIRECT);
-        assertThat(client.proxySelector().select(URI.create("http://www.example.com/")))
-                .hasSize(1)
-                .first()
-                .matches(proxy -> proxy.equals(server.toProxyAddress()));
-        okHttpSlackClient = new SlackClient(client);
+    public void setUp() throws IOException {
+      server.start();
+      okHttpSlackClient = new SlackClient(getOkHttpClient());
 
     }
 
@@ -56,6 +46,19 @@ public class SlackClientTest extends SlackPluginTestFixture {
                 .webhookUrl("http://localhost:8080")
                 .build();
         okHttpSlackClient.send(message,slackEventNotificationConfig.webhookUrl());
+    }
+
+    OkHttpClient getOkHttpClient() {
+
+        final OkHttpClientProvider provider = new OkHttpClientProvider(
+                Duration.milliseconds(100L),
+                Duration.milliseconds(100L),
+                Duration.milliseconds(100L),
+                server.url("/").uri(),
+                null);
+
+        return provider.get();
+
     }
 
 

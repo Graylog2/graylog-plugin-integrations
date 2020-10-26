@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SlackEventNotificationTest extends SlackPluginTestFixture {
+public class SlackEventNotificationTest  {
 
     @Mock
     NodeId mockNodeId;
@@ -51,8 +51,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
-    public SlackEventNotificationTest() throws IOException {
-    }
+
 
     @Before
     public void setUp() {

@@ -9,10 +9,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SlackMessageTest extends SlackPluginTestFixture{
+public class SlackMessageTest {
 
-    public SlackMessageTest() throws IOException {
-    }
 
     @Test
     public void test_good_usename() throws IOException {
