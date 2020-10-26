@@ -18,7 +18,11 @@ package org.graylog.integrations.notifications.types;
 
 
 
-import okhttp3.*;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.slf4j.Logger;
