@@ -39,8 +39,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
-    public SlackEventNotificationTest() throws IOException {
-    }
 
     @Before
     public void setUp() {
