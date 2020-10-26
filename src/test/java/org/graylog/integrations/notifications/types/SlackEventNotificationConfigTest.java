@@ -6,9 +6,7 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 public class SlackEventNotificationConfigTest {
 
