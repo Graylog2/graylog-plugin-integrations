@@ -23,7 +23,7 @@ public class SlackEventNotificationConfigTest {
     }
 
     @Test
-    public void test_invalid_slackwebhook() {
+    public void validate_failsAndReturnsAnError_whenWebhookUrlIsInvalid() {
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .webhookUrl("A67888900000")
                 .build();
