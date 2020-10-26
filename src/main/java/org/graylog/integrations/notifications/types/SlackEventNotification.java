@@ -47,8 +47,6 @@ import static java.util.Objects.requireNonNull;
 
 public class SlackEventNotification implements EventNotification {
 
-	private static final String UNKNOWN_VALUE = "<unknown>";
-
 	public interface Factory extends EventNotification.Factory {
 		@Override
         SlackEventNotification create();
@@ -98,11 +96,13 @@ public class SlackEventNotification implements EventNotification {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
 			slackClient.send(slackMessage,config.webhookUrl());
 		} catch (Exception e) {
+
+			LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
 			final Notification systemNotification = notificationService.buildNow()
 					.addNode(nodeId.toString())
 					.addType(Notification.Type.GENERIC)
 					.addSeverity(Notification.Severity.NORMAL)
-					.addDetail("exception", e.toString());
+					.addDetail("SlackEventNotification send error ", e.toString());
 
 			notificationService.publishIfFirst(systemNotification);
 			throw new TemporaryEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
