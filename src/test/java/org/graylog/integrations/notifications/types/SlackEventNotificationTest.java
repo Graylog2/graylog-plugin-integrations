@@ -34,7 +34,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Mock
     NodeId mockNodeId;
-    @InjectMocks
+
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
@@ -57,7 +57,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
         NotificationService mockNotificationService = mock(NotificationService.class);
-        SlackClient slackClient = new SlackClient(getOkHttpClient());
+        SlackClient slackClient = mock(SlackClient.class);
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                                                             Engine.createEngine(),
