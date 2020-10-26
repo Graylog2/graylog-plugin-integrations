@@ -4,21 +4,13 @@ import com.github.joschi.jadconfig.util.Duration;
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockWebServer;
 import org.graylog.events.notifications.PermanentEventNotificationException;
-import org.graylog.events.notifications.TemporaryEventNotificationException;
-import org.graylog2.plugin.rest.ValidationResult;
 import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-
 
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URI;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class SlackClientTest {
