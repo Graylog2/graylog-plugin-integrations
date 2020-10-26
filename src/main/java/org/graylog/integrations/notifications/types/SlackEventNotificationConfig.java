@@ -40,6 +40,9 @@ import java.util.regex.Pattern;
 @JsonTypeName(SlackEventNotificationConfig.TYPE_NAME)
 @JsonDeserialize(builder = SlackEventNotificationConfig.Builder.class)
 public abstract class SlackEventNotificationConfig implements EventNotificationConfig {
+
+	private final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
+	private final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 	public static final String TYPE_NAME = "slack-notification-v1";
 
 	static final String FIELD_COLOR = "color";
@@ -101,9 +104,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	@JsonIgnore
 	public ValidationResult validate() {
 		ValidationResult validation =  new ValidationResult();
-
-		final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
-		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 		final Matcher matcher = pattern.matcher(webhookUrl());
 
 		if (channel().isEmpty()) {
