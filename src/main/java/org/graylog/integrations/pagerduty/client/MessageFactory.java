@@ -16,17 +16,8 @@
  */
 package org.graylog.integrations.pagerduty.client;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
-import org.graylog.events.event.EventDto;
 import org.graylog.events.notifications.EventNotificationContext;
 import org.graylog.events.notifications.EventNotificationModelData;
 import org.graylog.events.notifications.EventNotificationService;
@@ -40,6 +31,13 @@ import org.graylog2.plugin.streams.Stream;
 import org.graylog2.streams.StreamService;
 
 import javax.inject.Inject;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Factory class for PagerDuty messages, heavily based on the works of the cited authors.

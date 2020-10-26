@@ -17,6 +17,7 @@
 package org.graylog.integrations.pagerduty.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -50,7 +51,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class PagerDutyClient {
     private static final Logger LOG = LoggerFactory.getLogger(PagerDutyClient.class);
 
-    private static final String API_URL = "https://events.pagerduty.com/v2/enqueue";
+    @VisibleForTesting
+    static final String API_URL = "https://events.pagerduty.com/v2/enqueue";
 
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -72,8 +74,7 @@ public class PagerDutyClient {
                 .post(RequestBody.create(MediaType.parse(APPLICATION_JSON), payloadString))
                 .build();
 
-        LOG.debug("Triggering event in PagerDuty with context: {}", ctx);
-        LOG.info("PagerDuty API POST payload: {}", payloadString);
+        LOG.debug("Triggering event in PagerDuty with POST payload: {}", payloadString);
 
         try (final Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
