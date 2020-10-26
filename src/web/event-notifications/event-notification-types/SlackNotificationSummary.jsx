@@ -6,7 +6,6 @@ import CommonNotificationSummary from 'components/event-notifications/event-noti
 function SlackNotificationSummary({ notification, ...restProps }) {
   return (
     <CommonNotificationSummary {...restProps} notification={notification}>
-      <>
         <tr>
           <td>Color</td>
           <td>{notification?.config?.color}</td>
@@ -47,8 +46,7 @@ function SlackNotificationSummary({ notification, ...restProps }) {
           <td>Graylog URL</td>
           <td>{notification.config.graylog_url}</td>
         </tr>
-      </>
-    </CommonNotificationSummary>
+      </CommonNotificationSummary>
   );
 }
 
