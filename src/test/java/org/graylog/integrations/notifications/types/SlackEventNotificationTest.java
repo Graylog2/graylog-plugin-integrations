@@ -32,8 +32,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
+    @Mock 
+    EventNotificationService mockEventNotificationService;
+    @Mock
+	ObjectMapper mockObjectMapper;
+	@Mock
+	Engine mockTemplateEngine;
+	@Mock
+	NotificationService mockNotificationService;
     @Mock
     NodeId mockNodeId;
+	@Mock
+	SlackClient mockSlackCLient;
 
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
