@@ -34,6 +34,7 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
 
     @Mock
     NodeId mockNodeId;
+    @InjectMocks
     private SlackEventNotification slackEventNotification;
     private SlackEventNotificationConfig slackEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
