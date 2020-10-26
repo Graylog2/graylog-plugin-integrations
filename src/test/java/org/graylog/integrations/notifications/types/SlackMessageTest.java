@@ -1,5 +1,7 @@
 package org.graylog.integrations.notifications.types;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,6 +31,12 @@ public class SlackMessageTest extends SlackPluginTestFixture{
         assertThat(userNames).isEmpty();
         assertThat(userNames).isNotNull();
 
+    }
+
+    List<String> getJsonNodeFieldValue(String expected,String fieldName) throws IOException {
+        final byte[] bytes = expected.getBytes();
+        JsonNode jsonNode = new ObjectMapper().readTree(bytes);
+        return jsonNode.findValuesAsText(fieldName);
     }
 
 
