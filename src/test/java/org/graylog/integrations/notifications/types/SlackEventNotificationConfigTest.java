@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 public class SlackEventNotificationConfigTest {
 
     @Test
-    public void validate() {
+    public void validate_succeeds_whenWebhookUrlIsValid() {
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .webhookUrl("https://hooks.slack.com/services/xxxx/xxxx/xxxxxxx")
                 .build();
