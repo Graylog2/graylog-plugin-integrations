@@ -119,7 +119,6 @@ public class SlackEventNotificationTest extends SlackPluginTestFixture {
     @Test
     public void getAlarmBacklog() {
         List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        messageSummaries.forEach(e -> System.out.println(e.getRawMessage()));
         assertThat(messageSummaries.size()).isEqualTo(2);
     }
 
