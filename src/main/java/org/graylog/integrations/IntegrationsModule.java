@@ -126,6 +126,5 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
-        bind(OkHttpClient.class).toProvider(OkHttpClientProvider.class).asEagerSingleton();
     }
 }
