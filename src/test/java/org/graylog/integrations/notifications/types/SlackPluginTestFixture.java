@@ -40,10 +40,6 @@ public abstract class SlackPluginTestFixture {
         return provider;
     }
 
-    List<String> getJsonNodeFieldValue(String expected,String fieldName) throws IOException {
-        final byte[] bytes = expected.getBytes();
-        JsonNode jsonNode = new ObjectMapper().readTree(bytes);
-        return jsonNode.findValuesAsText(fieldName);
-    }
+
 
 }
