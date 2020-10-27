@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  * @author Padma Liyanage
  * @author Edgar Molina
  */
-class MessageFactory {
+public class MessageFactory {
     private static final List<String> PAGER_DUTY_PRIORITIES = Arrays.asList("info", "warning", "critical");
 
     private final StreamService streamService;

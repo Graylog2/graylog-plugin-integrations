@@ -23,14 +23,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.graylog.events.notifications.EventNotificationContext;
 import org.graylog.integrations.pagerduty.dto.PagerDutyResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.Locale;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -56,19 +54,24 @@ public class PagerDutyClient {
 
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
-    private final MessageFactory messageFactory;
 
     @Inject
     public PagerDutyClient(final OkHttpClient httpClient,
-                    final ObjectMapper objectMapper,
-                    final MessageFactory messageFactory) {
+                           final ObjectMapper objectMapper) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
-        this.messageFactory = messageFactory;
     }
 
-    public PagerDutyResponse trigger(EventNotificationContext ctx) throws PagerDutyClientException {
-        final String payloadString = buildRequestBody(ctx);
+    /**
+     * This method POSTs a message to PagerDuty's events enqueue API.
+     *
+     * @param payloadString JSON representation of a valid PagerDuty change event or alert event
+     * @return PagerDutyResponse object
+     * @throws TemporaryPagerDutyClientException when a retryable error is encountered
+     * @throws PermanentPagerDutyClientException when a non-retriable error is encountered
+     */
+    public PagerDutyResponse enqueue(String payloadString)
+            throws TemporaryPagerDutyClientException, PermanentPagerDutyClientException {
         final Request request = new Request.Builder()
                 .url(API_URL)
                 .post(RequestBody.create(MediaType.parse(APPLICATION_JSON), payloadString))
@@ -78,29 +81,35 @@ public class PagerDutyClient {
 
         try (final Response response = httpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new PagerDutyClientException(String.format(Locale.US,
-                        "Received HTTP %d response when sending POST request to Pager Duty API", response.code()));
+                if (400 == response.code()) {
+                    // HTTP 400 - Bad Request
+                    throw new PermanentPagerDutyClientException(String.format("Invalid request sent to PagerDuty [%s]",
+                            response.body().string()));
+                } else if (429 == response.code()) {
+                    throw new TemporaryPagerDutyClientException("Too many PagerDuty API calls at one time");
+                } else {
+                    throw new TemporaryPagerDutyClientException(String.format(
+                            "HTTP %d - PagerDuty server encountered an internal error", response.code()));
+                }
             }
             return objectMapper.readValue(response.body().string(), PagerDutyResponse.class);
         } catch (IOException e) {
-            throw new IllegalStateException("There was an error sending the notification event.", e);
+            throw new TemporaryPagerDutyClientException("There was an error sending the notification event.", e);
         }
     }
 
-    private String buildRequestBody(EventNotificationContext ctx) throws PagerDutyClientException {
-        try {
-            return objectMapper.writeValueAsString(messageFactory.createTriggerMessage(ctx));
-        } catch (IOException e) {
-            throw new PagerDutyClientException("Failed to build trigger message", e);
-        }
-    }
-
-    public static class PagerDutyClientException extends Exception {
-        public PagerDutyClientException(String msg) {
+    public static class PermanentPagerDutyClientException extends Exception {
+        public PermanentPagerDutyClientException(String msg) {
             super(msg);
         }
+        public PermanentPagerDutyClientException(String msg, Throwable cause) { super(msg, cause); }
+    }
 
-        public PagerDutyClientException(String msg, Throwable cause) {
+    public static class TemporaryPagerDutyClientException extends Exception {
+        public TemporaryPagerDutyClientException(String msg) {
+            super(msg);
+        }
+        public TemporaryPagerDutyClientException(String msg, Throwable cause) {
             super(msg, cause);
         }
     }

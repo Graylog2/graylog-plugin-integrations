@@ -8,8 +8,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.graylog.events.notifications.EventNotificationContext;
-import org.graylog.integrations.pagerduty.dto.PagerDutyMessage;
 import org.graylog.integrations.pagerduty.dto.PagerDutyResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,11 +41,8 @@ public class PagerDutyClientTest {
     @Spy
     private ObjectMapper spyObjectMapper;
 
-    @Mock
-    private MessageFactory mockMessageFactory;
-
     // Test Objects
-    private EventNotificationContext ctx;
+    private String messagePayload;
     private PagerDutyResponse pagerDutyResponse;
 
     // Test constants
@@ -57,79 +52,94 @@ public class PagerDutyClientTest {
 
     // Test Cases
     @Test
-    public void trigger_returnsSuccessfulResponse_whenAPICallSucceeds() throws Exception {
-        givenGoodMessageFactory();
-        givenGoodContext();
-        givenGoodObjectMapper();
+    public void enqueue_returnsSuccessfulResponse_whenAPICallSucceeds() throws Exception {
+        givenGoodMessagePayload();
         givenApiCallSucceeds();
 
-        whenTriggerIsCalled();
+        whenEnqueueIsCalled();
 
         thenGoodRequestSentToAPI();
         thenGoodResponseReturned();
     }
 
     @Test
-    public void trigger_returnsErrorResponse_whenAPICallReturnsErrors() throws Exception {
-        givenGoodMessageFactory();
-        givenGoodContext();
-        givenGoodObjectMapper();
+    public void enqueue_returnsErrorResponse_whenAPICallReturnsErrors() throws Exception {
+        givenGoodMessagePayload();
         givenApiCallReturnsErrors();
 
-        whenTriggerIsCalled();
+        whenEnqueueIsCalled();
 
         thenGoodRequestSentToAPI();
         thenErrorResponseReturned();
     }
 
-    @Test(expected = PagerDutyClient.PagerDutyClientException.class)
-    public void trigger_throwsPagerDutyClientException_whenAPICallFails() throws Exception {
-        givenGoodMessageFactory();
-        givenGoodContext();
-        givenGoodObjectMapper();
-        givenApiCallFails();
+    @Test(expected = PagerDutyClient.TemporaryPagerDutyClientException.class)
+    public void enqueue_throwsTempPagerDutyClientException_whenServerError() throws Exception {
+        givenGoodMessagePayload();
+        givenApiCallFailsDueToServerError();
 
-        whenTriggerIsCalled();
+        whenEnqueueIsCalled();
+    }
+
+    @Test(expected = PagerDutyClient.TemporaryPagerDutyClientException.class)
+    public void enqueue_throwsTempPagerDutyClientException_whenTooManyAPICalls() throws Exception {
+        givenGoodMessagePayload();
+        givenApiCallFailsDueToTooManyCalls();
+
+        whenEnqueueIsCalled();
+    }
+
+    @Test(expected = PagerDutyClient.PermanentPagerDutyClientException.class)
+    public void enqueue_throwsPermPagerDutyClientException_whenBadRequest() throws Exception {
+        givenGoodMessagePayload();
+        givenApiCallFailsDueToBadInput();
+
+        whenEnqueueIsCalled();
     }
 
     // GIVENs
-    private void givenGoodMessageFactory() {
-        PagerDutyMessage message = mock(PagerDutyMessage.class);
-        given(mockMessageFactory.createTriggerMessage(any(EventNotificationContext.class))).willReturn(message);
-    }
-
-    private void givenGoodContext() {
-        ctx = mock(EventNotificationContext.class);
-    }
-
-    private void givenGoodObjectMapper() throws Exception {
-        given(spyObjectMapper.writeValueAsString(any(PagerDutyMessage.class))).willReturn(TEST_MESSAGE);
+    private void givenGoodMessagePayload() {
+        messagePayload = TEST_MESSAGE;
     }
 
     private void givenApiCallSucceeds() throws Exception {
-        Response response = buildResponse(true, GOOD_API_RESPONSE);
+        Response response = buildResponse(202, GOOD_API_RESPONSE);
         Call mockCall = mock(Call.class);
         given(mockCall.execute()).willReturn(response);
         given(mockHttpClient.newCall(any(Request.class))).willReturn(mockCall);
     }
 
     private void givenApiCallReturnsErrors() throws Exception {
-        Response response = buildResponse(true, ERROR_API_RESPONSE);
+        Response response = buildResponse(202, ERROR_API_RESPONSE);
         Call mockCall = mock(Call.class);
         given(mockCall.execute()).willReturn(response);
         given(mockHttpClient.newCall(any(Request.class))).willReturn(mockCall);
     }
 
-    private void givenApiCallFails() throws Exception {
-        Response response = buildResponse(false, "");
+    private void givenApiCallFailsDueToBadInput() throws Exception {
+        Response response = buildResponse(400, "bad routing key");
+        Call mockCall = mock(Call.class);
+        given(mockCall.execute()).willReturn(response);
+        given(mockHttpClient.newCall(any(Request.class))).willReturn(mockCall);
+    }
+
+    private void givenApiCallFailsDueToTooManyCalls() throws Exception {
+        Response response = buildResponse(429, "");
+        Call mockCall = mock(Call.class);
+        given(mockCall.execute()).willReturn(response);
+        given(mockHttpClient.newCall(any(Request.class))).willReturn(mockCall);
+    }
+
+    private void givenApiCallFailsDueToServerError() throws Exception {
+        Response response = buildResponse(500, "");
         Call mockCall = mock(Call.class);
         given(mockCall.execute()).willReturn(response);
         given(mockHttpClient.newCall(any(Request.class))).willReturn(mockCall);
     }
 
     // WHENs
-    private void whenTriggerIsCalled() throws Exception {
-        pagerDutyResponse = cut.trigger(ctx);
+    private void whenEnqueueIsCalled() throws Exception {
+        pagerDutyResponse = cut.enqueue(messagePayload);
     }
 
     // THENs
@@ -157,19 +167,13 @@ public class PagerDutyClientTest {
     }
 
     // Utility Methods
-    private Response buildResponse(boolean httpSuccess, String responseBody) {
-        int httpCode = 404;
-
-        if (httpSuccess) {
-            httpCode = 200;
-        }
-
+    private Response buildResponse(int httpResponseCode, String responseBody) {
         return new Response.Builder()
                 .request(new Request.Builder()
                         .url("https://events.pagerduty.com/v2/enqueue")
                         .build())
                 .protocol(Protocol.HTTP_2)
-                .code(httpCode)
+                .code(httpResponseCode)
                 .message("")
                 .body(ResponseBody.create(MediaType.parse(APPLICATION_JSON), responseBody))
                 .build();
