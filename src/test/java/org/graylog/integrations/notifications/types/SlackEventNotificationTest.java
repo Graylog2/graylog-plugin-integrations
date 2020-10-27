@@ -146,7 +146,7 @@ public class SlackEventNotificationTest  {
     }
 
 
-    @Ignore("not a good test")
+
     @Test (expected = EventNotificationException.class)
     public void execute_with_invalid_webhook_url() throws EventNotificationException {
        //has an invalid webhook url

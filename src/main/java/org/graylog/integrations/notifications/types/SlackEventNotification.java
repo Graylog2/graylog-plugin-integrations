@@ -80,8 +80,7 @@ public class SlackEventNotification implements EventNotification {
 	/**
 	 *
 	 * @param ctx
-	 * @throws PermanentEventNotificationException is thrown with bad webhook url, authentication error type issues
-	 * @throws TemporaryEventNotificationException is thrown for network or timeout type issues
+	 * @throws EventNotificationException - is thrown when send fails
 	 */
 	@Override
 	public void execute(EventNotificationContext ctx) throws EventNotificationException {
