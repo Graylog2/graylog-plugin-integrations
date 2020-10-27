@@ -93,12 +93,18 @@ public class IntegrationsModule extends PluginModule {
 
         addAuditEventTypes(IntegrationsAuditEventTypes.class);
 
-
-       // bind(SlackEventNotificationConfig.class).toProvider(EventNotificationConfig.class);
+        // Slack Notification
         addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
                 SlackEventNotificationConfig.class,
                 SlackEventNotification.class,
                 SlackEventNotification.Factory.class);
+
+        // Pager Duty Notification
+        addNotificationType(
+                PagerDutyNotificationConfig.TYPE_NAME,
+                PagerDutyNotificationConfig.class,
+                PagerDutyNotification.class,
+                PagerDutyNotification.Factory.class);
 
         // IPFIX
         addMessageInput(IpfixUdpInput.class);
@@ -128,12 +134,5 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
-
-        // Pager Duty Notification
-        addNotificationType(
-                PagerDutyNotificationConfig.TYPE_NAME,
-                PagerDutyNotificationConfig.class,
-                PagerDutyNotification.class,
-                PagerDutyNotification.Factory.class);
     }
 }

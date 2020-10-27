@@ -30,6 +30,8 @@ const manifest = new PluginManifest(packageJson, {
       formComponent: PagerDutyNotificationForm,
       summaryComponent: PagerDutyNotificationSummary,
       defaultConfig: PagerDutyNotificationForm.defaultConfig,
+    },
+    {
       type: 'slack-notification-v1',
       displayName: 'Slack Notification',
       formComponent: SlackNotificationForm,
