@@ -25,6 +25,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
+import org.graylog2.plugin.rest.ValidationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,35 +48,38 @@ public class SlackClient {
 		this.httpClient = httpClient;
 	}
 
+
 	/**
 	 *
 	 * @param message
-	 * @param webhookUrl
+	 * @param slackEventNotificationConfig
 	 * @throws TemporaryEventNotificationException - thrown for network or timeout type issues
 	 * @throws PermanentEventNotificationException - thrown with bad webhook url, authentication error type issues
 	 */
-    public void send(SlackMessage message,String webhookUrl) throws TemporaryEventNotificationException,PermanentEventNotificationException  {
+	public void send(SlackMessage message,SlackEventNotificationConfig slackEventNotificationConfig) throws TemporaryEventNotificationException, PermanentEventNotificationException {
+
+		ValidationResult result = slackEventNotificationConfig.validate();
+		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
+
+		if(result.failed()){
+			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
+		}
 
 		final Request request = new Request.Builder()
-				.url(webhookUrl)
+				.url(slackEventNotificationConfig.webhookUrl())
 				.post(RequestBody.create(MediaType.parse(APPLICATION_JSON), message.getJsonString()))
 				.build();
 
-		LOG.debug("Posting to webhook url <{}> the paylod is <{}>",
-					webhookUrl,
-				    message.getJsonString());
+		LOG.debug("sending a slack message to webhook url <{}> the paylod is <{}>",
+				slackEventNotificationConfig.webhookUrl(),
+				message.getJsonString());
 
 		try (final Response r = httpClient.newCall(request).execute()) {
-			if (!r.isSuccessful()) {
-				//ideally this should not happen and the user is expected to fill the
-				//right configuration , while setting up a notification
-				throw new PermanentEventNotificationException(
-						"Expected successful HTTP response [2xx] but got [" + r.code() + "]. " + webhookUrl);
-			}
+
 		} catch (IOException  e) {
 			throw new TemporaryEventNotificationException("Unable to send the slack Message" +e.getMessage(),e);
 		}
-    }
+	}
 
 
 

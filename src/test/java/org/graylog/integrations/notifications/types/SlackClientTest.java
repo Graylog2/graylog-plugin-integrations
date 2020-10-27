@@ -13,7 +13,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 
-@Ignore("Build is failing on jenkins")
+
 public class SlackClientTest {
 
     private SlackClient okHttpSlackClient;
@@ -38,7 +38,7 @@ public class SlackClientTest {
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .webhookUrl("http://localhost:8080")
                 .build();
-        okHttpSlackClient.send(message,slackEventNotificationConfig.webhookUrl());
+        okHttpSlackClient.send(message,slackEventNotificationConfig);
     }
 
     OkHttpClient getOkHttpClient() {

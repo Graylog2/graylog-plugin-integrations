@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
 import org.graylog.events.notifications.EventNotification;
 import org.graylog.events.notifications.EventNotificationContext;
+import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationModelData;
 import org.graylog.events.notifications.EventNotificationService;
 import org.graylog.events.notifications.PermanentEventNotificationException;
@@ -83,18 +84,13 @@ public class SlackEventNotification implements EventNotification {
 	 * @throws TemporaryEventNotificationException is thrown for network or timeout type issues
 	 */
 	@Override
-	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException,TemporaryEventNotificationException {
+	public void execute(EventNotificationContext ctx) throws EventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		ValidationResult  result = config.validate();
-		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
 
-		if(result.failed()){
-			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
-		}
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
-			slackClient.send(slackMessage,config.webhookUrl());
+			slackClient.send(slackMessage,config);
 		} catch (Exception e) {
 
 			LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
