@@ -1,6 +1,5 @@
 package org.graylog.integrations.notifications.types;
 
-import com.github.joschi.jadconfig.util.Duration;
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -9,24 +8,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockWebServer;
-import org.graylog.events.notifications.PermanentEventNotificationException;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 
 import java.io.IOException;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
