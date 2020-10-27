@@ -13,7 +13,7 @@ import org.junit.Test;
 import java.io.IOException;
 
 
-@Ignore("Build is failing on jenkins")
+
 public class SlackClientTest {
 
     private SlackClient okHttpSlackClient;
