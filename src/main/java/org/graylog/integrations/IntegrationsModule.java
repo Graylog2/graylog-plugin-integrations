@@ -16,6 +16,7 @@
  */
 package org.graylog.integrations;
 
+import okhttp3.OkHttpClient;
 import org.graylog.integrations.audit.IntegrationsAuditEventTypes;
 import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.codecs.AWSCodec;
@@ -35,8 +36,11 @@ import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
 import org.graylog.integrations.pagerduty.PagerDutyNotification;
 import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
+import org.graylog.integrations.notifications.types.SlackEventNotification;
+import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
+import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
@@ -88,6 +92,13 @@ public class IntegrationsModule extends PluginModule {
          */
 
         addAuditEventTypes(IntegrationsAuditEventTypes.class);
+
+
+       // bind(SlackEventNotificationConfig.class).toProvider(EventNotificationConfig.class);
+        addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
+                SlackEventNotificationConfig.class,
+                SlackEventNotification.class,
+                SlackEventNotification.Factory.class);
 
         // IPFIX
         addMessageInput(IpfixUdpInput.class);

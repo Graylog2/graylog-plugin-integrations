@@ -8,6 +8,8 @@ import AWSInputConfiguration from './aws/AWSInputConfiguration';
 import AWSCloudWatchApp from './aws/cloudwatch/CloudWatchApp';
 import PagerDutyNotificationForm from './pager-duty/PagerDutyNotificationForm';
 import PagerDutyNotificationSummary from './pager-duty/PagerDutyNotificationSummary';
+import SlackNotificationForm from './event-notifications/event-notification-types/SlackNotificationForm';
+import SlackNotificationSummary from './event-notifications/event-notification-types/SlackNotificationSummary';
 
 import packageJson from '../../package.json';
 
@@ -28,6 +30,11 @@ const manifest = new PluginManifest(packageJson, {
       formComponent: PagerDutyNotificationForm,
       summaryComponent: PagerDutyNotificationSummary,
       defaultConfig: PagerDutyNotificationForm.defaultConfig,
+      type: 'slack-notification-v1',
+      displayName: 'Slack Notification',
+      formComponent: SlackNotificationForm,
+      summaryComponent: SlackNotificationSummary,
+      defaultConfig: SlackNotificationForm.defaultConfig,
     },
   ],
 });
