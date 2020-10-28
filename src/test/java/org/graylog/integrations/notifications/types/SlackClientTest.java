@@ -62,7 +62,7 @@ public class SlackClientTest {
     }
 
     @Test(expected = PermanentEventNotificationException.class)
-    public void send_fails_with_badHook_url() throws Exception {
+    public void send_throwsPermNotifException_whenPostReturnsHttp402() throws Exception {
 
         final OkHttpClient okHttpClient = getMockHttpClient("{\"key\": \"val\"}",402);
         SlackClient slackClient = new SlackClient(okHttpClient);
