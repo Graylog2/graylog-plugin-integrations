@@ -48,7 +48,7 @@ public class SlackClientTest {
     }
 
     @Test(expected = TemporaryEventNotificationException.class)
-    public void send_fails_with_io_exception() throws Exception {
+    public void send_throwsTempNotifException_whenHttpClientThrowsIOException() throws Exception {
 
         final OkHttpClient okHttpClient = mock(OkHttpClient.class);
         final Call remoteCall = mock(Call.class);
