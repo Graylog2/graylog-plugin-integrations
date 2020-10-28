@@ -87,8 +87,8 @@ public abstract class PagerDutyNotificationConfig implements EventNotificationCo
         else if (routingKey().length() != 32) {
             validation.addError(FIELD_ROUTING_KEY, "Routing Key must be 32 characters long.");
         }
-        if (keyPrefix().isEmpty()) {
-            validation.addError(FIELD_KEY_PREFIX, "Incident Key Prefix cannot be empty.");
+        if (customIncident() && keyPrefix().isEmpty()) {
+            validation.addError(FIELD_KEY_PREFIX, "Incident Key Prefix cannot be empty when Custom Incident Key is selected.");
         }
         if (clientName().isEmpty()) {
             validation.addError(FIELD_CLIENT_NAME, "Client Name cannot be empty.");
