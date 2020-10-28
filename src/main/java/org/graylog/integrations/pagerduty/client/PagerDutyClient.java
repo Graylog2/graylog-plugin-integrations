@@ -80,6 +80,9 @@ public class PagerDutyClient {
         LOG.debug("Triggering event in PagerDuty with POST payload: {}", payloadString);
 
         try (final Response response = httpClient.newCall(request).execute()) {
+            LOG.debug("PagerDuty POST completed in {}ms [HTTP {}].  Response body: {}",
+                    response.receivedResponseAtMillis() - response.sentRequestAtMillis(),
+                    response.code(), response.body().string());
             if (!response.isSuccessful()) {
                 if (400 == response.code()) {
                     // HTTP 400 - Bad Request
@@ -94,6 +97,7 @@ public class PagerDutyClient {
             }
             return objectMapper.readValue(response.body().string(), PagerDutyResponse.class);
         } catch (IOException e) {
+            LOG.error("Error sending PagerDuty notification event: " + e.getMessage());
             throw new TemporaryPagerDutyClientException("There was an error sending the notification event.", e);
         }
     }
