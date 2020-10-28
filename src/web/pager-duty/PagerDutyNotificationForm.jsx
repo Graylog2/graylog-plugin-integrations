@@ -54,7 +54,7 @@ class PagerDutyNotificationForm extends React.Component {
 
       return (
         <>
-          <Input id="pagerduty-notification-v1-routing_key"
+          <Input id="pagerduty-notification-v2-routing_key"
                  name="routing_key"
                  label="Routing Key"
                  type="text"
@@ -63,7 +63,7 @@ class PagerDutyNotificationForm extends React.Component {
                  value={config.routing_key}
                  onChange={this.handleChange}
                  required />
-          <Input id="pagerduty-notification-v1-custom_incident"
+          <Input id="pagerduty-notification-v2-custom_incident"
                  name="custom_incident"
                  label="Use Custom Incident Key"
                  type="checkbox"
@@ -72,7 +72,7 @@ class PagerDutyNotificationForm extends React.Component {
                  value={config.custom_incident}
                  checked={config.custom_incident}
                  onChange={this.handleChange} />
-          <Input id="pagerduty-notification-v1-key_prefix"
+          <Input id="pagerduty-notification-v2-key_prefix"
                  name="key_prefix"
                  label="Incident Key Prefix"
                  type="text"
@@ -81,7 +81,7 @@ class PagerDutyNotificationForm extends React.Component {
                  value={config.key_prefix}
                  onChange={this.handleChange}
                  required />
-          <Input id="pagerduty-notification-v1-client_name"
+          <Input id="pagerduty-notification-v2-client_name"
                  name="client_name"
                  label="Client Name"
                  type="text"
@@ -90,7 +90,7 @@ class PagerDutyNotificationForm extends React.Component {
                  value={config.client_name}
                  onChange={this.handleChange}
                  required />
-          <Input id="pagerduty-notification-v1-client_url"
+          <Input id="pagerduty-notification-v2-client_url"
                  name="client_url"
                  label="Client URL"
                  type="text"

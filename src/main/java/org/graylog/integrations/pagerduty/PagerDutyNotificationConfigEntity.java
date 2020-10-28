@@ -38,7 +38,7 @@ import java.util.Map;
 @JsonTypeName(PagerDutyNotificationConfigEntity.TYPE_NAME)
 @JsonDeserialize(builder = PagerDutyNotificationConfigEntity.Builder.class)
 public abstract class PagerDutyNotificationConfigEntity implements EventNotificationConfigEntity {
-    public static final String TYPE_NAME = "pagerduty-notification-v1";
+    public static final String TYPE_NAME = "pagerduty-notification-v2";
 
     @JsonProperty(PagerDutyNotificationConfig.FIELD_ROUTING_KEY)
     public abstract ValueReference routingKey();

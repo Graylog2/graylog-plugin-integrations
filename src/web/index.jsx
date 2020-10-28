@@ -25,8 +25,8 @@ const manifest = new PluginManifest(packageJson, {
   ],
   eventNotificationTypes: [
     {
-      type: 'pagerduty-notification-v1',
-      displayName: 'Pager Duty Notification',
+      type: 'pagerduty-notification-v2',
+      displayName: 'PagerDuty Notification [Official]',
       formComponent: PagerDutyNotificationForm,
       summaryComponent: PagerDutyNotificationSummary,
       defaultConfig: PagerDutyNotificationForm.defaultConfig,

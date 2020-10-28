@@ -44,7 +44,7 @@ import java.net.URISyntaxException;
 @JsonTypeName(PagerDutyNotificationConfig.TYPE_NAME)
 @JsonDeserialize(builder = PagerDutyNotificationConfig.Builder.class)
 public abstract class PagerDutyNotificationConfig implements EventNotificationConfig {
-    public static final String TYPE_NAME = "pagerduty-notification-v1";
+    public static final String TYPE_NAME = "pagerduty-notification-v2";
 
     static final String FIELD_ROUTING_KEY = "routing_key";
     static final String FIELD_CUSTOM_INCIDENT = "custom_incident";
