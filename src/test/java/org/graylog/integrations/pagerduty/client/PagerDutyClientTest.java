@@ -8,6 +8,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import org.graylog.integrations.pagerduty.dto.PagerDutyResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -154,6 +155,9 @@ public class PagerDutyClientTest {
         assertThat(request.method(), is("POST"));
         assertThat(request.body(), notNullValue());
         assertThat(request.body().contentLength(), is(Long.valueOf(TEST_MESSAGE.length())));
+        Buffer buffer = new Buffer();
+        request.body().writeTo(buffer);
+        assertThat(buffer.readUtf8(), is(TEST_MESSAGE));
     }
 
     private void thenGoodResponseReturned() {
