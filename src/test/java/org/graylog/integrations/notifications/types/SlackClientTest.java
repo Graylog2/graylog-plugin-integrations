@@ -45,6 +45,16 @@ public class SlackClientTest {
         SlackClient slackClient = new SlackClient(mockHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
         slackClient.send(message,"http://url.com");
+        
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(mockHttpClient, times(1)).newCall(requestCaptor.capture());
+        
+        assertThat(requestCaptor.getValue(), notNullValue());
+        Request sent = requestCaptor.getValue();
+        assertThat(sent.url().toString(), is("http://url.com"));
+        assertThat(sent.method(), is("POST"));
+        assertThat(sent.body(), notNullValue());
+        assertThat(sent.body().contentLength(), is(Long.valueOf(message.length())));
     }
 
     @Test(expected = TemporaryEventNotificationException.class)
