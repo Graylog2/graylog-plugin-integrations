@@ -33,7 +33,7 @@ class PagerDutyNotificationForm extends React.Component {
       client_name: 'Graylog',
       client_url: '',
       custom_incident: true,
-      key_prefix: 'Graylog/',
+      key_prefix: 'Graylog',
       routing_key: '',
     };
 
@@ -95,7 +95,7 @@ class PagerDutyNotificationForm extends React.Component {
                  label="Client URL"
                  type="text"
                  bsStyle={validation.errors.client_url ? 'error' : null}
-                 help={get(validation, 'errors.client_url[0]', 'The name of the Graylog system that is triggering the PagerDuty event.')}
+                 help={get(validation, 'errors.client_url[0]', 'The URL of the Graylog system that is triggering the PagerDuty event.')}
                  value={config.client_url}
                  onChange={this.handleChange}
                  required />
