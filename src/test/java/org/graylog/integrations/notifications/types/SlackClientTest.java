@@ -41,7 +41,7 @@ public class SlackClientTest {
 
 
     @Test
-    public void send_is_successful() throws Exception {
+    public void send_sendsHttpRequestAsExpected_whenInputIsGood() throws Exception {
         SlackClient slackClient = new SlackClient(mockHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
         slackClient.send(message,"http://url.com");
