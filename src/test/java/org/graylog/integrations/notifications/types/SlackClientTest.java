@@ -31,11 +31,11 @@ public class SlackClientTest {
 
     @Before
     public void setUp() throws Exception {
-       mockHttpClient = getMockHttpClient("{\"key\": \"val\"}",200);
+       mockHttpClient = getMockHttpClient(200);
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         mockHttpClient = null;
     }
 
@@ -75,7 +75,7 @@ public class SlackClientTest {
     @Test(expected = PermanentEventNotificationException.class)
     public void send_throwsPermNotifException_whenPostReturnsHttp402() throws Exception {
 
-        final OkHttpClient okHttpClient = getMockHttpClient("{\"key\": \"val\"}",402);
+        final OkHttpClient okHttpClient = getMockHttpClient(402);
         SlackClient slackClient = new SlackClient(okHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
         slackClient.send(message,"http://url.com/");
@@ -83,7 +83,7 @@ public class SlackClientTest {
 
 
 
-    private static OkHttpClient getMockHttpClient(final String serializedBody,int httpCode) throws IOException {
+    private static OkHttpClient getMockHttpClient(int httpCode) throws IOException {
         final OkHttpClient okHttpClient = mock(OkHttpClient.class);
 
         final Call remoteCall = mock(Call.class);
@@ -94,7 +94,7 @@ public class SlackClientTest {
                 .code(httpCode).message("").body(
                         ResponseBody.create(
                                 MediaType.parse("application/json"),
-                                serializedBody
+                                "{\"key\": \"val\"}"
                         ))
                 .build();
 
