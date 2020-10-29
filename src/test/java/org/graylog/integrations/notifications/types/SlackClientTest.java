@@ -54,6 +54,7 @@ public class SlackClientTest {
         assertThat(sent.url().toString()).isEqualTo("http://url.com/");
         assertThat(sent.method()).isEqualTo("POST");
         assertThat(sent.body()).isNotNull();
+        assertThat(sent.body().contentLength()).isEqualTo(76);
 
     }
 
