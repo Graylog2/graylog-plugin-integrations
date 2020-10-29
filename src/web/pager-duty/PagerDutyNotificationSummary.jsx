@@ -44,6 +44,4 @@ PagerDutyNotificationSummary.propTypes = {
   definitionNotification: PropTypes.shape.isRequired,
 };
 
-PagerDutyNotificationSummary.defaultProps = {};
-
 export default PagerDutyNotificationSummary;
