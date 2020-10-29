@@ -7,7 +7,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.mockwebserver.MockWebServer;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.junit.After;
@@ -22,20 +21,17 @@ import static org.mockito.Mockito.when;
 
 
 public class SlackClientTest {
-
-    private final MockWebServer server = new MockWebServer();
+    
     private OkHttpClient mockHttpClient;
 
 
     @Before
     public void setUp() throws Exception {
        mockHttpClient = getMockHttpClient("{\"key\": \"val\"}",200);
-       server.start();
     }
 
     @After
     public void tearDown() throws IOException {
-        server.shutdown();
         mockHttpClient = null;
     }
 
