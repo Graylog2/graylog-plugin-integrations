@@ -15,8 +15,13 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.internal.bytebuddy.matcher.ElementMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.ArgumentCaptor;
 
@@ -41,17 +46,17 @@ public class SlackClientTest {
     public void send_sendsHttpRequestAsExpected_whenInputIsGood() throws Exception {
         SlackClient slackClient = new SlackClient(mockHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        slackClient.send(message,"http://url.com");
+        slackClient.send(message,"http://url.com/");
         
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(mockHttpClient, times(1)).newCall(requestCaptor.capture());
-        
-        assertThat(requestCaptor.getValue(), notNullValue());
+
+        assertThat(requestCaptor.getValue()).isNotNull();
         Request sent = requestCaptor.getValue();
-        assertThat(sent.url().toString(), is("http://url.com"));
-        assertThat(sent.method(), is("POST"));
-        assertThat(sent.body(), notNullValue());
-        assertThat(sent.body().contentLength(), is(Long.valueOf(message.length())));
+        assertThat(sent.url().toString()).isEqualTo("http://url.com/");
+        assertThat(sent.method()).isEqualTo("POST");
+        assertThat(sent.body()).isNotNull();
+
     }
 
     @Test(expected = TemporaryEventNotificationException.class)
@@ -65,7 +70,7 @@ public class SlackClientTest {
 
         SlackClient slackClient = new SlackClient(okHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        slackClient.send(message,"http://url.com");
+        slackClient.send(message,"http://url.com/");
     }
 
     @Test(expected = PermanentEventNotificationException.class)
@@ -74,7 +79,7 @@ public class SlackClientTest {
         final OkHttpClient okHttpClient = getMockHttpClient("{\"key\": \"val\"}",402);
         SlackClient slackClient = new SlackClient(okHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        slackClient.send(message,"http://url.com");
+        slackClient.send(message,"http://url.com/");
     }
 
 
@@ -85,7 +90,7 @@ public class SlackClientTest {
         final Call remoteCall = mock(Call.class);
 
         final Response response = new Response.Builder()
-                .request(new Request.Builder().url("http://url.com").build())
+                .request(new Request.Builder().url("http://url.com/").build())
                 .protocol(Protocol.HTTP_1_1)
                 .code(httpCode).message("").body(
                         ResponseBody.create(
