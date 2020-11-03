@@ -1,5 +1,4 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 
 import {ReadOnlyFormGroup} from 'components/common';
 import {Well} from 'components/graylog';
@@ -24,20 +23,22 @@ const SlackNotificationDetails = ({ notification }) => (
   </>
 );
 
+/**
 SlackNotificationDetails.propTypes = {
-  notification: PropTypes.shape({
-    config: PropTypes.shape({
-      graylog_url: PropTypes.string,
-      icon_emoji: PropTypes.string,
-      icon_url: PropTypes.string,
-      link_names: PropTypes.string,
-      notify_channel: PropTypes.string,
-      user_name: PropTypes.string,
-      custom_message: PropTypes.string,
-      channel: PropTypes.string,
-      webhook_url: PropTypes.string,
-      color: PropTypes.string,
-    }).isRequired,
-};
+    notification: PropTypes.object.shape( {
+        config: PropTypes.shape({
+            icon_emoji: PropTypes.string,
+            icon_url: PropTypes.string,
+            link_names: PropTypes.string,
+            notify_channel: PropTypes.string,
+            user_name: PropTypes.string,
+            custom_message: PropTypes.string,
+            channel: PropTypes.string,
+            webhook_url: PropTypes.string,
+            color: PropTypes.string,
+        }).isRequired
+    })
+};**/
+
 
 export default SlackNotificationDetails;
