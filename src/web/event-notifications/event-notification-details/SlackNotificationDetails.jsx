@@ -16,6 +16,11 @@ const SlackNotificationDetails = ({ notification }) => (
                            {notification.config.custom_message || <em>Empty body</em>}
                          </Well>
                        )} />
+      <ReadOnlyFormGroup label="User Name" value={notification.config.username} />
+      <ReadOnlyFormGroup label="Notify Channel" value={notification.config.notify_channel} />
+      <ReadOnlyFormGroup label="Link Names" value={notification.config.link_names} />
+      <ReadOnlyFormGroup label="Icon URL" value={notification.config.icon_url} />
+      <ReadOnlyFormGroup label="Icon Emoji" value={notification.config.icon_emoji} />
   </>
 );
 
