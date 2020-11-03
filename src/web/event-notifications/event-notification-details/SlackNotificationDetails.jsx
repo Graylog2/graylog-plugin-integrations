@@ -1,8 +1,17 @@
 import * as React from 'react';
 
 import {ReadOnlyFormGroup} from 'components/common';
+import styled, { css } from 'styled-components';
 import {Well} from 'components/graylog';
-import styles from './SlackNotificationSummary.css';
+
+const NewExampleWell = styled(Well)(({ theme }) => css`
+  margin-bottom: 5px;
+  font-family: ${theme.fonts.family.monospace};
+  font-size: ${theme.fonts.size.body};
+  white-space: pre-wrap;
+  word-wrap: break-word;
+`);
+
 
 
 const SlackNotificationDetails = ({ notification }) => (
@@ -11,9 +20,9 @@ const SlackNotificationDetails = ({ notification }) => (
     <ReadOnlyFormGroup label="Channel" value={notification.config.channel} />
     <ReadOnlyFormGroup label="Custom Message Template "
                        value={(
-                         <Well bsSize="small" className={styles.bodyPreview} >
+                         <NewExampleWell bsSize="small" >
                            {notification.config.custom_message || <em>Empty body</em>}
-                         </Well>
+                         </NewExampleWell>
                        )} />
       <ReadOnlyFormGroup label="User Name" value={notification.config.username} />
       <ReadOnlyFormGroup label="Notify Channel" value={notification.config.notify_channel} />
@@ -22,23 +31,6 @@ const SlackNotificationDetails = ({ notification }) => (
       <ReadOnlyFormGroup label="Icon Emoji" value={notification.config.icon_emoji} />
   </>
 );
-
-/**
-SlackNotificationDetails.propTypes = {
-    notification: PropTypes.object.shape( {
-        config: PropTypes.shape({
-            icon_emoji: PropTypes.string,
-            icon_url: PropTypes.string,
-            link_names: PropTypes.string,
-            notify_channel: PropTypes.string,
-            user_name: PropTypes.string,
-            custom_message: PropTypes.string,
-            channel: PropTypes.string,
-            webhook_url: PropTypes.string,
-            color: PropTypes.string,
-        }).isRequired
-    })
-};**/
 
 
 export default SlackNotificationDetails;
