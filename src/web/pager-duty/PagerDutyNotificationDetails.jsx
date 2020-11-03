@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 
-import {ReadOnlyFormGroup} from 'components/common';
+import { ReadOnlyFormGroup } from 'components/common';
 
 const PagerDutyNotificationDetails = ({ notification }) => {
   return (
