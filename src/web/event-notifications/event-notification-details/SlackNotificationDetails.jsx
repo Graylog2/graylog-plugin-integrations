@@ -25,7 +25,19 @@ const SlackNotificationDetails = ({ notification }) => (
 );
 
 SlackNotificationDetails.propTypes = {
-  notification: PropTypes.object.isRequired,
+  notification: PropTypes.shape({
+    config: PropTypes.shape({
+      graylog_url: PropTypes.string,
+      icon_emoji: PropTypes.string,
+      icon_url: PropTypes.string,
+      link_names: PropTypes.string,
+      notify_channel: PropTypes.string,
+      user_name: PropTypes.string,
+      custom_message: PropTypes.string,
+      channel: PropTypes.string,
+      webhook_url: PropTypes.string,
+      color: PropTypes.string,
+    }).isRequired,
 };
 
 export default SlackNotificationDetails;
