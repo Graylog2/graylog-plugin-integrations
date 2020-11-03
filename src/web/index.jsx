@@ -1,11 +1,12 @@
 import 'webpack-entry';
 
-import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin';
+import {PluginManifest, PluginStore} from 'graylog-web-plugin/plugin';
 
 import Routes from 'aws/common/Routes';
 
 import AWSInputConfiguration from './aws/AWSInputConfiguration';
 import AWSCloudWatchApp from './aws/cloudwatch/CloudWatchApp';
+import PagerDutyNotificationDetails from './pager-duty/PagerDutyNotificationDetails';
 import PagerDutyNotificationForm from './pager-duty/PagerDutyNotificationForm';
 import PagerDutyNotificationSummary from './pager-duty/PagerDutyNotificationSummary';
 import SlackNotificationForm from './event-notifications/event-notification-types/SlackNotificationForm';
@@ -29,6 +30,7 @@ const manifest = new PluginManifest(packageJson, {
       displayName: 'PagerDuty Notification [Official]',
       formComponent: PagerDutyNotificationForm,
       summaryComponent: PagerDutyNotificationSummary,
+      detailsComponent: PagerDutyNotificationDetails,
       defaultConfig: PagerDutyNotificationForm.defaultConfig,
     },
     {
