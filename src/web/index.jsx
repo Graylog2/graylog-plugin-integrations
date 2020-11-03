@@ -1,6 +1,6 @@
 import 'webpack-entry';
 
-import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin';
+import {PluginManifest, PluginStore} from 'graylog-web-plugin/plugin';
 
 import Routes from 'aws/common/Routes';
 
@@ -12,6 +12,7 @@ import SlackNotificationForm from './event-notifications/event-notification-type
 import SlackNotificationSummary from './event-notifications/event-notification-types/SlackNotificationSummary';
 
 import packageJson from '../../package.json';
+import SlackNotificationDetails from "./event-notifications/event-notification-details/SlackNotificationDetails";
 
 const manifest = new PluginManifest(packageJson, {
   routes: [
@@ -36,6 +37,7 @@ const manifest = new PluginManifest(packageJson, {
       displayName: 'Slack Notification',
       formComponent: SlackNotificationForm,
       summaryComponent: SlackNotificationSummary,
+      detailsComponent: SlackNotificationDetails,
       defaultConfig: SlackNotificationForm.defaultConfig,
     },
   ],
