@@ -8,8 +8,8 @@
   },
   "scripts": {
     "build": "webpack",
-    "lint": "eslint --ext js,jsx src",
-    "lint:path": "eslint --ext js,jsx",
+    "lint": "eslint src",
+    "lint:path": "eslint",
     "test": "jest",
     "flow-check": "flow check"
   },
