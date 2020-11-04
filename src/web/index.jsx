@@ -8,12 +8,11 @@ import AWSInputConfiguration from './aws/AWSInputConfiguration';
 import AWSCloudWatchApp from './aws/cloudwatch/CloudWatchApp';
 import PagerDutyNotificationForm from './pager-duty/PagerDutyNotificationForm';
 import PagerDutyNotificationSummary from './pager-duty/PagerDutyNotificationSummary';
-import SlackNotificationDetails from "./event-notifications/event-notification-details/SlackNotificationDetails";
+import SlackNotificationDetails from './event-notifications/event-notification-details/SlackNotificationDetails';
 import SlackNotificationForm from './event-notifications/event-notification-types/SlackNotificationForm';
 import SlackNotificationSummary from './event-notifications/event-notification-types/SlackNotificationSummary';
 
 import packageJson from '../../package.json';
-
 
 const manifest = new PluginManifest(packageJson, {
   routes: [
