@@ -82,17 +82,25 @@ public class SlackEventNotification implements EventNotification {
 	@Override
 	public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException,TemporaryEventNotificationException {
 		final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-		ValidationResult  result = config.validate();
-		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
-
-		if(result.failed()){
-			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
-		}
 
 		try {
 			SlackMessage slackMessage = createSlackMessage(ctx, config);
 			slackClient.send(slackMessage,config.webhookUrl());
-		} catch (Exception e) {
+		}
+		catch(PermanentEventNotificationException e) {
+			String errorMessage = String.format("Please verify your Slack Event Configuration (webhooks and channel) :: %s", e.getMessage());
+			Notification systemNotification = notificationService.buildNow()
+					.addNode(nodeId.toString())
+					.addType(Notification.Type.GENERIC)
+					.addSeverity(Notification.Severity.URGENT)
+					.addDetail("title", "Slack Event Notification Failed")
+					.addDetail("description", errorMessage);
+			notificationService.publishIfFirst(systemNotification);
+			throw new PermanentEventNotificationException(
+					errorMessage,
+					null != e.getCause() ? e.getCause() : e);
+		}
+		catch (Exception e) {
 
 			LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
 			final Notification systemNotification = notificationService.buildNow()
