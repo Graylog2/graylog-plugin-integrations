@@ -81,6 +81,7 @@ public class SlackEventNotificationTest  {
                 .color("#FF2052")
                 .webhookUrl("axzzzz")
                 .channel("#general")
+                .backlogSize(0)
                 .customMessage("a custom message")
                 .linkNames(true)
                 .build();
@@ -100,7 +101,7 @@ public class SlackEventNotificationTest  {
 
     @Test
     public void createSlackMessage() throws EventNotificationException {
-       String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
+       String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\",\"backlogSize\":0}";
        SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
        String actual  = message.getJsonString();
        assertThat(actual).isEqualTo(expected);

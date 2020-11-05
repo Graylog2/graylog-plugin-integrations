@@ -85,6 +85,8 @@ public class SlackEventNotification implements EventNotification {
 		ValidationResult  result = config.validate();
 		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
 
+		ctx.eventDefinition().ifPresent(eventDefinitionDto -> System.out.println("backlog size in slack event notificationclear:"+eventDefinitionDto.notificationSettings().backlogSize()));
+
 		if(result.failed()){
 			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
 		}
@@ -132,6 +134,7 @@ public class SlackEventNotification implements EventNotification {
 				config.iconUrl(),
 				config.userName(),
 				config.channel(),
+				config.backlogSize(),
 				linkNames,
 				message,
 				customMessage

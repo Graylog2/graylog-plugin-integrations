@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 
-import { Input } from 'components/bootstrap';
 import { getValueFromInput } from 'util/FormsUtils';
+import { Input } from 'components/bootstrap';
 import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
 import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
@@ -18,6 +18,7 @@ class SlackNotificationForm extends React.Component {
         link_names: PropTypes.string,
         icon_url: PropTypes.string,
         icon_emoji: PropTypes.string,
+        backlog_size: PropTypes.number,
         user_name: PropTypes.string,
         notify_channel: PropTypes.string,
         custom_message: PropTypes.string,
@@ -31,6 +32,7 @@ class SlackNotificationForm extends React.Component {
           link_names: PropTypes.string,
           icon_url: PropTypes.string,
           icon_emoji: PropTypes.string,
+          backlog_size: PropTypes.number,
           user_name: PropTypes.string,
           notify_channel: PropTypes.string,
           custom_message: PropTypes.string,
@@ -77,6 +79,7 @@ class SlackNotificationForm extends React.Component {
       link_names: false,
       icon_url: '',
       icon_emoji: '',
+      backlog_size: 0,
 
     };
 
@@ -144,6 +147,15 @@ class SlackNotificationForm extends React.Component {
                  help={get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. See https://docs.graylog.org/en/latest/pages/alerts.html#data-available-to-notifications for more details.')}
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
+          <Input id="notification-backlogSize"
+                 name="backlog_size"
+                 label="Backlog Items"
+                 type="text"
+                 bsStyle={validation.errors.backlog_size ? 'error' : null}
+                 help={get(validation, 'errors.backlog_size[0]', 'Number of backlog item descriptions to attach.')}
+                 value={config.backlog_size || ''}
+                 onChange={this.handleChange}
+                 required />
           <Input id="notification-userName"
                  name="user_name"
                  label="User Name (optional)"

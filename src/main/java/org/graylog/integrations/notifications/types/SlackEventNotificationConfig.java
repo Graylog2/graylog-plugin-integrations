@@ -54,6 +54,12 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 	static final String FIELD_LINK_NAMES = "link_names";
 	static final String FIELD_ICON_URL = "icon_url";
 	static final String FIELD_ICON_EMOJI = "icon_emoji";
+	static final String FIELD_BACKLOG_SIZE = "backlog_size";
+
+
+
+	@JsonProperty(FIELD_BACKLOG_SIZE)
+	public abstract long backlogSize();
 
 
 	@JsonProperty(FIELD_COLOR)
@@ -129,6 +135,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 					.channel("slacktest2")
 					.customMessage("hello World")
 					.notifyChannel(false)
+					.backlogSize(0)
 					.linkNames(false);
 		}
 
@@ -159,6 +166,8 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		@JsonProperty(FIELD_ICON_EMOJI)
 		public abstract SlackEventNotificationConfig.Builder iconEmoji(String iconEmoji);
 
+		@JsonProperty(FIELD_BACKLOG_SIZE)
+		public abstract SlackEventNotificationConfig.Builder backlogSize(long backlogSize);
 
 		public abstract SlackEventNotificationConfig build();
 	}

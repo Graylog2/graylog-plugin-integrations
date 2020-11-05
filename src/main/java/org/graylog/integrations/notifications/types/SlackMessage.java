@@ -40,6 +40,7 @@ public class SlackMessage {
 	private boolean linkNames;
 	private String message;
 	private String customMessage;
+	private long backlogSize;
 
 	public SlackMessage(
 			String color,
@@ -47,6 +48,7 @@ public class SlackMessage {
 			String iconUrl,
 			String userName,
 			String channel,
+			long backlogSize,
 			boolean linkNames,
 			String message,
 			String customMessage
@@ -58,6 +60,7 @@ public class SlackMessage {
 		this.userName = userName;
 		this.channel = channel;
 		this.linkNames = linkNames;
+		this.backlogSize = backlogSize;
 		this.message = message;
 		this.customMessage = customMessage;
 
@@ -73,6 +76,7 @@ public class SlackMessage {
 		params.put("channel", channel);
 		params.put("text", message);
 		params.put("link_names", linkNames);
+		params.put("backlogSize",backlogSize);
 
 		if (!isNullOrEmpty(userName)) {
 			params.put("username", userName);

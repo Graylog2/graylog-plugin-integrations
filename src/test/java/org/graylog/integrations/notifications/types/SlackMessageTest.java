@@ -14,7 +14,7 @@ public class SlackMessageTest {
 
     @Test
     public void test_good_usename() throws IOException {
-        SlackMessage message = new SlackMessage("#FF2052", ":turtle:", "https://media.defcon.org/DEF CON 1/DEF CON 1 logo.jpg", "aaa", "#general", false, "this is a happy message", "This is a happy custom message");
+        SlackMessage message = new SlackMessage("#FF2052", ":turtle:", "https://media.defcon.org/DEF CON 1/DEF CON 1 logo.jpg", "aaa", "#general", 5,false, "this is a happy message", "This is a happy custom message");
         String expected = message.getJsonString();
         List<String> username = getJsonNodeFieldValue(expected,"username");
         assertThat(username).isNotEmpty();
@@ -23,7 +23,7 @@ public class SlackMessageTest {
 
     @Test
     public void test_empty_usernames() throws  IOException{
-        SlackMessage message = new SlackMessage("#FF2052",":turtle:","https://media.defcon.org/DEF CON 1/DEF CON 1 logo.jpg",null,"aaa",false,"sss","sss");
+        SlackMessage message = new SlackMessage("#FF2052",":turtle:","https://media.defcon.org/DEF CON 1/DEF CON 1 logo.jpg",null,"aaa",5,false,"sss","sss");
         String anotherMessage = message.getJsonString();
         List<String> userNames = getJsonNodeFieldValue(anotherMessage,"username");
         assertThat(userNames).isEmpty();
