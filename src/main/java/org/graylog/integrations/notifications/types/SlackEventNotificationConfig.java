@@ -112,6 +112,10 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		ValidationResult validation =  new ValidationResult();
 		final Matcher matcher = pattern.matcher(webhookUrl());
 
+		if(backlogSize() < 0) {
+			validation.addError(FIELD_BACKLOG_SIZE, "backlog size cannot empty.");
+		}
+
 		if (channel().isEmpty()) {
 			validation.addError(FIELD_CHANNEL, "Channel cannot be empty.");
 		}

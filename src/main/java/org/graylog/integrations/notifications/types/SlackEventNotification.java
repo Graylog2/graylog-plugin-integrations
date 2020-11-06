@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
@@ -85,7 +86,6 @@ public class SlackEventNotification implements EventNotification {
 		ValidationResult  result = config.validate();
 		result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]",e.getKey() , e.getValue()));
 
-		ctx.eventDefinition().ifPresent(eventDefinitionDto -> System.out.println("backlog size in slack event notificationclear:"+eventDefinitionDto.notificationSettings().backlogSize()));
 
 		if(result.failed()){
 			throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
@@ -157,6 +157,10 @@ public class SlackEventNotification implements EventNotification {
 
 	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
+		if(config.backlogSize() > 0) {
+			backlog = backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
+		}
+
 		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
 		try {
 			LOG.debug("template = {} model = {}" ,template, model);

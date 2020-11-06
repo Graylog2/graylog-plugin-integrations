@@ -150,7 +150,7 @@ class SlackNotificationForm extends React.Component {
           <Input id="notification-backlogSize"
                  name="backlog_size"
                  label="Backlog Items"
-                 type="text"
+                 type="number"
                  bsStyle={validation.errors.backlog_size ? 'error' : null}
                  help={get(validation, 'errors.backlog_size[0]', 'Number of backlog item descriptions to attach.')}
                  value={config.backlog_size || ''}
