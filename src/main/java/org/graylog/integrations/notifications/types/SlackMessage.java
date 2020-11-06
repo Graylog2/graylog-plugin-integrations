@@ -76,7 +76,7 @@ public class SlackMessage {
 		params.put("channel", channel);
 		params.put("text", message);
 		params.put("link_names", linkNames);
-		params.put("backlogSize",backlogSize);
+		params.put("backlog_size",backlogSize);
 
 		if (!isNullOrEmpty(userName)) {
 			params.put("username", userName);
