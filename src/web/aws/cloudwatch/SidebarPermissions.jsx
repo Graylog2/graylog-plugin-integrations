@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Panel } from 'components/graylog';
+import { Icon } from 'components/common';
 
 import useFetch from 'aws/common/hooks/useFetch';
 import { ApiRoutes } from 'aws/common/Routes';
@@ -21,7 +22,7 @@ function Policies({ title, note, policy }) {
           <Note>{note}</Note>
         </HeaderContent>
 
-        <Icon opened={opened}><i className="fa fa-chevron-right fa-2x" /></Icon>
+        <Icon name={opened ? 'chevron-down' : 'chevron-right'} size="2x" opened={opened} />
       </Header>
 
       <Policy opened={opened}>
@@ -69,18 +70,13 @@ const HeaderContent = styled.div`
   flex-grow: 1;
 `;
 
-const Icon = styled.span`
-  transform: rotate(${props => (props.opened ? '90deg' : '0deg')});
-  transition: transform 150ms ease-in-out;
-`;
-
 const Policy = styled.pre`
   overflow: hidden;
-  max-height: ${props => (props.opened ? '1000px' : '0')};
-  opacity: ${props => (props.opened ? '1' : '0')};
+  max-height: ${({ opened }) => (opened ? '1000px' : '0')};
+  opacity: ${({ opened }) => (opened ? '1' : '0')};
   transition: max-height 150ms ease-in-out, opacity 150ms ease-in-out, margin 150ms ease-in-out, padding 150ms ease-in-out;
-  margin-bottom: ${props => (props.opened ? '12px' : '0')};
-  padding: ${props => (props.opened ? '9.5px' : '0')};
+  margin-bottom: ${({ opened }) => (opened ? '12px' : '0')};
+  padding: ${({ opened }) => (opened ? '9.5px' : '0')};
 `;
 
 const Title = styled.h4`

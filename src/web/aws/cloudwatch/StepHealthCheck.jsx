@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Button, Panel } from 'components/graylog';
+import { Icon } from 'components/common';
 import { Input } from 'components/bootstrap';
 
 import FormWrap from 'aws/common/FormWrap';
@@ -55,7 +56,7 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
     return (
       <Panel bsStyle="warning"
              header={(
-               <Notice><i className="fa fa-exclamation-triangle fa-2x" />
+               <Notice><Icon name="exclamation-triangle" size="2x" />
                  <span>We haven&apos;t received a response back from Amazon yet.</span>
                </Notice>
             )}>
@@ -86,7 +87,7 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
   const iconClass = knownLog ? 'check' : 'exclamation-triangle';
   const acknowledgment = knownLog ? 'Awesome!' : 'Drats!';
   const bsStyle = knownLog ? 'success' : 'warning';
-  const logTypeLabel = KINESIS_LOG_TYPES.find(type => type.value === logData.type).label;
+  const logTypeLabel = KINESIS_LOG_TYPES.find((type) => type.value === logData.type).label;
   const logType = knownLog ? `a ${logTypeLabel}` : 'an unknown';
   const handleSubmit = () => {
     onSubmit();
@@ -102,7 +103,7 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
 
       <Panel bsStyle={bsStyle}
              header={(
-               <Notice><i className={`fa fa-${iconClass} fa-2x`} />
+               <Notice><Icon name={iconClass} size="2x" />
                  <span>{acknowledgment} looks like <em>{logType}</em> message type.</span>
                </Notice>
              )}>
