@@ -5,7 +5,7 @@ import get from 'lodash/get';
 
 import { getValueFromInput } from 'util/FormsUtils';
 import { Input } from 'components/bootstrap';
-import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
+import { Button, ControlLabel, FormGroup, HelpBlock, FormControl, InputGroup } from 'components/graylog';
 import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 
@@ -147,15 +147,24 @@ class SlackNotificationForm extends React.Component {
                  help={get(validation, 'errors.custom_message[0]', 'Custom message to be appended below the alert title. See https://docs.graylog.org/en/latest/pages/alerts.html#data-available-to-notifications for more details.')}
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
-          <Input id="notification-backlogSize"
-                 name="backlog_size"
-                 label="Backlog Items"
-                 type="number"
-                 bsStyle={validation.errors.backlog_size ? 'error' : null}
-                 help={get(validation, 'errors.backlog_size[0]', 'Number of backlog item descriptions to attach.')}
-                 value={config.backlog_size || ''}
-                 onChange={this.handleChange}
-                 required />
+
+          <ControlLabel>Backlog Items</ControlLabel>
+          <InputGroup>
+            <InputGroup.Addon>
+              <input id="toggle_backlog_size"
+                     type="checkbox" />
+            </InputGroup.Addon>
+            <FormControl type="number"
+                         id="notification-backlogSize"
+                         name="backlog_size"
+                         bsStyle={validation.errors.backlog_size ? 'error' : null}
+                         help={get(validation, 'errors.backlog_size[0]', 'Number of backlog item descriptions to attach.')}
+                         value={config.backlog_size || 0}
+                         onChange={this.handleChange}
+                         required />
+          </InputGroup>
+          <HelpBlock>Number of messages to be included in Slack Notifications.</HelpBlock>
+
           <Input id="notification-userName"
                  name="user_name"
                  label="User Name (optional)"
