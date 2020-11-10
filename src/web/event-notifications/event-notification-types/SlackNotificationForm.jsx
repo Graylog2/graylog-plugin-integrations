@@ -81,7 +81,7 @@ class SlackNotificationForm extends React.Component {
       link_names: false,
       icon_url: '',
       icon_emoji: '',
-      backlog_size: 0,
+      backlog_size: 5,
 
     };
 
@@ -90,7 +90,7 @@ class SlackNotificationForm extends React.Component {
 
       this.state = {
         isBacklogSizeEnabled: false,
-        backlogSize: 0,
+        backlogSize: 5,
 
       };
     }
@@ -124,7 +124,7 @@ class SlackNotificationForm extends React.Component {
       const { isBacklogSizeEnabled, backlogSize } = this.state;
 
       this.setState({ isBacklogSizeEnabled: !isBacklogSizeEnabled });
-      this.propagateChanges('backlog_size', (isBacklogSizeEnabled ? 0 : backlogSize));
+      this.propagateChanges('backlog_size', (isBacklogSizeEnabled ? 5 : backlogSize));
     };
 
     render() {
@@ -192,6 +192,7 @@ class SlackNotificationForm extends React.Component {
                          value={backlogSize}
                          disabled={!isBacklogSizeEnabled}
                          onChange={this.handleBacklogSizeChange}
+                         min="0"
                          required />
           </InputGroup>
           <HelpBlock>Limit the number of backlog messages that will be included in Slack notifications.</HelpBlock>

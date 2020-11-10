@@ -33,6 +33,7 @@ import org.graylog2.plugin.rest.ValidationResult;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,9 +42,15 @@ import java.util.regex.Pattern;
 @JsonDeserialize(builder = SlackEventNotificationConfig.Builder.class)
 public abstract class SlackEventNotificationConfig implements EventNotificationConfig {
 
-	private final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
-	private final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-	public static final String TYPE_NAME = "slack-notification-v1";
+	private final  String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
+	private final  Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+	public static  final String TYPE_NAME = "slack-notification-v1";
+	private static final long MAX_BACKLOG_MESSAGES = 49;
+	static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero or greater than " + MAX_BACKLOG_MESSAGES + ".";
+	static final String INVALID_CHANNEL_ERROR_MESSAGE = "Channel cannot be empty.";
+	static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Please specify a valid webhook url";
+
+
 
 	static final String FIELD_COLOR = "color";
 	static final String FIELD_WEBHOOK_URL = "webhook_url";
@@ -112,16 +119,16 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 		ValidationResult validation =  new ValidationResult();
 		final Matcher matcher = pattern.matcher(webhookUrl());
 
-		if(backlogSize() < 0) {
-			validation.addError(FIELD_BACKLOG_SIZE, "backlog size cannot empty.");
+		if(backlogSize() < 0 || backlogSize() > MAX_BACKLOG_MESSAGES) {
+			validation.addError(FIELD_BACKLOG_SIZE, INVALID_BACKLOG_ERROR_MESSAGE);
 		}
 
 		if (channel().isEmpty()) {
-			validation.addError(FIELD_CHANNEL, "Channel cannot be empty.");
+			validation.addError(FIELD_CHANNEL, INVALID_CHANNEL_ERROR_MESSAGE);
 		}
 
 		if(matcher.find() == false) {
-			validation.addError(FIELD_WEBHOOK_URL, "please specify a valid webhook url");
+			validation.addError(FIELD_WEBHOOK_URL,INVALID_WEBHOOK_ERROR_MESSAGE );
 		}
 		return validation;
 
@@ -139,7 +146,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 					.channel("slacktest2")
 					.customMessage("hello World")
 					.notifyChannel(false)
-					.backlogSize(0)
+					.backlogSize(0L)
 					.linkNames(false);
 		}
 
