@@ -158,11 +158,9 @@ public class SlackEventNotification implements EventNotification {
 
 	String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
 		List<MessageSummary> backlog = getAlarmBacklog(ctx);
-		if(config.backlogSize() > 0) {
-			backlog = backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
-		}
+		backlog = getMessageBacklog(config, backlog);
 
-		Map<String, Object> model = getCustomMessageModel(ctx, config, backlog);
+		Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
 		try {
 			LOG.debug("template = {} model = {}" ,template, model);
 			return templateEngine.transform(template, model);
@@ -172,17 +170,24 @@ public class SlackEventNotification implements EventNotification {
 		}
 	}
 
+	List<MessageSummary> getMessageBacklog(SlackEventNotificationConfig config, List<MessageSummary> backlog) {
+		if(config.backlogSize() > 0) {
+			backlog = backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
+		}
+		return backlog;
+	}
+
 
 	List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
 		return notificationCallbackService.getBacklogForEvent(ctx);
 	}
 
-	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, SlackEventNotificationConfig config, List<MessageSummary> backlog) {
+	Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, String type, List<MessageSummary> backlog) {
 		EventNotificationModelData modelData = EventNotificationModelData.of(ctx, backlog);
 
 		LOG.debug("the custom message model data is {}",modelData.toString());
 		Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
-		objectMap.put("type",config.type());
+		objectMap.put("type",type);
 		return objectMap;
 	}
 

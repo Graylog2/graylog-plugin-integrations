@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,13 +61,8 @@ public class SlackEventNotificationTest  {
         eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(slackEventNotificationConfig).build();
 
 
-        final ImmutableList<MessageSummary> messageSummaries = ImmutableList.of(
-                new MessageSummary("graylog_1", new Message("Test message 1", "source1", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC))),
-                new MessageSummary("graylog_2", new Message("Test message 2", "source2", new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)))
-        );
-
+        final ImmutableList<MessageSummary> messageSummaries = generateMessageSummaries(50);
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
-
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                                                             Engine.createEngine(),
                                                             mockNotificationService,
@@ -128,13 +124,13 @@ public class SlackEventNotificationTest  {
     @Test
     public void getAlarmBacklog() {
         List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        assertThat(messageSummaries.size()).isEqualTo(2);
+        assertThat(messageSummaries.size()).isEqualTo(50);
     }
 
     @Test
     public void getCustomMessageModel() {
         List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig, messageSummaries);
+        Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig.type(), messageSummaries);
         //there are 9 keys and two asserts needs to be implemented (backlog,event)
         assertThat(customMessageModel).isNotNull();
         assertThat(customMessageModel.get("event_definition_description")).isEqualTo("Event Definition Test Description");
@@ -166,6 +162,53 @@ public class SlackEventNotificationTest  {
     public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
         slackEventNotificationConfig = buildInvalidTemplate();
         slackEventNotification.buildCustomMessage(eventNotificationContext,slackEventNotificationConfig,"Title:       ${does't exist}");
+    }
+
+
+    @Test
+    public void test_customMessage_With_Message_Backlog_Override() throws PermanentEventNotificationException {
+
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                                                   .backlogSize(5)
+                                                   .build();
+        String message = slackEventNotification.buildCustomMessage(eventNotificationContext,slackConfig,"Ich spreche Deutsch");
+        assertThat(message.toString()).isEqualTo("Ich spreche Deutsch");
+    }
+
+
+    @Test
+    public void test_backlog_messagesize() {
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                .backlogSize(5)
+                .build();
+
+        //global setting is at 10 and the message override is 5 then the backlog size = 5
+       List<MessageSummary>  messageSummaries = slackEventNotification.getMessageBacklog(slackConfig,generateMessageSummaries(10));
+       assertThat(messageSummaries.size()).isEqualTo(5);
+
+        SlackEventNotificationConfig slackConfig1 = SlackEventNotificationConfig.builder()
+                .backlogSize(0)
+                .build();
+
+        //global setting is at 10 and the message override is 0 then the backlog size = 10
+        List<MessageSummary>  messageSummaries1 = slackEventNotification.getMessageBacklog(slackConfig1,generateMessageSummaries(10));
+        assertThat(messageSummaries1.size()).isEqualTo(10);
+
+        //global setting is 0 and the backlog message size is set to 0
+        List<MessageSummary>  messageSummaries2 = slackEventNotification.getMessageBacklog(slackConfig1,generateMessageSummaries(0));
+        assertThat(messageSummaries2.size()).isEqualTo(0);
+
+    }
+
+
+    ImmutableList<MessageSummary> generateMessageSummaries(int size) {
+
+        List<MessageSummary> messageSummaries = new ArrayList();
+        for(int i=0; i< size; i++){
+            MessageSummary summary = new MessageSummary("graylog_"+i,new Message("Test message_"+i,"source"+i, new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)));
+            messageSummaries.add(summary);
+        }
+        return ImmutableList.copyOf(messageSummaries);
     }
 
     SlackEventNotificationConfig buildInvalidTemplate() {
