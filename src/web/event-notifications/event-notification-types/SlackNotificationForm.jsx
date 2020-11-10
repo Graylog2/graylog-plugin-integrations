@@ -176,7 +176,7 @@ class SlackNotificationForm extends React.Component {
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
 
-          <ControlLabel>Backlog Items</ControlLabel>
+          <ControlLabel>Message Backlog Items</ControlLabel>
           <InputGroup>
             <InputGroup.Addon>
               <input id="toggle_backlog_size"
@@ -194,7 +194,7 @@ class SlackNotificationForm extends React.Component {
                          onChange={this.handleBacklogSizeChange}
                          required />
           </InputGroup>
-          <HelpBlock>Number of messages to be included in Slack Notifications.</HelpBlock>
+          <HelpBlock>Limit the number of backlog messages that will be included in Slack notifications.</HelpBlock>
 
           <Input id="notification-userName"
                  name="user_name"
