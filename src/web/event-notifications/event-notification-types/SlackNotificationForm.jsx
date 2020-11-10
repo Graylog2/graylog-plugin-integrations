@@ -2,12 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
-import camelCase from 'lodash/camelCase';
-import max from 'lodash/max';
 
 import { getValueFromInput } from 'util/FormsUtils';
 import { Input } from 'components/bootstrap';
-import { Button, ControlLabel, FormGroup, HelpBlock, FormControl, InputGroup } from 'components/graylog';
+import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
 import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 
@@ -85,16 +83,6 @@ class SlackNotificationForm extends React.Component {
 
     };
 
-    constructor(props) {
-      super(props);
-
-      this.state = {
-        isBacklogSizeEnabled: false,
-        backlogSize: 5,
-
-      };
-    }
-
     propagateChange = (key, value) => {
       const { config, onChange } = this.props;
       const nextConfig = cloneDeep(config);
@@ -112,24 +100,8 @@ class SlackNotificationForm extends React.Component {
       this.propagateChange(name, getValueFromInput(event.target));
     };
 
-    handleBacklogSizeChange = (event) => {
-      const { name } = event.target;
-      const value = event.target.value === '' ? '' : getValueFromInput(event.target);
-
-      this.setState({ [camelCase(name)]: value });
-      this.propagateChanges(name, max([Number(value), 0]));
-    };
-
-    toggleBacklogSize = () => {
-      const { isBacklogSizeEnabled, backlogSize } = this.state;
-
-      this.setState({ isBacklogSizeEnabled: !isBacklogSizeEnabled });
-      this.propagateChanges('backlog_size', (isBacklogSizeEnabled ? 5 : backlogSize));
-    };
-
     render() {
       const { config, validation } = this.props;
-      const { isBacklogSizeEnabled, backlogSize } = this.state;
 
       return (
         <>
@@ -176,26 +148,14 @@ class SlackNotificationForm extends React.Component {
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
 
-          <ControlLabel>Message Backlog Items</ControlLabel>
-          <InputGroup>
-            <InputGroup.Addon>
-              <input id="toggle_backlog_size"
-                     type="checkbox"
-                     checked={isBacklogSizeEnabled}
-                     onChange={this.toggleBacklogSize} />
-            </InputGroup.Addon>
-            <FormControl type="number"
-                         id="notification-backlogSize"
-                         name="backlog_size"
-                         bsStyle={validation.errors.backlog_size ? 'error' : null}
-                         help={get(validation, 'errors.backlog_size[0]', 'Number of backlog item descriptions to attach.')}
-                         value={backlogSize}
-                         disabled={!isBacklogSizeEnabled}
-                         onChange={this.handleBacklogSizeChange}
-                         min="0"
-                         required />
-          </InputGroup>
-          <HelpBlock>Limit the number of backlog messages that will be included in Slack notifications.</HelpBlock>
+          <Input id="notification-backlog"
+                 name="backlog_size"
+                 label="Backlog Message Items (optional)"
+                 type="number"
+                 bsStyle={validation.errors.custom_message ? 'error' : null}
+                 help={get(validation, 'errors.custom_message[0]', 'Limit the number of backlog messages that will be included in Slack notifications.')}
+                 value={config.backlog_size || ''}
+                 onChange={this.handleChange} />
 
           <Input id="notification-userName"
                  name="user_name"
