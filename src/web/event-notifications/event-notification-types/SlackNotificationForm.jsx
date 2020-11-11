@@ -5,7 +5,7 @@ import get from 'lodash/get';
 
 import { getValueFromInput } from 'util/FormsUtils';
 import { Input } from 'components/bootstrap';
-import { Button, ControlLabel, FormGroup, HelpBlock } from 'components/graylog';
+import { Button, ControlLabel, FormControl, FormGroup, HelpBlock, InputGroup } from 'components/graylog';
 import { ColorPickerPopover } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 
@@ -148,14 +148,20 @@ class SlackNotificationForm extends React.Component {
                  value={config.custom_message || ''}
                  onChange={this.handleChange} />
 
-          <Input id="notification-backlog"
-                 name="backlog_size"
-                 label="Backlog Message Items (optional)"
-                 type="number"
-                 bsStyle={validation.errors.backlog_size ? 'error' : null}
-                 help={get(validation, 'errors.backlog_size[0]', 'Limit the number of backlog messages that will be included in Slack notifications.')}
-                 value={config.backlog_size}
-                 onChange={this.handleChange} />
+          <FormGroup>
+            <ControlLabel>Message Backlog</ControlLabel>
+            <InputGroup>
+              <InputGroup.Addon>
+                <input id="toggle_backlog_size"
+                       type="checkbox"
+                       onChange={this.toggleBacklogSize} />
+              </InputGroup.Addon>
+              <FormControl type="number"
+                           id="backlog_size"
+                           name="backlog_size" />
+            </InputGroup>
+            <HelpBlock>Number of messages to be included in Notifications.</HelpBlock>
+          </FormGroup>
 
           <Input id="notification-userName"
                  name="user_name"
