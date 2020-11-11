@@ -80,16 +80,18 @@ class SlackNotificationForm extends React.Component {
       link_names: false,
       icon_url: '',
       icon_emoji: '',
-      backlog_size: 5,
+      backlog_size: 0,
 
     };
 
     constructor(props) {
       super(props);
 
+      const defaultBacklogSize = props.config.backlog_size;
+
       this.state = {
-        isBacklogSizeEnabled: false,
-        backlogSize: props.config.backlog_size,
+        isBacklogSizeEnabled: defaultBacklogSize > 0,
+        backlogSize: defaultBacklogSize,
       };
     }
 
@@ -105,7 +107,7 @@ class SlackNotificationForm extends React.Component {
       const { isBacklogSizeEnabled, backlogSize } = this.state;
 
       this.setState({ isBacklogSizeEnabled: !isBacklogSizeEnabled });
-      this.propagateChanges('backlog_size', (isBacklogSizeEnabled ? 0 : backlogSize));
+      this.propagateChange('backlog_size', (isBacklogSizeEnabled ? 0 : backlogSize));
     };
 
     propagateChange = (key, value) => {
