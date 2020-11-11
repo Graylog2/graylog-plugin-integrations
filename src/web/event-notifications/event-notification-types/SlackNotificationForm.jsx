@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
+import camelCase from 'lodash/camelCase';
 
 import { getValueFromInput } from 'util/FormsUtils';
 import { Input } from 'components/bootstrap';
@@ -79,8 +80,32 @@ class SlackNotificationForm extends React.Component {
       link_names: false,
       icon_url: '',
       icon_emoji: '',
-      backlog_size: 0,
+      backlog_size: 5,
 
+    };
+
+    constructor(props) {
+      super(props);
+
+      this.state = {
+        isBacklogSizeEnabled: false,
+        backlogSize: props.config.backlog_size,
+      };
+    }
+
+    handleBacklogSizeChange = (event) => {
+      const { name } = event.target;
+      const value = getValueFromInput(event.target);
+
+      this.setState({ [camelCase(name)]: value });
+      this.propagateChange(name, getValueFromInput(event.target));
+    };
+
+    toggleBacklogSize = () => {
+      const { isBacklogSizeEnabled, backlogSize } = this.state;
+
+      this.setState({ isBacklogSizeEnabled: !isBacklogSizeEnabled });
+      this.propagateChanges('backlog_size', (isBacklogSizeEnabled ? 0 : backlogSize));
     };
 
     propagateChange = (key, value) => {
@@ -102,6 +127,7 @@ class SlackNotificationForm extends React.Component {
 
     render() {
       const { config, validation } = this.props;
+      const { isBacklogSizeEnabled, backlogSize } = this.state;
 
       return (
         <>
@@ -154,11 +180,15 @@ class SlackNotificationForm extends React.Component {
               <InputGroup.Addon>
                 <input id="toggle_backlog_size"
                        type="checkbox"
+                       checked={isBacklogSizeEnabled}
                        onChange={this.toggleBacklogSize} />
               </InputGroup.Addon>
               <FormControl type="number"
                            id="backlog_size"
-                           name="backlog_size" />
+                           name="backlog_size"
+                           onChange={this.handleBacklogSizeChange}
+                           value={backlogSize}
+                           disabled={!isBacklogSizeEnabled} />
             </InputGroup>
             <HelpBlock>Number of messages to be included in Notifications.</HelpBlock>
           </FormGroup>
