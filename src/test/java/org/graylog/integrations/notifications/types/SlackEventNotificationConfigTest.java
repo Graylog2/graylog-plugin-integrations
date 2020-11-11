@@ -3,6 +3,8 @@ package org.graylog.integrations.notifications.types;
 import org.graylog2.plugin.rest.ValidationResult;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,12 +38,22 @@ public class SlackEventNotificationConfigTest {
         SlackEventNotificationConfig negativeBacklogSize = SlackEventNotificationConfig.builder()
                                                           .backlogSize(-1)
                                                           .build();
-        assertThat(negativeBacklogSize.validate().getErrors().get(SlackEventNotificationConfig.INVALID_BACKLOG_ERROR_MESSAGE));
+
+        Collection<String> expected = new ArrayList();
+        expected.add(SlackEventNotificationConfig.INVALID_BACKLOG_ERROR_MESSAGE);
+
+        assertThat(negativeBacklogSize.validate().failed()).isTrue();
+        Map<String, Collection<String>> errors = negativeBacklogSize.validate().getErrors();
+        assertThat(errors.get("backlog_size")).isEqualTo(expected);
+
 
         SlackEventNotificationConfig veryBigBacklogSize =  SlackEventNotificationConfig.builder()
-                                                          .backlogSize(50)
+                                                          .backlogSize(99999)
                                                           .build();
-        assertThat(veryBigBacklogSize.validate().getErrors().get(SlackEventNotificationConfig.INVALID_BACKLOG_ERROR_MESSAGE));
+        assertThat(veryBigBacklogSize.validate().failed()).isTrue();
+        Map<String, Collection<String>> errors1 = negativeBacklogSize.validate().getErrors();
+        assertThat(errors1.get("backlog_size")).isEqualTo(expected);
+
 
         SlackEventNotificationConfig goodBacklogSize =  SlackEventNotificationConfig.builder()
                                                        .backlogSize(5)
