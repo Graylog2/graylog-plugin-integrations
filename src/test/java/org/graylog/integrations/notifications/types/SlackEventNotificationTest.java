@@ -189,15 +189,15 @@ public class SlackEventNotificationTest {
                 .backlogSize(0)
                 .build();
 
-        //global setting is at 10 and the message override is 0 then the backlog size = 10
+        //global backlog message is 10,when the SlackEventNotificationConfig backlog_size is set to 0, then the expected backlog message size is 10.
         List<MessageSummary> messageSummaries1 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(10));
         assertThat(messageSummaries1.size()).isEqualTo(10);
 
-        //global setting is 0 and the backlog message size is set to 0
+        //global backlog messages is 0 ,when the SlackEventNotificationConfig backlog_size is set to 0, then the expected backlog message size is 0.
         List<MessageSummary> messageSummaries2 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(0));
         assertThat(messageSummaries2.size()).isEqualTo(0);
 
-        //global setting is 0 and the backlog message size is set to 0
+        //global backlog messages is null, then the expected backlog messages is null.
         List<MessageSummary> messageSummaries3 = slackEventNotification.getMessageBacklog(slackConfig1, null);
         assertThat(messageSummaries3).isNull();
 
