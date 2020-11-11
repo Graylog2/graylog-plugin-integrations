@@ -1,16 +1,16 @@
 /**
  * This file is part of Graylog.
- *
+ * <p>
  * Graylog is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * Graylog is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -32,141 +32,138 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 public class SlackMessage {
 
-	private String color;
-	private String iconEmoji;
-	private String iconUrl;
-	private String userName;
-	private String channel;
-	private boolean linkNames;
-	private String message;
-	private String customMessage;
-	private long backlogSize;
+    private String color;
+    private String iconEmoji;
+    private String iconUrl;
+    private String userName;
+    private String channel;
+    private boolean linkNames;
+    private String message;
+    private String customMessage;
 
-	public SlackMessage(
-			String color,
-			String iconEmoji,
-			String iconUrl,
-			String userName,
-			String channel,
-			long backlogSize,
-			boolean linkNames,
-			String message,
-			String customMessage
 
-	) {
-		this.color = color;
-		this.iconEmoji = iconEmoji;
-		this.iconUrl = iconUrl;
-		this.userName = userName;
-		this.channel = channel;
-		this.linkNames = linkNames;
-		this.backlogSize = backlogSize;
-		this.message = message;
-		this.customMessage = customMessage;
+    public SlackMessage(
+            String color,
+            String iconEmoji,
+            String iconUrl,
+            String userName,
+            String channel,
+            boolean linkNames,
+            String message,
+            String customMessage
 
-	}
+    ) {
+        this.color = color;
+        this.iconEmoji = iconEmoji;
+        this.iconUrl = iconUrl;
+        this.userName = userName;
+        this.channel = channel;
+        this.linkNames = linkNames;
+        this.message = message;
+        this.customMessage = customMessage;
 
-	public SlackMessage(String message){
-		this.message = message;
-	}
+    }
 
-	public String getJsonString() {
-		// See https://api.slack.com/methods/chat.postMessage for valid parameters
-		final Map<String, Object> params = new HashMap<>();
-		params.put("channel", channel);
-		params.put("text", message);
-		params.put("link_names", linkNames);
-		params.put("backlog_size",backlogSize);
+    public SlackMessage(String message) {
+        this.message = message;
+    }
 
-		if (!isNullOrEmpty(userName)) {
-			params.put("username", userName);
-		}
+    public String getJsonString() {
+        // See https://api.slack.com/methods/chat.postMessage for valid parameters
+        final Map<String, Object> params = new HashMap<>();
+        params.put("channel", channel);
+        params.put("text", message);
+        params.put("link_names", linkNames);
 
-		if (!isNullOrEmpty(iconUrl)) {
-			params.put("icon_url", iconUrl);
-		}
+        if (!isNullOrEmpty(userName)) {
+            params.put("username", userName);
+        }
 
-		if (!isNullOrEmpty(iconEmoji)) {
-			params.put("icon_emoji", ensureEmojiSyntax(iconEmoji));
-		}
+        if (!isNullOrEmpty(iconUrl)) {
+            params.put("icon_url", iconUrl);
+        }
 
-		final List<Attachment> attachments = new ArrayList<>();
-		if (!isNullOrEmpty(customMessage)) {
-			final Attachment attachment = new Attachment(
-					color,
-					customMessage,
-					"Custom Message",
-					"Custom Message:",
-					null
-			);
-			attachments.add(attachment);
-		}
+        if (!isNullOrEmpty(iconEmoji)) {
+            params.put("icon_emoji", ensureEmojiSyntax(iconEmoji));
+        }
 
-		if (!attachments.isEmpty()) {
-			params.put("attachments", attachments);
-		}
+        final List<Attachment> attachments = new ArrayList<>();
+        if (!isNullOrEmpty(customMessage)) {
+            final Attachment attachment = new Attachment(
+                    color,
+                    customMessage,
+                    "Custom Message",
+                    "Custom Message:",
+                    null
+            );
+            attachments.add(attachment);
+        }
 
-		try {
-			return new ObjectMapper().writeValueAsString(params);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException("Could not build payload JSON.", e);
-		}
-	}
+        if (!attachments.isEmpty()) {
+            params.put("attachments", attachments);
+        }
 
-	private String ensureEmojiSyntax(final String x) {
-		String emoji = x.trim();
+        try {
+            return new ObjectMapper().writeValueAsString(params);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Could not build payload JSON.", e);
+        }
+    }
 
-		if (!emoji.isEmpty() && !emoji.startsWith(":")) {
-			emoji = ":" + emoji;
-		}
+    private String ensureEmojiSyntax(final String x) {
+        String emoji = x.trim();
 
-		if (!emoji.isEmpty() && !emoji.endsWith(":")) {
-			emoji = emoji + ":";
-		}
+        if (!emoji.isEmpty() && !emoji.startsWith(":")) {
+            emoji = ":" + emoji;
+        }
 
-		return emoji;
-	}
+        if (!emoji.isEmpty() && !emoji.endsWith(":")) {
+            emoji = emoji + ":";
+        }
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class Attachment {
-		@JsonProperty
-		public String fallback;
-		@JsonProperty
-		public String text;
-		@JsonProperty
-		public String pretext;
-		@JsonProperty
-		public String color;
-		@JsonProperty
-		public List<AttachmentField> fields;
+        return emoji;
+    }
 
-		@JsonCreator
-		public Attachment(String color, String text, String fallback, String pretext, List<AttachmentField> fields) {
-			this.fallback = fallback;
-			this.text = text;
-			this.pretext = pretext;
-			this.color = color;
-			this.fields = fields;
-		}
-	}
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Attachment {
+        @JsonProperty
+        public String fallback;
+        @JsonProperty
+        public String text;
+        @JsonProperty
+        public String pretext;
+        @JsonProperty
+        public String color;
+        @JsonProperty
+        public List<AttachmentField> fields;
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class AttachmentField {
-		@JsonProperty
-		public String title;
-		@JsonProperty
-		public String value;
-		@JsonProperty("short")
-		public boolean isShort;
+        @JsonCreator
+        public Attachment(String color, String text, String fallback, String pretext, List<AttachmentField> fields) {
+            this.fallback = fallback;
+            this.text = text;
+            this.pretext = pretext;
+            this.color = color;
+            this.fields = fields;
+        }
+    }
 
-		@JsonCreator
-		public AttachmentField(String title, String value, boolean isShort) {
-			this.title = title;
-			this.value = value;
-			this.isShort = isShort;
-		}
-	}
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AttachmentField {
+        @JsonProperty
+        public String title;
+        @JsonProperty
+        public String value;
+        @JsonProperty("short")
+        public boolean isShort;
+
+        @JsonCreator
+        public AttachmentField(String title, String value, boolean isShort) {
+            this.title = title;
+            this.value = value;
+            this.isShort = isShort;
+        }
+    }
 
 }
