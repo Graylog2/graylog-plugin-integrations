@@ -36,8 +36,12 @@ public class SlackEventNotificationConfigTest {
     @Test
     public void validate_messageBacklog() {
         SlackEventNotificationConfig negativeBacklogSize = SlackEventNotificationConfig.builder()
-                                                          .backlogSize(-1)
-                                                          .build();
+                .backlogSize(-1)
+                .build();
+
+
+        assertThat(negativeBacklogSize.channel()).isEqualTo(SlackEventNotificationConfig.CHANNEL);
+        assertThat(negativeBacklogSize.webhookUrl()).isEqualTo(SlackEventNotificationConfig.WEB_HOOK_URL);
 
         Collection<String> expected = new ArrayList();
         expected.add(SlackEventNotificationConfig.INVALID_BACKLOG_ERROR_MESSAGE);
@@ -48,16 +52,16 @@ public class SlackEventNotificationConfigTest {
 
 
         SlackEventNotificationConfig veryBigBacklogSize =  SlackEventNotificationConfig.builder()
-                                                          .backlogSize(99999)
-                                                          .build();
+                .backlogSize(99999)
+                .build();
         assertThat(veryBigBacklogSize.validate().failed()).isTrue();
         Map<String, Collection<String>> errors1 = negativeBacklogSize.validate().getErrors();
         assertThat(errors1.get("backlog_size")).isEqualTo(expected);
 
 
         SlackEventNotificationConfig goodBacklogSize =  SlackEventNotificationConfig.builder()
-                                                       .backlogSize(5)
-                                                       .build();
+                .backlogSize(5)
+                .build();
         assertThat(goodBacklogSize.validate().failed()).isFalse();
 
     }
