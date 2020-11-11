@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Input } from 'components/bootstrap';
+import { Icon } from 'components/common';
 
 import formValidation from 'aws/utils/formValidation';
 
@@ -11,7 +12,7 @@ const Label = ({ label, error }) => {
     return (
       <ErrorContainer>
         {label}
-        <Error><i className="fa fa-exclamation-triangle" /> {error}</Error>
+        <Error><Icon name="exclamation-triangle" /> {error}</Error>
       </ErrorContainer>
     );
   }

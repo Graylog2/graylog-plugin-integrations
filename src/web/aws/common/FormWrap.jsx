@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import { Button, Panel } from 'components/graylog';
+import { Icon } from 'components/common';
 
 export const ErrorMessage = ({ fullMessage, niceMessage }) => {
   const [expanded, toggleExpanded] = useState(false);
@@ -14,10 +15,9 @@ export const ErrorMessage = ({ fullMessage, niceMessage }) => {
       {niceMessage
         && (
           <ErrorToggleInfo onClick={() => toggleExpanded(!expanded)} expanded={expanded}>
-            More Info <i className="fa fa-chevron-right" />
+            More Info <Icon name="chevron-right" />
           </ErrorToggleInfo>
-        )
-      }
+        )}
     </>
   );
 
@@ -165,7 +165,7 @@ const ErrorToggleInfo = styled.button`
   padding: 0;
 
   .fa {
-    transform: rotate(${props => (props.expanded ? '90deg' : '0deg')});
+    transform: rotate(${(props) => (props.expanded ? '90deg' : '0deg')});
     transition: 150ms transform ease-in-out;
   }
 `;

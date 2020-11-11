@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Button, Modal, Panel } from 'components/graylog';
+import { Icon } from 'components/common';
 
 import { FormDataContext } from 'aws/context/FormData';
 import { ApiContext } from 'aws/context/Api';
@@ -79,7 +80,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                     keyboard={false}
                     bsSize="small">
         <LoadingContent>
-          <i className="fa fa-spin fa-spinner" />
+          <Icon name="spinner" spin />
           <LoadingMessage>This request may take a few moments.</LoadingMessage>
         </LoadingContent>
       </LoadingModal>
@@ -98,7 +99,7 @@ const KinesisStreams = ({ onChange, onSubmit, toggleSetup }) => {
                     <p>
                       Please select the stream you would like to read messages from, or follow the&nbsp;
                       <DocumentationLink page={DocsRoutes.INTEGRATIONS.AWS.AWS_KINESIS_CLOUDWATCH_INPUTS} text="AWS Kinesis/CloudWatch Input " />
-                         documentation for more details on this set up.
+                      documentation for more details on this set up.
                     </p>
                   </>
                 )}>
