@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -161,17 +162,19 @@ public class SlackEventNotification implements EventNotification {
 		backlog = getMessageBacklog(config, backlog);
 
 		Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
-		try {
-			LOG.debug("template = {} model = {}" ,template, model);
-			return templateEngine.transform(template, model);
-		} catch (Exception e) {
-			LOG.error("Exception during templating [{}]", e.toString());
-			throw new PermanentEventNotificationException(e.toString(),e.getCause());
+			try {
+				LOG.debug("template = {} model = {}", template, model);
+				return templateEngine.transform(template, model);
+			} catch (Exception e) {
+				LOG.error("Exception during templating [{}]", e.toString());
+				throw new PermanentEventNotificationException(e.toString(), e.getCause());
 		}
+
+
 	}
 
 	List<MessageSummary> getMessageBacklog(SlackEventNotificationConfig config, List<MessageSummary> backlog) {
-		if(config.backlogSize() > 0) {
+		if(config.backlogSize() > 0 && backlog != null) {
 			backlog = backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
 		}
 		return backlog;

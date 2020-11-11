@@ -97,7 +97,8 @@ public class SlackEventNotificationTest  {
 
     @Test
     public void createSlackMessage() throws EventNotificationException {
-       String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\",\"backlogSize\":1}";
+       //String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\",\"backlogSize\":1}";
+       String expected = "{\"link_names\":true,\"backlog_size\":1,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
        SlackMessage message =  slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
        String actual  = message.getJsonString();
        assertThat(actual).isEqualTo(expected);
@@ -172,7 +173,7 @@ public class SlackEventNotificationTest  {
                                                    .backlogSize(5)
                                                    .build();
         String message = slackEventNotification.buildCustomMessage(eventNotificationContext,slackConfig,"Ich spreche Deutsch");
-        assertThat(message.toString()).isEqualTo("Ich spreche Deutsch");
+        assertThat(message).isEqualTo("Ich spreche Deutsch");
     }
 
 
@@ -197,6 +198,10 @@ public class SlackEventNotificationTest  {
         //global setting is 0 and the backlog message size is set to 0
         List<MessageSummary>  messageSummaries2 = slackEventNotification.getMessageBacklog(slackConfig1,generateMessageSummaries(0));
         assertThat(messageSummaries2.size()).isEqualTo(0);
+
+        //global setting is 0 and the backlog message size is set to 0
+        List<MessageSummary>  messageSummaries3 = slackEventNotification.getMessageBacklog(slackConfig1,null);
+        assertThat(messageSummaries3).isNull();
 
     }
 
