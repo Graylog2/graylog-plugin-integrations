@@ -79,7 +79,7 @@ class SlackNotificationForm extends React.Component {
       link_names: false,
       icon_url: '',
       icon_emoji: '',
-      backlog_size: 5,
+      backlog_size: 0,
 
     };
 
@@ -152,9 +152,9 @@ class SlackNotificationForm extends React.Component {
                  name="backlog_size"
                  label="Backlog Message Items (optional)"
                  type="number"
-                 bsStyle={validation.errors.custom_message ? 'error' : null}
-                 help={get(validation, 'errors.custom_message[0]', 'Limit the number of backlog messages that will be included in Slack notifications.')}
-                 value={config.backlog_size || ''}
+                 bsStyle={validation.errors.backlog_size ? 'error' : null}
+                 help={get(validation, 'errors.backlog_size[0]', 'Limit the number of backlog messages that will be included in Slack notifications.')}
+                 value={config.backlog_size}
                  onChange={this.handleChange} />
 
           <Input id="notification-userName"

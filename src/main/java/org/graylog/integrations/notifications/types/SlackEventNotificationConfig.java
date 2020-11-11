@@ -51,7 +51,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
     private static final String CUSTOM_MESSAGE = "hello World";
     private static final boolean FALSE = false;
-    private static final long BACKLOG_SIZE = 5;
+    private static final long BACKLOG_SIZE = 0;
 
     static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero or greater than " + MAX_BACKLOG_MESSAGES + ".";
     static final String INVALID_CHANNEL_ERROR_MESSAGE = "Channel cannot be empty.";
