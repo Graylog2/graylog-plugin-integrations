@@ -47,14 +47,7 @@ import static java.util.Objects.requireNonNull;
 
 public class SlackEventNotification implements EventNotification {
 
-    public interface Factory extends EventNotification.Factory {
-        @Override
-        SlackEventNotification create();
-    }
-
-
     private static final Logger LOG = LoggerFactory.getLogger(SlackEventNotification.class);
-
     private final EventNotificationService notificationCallbackService;
     private final Engine templateEngine;
     private final NotificationService notificationService;
@@ -178,7 +171,6 @@ public class SlackEventNotification implements EventNotification {
         return truncatedBacklog;
     }
 
-
     @VisibleForTesting
     List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
         return notificationCallbackService.getBacklogForEvent(ctx);
@@ -192,6 +184,11 @@ public class SlackEventNotification implements EventNotification {
         Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
         objectMap.put("type", type);
         return objectMap;
+    }
+
+    public interface Factory extends EventNotification.Factory {
+        @Override
+        SlackEventNotification create();
     }
 
 
