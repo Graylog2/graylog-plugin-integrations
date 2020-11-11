@@ -96,7 +96,7 @@ public class SlackEventNotificationTest {
 
     @Test
     public void createSlackMessage() throws EventNotificationException {
-        String expected = "{\"link_names\":true,\"backlog_size\":1,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
+        String expected = "{\"link_names\":true,\"attachments\":[{\"fallback\":\"Custom Message\",\"text\":\"a custom message\",\"pretext\":\"Custom Message:\",\"color\":\"#FF2052\"}],\"channel\":\"#general\",\"text\":\"@channel *Alert _Event Definition Test Title_* triggered:\\n> Event Definition Test Description \\n\"}";
         SlackMessage message = slackEventNotification.createSlackMessage(eventNotificationContext, slackEventNotificationConfig);
         String actual = message.getJsonString();
         assertThat(actual).isEqualTo(expected);
@@ -189,9 +189,9 @@ public class SlackEventNotificationTest {
                 .backlogSize(0)
                 .build();
 
-        //global setting is at 10 and the message override is 0 then the backlog size = 0
+        //global setting is at 10 and the message override is 0 then the backlog size = 10
         List<MessageSummary> messageSummaries1 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(10));
-        assertThat(messageSummaries1.size()).isEqualTo(0);
+        assertThat(messageSummaries1.size()).isEqualTo(10);
 
         //global setting is 0 and the backlog message size is set to 0
         List<MessageSummary> messageSummaries2 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(0));
@@ -199,8 +199,8 @@ public class SlackEventNotificationTest {
 
         //global setting is 0 and the backlog message size is set to 0
         List<MessageSummary> messageSummaries3 = slackEventNotification.getMessageBacklog(slackConfig1, null);
-        assertThat(messageSummaries3).isNotNull();
-        assertThat(messageSummaries3.size()).isEqualTo(0);
+        assertThat(messageSummaries3).isNull();
+
 
     }
 
