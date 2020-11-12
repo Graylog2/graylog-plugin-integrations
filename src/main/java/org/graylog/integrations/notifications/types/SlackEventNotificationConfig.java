@@ -46,7 +46,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
     private final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
     private final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-    private static final long MAX_BACKLOG_MESSAGES = 49;
+    private static final long MAX_BACKLOG_MESSAGES = 50;
     private static final String HEX_COLOR = "#ff0500";
 
     private static final String CUSTOM_MESSAGE = "hello World";
