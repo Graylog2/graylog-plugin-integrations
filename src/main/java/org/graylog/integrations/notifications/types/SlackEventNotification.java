@@ -164,10 +164,8 @@ public class SlackEventNotification implements EventNotification {
 
     @VisibleForTesting
     List<MessageSummary> getMessageBacklog(SlackEventNotificationConfig config, List<MessageSummary> backlog) {
-        List<MessageSummary> truncatedBacklog = Collections.emptyList();
         if (config.backlogSize() > 0 && backlog != null) {
-            truncatedBacklog = backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
-            return truncatedBacklog;
+            return backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
         }
         return backlog;
     }
