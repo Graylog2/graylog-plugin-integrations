@@ -191,6 +191,7 @@ class SlackNotificationForm extends React.Component {
                            onChange={this.handleBacklogSizeChange}
                            value={backlogSize}
                            min="0"
+                           max="50"
                            disabled={!isBacklogSizeEnabled} />
             </InputGroup>
             <HelpBlock>Limit the number(max=50) of backlog messages that will be included in Slack notifications.</HelpBlock>
