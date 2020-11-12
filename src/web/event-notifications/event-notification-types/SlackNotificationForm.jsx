@@ -194,7 +194,7 @@ class SlackNotificationForm extends React.Component {
                            max="50"
                            disabled={!isBacklogSizeEnabled} />
             </InputGroup>
-            <HelpBlock>The Slack notification cannot have more than 50 backlog messages.</HelpBlock>
+            <HelpBlock>Slack notification cannot have more than 50 backlog messages.</HelpBlock>
           </FormGroup>
 
           <Input id="notification-userName"
