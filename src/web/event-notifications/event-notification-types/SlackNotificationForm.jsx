@@ -179,7 +179,7 @@ class SlackNotificationForm extends React.Component {
                  onChange={this.handleChange} />
 
           <FormGroup>
-            <ControlLabel>Backlog Messages</ControlLabel>
+            <ControlLabel>Backlog Message Items (optional)</ControlLabel>
             <InputGroup>
               <InputGroup.Addon>
                 <input id="toggle_backlog_size"
