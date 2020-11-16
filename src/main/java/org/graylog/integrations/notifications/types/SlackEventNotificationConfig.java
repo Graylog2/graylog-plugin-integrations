@@ -125,7 +125,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
         ValidationResult validation = new ValidationResult();
         final Matcher matcher = pattern.matcher(webhookUrl());
 
-        if (backlogSize() < 0 || backlogSize() > MAX_BACKLOG_MESSAGES) {
+        if (backlogSize() < 0 ) {
             validation.addError(FIELD_BACKLOG_SIZE, INVALID_BACKLOG_ERROR_MESSAGE);
         }
 
