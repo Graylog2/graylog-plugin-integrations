@@ -159,7 +159,7 @@ public class SlackEventNotificationTest {
 
 
     @Test
-    public void test_customMessage_With_Message_Backlog_Override() throws PermanentEventNotificationException {
+    public void test_customMessage() throws PermanentEventNotificationException {
 
         SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
                 .backlogSize(5)
@@ -170,7 +170,7 @@ public class SlackEventNotificationTest {
 
 
     @Test
-    public void test_backlog_messagesize() {
+    public void test_backlog_message_limit_when_backlogSize_isFive() {
         SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
                 .backlogSize(5)
                 .build();
@@ -178,6 +178,28 @@ public class SlackEventNotificationTest {
         //global setting is at N and the message override is 5 then the backlog size = 5
         List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(eventNotificationContext,slackConfig);
         assertThat(messageSummaries.size()).isEqualTo(5);
+    }
+
+    @Test
+    public void test_backlog_message_limit_when_backlogSize_isZero() {
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                .backlogSize(0)
+                .build();
+
+        //global setting is at N and the message override is 0 then the backlog size = 0
+        List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(eventNotificationContext,slackConfig);
+        assertThat(messageSummaries.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void test_backlog_message_limit_When_eventNotificationContext_isNull() {
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                .backlogSize(0)
+                .build();
+
+        //global setting is at N and the eventNotificationContext is null then the backlog size = 0
+        List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(null,slackConfig);
+        assertThat(messageSummaries).isNull();
     }
 
 
