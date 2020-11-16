@@ -202,9 +202,9 @@ public class SlackEventNotificationTest {
                 .backlogSize(0)
                 .build();
 
-        //global setting is at N and the message override is 0 then the backlog size = 0
+        //global setting is at N and the message override is 0 then the backlog size = 50
         List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(eventNotificationContext,slackConfig);
-        assertThat(messageSummaries.size()).isEqualTo(0);
+        assertThat(messageSummaries.size()).isEqualTo(50);
     }
 
     @Test
