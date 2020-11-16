@@ -121,14 +121,8 @@ public class SlackEventNotificationTest {
     }
 
     @Test
-    public void getAlarmBacklog() {
-        List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
-        assertThat(messageSummaries.size()).isEqualTo(50);
-    }
-
-    @Test
     public void getCustomMessageModel() {
-        List<MessageSummary> messageSummaries = slackEventNotification.getAlarmBacklog(eventNotificationContext);
+        List<MessageSummary> messageSummaries = generateMessageSummaries(50);
         Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig.type(), messageSummaries);
         //there are 9 keys and two asserts needs to be implemented (backlog,event)
         assertThat(customMessageModel).isNotNull();
@@ -181,27 +175,9 @@ public class SlackEventNotificationTest {
                 .backlogSize(5)
                 .build();
 
-        //global setting is at 10 and the message override is 5 then the backlog size = 5
-        List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(slackConfig, generateMessageSummaries(10));
+        //global setting is at N and the message override is 5 then the backlog size = 5
+        List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(eventNotificationContext,slackConfig);
         assertThat(messageSummaries.size()).isEqualTo(5);
-
-        SlackEventNotificationConfig slackConfig1 = SlackEventNotificationConfig.builder()
-                .backlogSize(0)
-                .build();
-
-        //global backlog message is 10,when the SlackEventNotificationConfig backlog_size is set to 0, then the expected backlog message size is 10.
-        List<MessageSummary> messageSummaries1 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(10));
-        assertThat(messageSummaries1.size()).isEqualTo(10);
-
-        //global backlog messages is 0 ,when the SlackEventNotificationConfig backlog_size is set to 0, then the expected backlog message size is 0.
-        List<MessageSummary> messageSummaries2 = slackEventNotification.getMessageBacklog(slackConfig1, generateMessageSummaries(0));
-        assertThat(messageSummaries2.size()).isEqualTo(0);
-
-        //global backlog messages is null, then the expected backlog messages is null.
-        List<MessageSummary> messageSummaries3 = slackEventNotification.getMessageBacklog(slackConfig1, null);
-        assertThat(messageSummaries3).isNull();
-
-
     }
 
 
