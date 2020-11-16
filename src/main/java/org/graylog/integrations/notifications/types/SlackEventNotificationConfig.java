@@ -51,6 +51,8 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     private static final boolean FALSE = false;
     private static final long BACKLOG_SIZE = 0;
 
+
+    static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero .";
     static final String INVALID_CHANNEL_ERROR_MESSAGE = "Channel cannot be empty.";
     static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Please specify a valid webhook url";
     static final String WEB_HOOK_URL = "https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx";
@@ -121,6 +123,10 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     public ValidationResult validate() {
         ValidationResult validation = new ValidationResult();
         final Matcher matcher = pattern.matcher(webhookUrl());
+
+        if (backlogSize() < 0) {
+            validation.addError(FIELD_BACKLOG_SIZE, INVALID_BACKLOG_ERROR_MESSAGE);
+        }
 
         if (channel().isEmpty()) {
             validation.addError(FIELD_CHANNEL, INVALID_CHANNEL_ERROR_MESSAGE);
