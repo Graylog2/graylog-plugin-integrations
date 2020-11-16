@@ -7,6 +7,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.junit.After;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.when;
 public class SlackClientTest {
     
     private OkHttpClient mockHttpClient;
+    private static final String TEST_MESSAGE = "Henry Hühnchen(little chicken)";
+    private static final String TEST_MESSAGE_1 = "{\"link_names\":false,\"channel\":null,\"text\":\"Henry Hühnchen(little chicken)\"}";
 
 
     @Before
@@ -43,7 +46,7 @@ public class SlackClientTest {
     @Test
     public void send_sendsHttpRequestAsExpected_whenInputIsGood() throws Exception {
         SlackClient slackClient = new SlackClient(mockHttpClient);
-        SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
+        SlackMessage message = new SlackMessage(TEST_MESSAGE);
         slackClient.send(message,"http://url.com/");
         
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
@@ -54,10 +57,9 @@ public class SlackClientTest {
         assertThat(sent.url().toString()).isEqualTo("http://url.com/");
         assertThat(sent.method()).isEqualTo("POST");
         assertThat(sent.body()).isNotNull();
-        assertThat(sent.body().contentLength()).isEqualTo(Long.valueof(TEST_MESSAGE.length()));
         Buffer buffer = new Buffer();
         sent.body().writeTo(buffer);
-        assertThat(buffer.readUtf8()).isEqualTo(TEST_MESSAGE);
+        assertThat(buffer.readUtf8()).isEqualTo(TEST_MESSAGE_1);
 
     }
 
@@ -71,7 +73,7 @@ public class SlackClientTest {
 
 
         SlackClient slackClient = new SlackClient(okHttpClient);
-        SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
+        SlackMessage message = new SlackMessage(TEST_MESSAGE);
         slackClient.send(message,"http://url.com/");
     }
 
