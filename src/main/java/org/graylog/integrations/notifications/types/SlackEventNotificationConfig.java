@@ -33,7 +33,6 @@ import org.graylog2.plugin.rest.ValidationResult;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,14 +45,12 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
 
     private final String regex = "https:\\/\\/hooks.slack.com\\/services\\/";
     private final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
-    private static final long MAX_BACKLOG_MESSAGES = 50;
     private static final String HEX_COLOR = "#ff0500";
 
     private static final String CUSTOM_MESSAGE = "hello World";
     private static final boolean FALSE = false;
     private static final long BACKLOG_SIZE = 0;
 
-    static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero or greater than " + MAX_BACKLOG_MESSAGES + ".";
     static final String INVALID_CHANNEL_ERROR_MESSAGE = "Channel cannot be empty.";
     static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Please specify a valid webhook url";
     static final String WEB_HOOK_URL = "https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx";
@@ -124,10 +121,6 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     public ValidationResult validate() {
         ValidationResult validation = new ValidationResult();
         final Matcher matcher = pattern.matcher(webhookUrl());
-
-        if (backlogSize() < 0 ) {
-            validation.addError(FIELD_BACKLOG_SIZE, INVALID_BACKLOG_ERROR_MESSAGE);
-        }
 
         if (channel().isEmpty()) {
             validation.addError(FIELD_CHANNEL, INVALID_CHANNEL_ERROR_MESSAGE);
