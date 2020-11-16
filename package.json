@@ -2,6 +2,7 @@
   "name": "graylog-plugin-integrations",
   "version": "4.0.0-SNAPSHOT",
   "description": "",
+  "license": "SSPL-1.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
