@@ -197,7 +197,7 @@ public class SlackEventNotificationTest {
                 .backlogSize(0)
                 .build();
 
-        //global setting is at N and the eventNotificationContext is null then the backlog size = 0
+        //global setting is at N and the eventNotificationContext is null then the message summaries is null
         List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(null,slackConfig);
         assertThat(messageSummaries).isNull();
     }
