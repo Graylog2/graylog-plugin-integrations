@@ -22,7 +22,7 @@ function SlackNotificationSummary({ notification, ...restProps }) {
         <td>{notification.config.custom_message}</td>
       </tr>
       <tr>
-        <td>Backlog Message Size</td>
+        <td>Message Backlog Limit</td>
         <td>{notification.config.backlog_size}</td>
       </tr>
       <tr>
