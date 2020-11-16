@@ -149,10 +149,8 @@ public class SlackEventNotification implements EventNotification {
     }
 
     String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
-        final List<MessageSummary> backlog = getAlarmBacklog(ctx);
-        final List<MessageSummary> truncatedBacklog = getMessageBacklog(config, backlog);
-
-        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), truncatedBacklog);
+        final List<MessageSummary> backlog = getMessageBacklog(ctx,config);
+        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
         try {
             LOG.debug("template = {} model = {}", template, model);
             return templateEngine.transform(template, model);
@@ -164,17 +162,14 @@ public class SlackEventNotification implements EventNotification {
     }
 
     @VisibleForTesting
-    List<MessageSummary> getMessageBacklog(SlackEventNotificationConfig config, List<MessageSummary> backlog) {
+    List<MessageSummary> getMessageBacklog(EventNotificationContext ctx, SlackEventNotificationConfig config) {
+        List<MessageSummary> backlog = notificationCallbackService.getBacklogForEvent(ctx);
         if (config.backlogSize() > 0 && backlog != null) {
             return backlog.stream().limit(config.backlogSize()).collect(Collectors.toList());
         }
         return backlog;
     }
 
-    @VisibleForTesting
-    List<MessageSummary> getAlarmBacklog(EventNotificationContext ctx) {
-        return notificationCallbackService.getBacklogForEvent(ctx);
-    }
 
     @VisibleForTesting
     Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, String type, List<MessageSummary> backlog) {

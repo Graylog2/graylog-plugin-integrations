@@ -50,11 +50,6 @@ public class SlackEventNotificationConfigTest {
         Map<String, Collection<String>> errors = negativeBacklogSize.validate().getErrors();
         assertThat(errors.get("backlog_size")).isEqualTo(expected);
 
-
-        SlackEventNotificationConfig veryBigBacklogSize =  SlackEventNotificationConfig.builder()
-                .backlogSize(99999)
-                .build();
-        assertThat(veryBigBacklogSize.validate().failed()).isTrue();
         Map<String, Collection<String>> errors1 = negativeBacklogSize.validate().getErrors();
         assertThat(errors1.get("backlog_size")).isEqualTo(expected);
 
