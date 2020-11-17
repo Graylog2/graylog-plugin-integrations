@@ -77,14 +77,7 @@ public class SlackEventNotification implements EventNotification {
     @Override
     public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException, TemporaryEventNotificationException {
         final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-        ValidationResult result = config.validate();
-        result.getErrors().entrySet().stream().forEach(e -> LOG.error("Invalid configuration for key [{}] and value [{}]", e.getKey(), e.getValue()));
-
         LOG.debug("SlackEventNotification backlog size in method execute is [{}]", config.backlogSize());
-
-        if (result.failed()) {
-            throw new PermanentEventNotificationException("Please verify your Slack Event Configuration");
-        }
 
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
