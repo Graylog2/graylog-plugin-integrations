@@ -24,30 +24,33 @@ import org.graylog.events.notifications.EventNotificationService;
 import org.graylog.events.notifications.NotificationDto;
 import org.graylog.events.notifications.NotificationTestData;
 import org.graylog.events.notifications.PermanentEventNotificationException;
-import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
+import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
+import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -152,10 +155,31 @@ public class SlackEventNotificationTest {
     }
 
 
-    @Test
-    @Ignore("Disabled, unable to test this method, since it return void")
-    public void execute_with_invalid_webhook_url() throws TemporaryEventNotificationException, PermanentEventNotificationException {
-        //has an invalid webhook url
+    @Test(expected = EventNotificationException.class)
+     public void execute_with_invalid_webhook_url() throws EventNotificationException {
+
+        final SlackClient mockSlackClient = mock(SlackClient.class);
+        final NodeId mockNodeId = mock(NodeId.class);
+        final NotificationService mockNotificationService = mock(NotificationService.class);
+
+        given(mockNotificationService.buildNow()).willReturn(new NotificationImpl().addTimestamp(Tools.nowUTC()));
+
+        doThrow(PermanentEventNotificationException.class)
+                .when(mockSlackClient)
+                .send(any(), anyString());
+
+        when(mockNodeId.toString()).thenReturn("12345");
+
+        assertThat(mockNodeId).isNotNull();
+        assertThat(mockNodeId.toString()).isEqualTo("12345");
+
+
+        SlackEventNotification slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
+                Engine.createEngine(),
+                mockNotificationService,
+                mockNodeId, mockSlackClient);
+        assertThat(eventNotificationContext.notificationConfig().type()).isEqualTo(SlackEventNotificationConfig.TYPE_NAME);
+        //when execute is called with a invalid webhook URL, we expect a event notification exception
         slackEventNotification.execute(eventNotificationContext);
     }
 

@@ -21,22 +21,20 @@ import com.floreysoft.jmte.Engine;
 import com.google.common.annotations.VisibleForTesting;
 import org.graylog.events.notifications.EventNotification;
 import org.graylog.events.notifications.EventNotificationContext;
+import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationModelData;
 import org.graylog.events.notifications.EventNotificationService;
 import org.graylog.events.notifications.PermanentEventNotificationException;
-import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
-import org.graylog2.plugin.rest.ValidationResult;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,18 +69,19 @@ public class SlackEventNotification implements EventNotification {
 
     /**
      * @param ctx
-     * @throws PermanentEventNotificationException is thrown with bad webhook url, authentication error type issues
-     * @throws TemporaryEventNotificationException is thrown for network or timeout type issues
+     * @throws EventNotificationException is thrown when sending is failed
+     *
      */
     @Override
-    public void execute(EventNotificationContext ctx) throws PermanentEventNotificationException, TemporaryEventNotificationException {
+    public void execute(EventNotificationContext ctx) throws EventNotificationException {
         final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
         LOG.debug("SlackEventNotification backlog size in method execute is [{}]", config.backlogSize());
 
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
             slackClient.send(slackMessage, config.webhookUrl());
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
 
             LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
             final Notification systemNotification = notificationService.buildNow()
@@ -92,7 +91,7 @@ public class SlackEventNotification implements EventNotification {
                     .addDetail("SlackEventNotification send error ", e.toString());
 
             notificationService.publishIfFirst(systemNotification);
-            throw new TemporaryEventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
+            throw new EventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
 
         }
 
