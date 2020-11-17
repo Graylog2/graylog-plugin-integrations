@@ -75,7 +75,7 @@ public class SlackClient {
 						"Expected successful HTTP response [2xx] but got [" + r.code() + "]. " + webhookUrl);
 			}
 		} catch (IOException  e) {
-			throw new TemporaryEventNotificationException("Unable to send the slack Message" +e.getMessage());
+			throw new TemporaryEventNotificationException("Unable to send the slack Message. " +e.getMessage());
 		}
     }
 
