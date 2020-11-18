@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import org.graylog.events.event.Event;
 import org.graylog.events.event.EventDto;
 import org.graylog.events.fields.FieldValueType;
-import org.graylog.events.notifications.EventNotification;
 import org.graylog.events.notifications.EventNotificationContext;
 import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationService;
@@ -38,7 +37,6 @@ import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.Tools;
-import org.graylog2.plugin.indexer.searches.timeranges.AbsoluteRange;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
@@ -47,7 +45,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -60,7 +57,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -206,7 +202,7 @@ public class SlackEventNotificationTest {
                 .alert(false)
                 .fields(ImmutableMap.of("hello", "world"))
                 .build();
-        
+
         //uses the eventDEfinitionDto from NotificationTestData.getDummyContext in the setup method
         EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().get();
         return EventNotificationContext.builder()
