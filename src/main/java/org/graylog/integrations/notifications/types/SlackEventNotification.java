@@ -70,7 +70,6 @@ public class SlackEventNotification implements EventNotification {
     /**
      * @param ctx
      * @throws EventNotificationException is thrown when sending is failed
-     *
      */
     @Override
     public void execute(EventNotificationContext ctx) throws EventNotificationException {
@@ -80,8 +79,7 @@ public class SlackEventNotification implements EventNotification {
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
             slackClient.send(slackMessage, config.webhookUrl());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
             LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
             final Notification systemNotification = notificationService.buildNow()
@@ -141,14 +139,14 @@ public class SlackEventNotification implements EventNotification {
     }
 
     String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
-        final List<MessageSummary> backlog = getMessageBacklog(ctx,config);
+        final List<MessageSummary> backlog = getMessageBacklog(ctx, config);
         Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
         try {
             LOG.debug("template = {} model = {}", template, model);
             return templateEngine.transform(template, model);
         } catch (Exception e) {
             String error = "Invalid Custom Message template.";
-            LOG.error(error +"[{}]", e.toString());
+            LOG.error(error + "[{}]", e.toString());
             throw new PermanentEventNotificationException(error + e.toString(), e.getCause());
         }
     }

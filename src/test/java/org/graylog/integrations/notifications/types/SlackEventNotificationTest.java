@@ -20,9 +20,7 @@ import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.graylog.events.event.Event;
 import org.graylog.events.event.EventDto;
-import org.graylog.events.fields.FieldValueType;
 import org.graylog.events.notifications.EventNotificationContext;
 import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationService;
@@ -91,9 +89,9 @@ public class SlackEventNotificationTest {
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
-                                                            Engine.createEngine(),
-                                                            mockNotificationService,
-                                                            mockNodeId, mockSlackClient);
+                Engine.createEngine(),
+                mockNotificationService,
+                mockNodeId, mockSlackClient);
 
     }
 

@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 
 
 public class SlackClientTest {
-    
+
     private OkHttpClient mockHttpClient;
     private static final String TEST_MESSAGE = "Henry Hühnchen(little chicken)";
     private static final String TEST_MESSAGE_1 = "{\"link_names\":false,\"channel\":null,\"text\":\"Henry Hühnchen(little chicken)\"}";
@@ -50,7 +50,7 @@ public class SlackClientTest {
 
     @Before
     public void setUp() throws Exception {
-       mockHttpClient = getMockHttpClient(200);
+        mockHttpClient = getMockHttpClient(200);
     }
 
     @After
@@ -63,8 +63,8 @@ public class SlackClientTest {
     public void send_sendsHttpRequestAsExpected_whenInputIsGood() throws Exception {
         SlackClient slackClient = new SlackClient(mockHttpClient);
         SlackMessage message = new SlackMessage(TEST_MESSAGE);
-        slackClient.send(message,"http://url.com/");
-        
+        slackClient.send(message, "http://url.com/");
+
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(mockHttpClient, times(1)).newCall(requestCaptor.capture());
 
@@ -90,7 +90,7 @@ public class SlackClientTest {
 
         SlackClient slackClient = new SlackClient(okHttpClient);
         SlackMessage message = new SlackMessage(TEST_MESSAGE);
-        slackClient.send(message,"http://url.com/");
+        slackClient.send(message, "http://url.com/");
     }
 
     @Test(expected = PermanentEventNotificationException.class)
@@ -99,9 +99,8 @@ public class SlackClientTest {
         final OkHttpClient okHttpClient = getMockHttpClient(402);
         SlackClient slackClient = new SlackClient(okHttpClient);
         SlackMessage message = new SlackMessage("Henry Hühnchen(little chicken)");
-        slackClient.send(message,"http://url.com/");
+        slackClient.send(message, "http://url.com/");
     }
-
 
 
     private static OkHttpClient getMockHttpClient(int httpCode) throws IOException {
@@ -124,8 +123,6 @@ public class SlackClientTest {
 
         return okHttpClient;
     }
-
-
 
 
 }
