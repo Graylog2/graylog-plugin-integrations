@@ -18,6 +18,12 @@ package org.graylog.integrations.notifications.types;
 
 import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.graylog.events.event.Event;
+import org.graylog.events.event.EventDto;
+import org.graylog.events.fields.FieldValueType;
+import org.graylog.events.notifications.EventNotification;
 import org.graylog.events.notifications.EventNotificationContext;
 import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationService;
@@ -26,11 +32,13 @@ import org.graylog.events.notifications.NotificationTestData;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog.events.notifications.types.HTTPEventNotificationConfig;
+import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.Tools;
+import org.graylog2.plugin.indexer.searches.timeranges.AbsoluteRange;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
@@ -165,6 +173,94 @@ public class SlackEventNotificationTest {
         givenSlackClientThrowsPermException();
         //when execute is called with a invalid webhook URL, we expect a event notification exception
         slackEventNotification.execute(eventNotificationContext);
+    }
+
+
+    @Test(expected = NullPointerException.class)
+    public void execute_with_null_event_timerange() throws EventNotificationException {
+        EventNotificationContext yetAnotherContext = getEventNotificationContextToSimulateNullPointerException();
+        assertThat(yetAnotherContext.event().timerangeStart().isPresent()).isFalse();
+        assertThat(yetAnotherContext.event().timerangeEnd().isPresent()).isFalse();
+        assertThat(yetAnotherContext.notificationConfig().type()).isEqualTo(SlackEventNotificationConfig.TYPE_NAME);
+        slackEventNotification.execute(yetAnotherContext);
+    }
+
+    private EventNotificationContext getEventNotificationContextToSimulateNullPointerException() {
+        final DateTime now = DateTime.parse("2019-01-01T00:00:00.000Z");
+        final ImmutableList<String> keyTuple = ImmutableList.of("a", "b");
+
+        final EventDto eventDto = EventDto.builder()
+                .id("01DF119QKMPCR5VWBXS8783799")
+                .eventDefinitionType("aggregation-v1")
+                .eventDefinitionId("54e3deadbeefdeadbeefaffe")
+                .originContext("urn:graylog:message:es:graylog_0:199a616d-4d48-4155-b4fc-339b1c3129b2")
+                .eventTimestamp(now)
+                .processingTimestamp(now)
+                .streams(ImmutableSet.of("000000000000000000000002"))
+                .sourceStreams(ImmutableSet.of("000000000000000000000001"))
+                .message("Test message")
+                .source("source")
+                .keyTuple(keyTuple)
+                .key(String.join("|", keyTuple))
+                .priority(4)
+                .alert(false)
+                .fields(ImmutableMap.of("hello", "world"))
+                .build();
+        
+        //uses the eventDEfinitionDto from NotificationTestData.getDummyContext in the setup method
+        EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().get();
+        return EventNotificationContext.builder()
+                .notificationId("1234")
+                .notificationConfig(slackEventNotificationConfig)
+                .event(eventDto)
+                .eventDefinition(eventDefinitionDto)
+                .build();
+    }
+
+    @Test
+    public void fromDto() {
+        final DateTime now = DateTime.parse("2019-01-01T00:00:00.000Z");
+        final ImmutableList<String> keyTuple = ImmutableList.of("a", "b");
+
+        final EventDto eventDto = EventDto.builder()
+                .id("01DF119QKMPCR5VWBXS8783799")
+                .eventDefinitionType("aggregation-v1")
+                .eventDefinitionId("54e3deadbeefdeadbeefaffe")
+                .originContext("urn:graylog:message:es:graylog_0:199a616d-4d48-4155-b4fc-339b1c3129b2")
+                .eventTimestamp(now)
+                .processingTimestamp(now)
+                .timerangeStart(now)
+                .timerangeEnd(now.minusHours(1))
+                .streams(ImmutableSet.of("000000000000000000000002"))
+                .sourceStreams(ImmutableSet.of("000000000000000000000001"))
+                .message("Test message")
+                .source("source")
+                .keyTuple(keyTuple)
+                .key(String.join("|", keyTuple))
+                .priority(4)
+                .alert(false)
+                .fields(ImmutableMap.of("hello", "world"))
+                .build();
+
+        assertThat(Event.fromDto(eventDto)).satisfies(event -> {
+            assertThat(event.getId()).isEqualTo("01DF119QKMPCR5VWBXS8783799");
+            assertThat(event.getEventDefinitionType()).isEqualTo("aggregation-v1");
+            assertThat(event.getEventDefinitionId()).isEqualTo("54e3deadbeefdeadbeefaffe");
+            assertThat(event.getOriginContext()).isEqualTo("urn:graylog:message:es:graylog_0:199a616d-4d48-4155-b4fc-339b1c3129b2");
+            assertThat(event.getEventTimestamp()).isEqualTo(now);
+            assertThat(event.getProcessingTimestamp()).isEqualTo(now);
+            assertThat(event.getTimerangeStart()).isEqualTo(now);
+            assertThat(event.getTimerangeEnd()).isEqualTo(now.minusHours(1));
+            assertThat(event.getStreams()).isEqualTo(ImmutableSet.of("000000000000000000000002"));
+            assertThat(event.getSourceStreams()).isEqualTo(ImmutableSet.of("000000000000000000000001"));
+            assertThat(event.getMessage()).isEqualTo("Test message");
+            assertThat(event.getSource()).isEqualTo("source");
+            assertThat(event.getKeyTuple()).isEqualTo(keyTuple);
+            assertThat(event.getPriority()).isEqualTo(4);
+            assertThat(event.getAlert()).isFalse();
+            assertThat(event.getField("hello").dataType()).isEqualTo(FieldValueType.STRING);
+            assertThat(event.getField("hello").value()).isEqualTo("world");
+        });
     }
 
     private void givenGoodNotificationService() {
