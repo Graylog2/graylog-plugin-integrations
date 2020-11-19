@@ -88,7 +88,7 @@ public class PaloAltoTypeParser {
 
             // Handling of duplicate keys
             if (fieldMap.containsKey(field.field())) {
-                if (rawValue.equals("") || value.equals(fieldMap.get(field.field()))) {
+                if (Strings.isNullOrEmpty(rawValue) || value.equals(fieldMap.get(field.field()))) {
                     // Same value, do nothing
                     continue;
                 } else if (fieldMap.get(field.field()) instanceof List) {
