@@ -70,7 +70,7 @@ public class SlackEventNotification implements EventNotification {
 
     /**
      * @param ctx
-     * @throws EventNotificationException is thrown when send fails
+     * @throws EventNotificationException is thrown when execute fails
      */
     @Override
     public void execute(EventNotificationContext ctx) throws EventNotificationException {
