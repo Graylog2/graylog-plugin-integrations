@@ -170,7 +170,7 @@ public class SlackEventNotificationTest {
     }
 
 
-    @Test(expected = NullPointerException.class)
+    @Test(expected = EventNotificationException.class)
     public void execute_with_null_event_timerange() throws EventNotificationException {
         EventNotificationContext yetAnotherContext = getEventNotificationContextToSimulateNullPointerException();
         assertThat(yetAnotherContext.event().timerangeStart().isPresent()).isFalse();

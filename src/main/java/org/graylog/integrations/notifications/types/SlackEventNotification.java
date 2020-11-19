@@ -94,11 +94,11 @@ public class SlackEventNotification implements EventNotification {
                     .addSeverity(Notification.Severity.URGENT)
                     .addDetail("SlackEventNotification send error ", e.toString());
             notificationService.publishIfFirst(systemNotification);
-            throw new TemporaryEventNotificationException(String.format("Error sending the SlackNotification message :: %s", e.getMessage()), e);
+            throw new PermanentEventNotificationException(String.format("Error sending the SlackNotification message :: %s", e.getMessage()), e);
 
         } catch (Exception exp) {
             LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), exp.toString());
-            throw exp;
+            throw new EventNotificationException("There was an exception triggering the PagerDuty event.", exp);
         }
 
     }
