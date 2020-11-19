@@ -75,32 +75,32 @@ public class SlackEventNotification implements EventNotification {
     @Override
     public void execute(EventNotificationContext ctx) throws EventNotificationException {
         final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
+        final String errorMessage = "SlackEventNotification send error for id : " + ctx.notificationId();
+
         LOG.debug("SlackEventNotification backlog size in method execute is [{}]", config.backlogSize());
+
 
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
             slackClient.send(slackMessage, config.webhookUrl());
         } catch (TemporaryEventNotificationException exp) {
             //scheduler needs to retry a TemporaryEventNotificationException
-            LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), exp.toString());
-
-            throw new TemporaryEventNotificationException(String.format("Error sending the SlackNotification message :: %s", exp.getMessage()), exp);
+            LOG.error(errorMessage, exp.toString());
+            throw exp;
         } catch (PermanentEventNotificationException e) {
-
-            LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
+            LOG.error(errorMessage, e.toString());
             final Notification systemNotification = notificationService.buildNow()
                     .addNode(nodeId.toString())
                     .addType(Notification.Type.GENERIC)
                     .addSeverity(Notification.Severity.URGENT)
-                    .addDetail("SlackEventNotification send error ", e.toString());
+                    .addDetail(errorMessage, e.toString());
             notificationService.publishIfFirst(systemNotification);
-            throw new PermanentEventNotificationException(String.format("Error sending the SlackNotification message :: %s", e.getMessage()), e);
+            throw e;
 
         } catch (Exception exp) {
-            LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), exp.toString());
-            throw new EventNotificationException("There was an exception triggering the PagerDuty event.", exp);
+            LOG.error(errorMessage, exp.toString());
+            throw new EventNotificationException(errorMessage, exp);
         }
-
     }
 
     /**
