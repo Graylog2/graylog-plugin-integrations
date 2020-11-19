@@ -25,6 +25,7 @@ import org.graylog.events.notifications.EventNotificationException;
 import org.graylog.events.notifications.EventNotificationModelData;
 import org.graylog.events.notifications.EventNotificationService;
 import org.graylog.events.notifications.PermanentEventNotificationException;
+import org.graylog.events.notifications.TemporaryEventNotificationException;
 import org.graylog.events.processor.EventDefinitionDto;
 import org.graylog2.jackson.TypeReferences;
 import org.graylog2.notifications.Notification;
@@ -69,7 +70,7 @@ public class SlackEventNotification implements EventNotification {
 
     /**
      * @param ctx
-     * @throws EventNotificationException is thrown when sending is failed
+     * @throws EventNotificationException is thrown when send fails
      */
     @Override
     public void execute(EventNotificationContext ctx) throws EventNotificationException {
@@ -79,18 +80,25 @@ public class SlackEventNotification implements EventNotification {
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
             slackClient.send(slackMessage, config.webhookUrl());
-        } catch (Exception e) {
+        } catch (TemporaryEventNotificationException exp) {
+            //scheduler needs to retry a TemporaryEventNotificationException
+            LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), exp.toString());
+
+            throw new TemporaryEventNotificationException(String.format("Error sending the SlackNotification message :: %s", exp.getMessage()), exp);
+        } catch (PermanentEventNotificationException e) {
 
             LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), e.toString());
             final Notification systemNotification = notificationService.buildNow()
                     .addNode(nodeId.toString())
                     .addType(Notification.Type.GENERIC)
-                    .addSeverity(Notification.Severity.NORMAL)
+                    .addSeverity(Notification.Severity.URGENT)
                     .addDetail("SlackEventNotification send error ", e.toString());
-
             notificationService.publishIfFirst(systemNotification);
-            throw new EventNotificationException("Slack notification is triggered, but sending failed. " + e.getMessage(), e);
+            throw new TemporaryEventNotificationException(String.format("Error sending the SlackNotification message :: %s", e.getMessage()), e);
 
+        } catch (Exception exp) {
+            LOG.error("SlackEventNotification send error for id {} : {}", ctx.notificationId(), exp.toString());
+            throw exp;
         }
 
     }
