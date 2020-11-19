@@ -75,31 +75,28 @@ public class SlackEventNotification implements EventNotification {
     @Override
     public void execute(EventNotificationContext ctx) throws EventNotificationException {
         final SlackEventNotificationConfig config = (SlackEventNotificationConfig) ctx.notificationConfig();
-        final String errorMessage = "SlackEventNotification send error for id : " + ctx.notificationId();
-
         LOG.debug("SlackEventNotification backlog size in method execute is [{}]", config.backlogSize());
-
 
         try {
             SlackMessage slackMessage = createSlackMessage(ctx, config);
             slackClient.send(slackMessage, config.webhookUrl());
         } catch (TemporaryEventNotificationException exp) {
             //scheduler needs to retry a TemporaryEventNotificationException
-            LOG.error(errorMessage, exp.toString());
             throw exp;
-        } catch (PermanentEventNotificationException e) {
-            LOG.error(errorMessage, e.toString());
+        } catch (PermanentEventNotificationException exp) {
+            String errorMessage = String.format("Error sending the SlackEventNotification :: %s", exp.getMessage());
             final Notification systemNotification = notificationService.buildNow()
                     .addNode(nodeId.toString())
                     .addType(Notification.Type.GENERIC)
                     .addSeverity(Notification.Severity.URGENT)
-                    .addDetail(errorMessage, e.toString());
+                    .addDetail("title", "SlackEventNotification Failed")
+                    .addDetail("description", errorMessage);
+
             notificationService.publishIfFirst(systemNotification);
-            throw e;
+            throw exp;
 
         } catch (Exception exp) {
-            LOG.error(errorMessage, exp.toString());
-            throw new EventNotificationException(errorMessage, exp);
+            throw new EventNotificationException("There was an exception triggering the SlackEventNotification", exp);
         }
     }
 
