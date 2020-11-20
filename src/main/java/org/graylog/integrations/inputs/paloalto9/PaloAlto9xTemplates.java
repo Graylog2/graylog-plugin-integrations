@@ -169,7 +169,7 @@ public class PaloAlto9xTemplates {
 
         // Field 0 is FUTURE USE
         fields.add(create(EventFields.EVENT_RECEIVED_TIME, 1, STRING));
-        fields.add(create(HostFields.HOST_ID, 2, STRING));
+        fields.add(create(HostFields.HOST_ID, 2, STRING)); // TODO: Used twice
         fields.add(create(EventFields.EVENT_UID, 3, STRING));
         fields.add(create(PaloAlto9xFields.PAN_LOG_PANORAMA, 4, STRING));
 
@@ -193,7 +193,7 @@ public class PaloAlto9xTemplates {
 
         fields.add(create(VendorFields.VENDOR_PRIVATE_IPV6, 20, STRING));
         fields.add(create(PaloAlto9xFields.PAN_GP_HOSTID, 21, STRING));
-        fields.add(create(HostFields.HOST_ID, 22, STRING));
+        // fields.add(create(HostFields.HOST_ID, 22, STRING)); // TODO: Used twice
         fields.add(create(PaloAlto9xFields.PAN_GP_CLIENT_VERSION, 23, STRING));
         fields.add(create(HostFields.HOST_TYPE, 24, STRING));
 
