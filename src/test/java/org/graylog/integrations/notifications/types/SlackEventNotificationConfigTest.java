@@ -56,6 +56,16 @@ public class SlackEventNotificationConfigTest {
     }
 
     @Test
+    public void validate_succeeds_whenWebhookUrlIsValidDiscordappSlackUrl() {
+        SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
+                .webhookUrl("https://discordapp.com/api/webhooks/xxxx/xxXXXxxxxxxxxx/slack")
+                .build();
+        ValidationResult result = slackEventNotificationConfig.validate();
+        Map errors = result.getErrors();
+        assertThat(errors).size().isEqualTo(0);
+    }
+
+    @Test
     public void validate_failsAndReturnsAnError_whenWebhookUrlIsInvalid() {
         SlackEventNotificationConfig slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .webhookUrl("A67888900000")
