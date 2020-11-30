@@ -17,6 +17,7 @@
 import 'webpack-entry';
 
 import { PluginManifest, PluginStore } from 'graylog-web-plugin/plugin';
+import AppConfig from 'util/AppConfig';
 
 import Routes from 'aws/common/Routes';
 
@@ -61,4 +62,6 @@ const manifest = new PluginManifest(packageJson, {
   ],
 });
 
-PluginStore.register(manifest);
+if (!AppConfig.isCloud()) {
+  PluginStore.register(manifest);
+}
