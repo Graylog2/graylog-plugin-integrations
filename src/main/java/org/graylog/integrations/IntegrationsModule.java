@@ -16,7 +16,6 @@
  */
 package org.graylog.integrations;
 
-import okhttp3.OkHttpClient;
 import org.graylog.integrations.audit.IntegrationsAuditEventTypes;
 import org.graylog.integrations.aws.AWSPermissions;
 import org.graylog.integrations.aws.codecs.AWSCodec;
@@ -34,13 +33,12 @@ import org.graylog.integrations.inputs.paloalto9.PaloAlto9xInput;
 import org.graylog.integrations.ipfix.codecs.IpfixCodec;
 import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
-import org.graylog.integrations.pagerduty.PagerDutyNotification;
-import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog.integrations.notifications.types.SlackEventNotification;
 import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
+import org.graylog.integrations.pagerduty.PagerDutyNotification;
+import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
-import org.graylog2.shared.bindings.providers.OkHttpClientProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
@@ -121,18 +119,20 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(PaloAlto9xInput.class);
         addCodec(PaloAlto9xCodec.NAME, PaloAlto9xCodec.class);
 
-        // AWS
-        addCodec(AWSCodec.NAME, AWSCodec.class);
-        addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
-        addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
-        addMessageInput(AWSInput.class);
-        addPermissions(AWSPermissions.class);
-        addRestResource(AWSResource.class);
-        addRestResource(KinesisSetupResource.class);
-        addTransport(AWSTransport.NAME, AWSTransport.class);
-        addTransport(KinesisTransport.NAME, KinesisTransport.class);
-        bind(IamClientBuilder.class).toProvider(IamClient::builder);
-        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
-        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+        if (!isCloud()) {
+            // AWS
+            addCodec(AWSCodec.NAME, AWSCodec.class);
+            addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
+            addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
+            addMessageInput(AWSInput.class);
+            addPermissions(AWSPermissions.class);
+            addRestResource(AWSResource.class);
+            addRestResource(KinesisSetupResource.class);
+            addTransport(AWSTransport.NAME, AWSTransport.class);
+            addTransport(KinesisTransport.NAME, KinesisTransport.class);
+            bind(IamClientBuilder.class).toProvider(IamClient::builder);
+            bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
+            bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+        }
     }
 }
