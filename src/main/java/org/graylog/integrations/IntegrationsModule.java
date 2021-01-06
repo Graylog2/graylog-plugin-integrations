@@ -60,7 +60,7 @@ public class IntegrationsModule extends PluginModule {
 
     /**
      * Returns all configuration beans required by this plugin.
-     *
+     * <p>
      * Implementing this method is optional. The default method returns an empty {@link Set}.
      */
     @Override
@@ -70,40 +70,54 @@ public class IntegrationsModule extends PluginModule {
 
     @Override
     protected void configure() {
-        /*
-         * Register your plugin types here.
-         *
-         * Examples:
-         *
-         * addMessageInput(Class<? extends MessageInput>);
-         * addMessageFilter(Class<? extends MessageFilter>);
-         * addMessageOutput(Class<? extends MessageOutput>);
-         * addPeriodical(Class<? extends Periodical>);
-         * addAlarmCallback(Class<? extends AlarmCallback>);
-         * addInitializer(Class<? extends Service>);
-         * addRestResource(Class<? extends PluginRestResource>);
-         *
-         *
-         * Add all configuration beans returned by getConfigBeans():
-         *
-         * addConfigBeans();
-         */
+        configureServerOnlyBindings();
+        configureUniversalBindings();
+    }
 
-        addAuditEventTypes(IntegrationsAuditEventTypes.class);
+    private void configureServerOnlyBindings() {
+        if (!isForwarder()) {
+            /*
+             * Register your plugin types here.
+             *
+             * Examples:
+             *
+             * addMessageInput(Class<? extends MessageInput>);
+             * addMessageFilter(Class<? extends MessageFilter>);
+             * addMessageOutput(Class<? extends MessageOutput>);
+             * addPeriodical(Class<? extends Periodical>);
+             * addAlarmCallback(Class<? extends AlarmCallback>);
+             * addInitializer(Class<? extends Service>);
+             * addRestResource(Class<? extends PluginRestResource>);
+             *
+             * Add all configuration beans returned by getConfigBeans():
+             *
+             * addConfigBeans();
+             */
 
-        // Slack Notification
-        addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
-                SlackEventNotificationConfig.class,
-                SlackEventNotification.class,
-                SlackEventNotification.Factory.class);
+            addAuditEventTypes(IntegrationsAuditEventTypes.class);
 
-        // Pager Duty Notification
-        addNotificationType(
-                PagerDutyNotificationConfig.TYPE_NAME,
-                PagerDutyNotificationConfig.class,
-                PagerDutyNotification.class,
-                PagerDutyNotification.Factory.class);
+            // Slack Notification
+            addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
+                    SlackEventNotificationConfig.class,
+                    SlackEventNotification.class,
+                    SlackEventNotification.Factory.class);
 
+            // Pager Duty Notification
+            addNotificationType(
+                    PagerDutyNotificationConfig.TYPE_NAME,
+                    PagerDutyNotificationConfig.class,
+                    PagerDutyNotification.class,
+                    PagerDutyNotification.Factory.class);
+        }
+    }
+
+    /**
+     * Place bindings here that need to run in the Graylog Server and the Forwarder.
+     * Please do not add any bindings here that use MongoDB since the Forwarder does not have access to MongoDB.
+     * In general, this should only contain input/codec/transport bindings that are supported in the Forwarder
+     * and do not use MongoDB.
+     */
+    private void configureUniversalBindings() {
         // IPFIX
         addMessageInput(IpfixUdpInput.class);
         addCodec("ipfix", IpfixCodec.class);
@@ -134,5 +148,16 @@ public class IntegrationsModule extends PluginModule {
             bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
             bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
         }
+    }
+
+    /**
+     * @return A boolean indicating if the plugin is being loaded within the Graylog Forwarder.
+     * The graylog.forwarder system property is set in the startup sequence of the Graylog Cloud Forwarder.
+     * <p>
+     * The Cloud Forwarder only supports inputs. This allows other bindings to be skipped when this plugin is
+     * loaded within the Cloud Forwarder.
+     */
+    boolean isForwarder() {
+        return Boolean.parseBoolean(System.getProperty("graylog.forwarder"));
     }
 }
