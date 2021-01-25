@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 package org.graylog.integrations.inputs.paloalto9;
 
 import com.google.common.collect.ImmutableList;
@@ -35,7 +51,8 @@ public class PaloAlto9xParserTest {
     // Mock Objects
     @Mock PaloAltoTypeParser mockConfigParser;
     @Mock PaloAltoTypeParser mockCorrelationParser;
-    @Mock PaloAltoTypeParser mockGlobalProtectParser;
+    @Mock PaloAltoTypeParser mockGlobalProtectPre913Parser;
+    @Mock PaloAltoTypeParser mockGlobalProtect913Parser;
     @Mock PaloAltoTypeParser mockHipParser;
     @Mock PaloAltoTypeParser mockSystemParser;
     @Mock PaloAltoTypeParser mockThreatParser;
@@ -51,7 +68,8 @@ public class PaloAlto9xParserTest {
     public void setUp() {
         cut = new PaloAlto9xParser(mockConfigParser,
                 mockCorrelationParser,
-                mockGlobalProtectParser,
+                mockGlobalProtectPre913Parser,
+                mockGlobalProtect913Parser,
                 mockHipParser,
                 mockSystemParser,
                 mockThreatParser,
@@ -84,14 +102,26 @@ public class PaloAlto9xParserTest {
     }
 
     @Test
-    public void parseFields_returnExpectedFieldMap_whenGlobalProtectMessageType() {
-        givenInputFieldType(PaloAltoMessageType.GLOBAL_PROTECT);
+    public void parseFields_returnExpectedFieldMap_whenPre913GlobalProtectMessageType() {
+        givenInputFieldType(PaloAltoMessageType.GLOBAL_PROTECT_PRE_9_1_3);
         givenGoodInputFields();
         givenGoodParsers();
 
         whenParseFieldsIsCalled();
 
-        thenGlobalProtectParserIsUsed();
+        thenPre913GlobalProtectParserIsUsed();
+        thenExpectedOutputIsReturned();
+    }
+
+    @Test
+    public void parseFields_returnExpectedFieldMap_when913GlobalProtectMessageType() {
+        givenInputFieldType(PaloAltoMessageType.GLOBAL_PROTECT_9_1_3);
+        givenGoodInputFields();
+        givenGoodParsers();
+
+        whenParseFieldsIsCalled();
+
+        then913GlobalProtectParserIsUsed();
         thenExpectedOutputIsReturned();
     }
 
@@ -167,7 +197,8 @@ public class PaloAlto9xParserTest {
     private void givenGoodParsers() {
         given(mockConfigParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
         given(mockCorrelationParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
-        given(mockGlobalProtectParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
+        given(mockGlobalProtectPre913Parser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
+        given(mockGlobalProtect913Parser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
         given(mockHipParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
         given(mockSystemParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
         given(mockThreatParser.parseFields(anyList())).willReturn(TEST_FIELD_MAP);
@@ -184,7 +215,7 @@ public class PaloAlto9xParserTest {
         ArgumentCaptor<List<String>> fieldsCaptor = ArgumentCaptor.forClass(List.class);
         verify(mockConfigParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockThreatParser);
@@ -195,16 +226,27 @@ public class PaloAlto9xParserTest {
         ArgumentCaptor<List<String>> fieldsCaptor = ArgumentCaptor.forClass(List.class);
         verify(mockCorrelationParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockThreatParser);
         verifyNoMoreInteractions(mockTrafficParser);
     }
 
-    private void thenGlobalProtectParserIsUsed() {
+    private void thenPre913GlobalProtectParserIsUsed() {
         ArgumentCaptor<List<String>> fieldsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(mockGlobalProtectParser, times(1)).parseFields(fieldsCaptor.capture());
+        verify(mockGlobalProtectPre913Parser, times(1)).parseFields(fieldsCaptor.capture());
+        verifyNoMoreInteractions(mockConfigParser);
+        verifyNoMoreInteractions(mockCorrelationParser);
+        verifyNoMoreInteractions(mockHipParser);
+        verifyNoMoreInteractions(mockSystemParser);
+        verifyNoMoreInteractions(mockThreatParser);
+        verifyNoMoreInteractions(mockTrafficParser);
+    }
+
+    private void then913GlobalProtectParserIsUsed() {
+        ArgumentCaptor<List<String>> fieldsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mockGlobalProtect913Parser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
         verifyNoMoreInteractions(mockHipParser);
@@ -218,7 +260,7 @@ public class PaloAlto9xParserTest {
         verify(mockHipParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockThreatParser);
         verifyNoMoreInteractions(mockTrafficParser);
@@ -229,7 +271,7 @@ public class PaloAlto9xParserTest {
         verify(mockSystemParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockThreatParser);
         verifyNoMoreInteractions(mockTrafficParser);
@@ -240,7 +282,7 @@ public class PaloAlto9xParserTest {
         verify(mockThreatParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockTrafficParser);
@@ -251,7 +293,7 @@ public class PaloAlto9xParserTest {
         verify(mockTrafficParser, times(1)).parseFields(fieldsCaptor.capture());
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockThreatParser);
@@ -260,7 +302,7 @@ public class PaloAlto9xParserTest {
     private void thenNoParserUsed() {
         verifyNoMoreInteractions(mockConfigParser);
         verifyNoMoreInteractions(mockCorrelationParser);
-        verifyNoMoreInteractions(mockGlobalProtectParser);
+        verifyNoMoreInteractions(mockGlobalProtectPre913Parser);
         verifyNoMoreInteractions(mockHipParser);
         verifyNoMoreInteractions(mockSystemParser);
         verifyNoMoreInteractions(mockThreatParser);

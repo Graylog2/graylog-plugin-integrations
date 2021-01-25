@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -8,9 +24,7 @@ import FormWrap from 'aws/common/FormWrap';
 import { ApiRoutes } from 'aws/common/Routes';
 import { renderOptions } from 'aws/common/Options';
 import useFetch from 'aws/common/hooks/useFetch';
-
 import formValidation from 'aws/utils/formValidation';
-
 import { FormDataContext } from 'aws/context/FormData';
 import { ApiContext } from 'aws/context/Api';
 
@@ -37,11 +51,13 @@ const KinesisSetup = ({ onChange, onSubmit, toggleSetup }) => {
       setGroupNamesUrl(null);
 
       const noGroups = /No CloudWatch log groups/g;
+
       if (groupNamesStatus.error.match(noGroups)) {
         setFormError({
           full_message: groupNamesStatus.error,
           nice_message: <span>We&apos;re unable to find any groups in your chosen region. Please try selecting a different region.</span>,
         });
+
         setDisabledGroups(true);
       } else {
         setFormError({

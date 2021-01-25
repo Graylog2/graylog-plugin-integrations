@@ -1,14 +1,21 @@
 {
   "name": "graylog-plugin-integrations",
-  "version": "4.0.0-SNAPSHOT",
+  "version": "4.1.0-SNAPSHOT",
   "description": "",
+  "license": "SSPL-1.0",
   "repository": {
     "type": "git",
     "url": "git@github.com:Graylog2/graylog-plugin-integrations.git"
   },
   "scripts": {
-    "build": "webpack --bail",
-    "lint": "eslint --ext js,jsx src"
+    "build": "webpack",
+    "lint": "eslint src",
+    "lint:path": "eslint",
+    "test": "jest",
+    "flow-check": "flow check"
+  },
+  "eslintConfig": {
+    "extends": "graylog"
   },
   "keywords": [
     "graylog"
@@ -18,7 +25,5 @@
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
   "private": true,
-  "devDependencies": {
-    "eslint-loader": "^1.6.3"
-  }
+  "devDependencies": {}
 }

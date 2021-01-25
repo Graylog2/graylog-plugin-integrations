@@ -1,18 +1,18 @@
-/**
- * This file is part of Graylog.
+/*
+ * Copyright (C) 2020 Graylog, Inc.
  *
- * Graylog is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
  *
- * Graylog is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 package org.graylog.integrations.inputs.paloalto9;
 
@@ -39,7 +39,8 @@ import java.nio.charset.StandardCharsets;
 
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.CONFIG;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.CORRELATION;
-import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.GLOBAL_PROTECT;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.GLOBAL_PROTECT_PRE_9_1_3;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.GLOBAL_PROTECT_9_1_3;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.HIP;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.SYSTEM;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.THREAT;
@@ -98,10 +99,14 @@ public class PaloAlto9xCodec implements Codec {
             case "CORRELATION":
                 message.addFields(fieldProducer.parseFields(CORRELATION, p.fields()));
                 break;
+            case "GLOBALPROTECT":
+                // For PAN v9.1.3 and later, Global Protect has type in the expected position
+                message.addFields(fieldProducer.parseFields(GLOBAL_PROTECT_9_1_3, p.fields()));
+                break;
             default:
-                // Global Protect messages have message type in position 5 rather than position 3
+                //For PAN v9.1.2 and earlier, Global Protect has type in position 5 rather than position 3
                 if (p.fields().get(5).equals("GLOBALPROTECT")) {
-                    message.addFields(fieldProducer.parseFields(GLOBAL_PROTECT, p.fields()));
+                    message.addFields(fieldProducer.parseFields(GLOBAL_PROTECT_PRE_9_1_3, p.fields()));
                     break;
                 } else {
                     LOG.error("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());

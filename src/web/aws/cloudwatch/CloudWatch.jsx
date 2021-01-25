@@ -1,14 +1,28 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 
 import ConfirmLeaveDialog from 'components/common/ConfirmLeaveDialog';
 import Wizard from 'components/common/Wizard';
-
 import FormUtils from 'util/FormsUtils.js';
 import history from 'util/History';
 import Routes from 'routing/Routes';
-
 import StepAuthorize from 'aws/StepAuthorize';
 import { StepsContext } from 'aws/context/Steps';
 import { FormDataContext } from 'aws/context/FormData';
@@ -39,7 +53,7 @@ const CloudWatch = ({ route }) => {
     setCurrentStep(nextStep);
   };
 
-  const handleEditClick = nextStep => () => {
+  const handleEditClick = (nextStep) => () => {
     setCurrentStep(nextStep);
   };
 
@@ -47,6 +61,7 @@ const CloudWatch = ({ route }) => {
     const id = target.name || target.id;
 
     let value = FormUtils.getValueFromInput(target);
+
     if (typeof value === 'string') {
       value = value.trim();
     }
@@ -106,7 +121,7 @@ const CloudWatch = ({ route }) => {
   ];
 
   if (availableSteps.length === 0) {
-    setAvailableStep(wizardSteps.map(step => step.key));
+    setAvailableStep(wizardSteps.map((step) => step.key));
   }
 
   return (

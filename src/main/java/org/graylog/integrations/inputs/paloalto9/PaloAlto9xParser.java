@@ -1,21 +1,22 @@
-/**
- * This file is part of Graylog.
+/*
+ * Copyright (C) 2020 Graylog, Inc.
  *
- * Graylog is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
  *
- * Graylog is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 package org.graylog.integrations.inputs.paloalto9;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.graylog.integrations.inputs.paloalto.PaloAltoMessageType;
@@ -34,16 +35,19 @@ public class PaloAlto9xParser {
     public PaloAlto9xParser() {
         this(new PaloAltoTypeParser(PaloAlto9xTemplates.configTemplate(), PaloAltoMessageType.CONFIG),
                 new PaloAltoTypeParser(PaloAlto9xTemplates.correlationTemplate(), PaloAltoMessageType.CORRELATION),
-                new PaloAltoTypeParser(PaloAlto9xTemplates.globalProtectTemplate(), PaloAltoMessageType.GLOBAL_PROTECT),
+                new PaloAltoTypeParser(PaloAlto9xTemplates.globalProtectPre913Template(), PaloAltoMessageType.GLOBAL_PROTECT_PRE_9_1_3),
+                new PaloAltoTypeParser(PaloAlto9xTemplates.globalProtect913Template(), PaloAltoMessageType.GLOBAL_PROTECT_9_1_3),
                 new PaloAltoTypeParser(PaloAlto9xTemplates.hipTemplate(), PaloAltoMessageType.HIP),
                 new PaloAltoTypeParser(PaloAlto9xTemplates.systemTemplate(), PaloAltoMessageType.SYSTEM),
                 new PaloAltoTypeParser(PaloAlto9xTemplates.threatTemplate(), PaloAltoMessageType.THREAT),
                 new PaloAltoTypeParser(PaloAlto9xTemplates.trafficTemplate(), PaloAltoMessageType.TRAFFIC));
     }
 
-    /* Package Private */ PaloAlto9xParser(PaloAltoTypeParser configParser,
+    @VisibleForTesting
+    PaloAlto9xParser(PaloAltoTypeParser configParser,
                                            PaloAltoTypeParser correlationParser,
-                                           PaloAltoTypeParser globalProtectParser,
+                                           PaloAltoTypeParser globalProtectPre913Parser,
+                                           PaloAltoTypeParser globalProtect913Parser,
                                            PaloAltoTypeParser hipParser,
                                            PaloAltoTypeParser systemParser,
                                            PaloAltoTypeParser threatParser,
@@ -51,7 +55,8 @@ public class PaloAlto9xParser {
         parsers = Maps.newHashMap();
         parsers.put(PaloAltoMessageType.CONFIG, configParser);
         parsers.put(PaloAltoMessageType.CORRELATION, correlationParser);
-        parsers.put(PaloAltoMessageType.GLOBAL_PROTECT, globalProtectParser);
+        parsers.put(PaloAltoMessageType.GLOBAL_PROTECT_PRE_9_1_3, globalProtectPre913Parser);
+        parsers.put(PaloAltoMessageType.GLOBAL_PROTECT_9_1_3, globalProtect913Parser);
         parsers.put(PaloAltoMessageType.HIP, hipParser);
         parsers.put(PaloAltoMessageType.SYSTEM, systemParser);
         parsers.put(PaloAltoMessageType.THREAT, threatParser);

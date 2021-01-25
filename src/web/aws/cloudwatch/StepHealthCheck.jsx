@@ -1,17 +1,31 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Button, Panel } from 'components/graylog';
 import { Input } from 'components/bootstrap';
-
 import FormWrap from 'aws/common/FormWrap';
 import SkipHealthCheck from 'aws/common/SkipHealthCheck';
 import useFetch from 'aws/common/hooks/useFetch';
 import { ApiRoutes } from 'aws/common/Routes';
 import Countdown from 'aws/common/Countdown';
 import { DEFAULT_KINESIS_LOG_TYPE, KINESIS_LOG_TYPES } from 'aws/common/constants';
-
 import { ApiContext } from 'aws/context/Api';
 import { FormDataContext } from 'aws/context/FormData';
 
@@ -86,8 +100,9 @@ const StepHealthCheck = ({ onChange, onSubmit }) => {
   const iconClass = knownLog ? 'check' : 'exclamation-triangle';
   const acknowledgment = knownLog ? 'Awesome!' : 'Drats!';
   const bsStyle = knownLog ? 'success' : 'warning';
-  const logTypeLabel = KINESIS_LOG_TYPES.find(type => type.value === logData.type).label;
+  const logTypeLabel = KINESIS_LOG_TYPES.find((type) => type.value === logData.type).label;
   const logType = knownLog ? `a ${logTypeLabel}` : 'an unknown';
+
   const handleSubmit = () => {
     onSubmit();
     onChange({ target: { name: 'awsCloudWatchKinesisInputType', value: logData.type } });

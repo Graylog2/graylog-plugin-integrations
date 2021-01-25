@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 package org.graylog.integrations.inputs.paloalto9;
 
 import com.google.common.collect.ImmutableList;
@@ -31,7 +47,7 @@ import static org.mockito.Mockito.verify;
 public class PaloAlto9xCodecTest {
     private static final String TEST_SOURCE = "Test Source";
     private static final DateTime TEST_DATE_TIME = DateTime.now();
-    private static final String TEST_RAW_MESSAGE = "Foo,Bar,Baz";
+    private static final String TEST_RAW_MESSAGE = "Foo,Bar,Baz,This,That,GLOBALPROTECT";
     private static final ImmutableList<String> TEST_FIELD_LIST = ImmutableList.of("Foo", "Bar", "Baz", "Three", "Four", "GLOBALPROTECT");
     private static final ImmutableMap<String,Object> TEST_FIELD_MAP = ImmutableMap.of("field_one", "value_one",
             "field_two", "value_two",
@@ -77,7 +93,20 @@ public class PaloAlto9xCodecTest {
     }
 
     @Test
-    public void decode_runsSuccessfully_whenGoodGlobalProtectInput() {
+    public void decode_runsSuccessfully_whenGoodGlobalProtect90Input() {
+        givenGoodInputRawMessage();
+        givenPaloMessageType("GLOBALPROTECT 9.0");
+        givenStoreFullMessage(false);
+        givenGoodFieldProducer();
+
+        whenDecodeIsCalled();
+
+        thenPaloParserCalledWithPaloMessageType(PaloAltoMessageType.GLOBAL_PROTECT_PRE_9_1_3);
+        thenOutputMessageContainsExpectedFields(false);
+    }
+
+    @Test
+    public void decode_runsSuccessfully_whenGoodGlobalProtect913Input() {
         givenGoodInputRawMessage();
         givenPaloMessageType("GLOBALPROTECT");
         givenStoreFullMessage(false);
@@ -85,7 +114,7 @@ public class PaloAlto9xCodecTest {
 
         whenDecodeIsCalled();
 
-        thenPaloParserCalledWithPaloMessageType(PaloAltoMessageType.GLOBAL_PROTECT);
+        thenPaloParserCalledWithPaloMessageType(PaloAltoMessageType.GLOBAL_PROTECT_9_1_3);
         thenOutputMessageContainsExpectedFields(false);
     }
 

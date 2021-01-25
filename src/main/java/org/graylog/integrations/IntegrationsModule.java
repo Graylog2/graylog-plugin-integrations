@@ -1,18 +1,18 @@
-/**
- * This file is part of Graylog.
+/*
+ * Copyright (C) 2020 Graylog, Inc.
  *
- * Graylog is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
  *
- * Graylog is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Graylog.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 package org.graylog.integrations;
 
@@ -33,6 +33,10 @@ import org.graylog.integrations.inputs.paloalto9.PaloAlto9xInput;
 import org.graylog.integrations.ipfix.codecs.IpfixCodec;
 import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
+import org.graylog.integrations.notifications.types.SlackEventNotification;
+import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
+import org.graylog.integrations.pagerduty.PagerDutyNotification;
+import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
@@ -56,7 +60,7 @@ public class IntegrationsModule extends PluginModule {
 
     /**
      * Returns all configuration beans required by this plugin.
-     *
+     * <p>
      * Implementing this method is optional. The default method returns an empty {@link Set}.
      */
     @Override
@@ -66,27 +70,54 @@ public class IntegrationsModule extends PluginModule {
 
     @Override
     protected void configure() {
-        /*
-         * Register your plugin types here.
-         *
-         * Examples:
-         *
-         * addMessageInput(Class<? extends MessageInput>);
-         * addMessageFilter(Class<? extends MessageFilter>);
-         * addMessageOutput(Class<? extends MessageOutput>);
-         * addPeriodical(Class<? extends Periodical>);
-         * addAlarmCallback(Class<? extends AlarmCallback>);
-         * addInitializer(Class<? extends Service>);
-         * addRestResource(Class<? extends PluginRestResource>);
-         *
-         *
-         * Add all configuration beans returned by getConfigBeans():
-         *
-         * addConfigBeans();
-         */
+        configureServerOnlyBindings();
+        configureUniversalBindings();
+    }
 
-        addAuditEventTypes(IntegrationsAuditEventTypes.class);
+    private void configureServerOnlyBindings() {
+        if (!isForwarder()) {
+            /*
+             * Register your plugin types here.
+             *
+             * Examples:
+             *
+             * addMessageInput(Class<? extends MessageInput>);
+             * addMessageFilter(Class<? extends MessageFilter>);
+             * addMessageOutput(Class<? extends MessageOutput>);
+             * addPeriodical(Class<? extends Periodical>);
+             * addAlarmCallback(Class<? extends AlarmCallback>);
+             * addInitializer(Class<? extends Service>);
+             * addRestResource(Class<? extends PluginRestResource>);
+             *
+             * Add all configuration beans returned by getConfigBeans():
+             *
+             * addConfigBeans();
+             */
 
+            addAuditEventTypes(IntegrationsAuditEventTypes.class);
+
+            // Slack Notification
+            addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
+                    SlackEventNotificationConfig.class,
+                    SlackEventNotification.class,
+                    SlackEventNotification.Factory.class);
+
+            // Pager Duty Notification
+            addNotificationType(
+                    PagerDutyNotificationConfig.TYPE_NAME,
+                    PagerDutyNotificationConfig.class,
+                    PagerDutyNotification.class,
+                    PagerDutyNotification.Factory.class);
+        }
+    }
+
+    /**
+     * Place bindings here that need to run in the Graylog Server and the Forwarder.
+     * Please do not add any bindings here that use MongoDB since the Forwarder does not have access to MongoDB.
+     * In general, this should only contain input/codec/transport bindings that are supported in the Forwarder
+     * and do not use MongoDB.
+     */
+    private void configureUniversalBindings() {
         // IPFIX
         addMessageInput(IpfixUdpInput.class);
         addCodec("ipfix", IpfixCodec.class);
@@ -115,5 +146,16 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+    }
+
+    /**
+     * @return A boolean indicating if the plugin is being loaded within the Graylog Forwarder.
+     * The graylog.forwarder system property is set in the startup sequence of the Graylog Cloud Forwarder.
+     * <p>
+     * The Cloud Forwarder only supports inputs. This allows other bindings to be skipped when this plugin is
+     * loaded within the Cloud Forwarder.
+     */
+    boolean isForwarder() {
+        return Boolean.parseBoolean(System.getProperty("graylog.forwarder"));
     }
 }
