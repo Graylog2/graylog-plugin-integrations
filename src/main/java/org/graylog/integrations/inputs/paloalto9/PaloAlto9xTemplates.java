@@ -17,7 +17,6 @@
 package org.graylog.integrations.inputs.paloalto9;
 
 import com.google.common.collect.Sets;
-import gov.nist.core.Host;
 import org.graylog.integrations.inputs.paloalto.PaloAltoFieldTemplate;
 import org.graylog.integrations.inputs.paloalto.PaloAltoMessageTemplate;
 import org.graylog.schema.AlertFields;
