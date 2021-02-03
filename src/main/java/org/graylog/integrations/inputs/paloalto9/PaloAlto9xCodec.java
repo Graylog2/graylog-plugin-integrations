@@ -113,7 +113,7 @@ public class PaloAlto9xCodec implements Codec {
                     message.addFields(fieldProducer.parseFields(GLOBAL_PROTECT_PRE_9_1_3, p.fields()));
                     break;
                 } else {
-                    LOG.error("Unsupported PAN type [{}]. Not adding any parsed fields.", p.panType());
+                    LOG.info("Received log for unsupported PAN type [{}]. Will not parse.", p.panType());
                 }
         }
 

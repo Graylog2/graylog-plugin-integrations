@@ -71,7 +71,7 @@ public class PaloAlto9xParser {
             PaloAltoTypeParser parser = parsers.get(type);
             return parser.parseFields(fields);
         }
-        LOG.error("Unsupported PAN type [{}]. Not adding any parsed fields.", type);
+        LOG.info("Received log for unsupported PAN type [{}]. Will not parse.", type);
         return ImmutableMap.of();
     }
 }
