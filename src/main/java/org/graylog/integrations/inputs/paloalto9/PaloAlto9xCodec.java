@@ -45,6 +45,7 @@ import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.HIP;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.SYSTEM;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.THREAT;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.TRAFFIC;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoMessageType.USERID;
 
 public class PaloAlto9xCodec implements Codec {
     private static final Logger LOG = LoggerFactory.getLogger(PaloAlto9xCodec.class);
@@ -102,6 +103,9 @@ public class PaloAlto9xCodec implements Codec {
             case "GLOBALPROTECT":
                 // For PAN v9.1.3 and later, Global Protect has type in the expected position
                 message.addFields(fieldProducer.parseFields(GLOBAL_PROTECT_9_1_3, p.fields()));
+                break;
+            case "USERID":
+                message.addFields(fieldProducer.parseFields(USERID, p.fields()));
                 break;
             default:
                 //For PAN v9.1.2 and earlier, Global Protect has type in position 5 rather than position 3
