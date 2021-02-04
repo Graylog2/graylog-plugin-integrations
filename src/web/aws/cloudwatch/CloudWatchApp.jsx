@@ -15,10 +15,8 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import PageHeader from 'components/common/PageHeader';
-import withParams from 'routing/withParams';
 import { SidebarProvider } from 'aws/context/Sidebar';
 import { FormDataProvider } from 'aws/context/FormData';
 import { StepsProvider } from 'aws/context/Steps';
@@ -28,7 +26,7 @@ import { AdvancedOptionsProvider } from 'aws/context/AdvancedOptions';
 import CloudWatch from './CloudWatch';
 import INITIAL_FORMDATA from './_initialFormData';
 
-const CloudWatchApp = ({ params: { step }, route }) => {
+const CloudWatchApp = () => {
   return (
     <ApiProvider>
       <StepsProvider>
@@ -39,7 +37,7 @@ const CloudWatchApp = ({ params: { step }, route }) => {
                 <span>This feature retrieves log messages from various AWS sources.</span>
               </PageHeader>
 
-              <CloudWatch wizardStep={step} route={route} />
+              <CloudWatch />
             </AdvancedOptionsProvider>
           </SidebarProvider>
         </FormDataProvider>
@@ -48,11 +46,6 @@ const CloudWatchApp = ({ params: { step }, route }) => {
   );
 };
 
-CloudWatchApp.propTypes = {
-  params: PropTypes.shape({
-    step: PropTypes.string,
-  }).isRequired,
-  route: PropTypes.object.isRequired,
-};
+CloudWatchApp.propTypes = {};
 
-export default withParams(CloudWatchApp);
+export default CloudWatchApp;

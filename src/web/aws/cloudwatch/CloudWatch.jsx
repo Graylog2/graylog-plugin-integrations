@@ -15,8 +15,6 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React, { useContext, useState } from 'react';
-import PropTypes from 'prop-types';
-import { withRouter } from 'react-router';
 
 import ConfirmLeaveDialog from 'components/common/ConfirmLeaveDialog';
 import Wizard from 'components/common/Wizard';
@@ -34,7 +32,7 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import SidebarPermissions from './SidebarPermissions';
 
-const CloudWatch = ({ route }) => {
+const CloudWatch = () => {
   const {
     availableSteps,
     currentStep,
@@ -126,7 +124,7 @@ const CloudWatch = ({ route }) => {
 
   return (
     <>
-      {dirty && !lastStep && <ConfirmLeaveDialog route={route} question="Are you sure? Your new Input will not be created." />}
+      {dirty && !lastStep && <ConfirmLeaveDialog question="Are you sure? Your new Input will not be created." />}
       <Wizard steps={wizardSteps}
               activeStep={currentStep}
               onStepChange={handleStepChange}
@@ -139,8 +137,6 @@ const CloudWatch = ({ route }) => {
   );
 };
 
-CloudWatch.propTypes = {
-  route: PropTypes.object.isRequired,
-};
+CloudWatch.propTypes = {};
 
-export default withRouter(CloudWatch);
+export default CloudWatch;
