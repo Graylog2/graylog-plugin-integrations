@@ -15,6 +15,7 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import ConfirmLeaveDialog from 'components/common/ConfirmLeaveDialog';
 import Wizard from 'components/common/Wizard';
@@ -32,7 +33,7 @@ import StepHealthCheck from './StepHealthCheck';
 import StepReview from './StepReview';
 import SidebarPermissions from './SidebarPermissions';
 
-const CloudWatch = () => {
+const CloudWatch = ({ externalInputSubmit, onSubmit }) => {
   const {
     availableSteps,
     currentStep,
@@ -72,7 +73,7 @@ const CloudWatch = () => {
       setFormData(id, { ...fieldData, value });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (maybeFormData) => {
       clearSidebar();
       const nextStep = availableSteps.indexOf(currentStep) + 1;
 
@@ -83,7 +84,12 @@ const CloudWatch = () => {
         setEnabledStep(key);
       } else {
         setLastStep(true);
-        history.push(Routes.SYSTEM.INPUTS);
+
+        if (externalInputSubmit) {
+          onSubmit(maybeFormData);
+        } else {
+          history.push(Routes.SYSTEM.INPUTS);
+        }
       }
     };
 
@@ -114,11 +120,12 @@ const CloudWatch = () => {
         key: 'review',
         title: 'AWS Kinesis Review',
         component: (<StepReview onSubmit={handleSubmit}
-                                onEditClick={handleEditClick} />),
+                                onEditClick={handleEditClick}
+                                externalInputSubmit={externalInputSubmit} />),
         disabled: isDisabledStep('review'),
       },
     ];
-  }, [availableSteps, availableStreams.length, clearSidebar, currentStep, dirty, isDisabledStep, setCurrentStep, setEnabledStep, setFormData]);
+  }, [availableSteps, availableStreams.length, clearSidebar, currentStep, dirty, isDisabledStep, setCurrentStep, setEnabledStep, setFormData, externalInputSubmit, onSubmit]);
 
   useEffect(() => {
     if (availableSteps.length === 0) {
@@ -141,6 +148,14 @@ const CloudWatch = () => {
   );
 };
 
-CloudWatch.propTypes = {};
+CloudWatch.propTypes = {
+  externalInputSubmit: PropTypes.bool,
+  onSubmit: PropTypes.func,
+};
+
+CloudWatch.defaultProps = {
+  externalInputSubmit: false,
+  onSubmit: undefined,
+};
 
 export default CloudWatch;

@@ -15,24 +15,34 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { SidebarProvider } from 'aws/context/Sidebar';
 import { FormDataProvider } from 'aws/context/FormData';
 import { StepsProvider } from 'aws/context/Steps';
 import { ApiProvider } from 'aws/context/Api';
 import { AdvancedOptionsProvider } from 'aws/context/AdvancedOptions';
+import { toGenericInputCreateRequest } from 'aws/common/formDataAdapter';
 
 import CloudWatch from './CloudWatch';
 import INITIAL_FORMDATA from './_initialFormData';
 
-const EmbeddedCloudWatchApp = () => {
+const EmbeddedCloudWatchApp = ({ onSubmit }) => {
+  const handleSubmit = (formData) => {
+    if (!onSubmit) {
+      return;
+    }
+
+    onSubmit(toGenericInputCreateRequest(formData));
+  };
+
   return (
     <ApiProvider>
       <StepsProvider>
         <FormDataProvider initialFormData={INITIAL_FORMDATA}>
           <SidebarProvider>
             <AdvancedOptionsProvider>
-              <CloudWatch />
+              <CloudWatch onSubmit={handleSubmit} externalInputSubmit={typeof onSubmit === 'function'} />
             </AdvancedOptionsProvider>
           </SidebarProvider>
         </FormDataProvider>
@@ -41,6 +51,12 @@ const EmbeddedCloudWatchApp = () => {
   );
 };
 
-EmbeddedCloudWatchApp.propTypes = {};
+EmbeddedCloudWatchApp.propTypes = {
+  onSubmit: PropTypes.func,
+};
+
+EmbeddedCloudWatchApp.defaultProps = {
+  onSubmit: undefined,
+};
 
 export default EmbeddedCloudWatchApp;
