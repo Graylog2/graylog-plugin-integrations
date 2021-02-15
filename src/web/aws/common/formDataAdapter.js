@@ -17,6 +17,37 @@
 
 import { AWS_AUTH_TYPES, DEFAULT_KINESIS_LOG_TYPE } from './constants';
 
+export const toAWSRequest = (formData, options) => {
+  const {
+    awsAuthenticationType,
+    awsCloudWatchAssumeARN,
+    awsCloudWatchAwsKey,
+    awsCloudWatchAwsSecret,
+    awsEndpointCloudWatch,
+    awsEndpointIAM,
+    awsEndpointDynamoDB,
+    awsEndpointKinesis,
+    key,
+    secret,
+  } = formData;
+
+  return {
+    ...awsAuthenticationType?.value === AWS_AUTH_TYPES.keysecret ? {
+      aws_access_key_id: awsCloudWatchAwsKey?.value,
+      aws_secret_access_key: awsCloudWatchAwsSecret?.value,
+    } : {
+      aws_access_key_id: key,
+      aws_secret_access_key: secret,
+    },
+    assume_role_arn: awsCloudWatchAssumeARN?.value,
+    cloudwatch_endpoint: awsEndpointCloudWatch?.value,
+    dynamodb_endpoint: awsEndpointDynamoDB?.value,
+    iam_endpoint: awsEndpointIAM?.value,
+    kinesis_endpoint: awsEndpointKinesis?.value,
+    ...options,
+  };
+};
+
 export const toGenericInputCreateRequest = ({
   awsAuthenticationType,
   awsCloudWatchAddFlowLogPrefix = { value: undefined },

@@ -15,7 +15,7 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 
-import { toGenericInputCreateRequest } from './formDataAdapter';
+import { toAWSRequest, toGenericInputCreateRequest } from './formDataAdapter';
 import { AWS_AUTH_TYPES, DEFAULT_KINESIS_LOG_TYPE } from './constants';
 
 describe('formDataAdapter', () => {
@@ -65,6 +65,92 @@ describe('formDataAdapter', () => {
 
     return request;
   };
+
+  const testAWSRequest = (formData, options = {}) => {
+    let awsAccessKey = 'key';
+    let awsAccessSecret = 'secret';
+
+    if (formData.awsAuthenticationType?.value === AWS_AUTH_TYPES.keysecret) {
+      awsAccessKey = 'awsCloudWatchAwsKey';
+      awsAccessSecret = 'awsCloudWatchAwsSecret';
+    }
+
+    const mappings = {
+      aws_access_key_id: awsAccessKey,
+      aws_secret_access_key: awsAccessSecret,
+      assume_role_arn: 'awsCloudWatchAssumeARN',
+      cloudwatch_endpoint: 'awsEndpointCloudWatch',
+      dynamodb_endpoint: 'awsEndpointDynamoDB',
+      iam_endpoint: 'awsEndpointIAM',
+      kinesis_endpoint: 'awsEndpointKinesis',
+    };
+
+    const request = toAWSRequest(formData, options);
+
+    expect(Object.keys(request).sort()).toEqual(Object.keys({ ...mappings, ...options }).sort());
+
+    const optionsMap = new Map(Object.entries(options));
+
+    Object.entries(request).forEach(([key, value]) => {
+      if (optionsMap.has(key)) {
+        return;
+      }
+
+      const formDataValue = (mappings[key] === 'key' || mappings[key] === 'secret'
+        ? formData[mappings[key]]
+        : formData[mappings[key]].value);
+
+      expect(value).toEqual(formDataValue);
+    });
+
+    return request;
+  };
+
+  it('adapts formData into an AWS request with key & secret', () => {
+    testAWSRequest({
+      awsAuthenticationType: { value: AWS_AUTH_TYPES.keysecret },
+      awsCloudWatchAssumeARN: { value: '' },
+      awsCloudWatchAwsKey: { value: 'mykey' },
+      awsEndpointCloudWatch: { value: undefined },
+      awsEndpointDynamoDB: { value: undefined },
+      awsEndpointIAM: { value: undefined },
+      awsEndpointKinesis: { value: undefined },
+      awsCloudWatchAwsSecret: { value: 'mysecret' },
+    });
+  });
+
+  it('adapts formData into an AWS request with automatic auth', () => {
+    testAWSRequest({
+      awsAuthenticationType: { value: AWS_AUTH_TYPES.automatic },
+      awsCloudWatchAssumeARN: { value: '' },
+      key: 'mykey',
+      awsEndpointCloudWatch: { value: undefined },
+      awsEndpointDynamoDB: { value: undefined },
+      awsEndpointIAM: { value: undefined },
+      awsEndpointKinesis: { value: undefined },
+      secret: 'mysecret',
+    });
+  });
+
+  it('adapts formData into an AWS request with additional options', () => {
+    const options = {
+      name: 'foobar',
+      global: true,
+    };
+
+    const request = testAWSRequest({
+      awsAuthenticationType: { value: AWS_AUTH_TYPES.keysecret },
+      awsCloudWatchAssumeARN: { value: '' },
+      awsCloudWatchAwsKey: { value: 'mykey' },
+      awsEndpointCloudWatch: { value: undefined },
+      awsEndpointDynamoDB: { value: undefined },
+      awsEndpointIAM: { value: undefined },
+      awsEndpointKinesis: { value: undefined },
+      awsCloudWatchAwsSecret: { value: 'mysecret' },
+    }, options);
+
+    expect(request).toMatchObject(options);
+  });
 
   it('adapts formData into an InputCreateRequest with key & secret', () => {
     testGenericInputCreateRequest({
