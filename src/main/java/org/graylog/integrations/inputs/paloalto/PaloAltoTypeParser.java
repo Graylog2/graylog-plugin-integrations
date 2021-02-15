@@ -35,11 +35,8 @@ public class PaloAltoTypeParser {
     private static final Logger LOG = LoggerFactory.getLogger(PaloAltoTypeParser.class);
 
     private final PaloAltoMessageTemplate messageTemplate;
-    private final PaloAltoMessageType messageType;
 
-    public PaloAltoTypeParser(PaloAltoMessageTemplate messageTemplate, PaloAltoMessageType messageType) {
-
-        this.messageType = messageType;
+    public PaloAltoTypeParser(PaloAltoMessageTemplate messageTemplate) {
         this.messageTemplate = messageTemplate;
     }
 
@@ -80,7 +77,8 @@ public class PaloAltoTypeParser {
 
                 // Handling of duplicate keys
                 if (fieldMap.containsKey(template.field())) {
-                    if (Strings.isNullOrEmpty(rawValue.trim()) || value.equals(fieldMap.get(template.field()))) {
+                    if (Strings.isNullOrEmpty(rawValue.trim()) || null == value
+                            || value.equals(fieldMap.get(template.field()))) {
                         // Same value, do nothing
                     } else if (fieldMap.get(template.field()) instanceof List) {
                         List valueList = (List) fieldMap.get(template.field());
