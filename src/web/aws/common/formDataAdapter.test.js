@@ -15,8 +15,10 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 
+import { exampleFormDataWithAutomaticAuth, exampleFormDataWithKeySecretAuth } from 'aws/FormData.fixtures';
+
 import { toAWSRequest, toGenericInputCreateRequest } from './formDataAdapter';
-import { AWS_AUTH_TYPES, DEFAULT_KINESIS_LOG_TYPE } from './constants';
+import { AWS_AUTH_TYPES } from './constants';
 
 describe('formDataAdapter', () => {
   const testGenericInputCreateRequest = (formData) => {
@@ -153,44 +155,10 @@ describe('formDataAdapter', () => {
   });
 
   it('adapts formData into an InputCreateRequest with key & secret', () => {
-    testGenericInputCreateRequest({
-      awsAuthenticationType: { value: AWS_AUTH_TYPES.keysecret },
-      awsCloudWatchAddFlowLogPrefix: { value: true },
-      awsCloudWatchAssumeARN: { value: '' },
-      awsCloudWatchAwsKey: { value: 'mykey' },
-      awsCloudWatchAwsRegion: { value: 'us-east-1' },
-      awsCloudWatchBatchSize: { value: 10000 },
-      awsEndpointCloudWatch: { value: undefined },
-      awsCloudWatchGlobalInput: { value: false },
-      awsCloudWatchKinesisInputType: { value: DEFAULT_KINESIS_LOG_TYPE },
-      awsCloudWatchKinesisStream: { value: 'my-stream' },
-      awsCloudWatchName: { value: 'My Input' },
-      awsCloudWatchThrottleEnabled: { value: false },
-      awsEndpointDynamoDB: { value: undefined },
-      awsEndpointIAM: { value: undefined },
-      awsEndpointKinesis: { value: undefined },
-      awsCloudWatchAwsSecret: { value: 'mysecret' },
-    });
+    testGenericInputCreateRequest(exampleFormDataWithKeySecretAuth);
   });
 
   it('adapts formData into an InputCreateRequest with automatic auth', () => {
-    testGenericInputCreateRequest({
-      awsAuthenticationType: { value: AWS_AUTH_TYPES.automatic },
-      awsCloudWatchAddFlowLogPrefix: { value: true },
-      awsCloudWatchAssumeARN: { value: '' },
-      awsCloudWatchAwsRegion: { value: 'us-east-1' },
-      awsCloudWatchBatchSize: { value: 10000 },
-      awsEndpointCloudWatch: { value: undefined },
-      awsCloudWatchGlobalInput: { value: false },
-      awsCloudWatchKinesisInputType: { value: DEFAULT_KINESIS_LOG_TYPE },
-      awsCloudWatchKinesisStream: { value: 'my-stream' },
-      awsCloudWatchName: { value: 'My Input' },
-      awsCloudWatchThrottleEnabled: { value: false },
-      awsEndpointDynamoDB: { value: undefined },
-      awsEndpointIAM: { value: undefined },
-      awsEndpointKinesis: { value: undefined },
-      key: 'mykey',
-      secret: 'mysecret',
-    });
+    testGenericInputCreateRequest(exampleFormDataWithAutomaticAuth);
   });
 });

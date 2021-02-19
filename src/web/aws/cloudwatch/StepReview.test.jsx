@@ -18,11 +18,11 @@ import React from 'react';
 import { screen, render, waitFor } from 'wrappedTestingLibrary';
 import { asMock, StoreMock as MockStore } from 'helpers/mocking';
 import userEvent from '@testing-library/user-event';
+import { exampleFormDataWithKeySecretAuth } from 'aws/FormData.fixtures';
 
 import fetch from 'logic/rest/FetchProvider';
 import { FormDataProvider } from 'aws/context/FormData';
 import { ApiContext } from 'aws/context/Api';
-import { DEFAULT_KINESIS_LOG_TYPE } from 'aws/common/constants';
 
 import StepReview from './StepReview';
 
@@ -33,24 +33,6 @@ jest.mock('stores/users/CurrentUserStore', () => MockStore(
   ['get', () => mockCurrentUser],
   ['getInitialState', () => mockCurrentUser],
 ));
-
-const minimumFormData = {
-  awsAuthenticationType: { value: undefined },
-  awsCloudWatchAddFlowLogPrefix: { value: undefined },
-  awsCloudWatchAssumeARN: { value: undefined },
-  awsCloudWatchAwsKey: { value: undefined },
-  awsCloudWatchAwsRegion: { value: undefined },
-  awsCloudWatchBatchSize: { value: undefined, defaultValue: 'default' },
-  awsEndpointCloudWatch: { value: undefined },
-  awsCloudWatchGlobalInput: { value: undefined },
-  awsCloudWatchKinesisInputType: { value: DEFAULT_KINESIS_LOG_TYPE },
-  awsCloudWatchKinesisStream: { value: undefined },
-  awsCloudWatchName: { value: undefined },
-  awsCloudWatchThrottleEnabled: { value: undefined },
-  awsEndpointDynamoDB: { value: undefined },
-  awsEndpointIAM: { value: undefined },
-  awsEndpointKinesis: { value: undefined },
-};
 
 describe('<StepReview>', () => {
   afterEach(() => {
@@ -64,7 +46,7 @@ describe('<StepReview>', () => {
 
     render(
       <ApiContext.Provider value={{ logData: null }}>
-        <FormDataProvider initialFormData={minimumFormData}>
+        <FormDataProvider initialFormData={exampleFormDataWithKeySecretAuth}>
           <StepReview onSubmit={submitFunction} onEditClick={() => {}} />
         </FormDataProvider>
       </ApiContext.Provider>,
@@ -88,7 +70,7 @@ describe('<StepReview>', () => {
 
     render(
       <ApiContext.Provider value={{ logData: null }}>
-        <FormDataProvider initialFormData={{ ...minimumFormData }}>
+        <FormDataProvider initialFormData={exampleFormDataWithKeySecretAuth}>
           <StepReview onSubmit={submitFunction} onEditClick={() => {}} externalInputSubmit />
         </FormDataProvider>
       </ApiContext.Provider>,
@@ -102,7 +84,7 @@ describe('<StepReview>', () => {
 
     await waitFor(() => expect(submitFunction).toHaveBeenCalledTimes(1));
 
-    expect(submitFunction).toHaveBeenCalledWith(minimumFormData);
+    expect(submitFunction).toHaveBeenCalledWith(exampleFormDataWithKeySecretAuth);
     expect(fetch).toHaveBeenCalledTimes(0);
   });
 });

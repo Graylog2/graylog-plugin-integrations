@@ -18,11 +18,11 @@ import React from 'react';
 import { screen, render, waitFor } from 'wrappedTestingLibrary';
 import { StoreMock as MockStore } from 'helpers/mocking';
 import userEvent from '@testing-library/user-event';
+import { exampleFormDataWithKeySecretAuth } from 'aws/FormData.fixtures';
 
 import history from 'util/History';
 import { FormDataProvider } from 'aws/context/FormData';
 import { ApiContext } from 'aws/context/Api';
-import { DEFAULT_KINESIS_LOG_TYPE } from 'aws/common/constants';
 import { StepsContext } from 'aws/context/Steps';
 import { SidebarContext } from 'aws/context/Sidebar';
 import Routes from 'routing/Routes';
@@ -39,24 +39,6 @@ jest.mock('stores/users/CurrentUserStore', () => MockStore(
 
 jest.mock('util/History');
 
-const minimumFormData = {
-  awsAuthenticationType: { value: undefined },
-  awsCloudWatchAddFlowLogPrefix: { value: undefined },
-  awsCloudWatchAssumeARN: { value: undefined },
-  awsCloudWatchAwsKey: { value: undefined },
-  awsCloudWatchAwsRegion: { value: undefined },
-  awsCloudWatchBatchSize: { value: undefined, defaultValue: 'default' },
-  awsEndpointCloudWatch: { value: undefined },
-  awsCloudWatchGlobalInput: { value: undefined },
-  awsCloudWatchKinesisInputType: { value: DEFAULT_KINESIS_LOG_TYPE },
-  awsCloudWatchKinesisStream: { value: undefined },
-  awsCloudWatchName: { value: undefined },
-  awsCloudWatchThrottleEnabled: { value: undefined },
-  awsEndpointDynamoDB: { value: undefined },
-  awsEndpointIAM: { value: undefined },
-  awsEndpointKinesis: { value: undefined },
-};
-
 // eslint-disable-next-line react/prop-types
 const TestCommonProviders = ({ children }) => (
   <ApiContext.Provider value={{
@@ -67,7 +49,7 @@ const TestCommonProviders = ({ children }) => (
       currentStep: 'review',
       isDisabledStep: () => false,
     }}>
-      <FormDataProvider initialFormData={minimumFormData}>
+      <FormDataProvider initialFormData={exampleFormDataWithKeySecretAuth}>
         <SidebarContext.Provider value={{
           sidebar: <></>,
           clearSidebar: jest.fn(),
@@ -115,6 +97,6 @@ describe('<CloudWatch>', () => {
 
     await waitFor(() => expect(submitFunction).toHaveBeenCalledTimes(1));
 
-    expect(submitFunction).toHaveBeenCalledWith(minimumFormData);
+    expect(submitFunction).toHaveBeenCalledWith(exampleFormDataWithKeySecretAuth);
   });
 });
