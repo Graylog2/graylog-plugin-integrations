@@ -14,23 +14,6 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-import React from 'react';
+const coreBabelConfig = require('../graylog2-server/graylog2-web-interface/babel.config.js');
 
-import PageHeader from 'components/common/PageHeader';
-
-import EmbeddedCloudWatchApp from './EmbeddedCloudWatchApp';
-
-const CloudWatchApp = () => {
-  return (
-    <>
-      <PageHeader title="AWS Integrations">
-        <span>This feature retrieves log messages from various AWS sources.</span>
-      </PageHeader>
-      <EmbeddedCloudWatchApp />
-    </>
-  );
-};
-
-CloudWatchApp.propTypes = {};
-
-export default CloudWatchApp;
+module.exports = { ...coreBabelConfig };

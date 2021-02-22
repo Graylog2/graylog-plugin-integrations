@@ -133,21 +133,19 @@ public class IntegrationsModule extends PluginModule {
         addMessageInput(PaloAlto9xInput.class);
         addCodec(PaloAlto9xCodec.NAME, PaloAlto9xCodec.class);
 
-        if (!isCloud()) {
-            // AWS
-            addCodec(AWSCodec.NAME, AWSCodec.class);
-            addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
-            addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
-            addMessageInput(AWSInput.class);
-            addPermissions(AWSPermissions.class);
-            addRestResource(AWSResource.class);
-            addRestResource(KinesisSetupResource.class);
-            addTransport(AWSTransport.NAME, AWSTransport.class);
-            addTransport(KinesisTransport.NAME, KinesisTransport.class);
-            bind(IamClientBuilder.class).toProvider(IamClient::builder);
-            bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
-            bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
-        }
+        // AWS
+        addCodec(AWSCodec.NAME, AWSCodec.class);
+        addCodec(KinesisCloudWatchFlowLogCodec.NAME, KinesisCloudWatchFlowLogCodec.class);
+        addCodec(KinesisRawLogCodec.NAME, KinesisRawLogCodec.class);
+        addMessageInput(AWSInput.class);
+        addPermissions(AWSPermissions.class);
+        addRestResource(AWSResource.class);
+        addRestResource(KinesisSetupResource.class);
+        addTransport(AWSTransport.NAME, AWSTransport.class);
+        addTransport(KinesisTransport.NAME, KinesisTransport.class);
+        bind(IamClientBuilder.class).toProvider(IamClient::builder);
+        bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
+        bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
     }
 
     /**
