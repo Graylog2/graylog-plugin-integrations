@@ -8,8 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
+import com.unboundid.util.json.JSONException;
+import com.unboundid.util.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,7 +24,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class GreyNoiseDataAdapter extends LookupDataAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseDataAdapter.class);
@@ -31,12 +37,6 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
 
     OkHttpClient okHttpClient;
     Config config;
-
-    private static final ImmutableSet<String> GreyNoiseResponse = ImmutableSet.<String>builder()
-            .add("code")
-            .add("ip")
-            .add("seen")
-            .build();
 
     @Inject
     public GreyNoiseDataAdapter(@Assisted("id") String id,
@@ -91,9 +91,20 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
     public static LookupResult parseResponse(Response response) throws IOException {
 
         if (response.isSuccessful()) {
+            Map<Object, Object> map = new HashMap<>();
 
-            // TODO resolve parsing
-            return LookupResult.withoutTTL().multiSingleton(response)
+            BufferedReader in = new BufferedReader(new InputStreamReader(Objects.requireNonNull(response.body()).byteStream()));
+            String jsonString = in.readLine();
+            try {
+                JSONObject obj = new JSONObject(jsonString);
+                map.put("ip", Objects.requireNonNull(obj).getFieldAsString("ip"));
+                map.put("noise", Objects.requireNonNull(obj).getFieldAsString("seen"));
+                // TODO resolve code value
+                map.put("code", Objects.requireNonNull(obj).getFieldAsString("code"));
+            } catch (JSONException e) {
+                LOG.error("An error occurred while parsing Lookup result [{}]", e.toString());
+            }
+            return LookupResult.withoutTTL().multiValue(map)
                                .build();
         } else
             return LookupResult.empty();
