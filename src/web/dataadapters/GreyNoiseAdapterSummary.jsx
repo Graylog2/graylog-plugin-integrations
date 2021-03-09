@@ -19,6 +19,8 @@ class GreyNoiseAdapterSummary extends React.Component {
 
     return (
       <dl>
+        <dt>API Token</dt>
+        <dd>******</dd>
       </dl>
     );
   }

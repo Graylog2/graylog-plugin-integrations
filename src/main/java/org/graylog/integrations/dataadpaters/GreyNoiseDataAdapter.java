@@ -74,7 +74,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
     protected LookupResult doGet(Object keyObject) {
         try {
             Request request = new Request.Builder()
-                    .url("https://api.greynoise.io/v2/noise/context/" + keyObject.toString())
+                    .url("https://api.greynoise.io/v2/noise/quick/" + keyObject.toString())
                     .method("GET", null)
                     .addHeader("Accept", "application/json")
                     .addHeader("key", config.apiToken())
@@ -98,8 +98,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
             try {
                 JSONObject obj = new JSONObject(jsonString);
                 map.put("ip", Objects.requireNonNull(obj).getFieldAsString("ip"));
-                map.put("noise", Objects.requireNonNull(obj).getFieldAsString("seen"));
-                // TODO resolve code value
+                map.put("noise", Objects.requireNonNull(obj).getFieldAsBoolean("noise"));
                 map.put("code", Objects.requireNonNull(obj).getFieldAsString("code"));
             } catch (JSONException e) {
                 LOG.error("An error occurred while parsing Lookup result [{}]", e.toString());
