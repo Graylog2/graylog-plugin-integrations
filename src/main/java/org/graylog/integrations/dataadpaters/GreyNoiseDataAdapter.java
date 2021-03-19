@@ -34,6 +34,8 @@ import org.graylog2.plugin.lookup.LookupCachePurge;
 import org.graylog2.plugin.lookup.LookupDataAdapter;
 import org.graylog2.plugin.lookup.LookupDataAdapterConfiguration;
 import org.graylog2.plugin.lookup.LookupResult;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +52,21 @@ import java.util.Objects;
 public class GreyNoiseDataAdapter extends LookupDataAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseDataAdapter.class);
     public static final String NAME = "GreyNoise";
+    static final String GREYNOISE_IPQC_ENDPOINT = "https://api.greynoise.io/v2/noise/quick/";
 
-    OkHttpClient okHttpClient;
-    Config config;
+    private final EncryptedValueService encryptedValueService;
+    private final Config config;
+    private OkHttpClient okHttpClient;
 
     @Inject
     public GreyNoiseDataAdapter(@Assisted("id") String id,
                                 @Assisted("name") String name,
                                 @Assisted LookupDataAdapterConfiguration config,
-                                MetricRegistry metricRegistry) {
+                                MetricRegistry metricRegistry,
+                                EncryptedValueService encryptedValueService) {
         super(id, name, config, metricRegistry);
         this.config = (Config) config;
+        this.encryptedValueService = encryptedValueService;
     }
 
     @Override
@@ -89,11 +95,12 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
     @Override
     protected LookupResult doGet(Object keyObject) {
         try {
+
             Request request = new Request.Builder()
-                    .url("https://api.greynoise.io/v2/noise/quick/" + keyObject.toString())
+                    .url(GREYNOISE_IPQC_ENDPOINT + keyObject.toString())
                     .method("GET", null)
                     .addHeader("Accept", "application/json")
-                    .addHeader("key", config.apiToken())
+                    .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
                     .build();
 
             return parseResponse(okHttpClient.newCall(request).execute());
@@ -151,7 +158,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
         public Config defaultConfiguration() {
             return Config.builder()
                          .type(NAME)
-                         .apiToken("token")
+                         .apiToken(EncryptedValue.createUnset())
                          .build();
         }
 
@@ -170,7 +177,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
 
         @JsonProperty("api_token")
         @NotEmpty
-        public abstract String apiToken();
+        public abstract EncryptedValue apiToken();
 
         public static Builder builder() {
             return new AutoValue_GreyNoiseDataAdapter_Config.Builder();
@@ -186,9 +193,8 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
             @JsonProperty(TYPE_FIELD)
             public abstract Builder type(String type);
 
-            // TODO resolve string key
             @JsonProperty("api_token")
-            public abstract Builder apiToken(String user_passwd);
+            public abstract Builder apiToken(EncryptedValue api_token);
 
             public abstract Config build();
         }
