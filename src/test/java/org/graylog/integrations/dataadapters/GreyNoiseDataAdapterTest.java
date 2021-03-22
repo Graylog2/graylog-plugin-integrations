@@ -5,6 +5,7 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.assertj.core.api.Assertions;
 import org.graylog.integrations.dataadpaters.GreyNoiseDataAdapter;
 import org.graylog2.plugin.lookup.LookupResult;
 import org.junit.Before;
@@ -22,11 +23,7 @@ public class GreyNoiseDataAdapterTest {
     @Before
     public void setUp() throws Exception {
 
-        stringResponse = "{\n" +
-                         "\"code\":\"0x00\"\n" +
-                         "\"ip\":\"string\"\n" +
-                         "\"noise\":true\n" +
-                         "}";
+        stringResponse = "{\"ip\":\"192.168.1.1\",\"noise\":true,\"code\":\"0x01\"}";
 
         Request mockRequest = new Request.Builder()
                 .url("https://api.greynoise.io/v2/noise/quick/")
@@ -45,9 +42,15 @@ public class GreyNoiseDataAdapterTest {
     @Test
     public void parseBodyWithMultiValue() throws Exception {
 
-        // TODO resolve error
         result = GreyNoiseDataAdapter.parseResponse(mockResponse);
         assertThat(result, notNullValue());
+        Assertions.assertThat(result.isEmpty()).isFalse();
+        Assertions.assertThat(result.hasError()).isFalse();
+        Assertions.assertThat(result.singleValue()).isEqualTo(null);
+        Assertions.assertThat(result.multiValue()).isNotNull();
+        Assertions.assertThat(result.multiValue().containsValue("192.168.1.1")).isTrue();
+        Assertions.assertThat(result.multiValue().containsValue("0x01")).isTrue();
+        Assertions.assertThat(result.multiValue().containsValue(true)).isTrue();
     }
 
 
