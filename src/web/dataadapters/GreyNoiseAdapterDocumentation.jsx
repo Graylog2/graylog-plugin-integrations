@@ -17,13 +17,17 @@
 /* eslint-disable react/no-unescaped-entities, no-template-curly-in-string */
 import React from 'react';
 
+import { ExternalLink } from 'components/common';
+
 class GreyNoiseAdapterDocumentation extends React.Component {
   render() {
+    const style = { marginBottom: 10 };
     return (
       <div>
         <p style={style}>
-          The Greynoise data adapter uses the <ExternalLink href="https://developer.greynoise.io/">Greynoise API</ExternalLink> to
-          lookup indicators for the given key.
+            The Greynoise data adapter uses the <ExternalLink href="https://developer.greynoise.io/">Greynoise API</ExternalLink> to
+            lookup indicators for the given key and returns the values for the  IP Quick Context endpoint.
+            See <ExternalLink href="https://developer.greynoise.io/reference/ip-lookup-1#quickcheck-1">IP Quick Context</ExternalLink>
         </p>
       </div>
     )
