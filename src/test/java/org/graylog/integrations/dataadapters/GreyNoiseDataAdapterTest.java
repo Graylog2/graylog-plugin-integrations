@@ -57,16 +57,6 @@ public class GreyNoiseDataAdapterTest {
                 .build();
     }
 
-    private void getBadResponse() {
-        mockResponse = new Response.Builder()
-                .request(mockRequest)
-                .protocol(Protocol.HTTP_2)
-                .code(300)
-                .message("")
-                .body(ResponseBody.create(MediaType.get("application/json"), stringResponse))
-                .build();
-    }
-
     @Test
     public void parseBodyWithMultiValue() throws Exception {
         getvalidResponse();
@@ -80,20 +70,6 @@ public class GreyNoiseDataAdapterTest {
         Assertions.assertThat(result.multiValue().containsValue("192.168.1.1")).isTrue();
         Assertions.assertThat(result.multiValue().containsValue("0x01")).isTrue();
         Assertions.assertThat(result.multiValue().containsValue(true)).isTrue();
-    }
-
-    @Test
-    public void verifyExpectedUrl() {
-
-        getvalidResponse();
-        Assertions.assertThat(mockRequest.url().toString()).isEqualTo("https://api.greynoise.io/v2/noise/quick/");
-    }
-
-    @Test
-    public void verifyBadResponse(){
-        getBadResponse();
-        Assertions.assertThat(mockResponse.isSuccessful()).isEqualTo(false);
-
     }
 
 }
