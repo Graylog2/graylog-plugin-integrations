@@ -32,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GreyNoiseDataAdapterTest {
 
+    Request mockRequest;
     Response mockResponse;
     LookupResult result = null;
     String stringResponse;
@@ -41,10 +42,12 @@ public class GreyNoiseDataAdapterTest {
 
         stringResponse = "{\"ip\":\"192.168.1.1\",\"noise\":true,\"code\":\"0x01\"}";
 
-        Request mockRequest = new Request.Builder()
+        mockRequest = new Request.Builder()
                 .url("https://api.greynoise.io/v2/noise/quick/")
                 .build();
+    }
 
+    private void getvalidResponse() {
         mockResponse = new Response.Builder()
                 .request(mockRequest)
                 .protocol(Protocol.HTTP_2)
@@ -52,11 +55,21 @@ public class GreyNoiseDataAdapterTest {
                 .message("")
                 .body(ResponseBody.create(MediaType.get("application/json"), stringResponse))
                 .build();
+    }
 
+    private void getBadResponse() {
+        mockResponse = new Response.Builder()
+                .request(mockRequest)
+                .protocol(Protocol.HTTP_2)
+                .code(300)
+                .message("")
+                .body(ResponseBody.create(MediaType.get("application/json"), stringResponse))
+                .build();
     }
 
     @Test
     public void parseBodyWithMultiValue() throws Exception {
+        getvalidResponse();
 
         result = GreyNoiseDataAdapter.parseResponse(mockResponse);
         assertThat(result, notNullValue());
@@ -69,5 +82,18 @@ public class GreyNoiseDataAdapterTest {
         Assertions.assertThat(result.multiValue().containsValue(true)).isTrue();
     }
 
+    @Test
+    public void verifyExpectedUrl() {
+
+        getvalidResponse();
+        Assertions.assertThat(mockRequest.url().toString()).isEqualTo("https://api.greynoise.io/v2/noise/quick/");
+    }
+
+    @Test
+    public void verifyBadResponse(){
+        getBadResponse();
+        Assertions.assertThat(mockResponse.isSuccessful()).isEqualTo(false);
+
+    }
 
 }

@@ -19,8 +19,15 @@ import React from 'react';
 
 class GreyNoiseAdapterDocumentation extends React.Component {
   render() {
-    return () => {
-    };
+    return (
+      <div>
+        <p style={style}>
+          The Greynoise data adapter uses the <ExternalLink href="https://developer.greynoise.io/">Greynoise API</ExternalLink> to
+          lookup indicators for the given key.
+        </p>
+      </div>
+    )
+    ;
   }
 }
 

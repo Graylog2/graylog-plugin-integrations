@@ -24,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import com.google.inject.assistedinject.Assisted;
 import com.unboundid.util.json.JSONException;
 import com.unboundid.util.json.JSONObject;
@@ -42,10 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -56,24 +55,23 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
 
     private final EncryptedValueService encryptedValueService;
     private final Config config;
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient;
 
     @Inject
     public GreyNoiseDataAdapter(@Assisted("id") String id,
                                 @Assisted("name") String name,
                                 @Assisted LookupDataAdapterConfiguration config,
                                 MetricRegistry metricRegistry,
-                                EncryptedValueService encryptedValueService) {
+                                EncryptedValueService encryptedValueService,
+                                OkHttpClient okHttpClient) {
         super(id, name, config, metricRegistry);
         this.config = (Config) config;
         this.encryptedValueService = encryptedValueService;
+        this.okHttpClient = okHttpClient;
     }
 
     @Override
     public void doStart() throws Exception {
-
-        okHttpClient = new OkHttpClient().newBuilder()
-                                         .build();
 
     }
 
@@ -94,32 +92,28 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
 
     @Override
     protected LookupResult doGet(Object keyObject) {
-        try {
-
-            Request request = new Request.Builder()
-                    .url(GREYNOISE_IPQC_ENDPOINT + keyObject.toString())
-                    .method("GET", null)
-                    .addHeader("Accept", "application/json")
-                    .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
-                    .build();
-
-            return parseResponse(okHttpClient.newCall(request).execute());
-
+        Request request = new Request.Builder()
+                .url(GREYNOISE_IPQC_ENDPOINT + keyObject.toString())
+                .method("GET", null)
+                .addHeader("Accept", "application/json")
+                .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
+                .build();
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            return parseResponse(response);
         } catch (Exception e) {
             LOG.error("An error occurred while retrieving lookup result [{}]", e.toString());
             return LookupResult.withError();
         }
     }
 
+    @VisibleForTesting
     public static LookupResult parseResponse(Response response) throws IOException {
 
         if (response.isSuccessful()) {
-            Map<Object, Object> map = new HashMap<>();
+            Map<Object, Object> map = Maps.newHashMap();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(Objects.requireNonNull(response.body()).byteStream()));
-            String jsonString = in.readLine();
             try {
-                JSONObject obj = new JSONObject(jsonString);
+                JSONObject obj = new JSONObject(response.body().string());
                 map.put("ip", Objects.requireNonNull(obj).getFieldAsString("ip"));
                 map.put("noise", Objects.requireNonNull(obj).getFieldAsBoolean("noise"));
                 map.put("code", Objects.requireNonNull(obj).getFieldAsString("code"));
