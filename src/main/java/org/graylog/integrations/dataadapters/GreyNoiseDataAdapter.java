@@ -14,7 +14,7 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog.integrations.dataadpaters;
+package org.graylog.integrations.dataadapters;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -107,7 +107,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
     }
 
     @VisibleForTesting
-    public static LookupResult parseResponse(Response response) throws IOException {
+    static LookupResult parseResponse(Response response) {
 
         if (response.isSuccessful()) {
             Map<Object, Object> map = Maps.newHashMap();
@@ -117,7 +117,7 @@ public class GreyNoiseDataAdapter extends LookupDataAdapter {
                 map.put("ip", Objects.requireNonNull(obj).getFieldAsString("ip"));
                 map.put("noise", Objects.requireNonNull(obj).getFieldAsBoolean("noise"));
                 map.put("code", Objects.requireNonNull(obj).getFieldAsString("code"));
-            } catch (JSONException e) {
+            } catch (JSONException | IOException e) {
                 LOG.error("An error occurred while parsing Lookup result [{}]", e.toString());
             }
             return LookupResult.withoutTTL().multiValue(map)

@@ -22,7 +22,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.assertj.core.api.Assertions;
-import org.graylog.integrations.dataadpaters.GreyNoiseDataAdapter;
 import org.graylog2.plugin.lookup.LookupResult;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,6 @@ public class GreyNoiseDataAdapterTest {
 
     Request mockRequest;
     Response mockResponse;
-    LookupResult result = null;
     String stringResponse;
 
     @Before
@@ -58,10 +56,10 @@ public class GreyNoiseDataAdapterTest {
     }
 
     @Test
-    public void parseBodyWithMultiValue() throws Exception {
+    public void parseBodyWithMultiValue(){
         getvalidResponse();
 
-        result = GreyNoiseDataAdapter.parseResponse(mockResponse);
+        final LookupResult result = GreyNoiseDataAdapter.parseResponse(mockResponse);
         assertThat(result, notNullValue());
         Assertions.assertThat(result.isEmpty()).isFalse();
         Assertions.assertThat(result.hasError()).isFalse();
