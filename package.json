@@ -1,6 +1,6 @@
 {
   "name": "graylog-plugin-integrations",
-  "version": "3.3.12",
+  "version": "3.3.13-SNAPSHOT",
   "description": "",
   "repository": {
     "type": "git",
