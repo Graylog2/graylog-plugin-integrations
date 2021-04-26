@@ -93,6 +93,35 @@ public class IpfixParserTest {
                 .extracting(ShallowDataSet::templateId).containsExactly(256);
     }
 
+    @Test
+    public void parseBasicList() throws IOException {
+        ByteBuf packet = Utils.readPacket("basiclist-ipfix.dat");
+        final IpfixMessage message = new IpfixParser(definitions).parseMessage(packet);
+        assertThat(message).isNotNull();
+        final ImmutableList<TemplateRecord> templateRecords = message.templateRecords();
+        assertThat(templateRecords).hasSize(1);
+        final TemplateRecord templateRecord = templateRecords.get(0);
+        assertThat(templateRecord.templateId()).isEqualTo(256);
+        assertThat(templateRecord.informationElements()).hasSize(4).containsExactly(
+                InformationElement.create(10, 4, 0),
+                InformationElement.create(8,4,0),
+                InformationElement.create(12,4,0),
+                InformationElement.create(291, 65535, 0)
+        );
+        assertThat(message.optionsTemplateRecords()).isEmpty();
+        assertThat(message.flows()).hasSize(1);
+        final Flow flow = message.flows().get(0);
+        assertThat(flow.fields()).hasSize(6).containsExactly(
+                immutableEntry("ingressInterface", 9L),
+                immutableEntry("sourceIPv4Address", "192.0.2.201"),
+                immutableEntry("destinationIPv4Address", "233.252.0.1"),
+                immutableEntry("postMCastOctetDeltaCount_0", 1L),
+                immutableEntry("postMCastOctetDeltaCount_1", 4L),
+                immutableEntry("postMCastOctetDeltaCount_2", 8L)
+        );
+
+    }
+
     //@Ignore("Missing ied for private enterprise number 3054 failure.")
     @Test
     public void parseDataSet() throws IOException {
