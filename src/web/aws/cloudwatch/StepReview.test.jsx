@@ -34,6 +34,8 @@ jest.mock('stores/users/CurrentUserStore', () => MockStore(
   ['getInitialState', () => mockCurrentUser],
 ));
 
+jest.mock('logic/rest/FetchProvider', () => jest.fn());
+
 describe('<StepReview>', () => {
   afterEach(() => {
     jest.resetAllMocks();
