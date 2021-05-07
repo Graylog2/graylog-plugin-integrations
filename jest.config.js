@@ -19,17 +19,19 @@ const buildConfig = require('./build.config');
 
 const packageJson = JSON.parse(fs.readFileSync('package.json'));
 const webSrcPrefix = buildConfig.web_src_path;
-const { moduleDirectories, moduleNameMapper } = packageJson.jest;
+const {
+  moduleDirectories,
+  moduleNameMapper
+} = packageJson.jest;
 
-const jestConfig = Object.assign({}, packageJson.jest, {
+const jestConfig = {
+  ...packageJson.jest,
   moduleDirectories: [].concat(moduleDirectories, [`${webSrcPrefix}/src`, `${webSrcPrefix}/test`]),
-  moduleNameMapper: Object.assign(
-    {},
-    moduleNameMapper,
-    {
-      '^react$': `${webSrcPrefix}/node_modules/react/index.js`,
-      '^react-dom$': `${webSrcPrefix}/node_modules/react-dom/index.js`,
-    },
-  ),
-});
+  moduleNameMapper: {
+    ...moduleNameMapper,
+    '^react$': `${webSrcPrefix}/node_modules/react/index.js`,
+    '^react-dom$': `${webSrcPrefix}/node_modules/react-dom/index.js`,
+    '^styled-components$': `${webSrcPrefix}/node_modules/styled-components`,
+  },
+};
 module.exports = jestConfig;

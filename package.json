@@ -9,47 +9,38 @@
   },
   "scripts": {
     "build": "webpack",
+    "test": "jest",
     "lint": "eslint src",
     "lint:path": "eslint",
-    "test": "jest",
-    "flow-check": "flow check"
+    "lint:styles": "stylelint './src/web/**/*.{js,jsx,ts,tsx}' --syntax css-in-js",
+    "lint:styles:path": "stylelint --syntax css-in-js"
   },
   "eslintConfig": {
     "extends": "graylog"
   },
+  "stylelint": {
+    "extends": "stylelint-config-graylog"
+  },
   "jest": {
-    "collectCoverageFrom": [
-      "src/web/**/*.{js,jsx}"
-    ],
-    "setupFiles": [
-      "jest-localstorage-mock",
-      "../graylog2-server/graylog2-web-interface/test/mock-FetchProvider.js",
-      "../graylog2-server/graylog2-web-interface/test/console-warnings-fail-tests.js"
-    ],
-    "testPathIgnorePatterns": [
-      ".fixtures.js$"
-    ],
+    "preset": "jest-preset-graylog",
+    "setupFiles": [],
+    "testEnvironment": "enzyme",
+    "testEnvironmentOptions": {
+      "enzymeAdapter": "react16"
+    },
     "moduleDirectories": [
       "src",
-      "test",
+      "src/test",
       "node_modules"
     ],
-    "moduleFileExtensions": [
-      "js",
-      "jsx"
-    ],
     "moduleNameMapper": {
-      "^file-loader!(.+)$": "$1",
-      "\\.(css|less)$": "identity-obj-proxy",
-      "^aws/(.+)$": "web/aws/$1",
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/test/web/fileMock.js",
-      "^styled-components$": "<rootDir>/node_modules/styled-components"
+      "^aws/(.+)$": "web/aws/$1"
     },
     "roots": [
       "src"
     ],
     "transform": {
-      "^.+\\.jsx?$": "babel-jest"
+      "^.+\\.[tj]sx?$": "babel-jest"
     }
   },
   "keywords": [
@@ -57,28 +48,23 @@
   ],
   "author": "Graylog, Inc. <hello@graylog.com>",
   "dependencies": {
+    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
   "devDependencies": {
-    "@babel/core": "7.11.6",
+    "@babel/core": "7.12.10",
     "@babel/plugin-proposal-class-properties": "7.10.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/plugin-transform-runtime": "7.11.5",
     "@babel/preset-env": "7.11.5",
-    "@babel/preset-flow": "7.10.4",
-    "@babel/preset-react": "7.10.4",
-    "@testing-library/dom": "7.20.2",
-    "@testing-library/jest-dom": "5.11.0",
-    "@testing-library/react": "11.0.4",
-    "@testing-library/user-event": "^12.6.3",
-    "babel-jest": "25.4.0",
-    "babel-plugin-add-module-exports": "1.0.2",
+    "@babel/preset-react": "7.12.10",
+    "@testing-library/user-event": "^13.0.2",
+    "babel-plugin-add-module-exports": "1.0.4",
     "babel-plugin-dynamic-import-node": "2.3.3",
     "babel-plugin-styled-components": "1.11.1",
-    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^25.1.0",
-    "jest-localstorage-mock": "^2.4.0",
-    "react-select-event": "5.0.0"
+    "identity-obj-proxy": "^3.0.0"
+  },
+  "resolutions": {
+    "jest-environment-jsdom": "^26.0.1"
   },
   "private": true
 }
