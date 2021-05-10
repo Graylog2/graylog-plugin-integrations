@@ -22,6 +22,7 @@ import { Input } from 'components/bootstrap';
 import { FormDataContext } from 'aws/context/FormData';
 import { AdvancedOptionsContext } from 'aws/context/AdvancedOptions';
 import AdditionalFields from 'aws/common/AdditionalFields';
+import HideOnCloud from 'util/conditional/HideOnCloud';
 
 const FormAdvancedOptions = ({ onChange }) => {
   const { formData } = useContext(FormDataContext);
@@ -40,13 +41,15 @@ const FormAdvancedOptions = ({ onChange }) => {
 
   return (
     <StyledAdditionalFields title="Advanced Options" visible={isAdvancedOptionsVisible} onToggle={handleToggle}>
-      <Input id="awsCloudWatchGlobalInput"
-             type="checkbox"
-             value="global-input"
-             defaultChecked={awsCloudWatchGlobalInput ? awsCloudWatchGlobalInput.value : ''}
-             onChange={onChange}
-             label="Global Input"
-             help="Should this input start on all nodes" />
+      <HideOnCloud>
+        <Input id="awsCloudWatchGlobalInput"
+               type="checkbox"
+               value="global-input"
+               defaultChecked={awsCloudWatchGlobalInput ? awsCloudWatchGlobalInput.value : ''}
+               onChange={onChange}
+               label="Global Input"
+               help="Should this input start on all nodes" />
+      </HideOnCloud>
 
       <Input id="awsCloudWatchThrottleEnabled"
              type="checkbox"

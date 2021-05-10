@@ -28,6 +28,7 @@ import useFetch from 'aws/common/hooks/useFetch';
 import FormWrap from 'aws/common/FormWrap';
 import { ApiRoutes } from 'aws/common/Routes';
 import { DEFAULT_KINESIS_LOG_TYPE, KINESIS_LOG_TYPES } from 'aws/common/constants';
+import HideOnCloud from 'util/conditional/HideOnCloud';
 
 const Default = ({ value }) => (
   <>{value} <small>(default)</small></>
@@ -175,10 +176,12 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
             <strong>Stream</strong>
             <span>{awsCloudWatchKinesisStream.value}</span>
           </li>
-          <li>
-            <strong>Global Input</strong>
-            <span><Icon name={globalInputEnabled ? 'check' : 'times'} /></span>
-          </li>
+          <HideOnCloud>
+            <li>
+              <strong>Global Input</strong>
+              <span><Icon name={globalInputEnabled ? 'check' : 'times'} /></span>
+            </li>
+          </HideOnCloud>
           <li>
             <strong>Record Batch Size</strong>
             <span>
