@@ -180,7 +180,7 @@ public class PaloAlto9xTemplatesTest {
         assertThat(out.getField(EventFields.EVENT_LOG_NAME), is("HIPMATCH"));
         assertThat(out.getField(PaloAlto9xFields.PAN_LOG_SUBTYPE), is("0"));
         assertThat(out.getField(Message.FIELD_TIMESTAMP), is(DateTime.parse("2020-03-18T04:02:55Z")));
-        assertThat(out.getField(UserFields.USER_NAME), is("user1@prismaissase.com"));
+        assertThat(out.getField(SourceFields.SOURCE_USER), is("user1@prismaissase.com"));
         assertThat(out.getField(HostFields.HOST_VIRTFW_ID), is("vsys1"));
         assertThat(out.getField(EventFields.EVENT_OBSERVER_HOSTNAME), is("DFWMACW12KG8WL"));
         assertThat(out.getField(HostFields.HOST_TYPE), is("Mac"));
