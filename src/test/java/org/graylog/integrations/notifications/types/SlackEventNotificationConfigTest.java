@@ -28,9 +28,11 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 
 public class SlackEventNotificationConfigTest {
@@ -84,8 +86,8 @@ public class SlackEventNotificationConfigTest {
         assertThat(result.failed()).isTrue();
         Map errors = result.getErrors();
         assertThat(errors).size().isEqualTo(1);
-        assertThat(errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)
-                .equals(SlackEventNotificationConfig.INVALID_WEBHOOK_ERROR_MESSAGE));
+        assertEquals(((List)errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)).get(0),
+                SlackEventNotificationConfig.INVALID_WEBHOOK_ERROR_MESSAGE);
     }
 
     @Test
@@ -97,8 +99,8 @@ public class SlackEventNotificationConfigTest {
         assertThat(result.failed()).isTrue();
         Map errors = result.getErrors();
         assertThat(errors).size().isEqualTo(1);
-        assertThat(errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)
-                .equals(SlackEventNotificationConfig.INVALID_SLACK_URL_ERROR_MESSAGE));
+        assertEquals(((List)errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)).get(0),
+                SlackEventNotificationConfig.INVALID_SLACK_URL_ERROR_MESSAGE);
     }
 
     @Test
@@ -110,8 +112,8 @@ public class SlackEventNotificationConfigTest {
         assertThat(result.failed()).isTrue();
         Map errors = result.getErrors();
         assertThat(errors).size().isEqualTo(1);
-        assertThat(errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)
-                .equals(SlackEventNotificationConfig.INVALID_DISCORD_URL_ERROR_MESSAGE));
+        assertEquals(((List)errors.get(SlackEventNotificationConfig.FIELD_WEBHOOK_URL)).get(0),
+                SlackEventNotificationConfig.INVALID_DISCORD_URL_ERROR_MESSAGE);
     }
 
     @Test
