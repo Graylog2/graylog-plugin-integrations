@@ -9,13 +9,39 @@
   },
   "scripts": {
     "build": "webpack",
+    "test": "jest",
     "lint": "eslint src",
     "lint:path": "eslint",
-    "test": "jest",
-    "flow-check": "flow check"
+    "lint:styles": "stylelint './src/web/**/*.{js,jsx,ts,tsx}' --syntax css-in-js",
+    "lint:styles:path": "stylelint --syntax css-in-js"
   },
   "eslintConfig": {
     "extends": "graylog"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-graylog"
+  },
+  "jest": {
+    "preset": "jest-preset-graylog",
+    "setupFiles": [],
+    "testEnvironment": "enzyme",
+    "testEnvironmentOptions": {
+      "enzymeAdapter": "react16"
+    },
+    "moduleDirectories": [
+      "src",
+      "src/test",
+      "node_modules"
+    ],
+    "moduleNameMapper": {
+      "^aws/(.+)$": "web/aws/$1"
+    },
+    "roots": [
+      "src"
+    ],
+    "transform": {
+      "^.+\\.[tj]sx?$": "babel-jest"
+    }
   },
   "keywords": [
     "graylog"
@@ -24,6 +50,21 @@
   "dependencies": {
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
-  "private": true,
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/core": "7.12.10",
+    "@babel/plugin-proposal-class-properties": "7.10.4",
+    "@babel/plugin-syntax-dynamic-import": "7.8.3",
+    "@babel/plugin-transform-runtime": "7.11.5",
+    "@babel/preset-env": "7.11.5",
+    "@babel/preset-react": "7.12.10",
+    "@testing-library/user-event": "^13.0.2",
+    "babel-plugin-add-module-exports": "1.0.4",
+    "babel-plugin-dynamic-import-node": "2.3.3",
+    "babel-plugin-styled-components": "1.11.1",
+    "identity-obj-proxy": "^3.0.0"
+  },
+  "resolutions": {
+    "jest-environment-jsdom": "^26.0.1"
+  },
+  "private": true
 }
