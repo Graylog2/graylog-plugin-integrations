@@ -24,10 +24,6 @@
   "jest": {
     "preset": "jest-preset-graylog",
     "setupFiles": [],
-    "testEnvironment": "enzyme",
-    "testEnvironmentOptions": {
-      "enzymeAdapter": "react16"
-    },
     "moduleDirectories": [
       "src",
       "src/test",
@@ -62,9 +58,6 @@
     "babel-plugin-dynamic-import-node": "2.3.3",
     "babel-plugin-styled-components": "1.11.1",
     "identity-obj-proxy": "^3.0.0"
-  },
-  "resolutions": {
-    "jest-environment-jsdom": "^26.0.1"
   },
   "private": true
 }
