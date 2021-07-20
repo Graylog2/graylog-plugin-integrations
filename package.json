@@ -47,7 +47,7 @@
     "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
   },
   "devDependencies": {
-    "@babel/core": "7.12.10",
+    "@babel/core": "7.14.8",
     "@babel/plugin-proposal-class-properties": "7.10.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/plugin-transform-runtime": "7.11.5",
