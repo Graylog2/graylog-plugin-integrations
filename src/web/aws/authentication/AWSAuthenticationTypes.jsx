@@ -29,7 +29,7 @@ import ARN from './ARN';
 const AuthWrapper = styled.div(({ theme }) => css`
   margin: 0 0 21px 9px;
   padding: 3px 0 3px 21px;
-  border-left: 3px solid ${theme.colors.gray[80]};
+  border-left: 3px solid var(--color-gray-80);
 `);
 
 const AWSAuthenticationTypes = ({ onChange }) => {
