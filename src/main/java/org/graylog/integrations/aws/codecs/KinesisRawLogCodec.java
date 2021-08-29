@@ -48,7 +48,7 @@ public class KinesisRawLogCodec extends AbstractKinesisCodec {
             Message result = new Message(
                     logEvent.message(),
                     source,
-                    new DateTime(logEvent.timestamp())
+                    logEvent.timestamp()
             );
             result.addField(FIELD_KINESIS_STREAM, logEvent.kinesisStream());
             result.addField(FIELD_LOG_GROUP, logEvent.logGroup());
