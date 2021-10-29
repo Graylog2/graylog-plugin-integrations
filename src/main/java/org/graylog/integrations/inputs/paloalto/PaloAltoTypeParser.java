@@ -20,6 +20,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +33,12 @@ import java.util.Map;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.BOOLEAN;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.LONG;
 import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.STRING;
+import static org.graylog.integrations.inputs.paloalto.PaloAltoFieldType.TIMESTAMP;
 
 public class PaloAltoTypeParser {
 
     private static final Logger LOG = LoggerFactory.getLogger(PaloAltoTypeParser.class);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy/MM/dd HH:mm:ss ZZZ");
 
     private final PaloAltoMessageTemplate messageTemplate;
 
@@ -40,7 +46,7 @@ public class PaloAltoTypeParser {
         this.messageTemplate = messageTemplate;
     }
 
-    public ImmutableMap<String, Object> parseFields(List<String> fields) {
+    public ImmutableMap<String, Object> parseFields(List<String> fields, DateTimeZone timezone) {
         Map<String, Object> fieldMap = Maps.newHashMap();
         List<PaloAltoFieldTemplate> templateFields = Lists.newArrayList(messageTemplate.getFields());
 
@@ -70,6 +76,20 @@ public class PaloAltoTypeParser {
                     }
                 } else if (template.fieldType() == BOOLEAN) {
                     value = Boolean.valueOf(rawValue);
+                } else if (template.fieldType() == TIMESTAMP) {
+                    String stringValue = rawValue;
+                    if (rawValue.startsWith("\"") && rawValue.endsWith("\"")) {
+                        stringValue = rawValue.substring(1, rawValue.length() - 1);
+                    }
+                    if (!Strings.isNullOrEmpty(stringValue)) {
+                        try {
+                            LOG.trace("Parsing timestamp {} with timezone {}", stringValue, timezone);
+                            value = DateTime.parse(stringValue + " " + timezone, DATE_TIME_FORMATTER).withZone(timezone);
+                            LOG.trace("Timestamp after parsing {}", value);
+                        } catch (Exception e) {
+                            LOG.debug("Error parsing field {}, {} is not a valid timestamp value", template.field(), stringValue, e);
+                        }
+                    }
                 } else {
                     LOG.warn("Unrecognized data type [{}] for field [{}], handling as STRING",
                             template.fieldType(), template.field());
@@ -91,7 +111,9 @@ public class PaloAltoTypeParser {
                         value = valueList;
                     }
                 }
-                fieldMap.put(template.field(), value);
+                if (value != null) {
+                    fieldMap.put(template.field(), value);
+                }
 
                 fieldIndex++;
                 templateIndex++;
