@@ -1,7 +1,5 @@
 package org.graylog.integrations.dataadapters;
 
-import com.unboundid.util.json.JSONException;
-import com.unboundid.util.json.JSONObject;
 import okhttp3.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -14,7 +12,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-public class CommunityGreyNoiseIpLookupAdapterTest {
+public class GreyNoiseCommunityIpLookupAdapterTest {
 
     private Request request;
 
@@ -22,7 +20,7 @@ public class CommunityGreyNoiseIpLookupAdapterTest {
     public void setup() {
 
         request = new Request.Builder()
-                .url(CommunityGreyNoiseIpLookupAdapter.GREYNOISE_ENDPOINT)
+                .url(GreyNoiseCommunityIpLookupAdapter.GREYNOISE_ENDPOINT)
                 .build();
     }
 
@@ -32,7 +30,7 @@ public class CommunityGreyNoiseIpLookupAdapterTest {
         int statusCode = 200;
 
         Response response = createResponse(string, statusCode);
-        LookupResult result = CommunityGreyNoiseIpLookupAdapter.parseResponse(response);
+        LookupResult result = GreyNoiseCommunityIpLookupAdapter.parseResponse(response);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
@@ -47,7 +45,7 @@ public class CommunityGreyNoiseIpLookupAdapterTest {
         int statusCode = 404;
 
         Response response = createResponse(string, statusCode);
-        LookupResult result = CommunityGreyNoiseIpLookupAdapter.parseResponse(response);
+        LookupResult result = GreyNoiseCommunityIpLookupAdapter.parseResponse(response);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
@@ -63,7 +61,7 @@ public class CommunityGreyNoiseIpLookupAdapterTest {
         int statusCode = 429;
 
         Response response = createResponse(string, statusCode);
-        LookupResult result = CommunityGreyNoiseIpLookupAdapter.parseResponse(response);
+        LookupResult result = GreyNoiseCommunityIpLookupAdapter.parseResponse(response);
 
         Assert.assertNotNull(result);
         Assert.assertFalse(result.isEmpty());
@@ -81,11 +79,11 @@ public class CommunityGreyNoiseIpLookupAdapterTest {
                 .build();
     }
 
-    private void assertValidMapWithKeys(Map<Object, Object> map, Object... keys) {
+    private void assertValidMapWithKeys(Map<Object, Object> map, Object... expectedKeys) {
 
-        Assert.assertNotNull("Invalid result values", map);
+        Assert.assertNotNull("Invalid result values map (NULL)", map);
 
-        for (Object key : keys) {
+        for (Object key : expectedKeys) {
             String error = String.format("Key [%s] not found in values map", key);
             Assert.assertTrue(error, map.containsKey(key));
         }
