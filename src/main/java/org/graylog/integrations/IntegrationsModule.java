@@ -26,6 +26,7 @@ import org.graylog.integrations.aws.resources.AWSResource;
 import org.graylog.integrations.aws.resources.KinesisSetupResource;
 import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
+import org.graylog.integrations.dataadapters.CommunityGreyNoiseIpLookupAdapter;
 import org.graylog.integrations.dataadapters.GreyNoiseDataAdapter;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
@@ -115,6 +116,12 @@ public class IntegrationsModule extends PluginModule {
                                      GreyNoiseDataAdapter.class,
                                      GreyNoiseDataAdapter.Factory.class,
                                      GreyNoiseDataAdapter.Config.class);
+
+            //Community GreyNoise IP Lookup Adapter
+            installLookupDataAdapter(CommunityGreyNoiseIpLookupAdapter.ADAPTER_NAME,
+                    CommunityGreyNoiseIpLookupAdapter.class,
+                    CommunityGreyNoiseIpLookupAdapter.Factory.class,
+                    CommunityGreyNoiseIpLookupAdapter.Config.class);
         }
     }
 
