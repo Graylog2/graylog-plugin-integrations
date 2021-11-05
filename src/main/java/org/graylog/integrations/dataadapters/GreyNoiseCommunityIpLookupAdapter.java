@@ -1,3 +1,21 @@
+/*
+ *   Copyright (C) 2021 Graylog, Inc.
+ *
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the Server Side Public License, version 1,
+ *   as published by MongoDB, Inc.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *   Server Side Public License for more details.
+ *
+ *   You should have received a copy of the Server Side Public License
+ *   along with this program. If not, see
+ *   <http://www.mongodb.com/licensing/server-side-public-license>.
+ *
+ */
+
 package org.graylog.integrations.dataadapters;
 
 import com.codahale.metrics.MetricRegistry;
@@ -33,11 +51,11 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * A {@link LookupDataAdapter} use the <a href="https://docs.greynoise.io/reference/get_v3-community-ip">GreyNoise Community API</a>
+ * A {@link LookupDataAdapter} that uses the <a href="https://docs.greynoise.io/reference/get_v3-community-ip">GreyNoise Community API</a>
  * to perform IP lookups.
  *
  * <p>
- * The API response is a subset of the IP context returned by the IP Lookup API.
+ * The API response is a subset of the IP context returned by the full IP Lookup API.
  * </p>
  */
 public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
