@@ -13,9 +13,7 @@
  *   You should have received a copy of the Server Side Public License
  *   along with this program. If not, see
  *   <http://www.mongodb.com/licensing/server-side-public-license>.
- *
  */
-
 package org.graylog.integrations.dataadapters;
 
 import com.codahale.metrics.MetricRegistry;
