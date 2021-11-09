@@ -134,6 +134,10 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
         String userAgent = String.format(USER_AGENT, Version.CURRENT_CLASSPATH);
         String apiToken = encryptedValueService.decrypt(config.apiToken());
+        if(apiToken == null || apiToken.trim().isEmpty()){
+            String error = String.format("[%s] requires a non-null API Token",ADAPTER_NAME);
+            throw new IllegalArgumentException(error);
+        }
 
         return new Request.Builder()
                 .url(String.join("/", GREYNOISE_COMMUNITY_ENDPOINT, ipString))

@@ -78,9 +78,10 @@ public abstract class TestWithResources {
                 URL path = getClass().getResource("");
                 String error = String.format("Error.  Resource '%s' does not exist at '%s'", name, path);
                 throw new IllegalArgumentException(error);
-            } else {
-                return Paths.get(resource.toURI());
             }
+
+            return Paths.get(resource.toURI());
+
         } catch (URISyntaxException e) {
             String error = String.format("Error getting resource '%s'. %s", name, e.getMessage());
             throw new IllegalArgumentException(error, e);
