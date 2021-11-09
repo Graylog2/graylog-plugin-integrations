@@ -25,8 +25,8 @@ class GreyNoiseCommunityIpLookupAdapterDocumentation extends React.Component {
     return (
       <div>
         <p style={style}>
-            The Community Greynoise IP lookup data adapter uses the <ExternalLink href="https://docs.greynoise.io/reference/get_v3-community-ip">Greynoise Community API</ExternalLink>
-          query IPs in the GreyNoise dataset to retrieve IP data.  The data returned is a subset of the full IP context data returned by the full IP Lookup API.
+          The Community Greynoise IP lookup data adapter uses the <ExternalLink href="https://docs.greynoise.io/reference/get_v3-community-ip">Greynoise Community API</ExternalLink>.&nbsp;
+          The data returned is a subset of the full IP context data returned by the full IP Lookup API.
         </p>
       </div>
     )

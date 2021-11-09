@@ -60,7 +60,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     public static final String ADAPTER_NAME = "GreyNoise Community IP Lookup";
 
-    protected static final String GREYNOISE_ENDPOINT = "https://api.greynoise.io/v3/community";
+    protected static final String GREYNOISE_COMMUNITY_ENDPOINT = "https://api.greynoise.io/v3/community";
 
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseCommunityIpLookupAdapter.class);
     private static final String USER_AGENT = "Graylog/%s";
@@ -134,19 +134,14 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
         String userAgent = String.format(USER_AGENT, Version.CURRENT_CLASSPATH);
         String apiToken = encryptedValueService.decrypt(config.apiToken());
-        Request.Builder builder = new Request.Builder()
-                .url(String.join("/", GREYNOISE_ENDPOINT, ipString))
+
+        return new Request.Builder()
+                .url(String.join("/", GREYNOISE_COMMUNITY_ENDPOINT, ipString))
                 .method(METHOD, null)
                 .addHeader("Accept", ACCEPT_TYPE)
-                .addHeader("User-Agent", userAgent);
-
-        //Request.Builder::addHeader does not accept null values; so, only set the API token if
-        //a non-null token was found.
-        if(apiToken != null){
-            builder.addHeader("key", apiToken);
-        }
-
-        return builder.build();
+                .addHeader("User-Agent", userAgent)
+                .addHeader("key", apiToken)
+                .build();
     }
 
     @VisibleForTesting
@@ -234,7 +229,6 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
                     .apiToken(EncryptedValue.createUnset())
                     .build();
         }
-
     }
 
     @AutoValue
@@ -255,15 +249,15 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
         @AutoValue.Builder
         public abstract static class Builder {
             @JsonCreator
-            public static GreyNoiseCommunityIpLookupAdapter.Config.Builder create() {
-                return GreyNoiseCommunityIpLookupAdapter.Config.builder();
+            public static Builder create() {
+                return builder();
             }
 
             @JsonProperty(TYPE_FIELD)
-            public abstract GreyNoiseCommunityIpLookupAdapter.Config.Builder type(String type);
+            public abstract Builder type(String type);
 
             @JsonProperty("api_token")
-            public abstract GreyNoiseCommunityIpLookupAdapter.Config.Builder apiToken(EncryptedValue apiToken);
+            public abstract Builder apiToken(EncryptedValue apiToken);
 
             public abstract GreyNoiseCommunityIpLookupAdapter.Config build();
         }
