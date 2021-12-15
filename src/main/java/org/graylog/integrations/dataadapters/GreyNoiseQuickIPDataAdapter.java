@@ -120,6 +120,7 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
                 map.put("ip", Objects.requireNonNull(obj).getFieldAsString("ip"));
                 map.put("noise", Objects.requireNonNull(obj).getFieldAsBoolean("noise"));
                 map.put("code", Objects.requireNonNull(obj).getFieldAsString("code"));
+                map.put("riot", Objects.requireNonNull(obj).getFieldAsBoolean("riot"));
             } catch (JSONException | IOException e) {
                 LOG.error("An error occurred while parsing Lookup result [{}]", e.toString());
             }
