@@ -32,7 +32,6 @@ import com.unboundid.util.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.graylog2.plugin.Version;
 import org.graylog2.plugin.lookup.LookupCachePurge;
 import org.graylog2.plugin.lookup.LookupDataAdapter;
 import org.graylog2.plugin.lookup.LookupDataAdapterConfiguration;
@@ -93,13 +92,12 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
 
     @Override
     protected LookupResult doGet(Object keyObject) {
-        String userAgent = String.format("Graylog/%s", Version.CURRENT_CLASSPATH);
         Request request = new Request.Builder()
                 .url(GREYNOISE_IPQC_ENDPOINT + keyObject.toString())
                 .method("GET", null)
                 .addHeader("Accept", "application/json")
                 .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
-                .addHeader("User-Agent", userAgent)
+                .addHeader("User-Agent", "Graylog")
                 .build();
         try (Response response = okHttpClient.newCall(request).execute()) {
             return parseResponse(response);
