@@ -63,7 +63,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
     protected static final String GREYNOISE_COMMUNITY_ENDPOINT = "https://api.greynoise.io/v3/community";
 
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseCommunityIpLookupAdapter.class);
-    private static final String USER_AGENT = "Graylog";
+    private static final String USER_AGENT = "Graylog/%s";
     private static final String ACCEPT_TYPE = "application/json";
     private static final String METHOD = "GET";
 
