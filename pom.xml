@@ -24,12 +24,12 @@
     <parent>
         <groupId>org.graylog.plugins</groupId>
         <artifactId>graylog-plugin-web-parent</artifactId>
-        <version>4.2.5-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
         <relativePath>../graylog2-server/graylog-plugin-parent/graylog-plugin-web-parent</relativePath>
     </parent>
 
     <artifactId>graylog-plugin-integrations</artifactId>
-    <version>4.2.5-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
@@ -51,6 +51,8 @@
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>4.2.5-SNAPSHOT</graylog.version>
         <aws-java-sdk-2.version>2.13.6</aws-java-sdk-2.version>
+        <graylog.version>4.3.0-SNAPSHOT</graylog.version>
+        <aws-java-sdk-2.version>2.17.77</aws-java-sdk-2.version>
         <aws-kinesis-client.version>2.2.10</aws-kinesis-client.version>
         <integrations.protobuf.version>3.11.1</integrations.protobuf.version>
     </properties>
@@ -231,6 +233,7 @@
                                 <include>software/amazon/awssdk/regions/**</include>
                                 <include>software/amazon/awssdk/thirdparty/**</include>
                                 <include>software/amazon/awssdk/utils/**</include>
+                                <include>software/amazon/awssdk/metrics/**</include>
                                 <!-- Include only the specific service packages that are needed. -->
                                 <include>software/amazon/awssdk/services/cloudwatchlogs/**</include>
                                 <include>software/amazon/awssdk/services/dynamodb/**</include>
