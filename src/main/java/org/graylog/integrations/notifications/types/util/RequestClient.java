@@ -7,7 +7,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.graylog.events.notifications.PermanentEventNotificationException;
 import org.graylog.events.notifications.TemporaryEventNotificationException;
-import org.graylog.integrations.notifications.types.microsoftTeams.TeamsClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,7 @@ import java.io.IOException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 public class RequestClient {
-    private static final Logger LOG = LoggerFactory.getLogger(TeamsClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestClient.class);
     private final OkHttpClient httpClient;
 
 
