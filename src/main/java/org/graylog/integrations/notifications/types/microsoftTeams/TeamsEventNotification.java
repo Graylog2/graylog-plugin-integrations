@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 package org.graylog.integrations.notifications.types.microsoftTeams;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -130,9 +146,9 @@ public class TeamsEventNotification implements EventNotification{
     JsonNode buildCustomMessage(EventNotificationContext ctx, TeamsEventNotificationConfig config, String template) throws PermanentEventNotificationException {
         final List<MessageSummary> backlog = getMessageBacklog(ctx, config);
         Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
-        String facts = templateEngine.transform(template, model);
-        JsonNode factsNode = getMessageDetails(facts);
         try {
+            String facts = templateEngine.transform(template, model);
+            JsonNode factsNode = getMessageDetails(facts);
             LOG.debug("customMessage: template = {} model = {}", template, model);
             return factsNode;
         } catch (Exception e) {

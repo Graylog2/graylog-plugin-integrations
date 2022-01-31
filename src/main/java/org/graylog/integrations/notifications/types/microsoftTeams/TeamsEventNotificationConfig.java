@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Graylog, Inc.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the Server Side Public License, version 1,
+ * as published by MongoDB, Inc.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * Server Side Public License for more details.
+ *
+ * You should have received a copy of the Server Side Public License
+ * along with this program. If not, see
+ * <http://www.mongodb.com/licensing/server-side-public-license>.
+ */
 package org.graylog.integrations.notifications.types.microsoftTeams;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -35,7 +51,7 @@ public abstract class TeamsEventNotificationConfig implements EventNotificationC
     static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero";
     static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Specified Webhook URL is not a valid URL";
     static final String INVALID_TEAMS_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Teams URL";
-    static final String WEB_HOOK_URL = "https://webhook.office.com/services/xxxx/xxxxxxxxxxxxxxxxxxx";
+    static final String WEB_HOOK_URL = "https://teams.webhook.office.com/services/xxxx/xxxxxxxxxxxxxxxxxxx";
 
     static final String FIELD_WEBHOOK_URL = "webhook_url";
     static final String TEAMS_CUSTOM_MESSAGE = "custom_message";
