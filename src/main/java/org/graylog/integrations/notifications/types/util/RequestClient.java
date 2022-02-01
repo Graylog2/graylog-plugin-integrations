@@ -13,7 +13,8 @@
  * You should have received a copy of the Server Side Public License
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
- */package org.graylog.integrations.notifications.types.util;
+ */
+package org.graylog.integrations.notifications.types.util;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
