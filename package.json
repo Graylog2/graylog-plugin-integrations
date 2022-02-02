@@ -1,6 +1,6 @@
 {
   "name": "graylog-plugin-integrations",
-  "version": "4.2.6-SNAPSHOT",
+  "version": "4.2.6",
   "description": "",
   "license": "SSPL-1.0",
   "repository": {
