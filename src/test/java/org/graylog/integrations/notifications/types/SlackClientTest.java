@@ -90,7 +90,9 @@ public class SlackClientTest {
 
     @Test
     public void doesNotFollowRedirects() {
-        server.enqueue(new MockResponse().setResponseCode(302));
+        server.enqueue(new MockResponse().setResponseCode(302)
+                .setHeader("Location", server.url("/redirected")));
+        server.enqueue(new MockResponse().setResponseCode(200));
 
         SlackClient slackClient = new SlackClient(httpClient);
         assertThatThrownBy(() -> slackClient.send(new SlackMessage(TEST_MESSAGE), server.url("/").toString()))
