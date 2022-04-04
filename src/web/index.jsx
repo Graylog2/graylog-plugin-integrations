@@ -29,7 +29,9 @@ import PagerDutyNotificationSummary from './pager-duty/PagerDutyNotificationSumm
 import SlackNotificationDetails from './event-notifications/event-notification-details/SlackNotificationDetails';
 import SlackNotificationForm from './event-notifications/event-notification-types/SlackNotificationForm';
 import SlackNotificationSummary from './event-notifications/event-notification-types/SlackNotificationSummary';
-
+import OpsGenieNotificationDetails from './event-notifications/event-notification-details/OpsGenieNotificationDetails';
+import OpsGenieNotificationForm from './event-notifications/event-notification-types/OpsGenieNotificationForm';
+import OpsGenieNotificationSummary from './event-notifications/event-notification-types/OpsGenieNotificationSummary';
 import packageJson from '../../package.json';
 import GreyNoiseAdapterFieldSet from "./dataadapters/GreyNoiseAdapterFieldSet";
 import GreyNoiseAdapterSummary from "./dataadapters/GreyNoiseAdapterSummary";
@@ -65,6 +67,14 @@ const manifest = new PluginManifest(packageJson, {
       detailsComponent: SlackNotificationDetails,
       defaultConfig: SlackNotificationForm.defaultConfig,
     },
+        {
+          type: 'opsgenie-notification-v1',
+          displayName: 'OpsGenie Notification',
+          formComponent: OpsGenieNotificationForm,
+          summaryComponent: OpsGenieNotificationSummary,
+          detailsComponent: OpsGenieNotificationDetails,
+          defaultConfig: OpsGenieNotificationForm.defaultConfig,
+        },
   ],
   lookupTableAdapters: [
     {
