@@ -48,7 +48,7 @@ public abstract class OpsGenieEventNotificationConfig implements EventNotificati
 
     static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero";
     static final String ACCESS_TOKEN = "access_token";
-    static final String TAGS = "tags";
+    static final String TAGS = "Graylog-alert";
     static final String INVALID_ACCESSTOKEN_ERROR_MESSAGE = "API Access Token is mandatory";
 
 
@@ -59,7 +59,7 @@ public abstract class OpsGenieEventNotificationConfig implements EventNotificati
     static final String OPSGENIE_CHANNEL = "channel";
     static final String OPSGENIE_TAGS = "tags";
     static final String OPSGENIE_USER_NAME = "user_name";
-    static final String CHANNEL = "#general";
+    static final String CHANNEL = "general";
 
     @JsonProperty(OPSGENIE_BACKLOG_SIZE)
     public abstract long backlogSize();
