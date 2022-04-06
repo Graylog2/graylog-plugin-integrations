@@ -165,7 +165,7 @@ class OpsGenieNotificationForm extends React.Component<OpsGenieNotificationFormT
                            min="0"
                            disabled={!isBacklogSizeEnabled} />
             </InputGroup>
-            <HelpBlock>Limit the number of backlog messages sent as part of the Microsoft OpsGenie notification.  If set to 0, no limit will be enforced.</HelpBlock>
+            <HelpBlock>Limit the number of backlog messages sent as part of the OpsGenie notification.  If set to 0, no limit will be enforced.</HelpBlock>
           </FormGroup>
                 <Input id="notification-userName"
                        name="user_name"
