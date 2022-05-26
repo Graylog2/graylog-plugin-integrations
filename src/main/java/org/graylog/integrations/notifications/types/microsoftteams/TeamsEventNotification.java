@@ -14,7 +14,7 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog.integrations.notifications.types.microsoftTeams;
+package org.graylog.integrations.notifications.types.microsoftteams;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Objects.requireNonNull;
 
-public class TeamsEventNotification implements EventNotification{
+public class TeamsEventNotification implements EventNotification {
 
     private static final Logger LOG = LoggerFactory.getLogger(TeamsEventNotification.class);
     private final EventNotificationService notificationCallbackService;
@@ -57,7 +57,7 @@ public class TeamsEventNotification implements EventNotification{
     private final ObjectMapper objectMapper;
     private final NodeId nodeId;
     private final RequestClient requestClient;
-    private final List<Map> event = new ArrayList<>();
+    private final List<Map<String, String>> event = new ArrayList<>();
 
     @Inject
     public TeamsEventNotification(EventNotificationService notificationCallbackService,
@@ -160,7 +160,7 @@ public class TeamsEventNotification implements EventNotification{
 
     public JsonNode getMessageDetails(String eventFields) {
         String[] fields = eventFields.split("\\r?\\n");
-        for (String  field: fields){
+        for (String  field: fields) {
             Map<String,String> facts = new HashMap<>();
             String[] factFields = field.split(":");
             facts.put("name", factFields[0]);

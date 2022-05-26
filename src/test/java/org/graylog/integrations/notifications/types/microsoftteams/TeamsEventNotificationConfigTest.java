@@ -14,7 +14,7 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog.integrations.notifications.types.microsoftTeams;
+package org.graylog.integrations.notifications.types.microsoftteams;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -31,8 +31,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 public class TeamsEventNotificationConfigTest {
@@ -43,8 +44,8 @@ public class TeamsEventNotificationConfigTest {
                     .webhookUrl("http://graylog.org")
                     .build();
             ValidationResult result = teamsEventNotificationConfig.validate();
-            Map errors = result.getErrors();
-            assertThat(errors).size().isEqualTo(0);
+            Map<String, Collection<String>> errors = result.getErrors();
+            assertEquals(errors.size(), 0);
         }
 
         @Test
@@ -53,8 +54,8 @@ public class TeamsEventNotificationConfigTest {
                     .webhookUrl("https://teams.webhook.office.com/webhookb2/d6068ba8-584c-41--bb7e-3b112e9b1ff4/IncomingWebhook/440/846c")
                     .build();
             ValidationResult result = teamsEventNotificationConfig.validate();
-            Map errors = result.getErrors();
-            assertThat(errors).size().isEqualTo(0);
+            Map<String, Collection<String>> errors = result.getErrors();
+            assertEquals(errors.size(), 0);
         }
 
 
@@ -65,9 +66,9 @@ public class TeamsEventNotificationConfigTest {
                     .webhookUrl("html:/?Thing.foo")
                     .build();
             ValidationResult result = teamsEventNotificationConfig.validate();
-            assertThat(result.failed()).isTrue();
-            Map errors = result.getErrors();
-            assertThat(errors).size().isEqualTo(1);
+            assertTrue(result.failed());
+            Map<String, Collection<String>> errors = result.getErrors();
+            assertEquals(errors.size(), 1);
             assertEquals(((List)errors.get(TeamsEventNotificationConfig.FIELD_WEBHOOK_URL)).get(0),
                     TeamsEventNotificationConfig.INVALID_WEBHOOK_ERROR_MESSAGE);
         }
@@ -78,9 +79,9 @@ public class TeamsEventNotificationConfigTest {
                     .webhookUrl("https://webhooks.office.com/foo")
                     .build();
             ValidationResult result = teamsEventNotificationConfig.validate();
-            assertThat(result.failed()).isTrue();
-            Map errors = result.getErrors();
-            assertThat(errors).size().isEqualTo(1);
+            assertTrue(result.failed());
+            Map<String, Collection<String>> errors = result.getErrors();
+            assertEquals(errors.size(), 1);
             assertEquals(((List)errors.get(TeamsEventNotificationConfig.FIELD_WEBHOOK_URL)).get(0),
                     TeamsEventNotificationConfig.INVALID_TEAMS_URL_ERROR_MESSAGE);
         }
@@ -92,23 +93,23 @@ public class TeamsEventNotificationConfigTest {
                     .backlogSize(-1)
                     .build();
 
-            assertThat(negativeBacklogSize.webhookUrl()).isEqualTo(TeamsEventNotificationConfig.WEB_HOOK_URL);
+            assertEquals(negativeBacklogSize.webhookUrl(),TeamsEventNotificationConfig.WEB_HOOK_URL );
 
             Collection<String> expected = new ArrayList();
             expected.add(TeamsEventNotificationConfig.INVALID_BACKLOG_ERROR_MESSAGE);
 
-            assertThat(negativeBacklogSize.validate().failed()).isTrue();
+            assertTrue(negativeBacklogSize.validate().failed());
             Map<String, Collection<String>> errors = negativeBacklogSize.validate().getErrors();
-            assertThat(errors.get("backlog_size")).isEqualTo(expected);
+            assertEquals(errors.get("backlog_size"), expected);
 
             Map<String, Collection<String>> errors1 = negativeBacklogSize.validate().getErrors();
-            assertThat(errors1.get("backlog_size")).isEqualTo(expected);
+            assertEquals(errors1.get("backlog_size"),expected);
 
 
             TeamsEventNotificationConfig goodBacklogSize = TeamsEventNotificationConfig.builder()
                     .backlogSize(5)
                     .build();
-            assertThat(goodBacklogSize.validate().failed()).isFalse();
+            assertFalse(goodBacklogSize.validate().failed());
 
         }
 
@@ -139,8 +140,8 @@ public class TeamsEventNotificationConfigTest {
 
             final TeamsEventNotificationConfig teamsEventNotificationConfig = TeamsEventNotificationConfig.builder().build();
             EventNotificationExecutionJob.Data data = (EventNotificationExecutionJob.Data) teamsEventNotificationConfig.toJobTriggerData(eventDto);
-            assertThat(data.type()).isEqualTo(EventNotificationExecutionJob.TYPE_NAME);
-            assertThat(data.eventDto().processingTimestamp()).isEqualTo(now);
+            assertEquals(data.type(), EventNotificationExecutionJob.TYPE_NAME);
+            assertEquals(data.eventDto().processingTimestamp(), now);
 
         }
 

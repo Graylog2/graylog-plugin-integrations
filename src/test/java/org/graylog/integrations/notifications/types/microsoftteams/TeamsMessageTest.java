@@ -14,7 +14,7 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog.integrations.notifications.types.microsoftTeams;
+package org.graylog.integrations.notifications.types.microsoftteams;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,13 +29,12 @@ public class TeamsMessageTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
     @Test
-    public void test_good_title() throws IOException {
+    public void validateTitle() throws IOException {
         JsonNode customMessage = objectMapper.readTree("{\"name\":\"Type\",\"value\":\"test-dummy-v1\"}");
         TeamsMessage message = new TeamsMessage("#FF0000", "", "\"**Alert Event Definition Test Title triggered:**\"",customMessage,"_Event Definition Test Description_" );
         String expected = message.getJsonString();
         List<String> text = getJsonNodeFieldValue(expected, "text");
         assertThat(text).isNotEmpty();
-        assertThat(text).isNotNull();
     }
 
     List<String> getJsonNodeFieldValue(String expected, String fieldName) throws IOException {

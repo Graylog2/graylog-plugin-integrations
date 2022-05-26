@@ -42,8 +42,5 @@ const TeamsNotificationDetails: React.FC<TeamsNotificationSummaryType> = ({ noti
   </>
 );
 
-// TeamsNotificationDetails.propTypes = {
-//   notification: PropTypes.object.isRequired,
-// };
 
 export default TeamsNotificationDetails;

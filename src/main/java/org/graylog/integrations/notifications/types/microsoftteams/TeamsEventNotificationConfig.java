@@ -14,7 +14,7 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog.integrations.notifications.types.microsoftTeams;
+package org.graylog.integrations.notifications.types.microsoftteams;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,7 +43,7 @@ public abstract class TeamsEventNotificationConfig implements EventNotificationC
 
     public static final String TYPE_NAME = "teams-notification-v1";
 
-    private static final Pattern TEAMS_PATTERN = Pattern.compile("https:\\/\\/.*\\.webhook.office.com\\/");
+    private static final Pattern TEAMS_PATTERN = Pattern.compile("https://.*.webhook.office.com/");
     private static final String DEFAULT_HEX_COLOR = "#ff0500";
     private static final String DEFAULT_CUSTOM_MESSAGE = "Graylog Teams Notification";
     private static final long DEFAULT_BACKLOG_SIZE = 0;
