@@ -193,7 +193,7 @@ public class TeamsEventNotification implements EventNotification {
         return objectMap;
     }
 
-    public interface Factory extends EventNotification.Factory {
+    public interface Factory extends EventNotification.Factory<TeamsEventNotification>{
         @Override
         TeamsEventNotification create();
     }
