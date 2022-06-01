@@ -26,8 +26,8 @@ import org.graylog.integrations.aws.resources.AWSResource;
 import org.graylog.integrations.aws.resources.KinesisSetupResource;
 import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
-import org.graylog.integrations.dataadapters.GreyNoiseQuickIPDataAdapter;
 import org.graylog.integrations.dataadapters.GreyNoiseCommunityIpLookupAdapter;
+import org.graylog.integrations.dataadapters.GreyNoiseQuickIPDataAdapter;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
 import org.graylog.integrations.inputs.paloalto9.PaloAlto9xCodec;
@@ -37,6 +37,8 @@ import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
 import org.graylog.integrations.notifications.types.SlackEventNotification;
 import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
+import org.graylog.integrations.notifications.types.opsGenie.OpsGenieEventNotification;
+import org.graylog.integrations.notifications.types.opsGenie.OpsGenieEventNotificationConfig;
 import org.graylog.integrations.pagerduty.PagerDutyNotification;
 import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
@@ -103,6 +105,12 @@ public class IntegrationsModule extends PluginModule {
                     SlackEventNotificationConfig.class,
                     SlackEventNotification.class,
                     SlackEventNotification.Factory.class);
+
+            // Teams Notification
+            addNotificationType(OpsGenieEventNotificationConfig.TYPE_NAME,
+                    OpsGenieEventNotificationConfig.class,
+                    OpsGenieEventNotification.class,
+                    OpsGenieEventNotification.Factory.class);
 
             // Pager Duty Notification
             addNotificationType(
