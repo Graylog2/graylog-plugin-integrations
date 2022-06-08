@@ -14,24 +14,35 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-const fs = require('fs');
 const buildConfig = require('./build.config');
 
-const packageJson = JSON.parse(fs.readFileSync('package.json'));
 const webSrcPrefix = buildConfig.web_src_path;
-const {
-  moduleDirectories,
-  moduleNameMapper
-} = packageJson.jest;
 
 const jestConfig = {
-  ...packageJson.jest,
-  moduleDirectories: [].concat(moduleDirectories, [`${webSrcPrefix}/src`, `${webSrcPrefix}/test`]),
+  preset: 'jest-preset-graylog',
+  setupFiles: [],
+  setupFilesAfterEnv: [
+    'jest-enzyme',
+  ],
+  moduleDirectories: [
+    'src',
+    'test',
+    'node_modules',
+    `${webSrcPrefix}/src`,
+    `${webSrcPrefix}/test`,
+  ],
   moduleNameMapper: {
-    ...moduleNameMapper,
+    '^aws/(.+)$': 'web/aws/$1',
+
     '^react$': `${webSrcPrefix}/node_modules/react/index.js`,
     '^react-dom$': `${webSrcPrefix}/node_modules/react-dom/index.js`,
     '^styled-components$': `${webSrcPrefix}/node_modules/styled-components`,
+  },
+  roots: [
+    'src',
+  ],
+  transform: {
+    '^.+\\.[tj]sx?$': 'babel-jest',
   },
 };
 module.exports = jestConfig;

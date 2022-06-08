@@ -21,24 +21,6 @@
   "stylelint": {
     "extends": "stylelint-config-graylog"
   },
-  "jest": {
-    "preset": "jest-preset-graylog",
-    "setupFiles": [],
-    "moduleDirectories": [
-      "src",
-      "src/test",
-      "node_modules"
-    ],
-    "moduleNameMapper": {
-      "^aws/(.+)$": "web/aws/$1"
-    },
-    "roots": [
-      "src"
-    ],
-    "transform": {
-      "^.+\\.[tj]sx?$": "babel-jest"
-    }
-  },
   "keywords": [
     "graylog"
   ],
