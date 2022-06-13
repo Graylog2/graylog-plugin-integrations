@@ -57,7 +57,6 @@ public class TeamsEventNotification implements EventNotification {
     private final ObjectMapper objectMapper;
     private final NodeId nodeId;
     private final RequestClient requestClient;
-    private final List<Map<String, String>> event = new ArrayList<>();
 
     @Inject
     public TeamsEventNotification(EventNotificationService notificationCallbackService,
@@ -160,6 +159,7 @@ public class TeamsEventNotification implements EventNotification {
 
     public JsonNode getMessageDetails(String eventFields) {
         String[] fields = eventFields.split("\\r?\\n");
+        List<Map<String, String>> event = new ArrayList<>();
         for (String field : fields) {
             Map<String, String> facts = new HashMap<>();
             String[] factFields = field.split(":");
@@ -186,7 +186,7 @@ public class TeamsEventNotification implements EventNotification {
     Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, String type, List<MessageSummary> backlog) {
         EventNotificationModelData modelData = EventNotificationModelData.of(ctx, backlog);
 
-        LOG.debug("the custom message model data is {}", modelData.toString());
+        LOG.debug("the custom message model data is {}", modelData);
         Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
         objectMap.put("type", type);
 

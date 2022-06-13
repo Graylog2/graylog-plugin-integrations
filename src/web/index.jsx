@@ -70,7 +70,7 @@ const manifest = new PluginManifest(packageJson, {
     },
     {
       type: 'teams-notification-v1',
-      displayName: 'Teams Notification',
+      displayName: 'Microsoft Teams Notification',
       formComponent: TeamsNotificationForm,
       summaryComponent: TeamsNotificationSummary,
       detailsComponent: TeamsNotificationDetails,

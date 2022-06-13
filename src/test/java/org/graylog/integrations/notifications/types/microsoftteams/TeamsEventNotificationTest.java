@@ -65,7 +65,7 @@ import static org.mockito.Mockito.when;
 public class TeamsEventNotificationTest {
 
     //code under test
-    TeamsEventNotification TeamsEventNotification;
+    TeamsEventNotification teamsEventNotification;
 
     @Mock
     NodeId mockNodeId;
@@ -79,28 +79,25 @@ public class TeamsEventNotificationTest {
     @Mock
     EventNotificationService notificationCallbackService;
 
-
-    private TeamsEventNotificationConfig TeamsEventNotificationConfig;
+    private TeamsEventNotificationConfig teamsEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
-
 
     @Before
     public void setUp() {
 
         getDummyTeamsNotificationConfig();
-        eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(TeamsEventNotificationConfig).build();
+        eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(teamsEventNotificationConfig).build();
         final ImmutableList<MessageSummary> messageSummaries = generateMessageSummaries(50);
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
-        TeamsEventNotification = new TeamsEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
+        teamsEventNotification = new TeamsEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                 Engine.createEngine(),
                 mockNotificationService,
                 mockNodeId, mockrequestClient);
-
     }
 
     private void getDummyTeamsNotificationConfig() {
-        TeamsEventNotificationConfig = new AutoValue_TeamsEventNotificationConfig.Builder()
+        teamsEventNotificationConfig = TeamsEventNotificationConfig.builder()
                 .type(TeamsEventNotificationConfig.TYPE_NAME)
                 .color("#FF2052")
                 .webhookUrl("axzzzz")
@@ -123,7 +120,7 @@ public class TeamsEventNotificationTest {
     @Test
     public void createTeamsMessage() throws EventNotificationException {
         String expected = "{\"themeColor\":\"#FF2052\",\"@type\":\"MessageCard\",\"text\":\"**Alert Event Definition Test Title triggered:**\\n\",\"@context\":\"http://schema.org/extensions\",\"sections\":[{\"activitySubtitle\":\"_Event Definition Test Description_\",\"facts\":[{\"name\":\"a custom message\",\"value\":\"\"}]}]}";
-        TeamsMessage message = TeamsEventNotification.createTeamsMessage(eventNotificationContext, TeamsEventNotificationConfig);
+        TeamsMessage message = teamsEventNotification.createTeamsMessage(eventNotificationContext, teamsEventNotificationConfig);
         String actual = message.getJsonString();
         assertThat(actual).isEqualTo(expected);
 
@@ -131,24 +128,21 @@ public class TeamsEventNotificationTest {
 
     @After
     public void tearDown() {
-        TeamsEventNotification = null;
-        TeamsEventNotificationConfig = null;
+        teamsEventNotification = null;
+        teamsEventNotificationConfig = null;
         eventNotificationContext = null;
     }
 
     @Test
     public void buildDefaultMessage() {
-        String message = TeamsEventNotification.buildDefaultMessage(eventNotificationContext);
-//        assertThat(message).isNotBlank();
+        String message = teamsEventNotification.buildDefaultMessage(eventNotificationContext);
         assertThat(message).isNotEmpty();
-        assertThat(message).isNotNull();
-//        assertThat(message.getBytes().length).isEqualTo(86);
     }
 
     @Test
     public void getCustomMessageModel() {
         List<MessageSummary> messageSummaries = generateMessageSummaries(50);
-        Map<String, Object> customMessageModel = TeamsEventNotification.getCustomMessageModel(eventNotificationContext, TeamsEventNotificationConfig.type(), messageSummaries);
+        Map<String, Object> customMessageModel = teamsEventNotification.getCustomMessageModel(eventNotificationContext, teamsEventNotificationConfig.type(), messageSummaries);
         //there are 9 keys and two asserts needs to be implemented (backlog,event)
         assertThat(customMessageModel).isNotNull();
         assertThat(customMessageModel.get("event_definition_description")).isEqualTo("Event Definition Test Description");
@@ -166,7 +160,7 @@ public class TeamsEventNotificationTest {
         givenGoodNodeId();
         givenTeamsClientThrowsPermException();
         //when execute is called with a invalid webhook URL, we expect a event notification exception
-        TeamsEventNotification.execute(eventNotificationContext);
+        teamsEventNotification.execute(eventNotificationContext);
     }
 
 
@@ -176,7 +170,7 @@ public class TeamsEventNotificationTest {
         assertThat(yetAnotherContext.event().timerangeStart().isPresent()).isFalse();
         assertThat(yetAnotherContext.event().timerangeEnd().isPresent()).isFalse();
         assertThat(yetAnotherContext.notificationConfig().type()).isEqualTo(TeamsEventNotificationConfig.TYPE_NAME);
-        TeamsEventNotification.execute(yetAnotherContext);
+        teamsEventNotification.execute(yetAnotherContext);
     }
 
     private EventNotificationContext getEventNotificationContextToSimulateNullPointerException() {
@@ -202,10 +196,10 @@ public class TeamsEventNotificationTest {
                 .build();
 
         //uses the eventDEfinitionDto from NotificationTestData.getDummyContext in the setup method
-        EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().get();
+        EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().orElseThrow(NullPointerException::new);
         return EventNotificationContext.builder()
                 .notificationId("1234")
-                .notificationConfig(TeamsEventNotificationConfig)
+                .notificationConfig(teamsEventNotificationConfig)
                 .event(eventDto)
                 .eventDefinition(eventDefinitionDto)
                 .build();
@@ -232,17 +226,15 @@ public class TeamsEventNotificationTest {
 
     @Test
     public void buildCustomMessage() throws PermanentEventNotificationException {
-        JsonNode s = TeamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsEventNotificationConfig, "${thisDoesnotExist}");
-//        assertThat(s).isEmpty();
-        JsonNode expectedCustomMessage = TeamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsEventNotificationConfig, "test");
+        JsonNode expectedCustomMessage = teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "test");
         assertThat(expectedCustomMessage).isNotEmpty();
 
     }
 
     @Test(expected = PermanentEventNotificationException.class)
     public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
-        TeamsEventNotificationConfig = buildInvalidTemplate();
-        TeamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsEventNotificationConfig, "Title:       ${does't exist}");
+        teamsEventNotificationConfig = buildInvalidTemplate();
+        teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "Title:       ${does't exist}");
     }
 
 
@@ -253,11 +245,11 @@ public class TeamsEventNotificationTest {
                 .backlogSize(5)
                 .build();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode message = TeamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig, "Title:       ${event_definition_title}");
+        JsonNode message = teamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig, "Title:       ${event_definition_title}");
         Map<String, String> fact = new HashMap<>();
         fact.put("name", "Title");
         fact.put("value", "Event Definition Test Title");
-        List<Map> facts = new ArrayList<>();
+        List<Map<String, String>> facts = new ArrayList<>();
         facts.add(fact);
 
         assertThat(message).isEqualTo(objectMapper.convertValue(facts, JsonNode.class));
@@ -271,7 +263,7 @@ public class TeamsEventNotificationTest {
                 .build();
 
         //global setting is at N and the message override is 5 then the backlog size = 5
-        List<MessageSummary> messageSummaries = TeamsEventNotification.getMessageBacklog(eventNotificationContext, TeamsConfig);
+        List<MessageSummary> messageSummaries = teamsEventNotification.getMessageBacklog(eventNotificationContext, TeamsConfig);
         assertThat(messageSummaries.size()).isEqualTo(5);
     }
 
@@ -282,7 +274,7 @@ public class TeamsEventNotificationTest {
                 .build();
 
         //global setting is at N and the message override is 0 then the backlog size = 50
-        List<MessageSummary> messageSummaries = TeamsEventNotification.getMessageBacklog(eventNotificationContext, TeamsConfig);
+        List<MessageSummary> messageSummaries = teamsEventNotification.getMessageBacklog(eventNotificationContext, TeamsConfig);
         assertThat(messageSummaries.size()).isEqualTo(50);
     }
 
@@ -293,14 +285,14 @@ public class TeamsEventNotificationTest {
                 .build();
 
         //global setting is at N and the eventNotificationContext is null then the message summaries is null
-        List<MessageSummary> messageSummaries = TeamsEventNotification.getMessageBacklog(null, TeamsConfig);
+        List<MessageSummary> messageSummaries = teamsEventNotification.getMessageBacklog(null, TeamsConfig);
         assertThat(messageSummaries).isNull();
     }
 
 
     ImmutableList<MessageSummary> generateMessageSummaries(int size) {
 
-        List<MessageSummary> messageSummaries = new ArrayList();
+        List<MessageSummary> messageSummaries = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             MessageSummary summary = new MessageSummary("graylog_" + i, new Message("Test message_" + i, "source" + i, new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)));
             messageSummaries.add(summary);
@@ -309,7 +301,7 @@ public class TeamsEventNotificationTest {
     }
 
     TeamsEventNotificationConfig buildInvalidTemplate() {
-        TeamsEventNotificationConfig.Builder builder = new AutoValue_TeamsEventNotificationConfig.Builder().create();
+        TeamsEventNotificationConfig.Builder builder = TeamsEventNotificationConfig.builder();
         builder.customMessage("Title");
         return builder.build();
     }

@@ -42,6 +42,4 @@ public class TeamsMessageTest {
         JsonNode jsonNode = new ObjectMapper().readTree(bytes);
         return jsonNode.findValuesAsText(fieldName);
     }
-
-
 }
