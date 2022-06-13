@@ -139,7 +139,7 @@ class TeamsNotificationForm extends React.Component<TeamsNotificationFormType, a
                name="webhook_url"
                label="Webhook URL"
                type="text"
-               bsStyle={validation.error.webhook_url ? 'error' : null}
+               bsStyle={validation.errors.webhook_url ? 'error' : null}
                help={get(validation, 'errors.webhook_url[0]', 'Teams "Incoming Webhook" URL')}
                value={config.webhook_url || ''}
                onChange={this.handleChange}
@@ -148,7 +148,7 @@ class TeamsNotificationForm extends React.Component<TeamsNotificationFormType, a
                name="custom_message"
                label="Custom Message (optional)"
                type="textarea"
-               bsStyle={validation.error.custom_message ? 'error' : null}
+               bsStyle={validation.errors.custom_message ? 'error' : null}
                help={get(validation, 'errors.custom_message[0]', element)}
                value={config.custom_message || ''}
                onChange={this.handleChange} />
@@ -177,7 +177,7 @@ class TeamsNotificationForm extends React.Component<TeamsNotificationFormType, a
                name="icon_url"
                label="Icon URL (optional)"
                type="text"
-               bsStyle={validation.error.icon_url ? 'error' : null}
+               bsStyle={validation.errors.icon_url ? 'error' : null}
                help={get(validation, 'errors.icon_url[0]', 'Image to use as the icon for this message')}
                value={config.icon_url || ''}
                onChange={this.handleChange} />

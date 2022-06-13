@@ -35,7 +35,7 @@ export interface ConfigType {
 
 export type ValidationType = {
     failed?: boolean,
-    error?: ErrorType,
+    errors?: ErrorType,
 }
 
 export interface ErrorType {
