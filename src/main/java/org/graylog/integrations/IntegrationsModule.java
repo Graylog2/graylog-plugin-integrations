@@ -39,6 +39,7 @@ import org.graylog.integrations.notifications.types.SlackEventNotification;
 import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
 import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotification;
 import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotificationConfig;
+import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotificationConfigEntity;
 import org.graylog.integrations.pagerduty.PagerDutyNotification;
 import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
 import org.graylog2.plugin.PluginConfigBean;
@@ -111,6 +112,9 @@ public class IntegrationsModule extends PluginModule {
                     TeamsEventNotificationConfig.class,
                     TeamsEventNotification.class,
                     TeamsEventNotification.Factory.class);
+            // Adds content pack support for Teams Notification.
+            registerJacksonSubtype(TeamsEventNotificationConfigEntity.class,
+                    TeamsEventNotificationConfigEntity.TYPE_NAME);
 
             // Pager Duty Notification
             addNotificationType(
