@@ -33,7 +33,7 @@ import java.util.Map;
 @JsonDeserialize(builder = TeamsEventNotificationConfigEntity.Builder.class)
 public abstract class TeamsEventNotificationConfigEntity implements EventNotificationConfigEntity {
 
-    public static final String TYPE_NAME = "Teams-notification-v1";
+    public static final String TYPE_NAME = "teams-notification-v1";
 
     @JsonProperty(TeamsEventNotificationConfig.TEAMS_COLOR)
     public abstract ValueReference color();

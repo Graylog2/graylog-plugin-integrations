@@ -153,7 +153,7 @@ public class TeamsEventNotification implements EventNotification {
             return factsNode;
         } catch (Exception e) {
             String error = "Invalid Custom Message template.";
-            LOG.error(error + "[{}]", e.toString());
+            LOG.error("{} [{}]", error, e.toString());
             throw new PermanentEventNotificationException(error + e, e.getCause());
         }
     }
