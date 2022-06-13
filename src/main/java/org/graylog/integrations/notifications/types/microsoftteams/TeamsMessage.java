@@ -49,7 +49,6 @@ public class TeamsMessage {
         this.messageTitle = messageTitle;
         this.customMessage = customMessage;
         this.description = description;
-
     }
 
     public TeamsMessage(String messageTitle) {
@@ -59,11 +58,10 @@ public class TeamsMessage {
     public String getJsonString() {
 
         final Map<String, Object> params = new HashMap<>();
-        params.put("@type","MessageCard");
-        params.put("@context","http://schema.org/extensions");
+        params.put("@type", "MessageCard");
+        params.put("@context", "http://schema.org/extensions");
         params.put("themeColor", color);
         params.put("text", messageTitle);
-
 
         final List<Sections> Sections = new ArrayList<>();
         if (!customMessage.isNull()) {
@@ -99,8 +97,6 @@ public class TeamsMessage {
 
         @JsonProperty
         public JsonNode facts;
-
-
 
         @JsonCreator
         public Sections(String activitySubtitle, String activityImage, JsonNode facts) {

@@ -35,12 +35,10 @@ public class RequestClient {
     private static final Logger LOG = LoggerFactory.getLogger(RequestClient.class);
     private final OkHttpClient httpClient;
 
-
     @Inject
     public RequestClient(OkHttpClient httpClient) {
         this.httpClient = httpClient;
     }
-
 
     /**
      * @param message

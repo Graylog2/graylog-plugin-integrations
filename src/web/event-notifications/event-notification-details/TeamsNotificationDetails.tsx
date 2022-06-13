@@ -16,9 +16,11 @@
  */
 import * as React from 'react';
 import styled, { css } from 'styled-components';
+
 import { ReadOnlyFormGroup } from 'components/common';
 import { Well } from 'components/bootstrap';
-import { TeamsNotificationSummaryType } from '../types';
+
+import type { TeamsNotificationSummaryType } from '../types';
 
 const NewExampleWell = styled(Well)(({ theme }) => css`
   margin-bottom: 5px;
@@ -41,6 +43,5 @@ const TeamsNotificationDetails: React.FC<TeamsNotificationSummaryType> = ({ noti
     <ReadOnlyFormGroup label="Icon URL" value={notification.config.icon_url} />
   </>
 );
-
 
 export default TeamsNotificationDetails;

@@ -15,10 +15,12 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React from 'react';
-import CommonNotificationSummary from 'components/event-notifications/event-notification-types/CommonNotificationSummary';
-import { TeamsNotificationSummaryType } from '../types';
 
-function TeamsNotificationSummary({ notification, ...restProps }:React.FC<TeamsNotificationSummaryType>) {
+import CommonNotificationSummary from 'components/event-notifications/event-notification-types/CommonNotificationSummary';
+
+import type { TeamsNotificationSummaryType } from '../types';
+
+function TeamsNotificationSummary({ notification, ...restProps }: TeamsNotificationSummaryType) {
   return (
     <CommonNotificationSummary {...restProps} notification={notification}>
       <tr>

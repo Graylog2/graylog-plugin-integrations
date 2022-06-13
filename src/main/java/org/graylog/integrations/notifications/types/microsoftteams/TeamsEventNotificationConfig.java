@@ -52,7 +52,6 @@ public abstract class TeamsEventNotificationConfig implements EventNotificationC
     static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Specified Webhook URL is not a valid URL";
     static final String INVALID_TEAMS_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Teams URL";
     static final String WEB_HOOK_URL = "https://teams.webhook.office.com/services/xxxx/xxxxxxxxxxxxxxxxxxx";
-
     static final String FIELD_WEBHOOK_URL = "webhook_url";
     static final String TEAMS_CUSTOM_MESSAGE = "custom_message";
     static final String TEAMS_ICON_URL = "icon_url";

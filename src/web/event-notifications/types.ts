@@ -15,9 +15,8 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 export type TeamsNotificationSummaryType = {
-    type: String,
+    type: string,
     notification: NotificationType,
-    
 }
 
 export type NotificationType = {
@@ -26,18 +25,17 @@ export type NotificationType = {
 
 export interface ConfigType {
     defaultValue?: any,
-    graylog_url?: String,
-    icon_url?: String,
+    graylog_url?: string,
+    icon_url?: string,
     backlog_size?: number,
-    custom_message: String,
-    webhook_url?: String,
-    color?: String,
+    custom_message: string,
+    webhook_url?: string,
+    color?: string,
 }
 
 export type ValidationType = {
     failed?: boolean,
-    error?: ErrorType
-    
+    error?: ErrorType,
 }
 
 export interface ErrorType {

@@ -160,11 +160,11 @@ public class TeamsEventNotification implements EventNotification {
 
     public JsonNode getMessageDetails(String eventFields) {
         String[] fields = eventFields.split("\\r?\\n");
-        for (String  field: fields) {
-            Map<String,String> facts = new HashMap<>();
+        for (String field : fields) {
+            Map<String, String> facts = new HashMap<>();
             String[] factFields = field.split(":");
             facts.put("name", factFields[0]);
-            facts.put("value",factFields.length == 1 ? "" : factFields[1].trim());
+            facts.put("value", factFields.length == 1 ? "" : factFields[1].trim());
             event.add(facts);
         }
         LOG.debug("Created list of facts");
@@ -193,7 +193,7 @@ public class TeamsEventNotification implements EventNotification {
         return objectMap;
     }
 
-    public interface Factory extends EventNotification.Factory<TeamsEventNotification>{
+    public interface Factory extends EventNotification.Factory<TeamsEventNotification> {
         @Override
         TeamsEventNotification create();
     }
