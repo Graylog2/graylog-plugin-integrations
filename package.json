@@ -1,6 +1,6 @@
 {
   "name": "graylog-plugin-integrations",
-  "version": "4.3.0-SNAPSHOT",
+  "version": "4.4.0-SNAPSHOT",
   "description": "",
   "license": "SSPL-1.0",
   "repository": {
@@ -45,16 +45,17 @@
   "author": "Graylog, Inc. <hello@graylog.com>",
   "dependencies": {
     "buffer": "^6.0.3",
-    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin"
+    "graylog-web-plugin": "file:../graylog2-server/graylog2-web-interface/packages/graylog-web-plugin",
+    "urijs": "^1.19.10"
   },
   "devDependencies": {
-    "@babel/core": "7.12.10",
-    "@babel/plugin-proposal-class-properties": "7.10.4",
+    "@babel/core": "7.18.2",
+    "@babel/plugin-proposal-class-properties": "7.17.12",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
-    "@babel/plugin-transform-runtime": "7.11.5",
-    "@babel/preset-env": "7.11.5",
+    "@babel/plugin-transform-runtime": "7.18.2",
+    "@babel/preset-env": "7.18.2",
     "@babel/preset-react": "7.12.10",
-    "@testing-library/user-event": "^13.0.2",
+    "@testing-library/user-event": "^14.2.0",
     "babel-plugin-add-module-exports": "1.0.4",
     "babel-plugin-dynamic-import-node": "2.3.3",
     "babel-plugin-styled-components": "1.11.1",
