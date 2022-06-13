@@ -32,12 +32,13 @@ import SlackNotificationSummary from './event-notifications/event-notification-t
 import TeamsNotificationDetails from './event-notifications/event-notification-details/TeamsNotificationDetails';
 import TeamsNotificationForm from './event-notifications/event-notification-types/TeamsNotificationForm';
 import TeamsNotificationSummary from './event-notifications/event-notification-types/TeamsNotificationSummary';
-import packageJson from '../../package.json';
-import GreyNoiseAdapterFieldSet from "./dataadapters/GreyNoiseAdapterFieldSet";
-import GreyNoiseAdapterSummary from "./dataadapters/GreyNoiseAdapterSummary";
-import GreyNoiseAdapterDocumentation from "./dataadapters/GreyNoiseAdapterDocumentation";
+import GreyNoiseAdapterFieldSet from './dataadapters/GreyNoiseAdapterFieldSet';
+import GreyNoiseAdapterSummary from './dataadapters/GreyNoiseAdapterSummary';
+import GreyNoiseAdapterDocumentation from './dataadapters/GreyNoiseAdapterDocumentation';
 import GreyNoiseCommunityIpLookupAdapterDocumentation
   from './dataadapters/GreyNoiseCommunityIpLookupAdapterDocumentation';
+
+import packageJson from '../../package.json';
 
 const manifest = new PluginManifest(packageJson, {
   routes: [
@@ -67,14 +68,14 @@ const manifest = new PluginManifest(packageJson, {
       detailsComponent: SlackNotificationDetails,
       defaultConfig: SlackNotificationForm.defaultConfig,
     },
-        {
-          type: 'teams-notification-v1',
-          displayName: 'Teams Notification',
-          formComponent: TeamsNotificationForm,
-          summaryComponent: TeamsNotificationSummary,
-          detailsComponent: TeamsNotificationDetails,
-          defaultConfig: TeamsNotificationForm.defaultConfig,
-        },
+    {
+      type: 'teams-notification-v1',
+      displayName: 'Teams Notification',
+      formComponent: TeamsNotificationForm,
+      summaryComponent: TeamsNotificationSummary,
+      detailsComponent: TeamsNotificationDetails,
+      defaultConfig: TeamsNotificationForm.defaultConfig,
+    },
   ],
   lookupTableAdapters: [
     {
