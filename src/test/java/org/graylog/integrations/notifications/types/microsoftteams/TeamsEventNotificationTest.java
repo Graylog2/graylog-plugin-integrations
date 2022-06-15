@@ -117,15 +117,6 @@ public class TeamsEventNotificationTest {
                 .build();
     }
 
-    @Test
-    public void createTeamsMessage() throws EventNotificationException {
-        String expected = "{\"themeColor\":\"#FF2052\",\"@type\":\"MessageCard\",\"text\":\"**Alert Event Definition Test Title triggered:**\\n\",\"@context\":\"http://schema.org/extensions\",\"sections\":[{\"activitySubtitle\":\"_Event Definition Test Description_\",\"facts\":[{\"name\":\"a custom message\",\"value\":\"\"}]}]}";
-        TeamsMessage message = teamsEventNotification.createTeamsMessage(eventNotificationContext, teamsEventNotificationConfig);
-        String actual = message.getJsonString();
-        assertThat(actual).isEqualTo(expected);
-
-    }
-
     @After
     public void tearDown() {
         teamsEventNotification = null;
