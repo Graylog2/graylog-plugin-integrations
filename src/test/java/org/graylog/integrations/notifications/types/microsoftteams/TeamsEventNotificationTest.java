@@ -82,6 +82,9 @@ public class TeamsEventNotificationTest {
     private TeamsEventNotificationConfig teamsEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
+    private final String expectedColor = "#FF2052";
+    private final String expectedImage = "iconUrl";
+
     @Before
     public void setUp() {
 
@@ -99,9 +102,10 @@ public class TeamsEventNotificationTest {
     private void getDummyTeamsNotificationConfig() {
         teamsEventNotificationConfig = TeamsEventNotificationConfig.builder()
                 .type(TeamsEventNotificationConfig.TYPE_NAME)
-                .color("#FF2052")
+                .color(expectedColor)
                 .webhookUrl("axzzzz")
                 .backlogSize(1)
+                .iconUrl(expectedImage)
                 .customMessage("a custom message")
                 .build();
     }
@@ -115,6 +119,22 @@ public class TeamsEventNotificationTest {
                         .url("http://localhost")
                         .build())
                 .build();
+    }
+
+    @Test
+    public void createTeamsMessage() throws EventNotificationException {
+        String expectedText = "**Alert Event Definition Test Title triggered:**\n";
+        String expectedSubtitle = "_Event Definition Test Description_";
+        TeamsMessage actual = teamsEventNotification.createTeamsMessage(eventNotificationContext, teamsEventNotificationConfig);
+        assertThat(actual.type()).isEqualTo(TeamsMessage.VALUE_TYPE);
+        assertThat(actual.context()).isEqualTo(TeamsMessage.VALUE_CONTEXT);
+        assertThat(actual.color()).isEqualTo(expectedColor);
+        assertThat(actual.text()).isEqualTo(expectedText);
+        assertThat(actual.sections().size()).isEqualTo(1);
+        TeamsMessage.Sections section = actual.sections().iterator().next();
+        assertThat(section.activitySubtitle()).isEqualTo(expectedSubtitle);
+        assertThat(section.activityImage()).isEqualTo(expectedImage);
+        assertThat(section.facts().toString().contains("\"name\":\"a custom message\"")).isTrue();
     }
 
     @After
