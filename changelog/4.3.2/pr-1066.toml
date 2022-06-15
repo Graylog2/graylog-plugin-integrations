@@ -1,0 +1,4 @@
+type = "a"
+message = "Add Microsoft Teams event notification plugin."
+
+pulls = ["1066"]
