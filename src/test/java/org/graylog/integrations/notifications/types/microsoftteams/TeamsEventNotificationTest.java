@@ -166,7 +166,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test(expected = EventNotificationException.class)
-    public void execute_with_invalid_webhook_url() throws EventNotificationException {
+    public void executeWithInvalidWebhookUrl() throws EventNotificationException {
         givenGoodNotificationService();
         givenGoodNodeId();
         givenTeamsClientThrowsPermException();
@@ -176,7 +176,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test(expected = EventNotificationException.class)
-    public void execute_with_null_event_timerange() throws EventNotificationException {
+    public void executeWithNullEventTimerange() throws EventNotificationException {
         EventNotificationContext yetAnotherContext = getEventNotificationContextToSimulateNullPointerException();
         assertThat(yetAnotherContext.event().timerangeStart().isPresent()).isFalse();
         assertThat(yetAnotherContext.event().timerangeEnd().isPresent()).isFalse();
@@ -243,14 +243,14 @@ public class TeamsEventNotificationTest {
     }
 
     @Test(expected = PermanentEventNotificationException.class)
-    public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
+    public void buildCustomMessageWithInvalidTemplate() throws EventNotificationException {
         teamsEventNotificationConfig = buildInvalidTemplate();
         teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "Title:       ${does't exist}");
     }
 
 
     @Test
-    public void test_customMessage() throws PermanentEventNotificationException {
+    public void testCustomMessage() throws PermanentEventNotificationException {
 
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(5)
@@ -268,7 +268,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test
-    public void test_backlog_message_limit_when_backlogSize_isFive() {
+    public void testBacklogMessageLimitWhenBacklogSizeIsFive() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(5)
                 .build();
@@ -279,7 +279,7 @@ public class TeamsEventNotificationTest {
     }
 
     @Test
-    public void test_backlog_message_limit_when_backlogSize_isZero() {
+    public void testBacklogMessageLimitWhenBacklogSizeIsZero() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(0)
                 .build();
@@ -290,7 +290,7 @@ public class TeamsEventNotificationTest {
     }
 
     @Test
-    public void test_backlog_message_limit_When_eventNotificationContext_isNull() {
+    public void testBacklogMessageLimitWhenEventNotificationContextIsNull() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(0)
                 .build();
