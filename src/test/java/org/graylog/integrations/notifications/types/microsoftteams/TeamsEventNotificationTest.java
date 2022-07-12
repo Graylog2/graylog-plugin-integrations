@@ -89,7 +89,9 @@ public class TeamsEventNotificationTest {
     public void setUp() {
 
         getDummyTeamsNotificationConfig();
-        eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder().notificationConfig(teamsEventNotificationConfig).build();
+        eventNotificationContext = NotificationTestData.getDummyContext(getHttpNotification(), "ayirp").toBuilder()
+                .notificationConfig(teamsEventNotificationConfig).build();
+        eventNotificationContext = eventNotificationContext.toBuilder().event(eventNotificationContext.event().toBuilder().key("testkey:with:colons and spaces").build()).build();
         final ImmutableList<MessageSummary> messageSummaries = generateMessageSummaries(50);
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
@@ -256,12 +258,18 @@ public class TeamsEventNotificationTest {
                 .backlogSize(5)
                 .build();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode message = teamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig, "Title:       ${event_definition_title}");
+        JsonNode message = teamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig,
+                "Title:       ${event_definition_title}\n" +
+                "Key: ${event.key}\n");
         Map<String, String> fact = new HashMap<>();
-        fact.put("name", "Title");
-        fact.put("value", "Event Definition Test Title");
-        List<Map<String, String>> facts = new ArrayList<>();
-        facts.add(fact);
+        List<Map<String, String>> facts = ImmutableList.of(
+                ImmutableMap.of(
+                        "name", "Title",
+                        "value", "Event Definition Test Title"),
+                ImmutableMap.of(
+                        "name", "Key",
+                        "value", "testkey:with:colons and spaces")
+        );
 
         assertThat(message).isEqualTo(objectMapper.convertValue(facts, JsonNode.class));
     }
