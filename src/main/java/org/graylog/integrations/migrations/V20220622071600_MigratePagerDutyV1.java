@@ -77,7 +77,7 @@ public class V20220622071600_MigratePagerDutyV1 extends Migration {
         Bson v2Update = Updates.set(TYPE_FIELD, PagerDutyNotificationConfig.TYPE_NAME);
 
         LOG.info("Updating {} from {} to {}", TYPE_FIELD, PAGER_DUTY_V1, PagerDutyNotificationConfig.TYPE_NAME);
-        final UpdateResult updateTypeResult = collection.updateOne(v1Filter, v2Update);
+        final UpdateResult updateTypeResult = collection.updateMany(v1Filter, v2Update);
         LOG.info("Update result: {}", updateTypeResult);
 
         clusterConfigService.write(MigrationCompletion.create());
