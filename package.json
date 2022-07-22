@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "jest",
+    "test": "jest --config=jest.config.js",
     "lint": "eslint src",
     "lint:path": "eslint",
     "lint:styles": "stylelint './src/web/**/*.{js,jsx,ts,tsx}' --syntax css-in-js",
