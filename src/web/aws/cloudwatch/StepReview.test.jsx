@@ -26,7 +26,7 @@ import { ApiContext } from 'aws/context/Api';
 
 import StepReview from './StepReview';
 
-jest.mock('stores/sessions/SessionStore', () => ({ SessionStore: MockStore() }));
+jest.mock('stores/sessions/SessionStore', () => ({ SessionStore: MockStore(['isLoggedIn', jest.fn()]) }));
 jest.mock('stores/system/SystemStore', () => ({ SystemStore: MockStore() }));
 
 jest.mock('logic/rest/FetchProvider', () => jest.fn());
