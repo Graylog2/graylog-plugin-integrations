@@ -35,13 +35,16 @@ import org.graylog.integrations.inputs.paloalto9.PaloAlto9xInput;
 import org.graylog.integrations.ipfix.codecs.IpfixCodec;
 import org.graylog.integrations.ipfix.inputs.IpfixUdpInput;
 import org.graylog.integrations.ipfix.transports.IpfixUdpTransport;
+import org.graylog.integrations.migrations.V20220622071600_MigratePagerDutyV1;
 import org.graylog.integrations.notifications.types.SlackEventNotification;
 import org.graylog.integrations.notifications.types.SlackEventNotificationConfig;
+import org.graylog.integrations.notifications.types.SlackEventNotificationConfigEntity;
 import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotification;
 import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotificationConfig;
 import org.graylog.integrations.notifications.types.microsoftteams.TeamsEventNotificationConfigEntity;
 import org.graylog.integrations.pagerduty.PagerDutyNotification;
 import org.graylog.integrations.pagerduty.PagerDutyNotificationConfig;
+import org.graylog.integrations.pagerduty.PagerDutyNotificationConfigEntity;
 import org.graylog2.plugin.PluginConfigBean;
 import org.graylog2.plugin.PluginModule;
 import org.slf4j.Logger;
@@ -105,23 +108,25 @@ public class IntegrationsModule extends PluginModule {
             addNotificationType(SlackEventNotificationConfig.TYPE_NAME,
                     SlackEventNotificationConfig.class,
                     SlackEventNotification.class,
-                    SlackEventNotification.Factory.class);
+                    SlackEventNotification.Factory.class,
+                    SlackEventNotificationConfigEntity.TYPE_NAME,
+                    SlackEventNotificationConfigEntity.class);
 
             // Teams Notification
             addNotificationType(TeamsEventNotificationConfig.TYPE_NAME,
                     TeamsEventNotificationConfig.class,
                     TeamsEventNotification.class,
-                    TeamsEventNotification.Factory.class);
-            // Adds content pack support for Teams Notification.
-            registerJacksonSubtype(TeamsEventNotificationConfigEntity.class,
-                    TeamsEventNotificationConfigEntity.TYPE_NAME);
+                    TeamsEventNotification.Factory.class,
+                    TeamsEventNotificationConfigEntity.TYPE_NAME,
+                    TeamsEventNotificationConfigEntity.class);
 
             // Pager Duty Notification
-            addNotificationType(
-                    PagerDutyNotificationConfig.TYPE_NAME,
+            addNotificationType(PagerDutyNotificationConfig.TYPE_NAME,
                     PagerDutyNotificationConfig.class,
                     PagerDutyNotification.class,
-                    PagerDutyNotification.Factory.class);
+                    PagerDutyNotification.Factory.class,
+                    PagerDutyNotificationConfigEntity.TYPE_NAME,
+                    PagerDutyNotificationConfigEntity.class);
 
             // GreyNoise Data Adapter
             installLookupDataAdapter(GreyNoiseQuickIPDataAdapter.NAME,
@@ -172,6 +177,9 @@ public class IntegrationsModule extends PluginModule {
         bind(IamClientBuilder.class).toProvider(IamClient::builder);
         bind(CloudWatchLogsClientBuilder.class).toProvider(CloudWatchLogsClient::builder);
         bind(KinesisClientBuilder.class).toProvider(KinesisClient::builder);
+
+        // PagerDuty notification type fix
+        addMigration(V20220622071600_MigratePagerDutyV1.class);
     }
 
     /**
