@@ -162,9 +162,13 @@ public class TeamsEventNotification implements EventNotification {
         List<Map<String, String>> event = new ArrayList<>();
         for (String field : fields) {
             Map<String, String> facts = new HashMap<>();
-            String[] factFields = field.split(":");
-            facts.put("name", factFields[0]);
-            facts.put("value", factFields.length == 1 ? "" : factFields[1].trim());
+            int firstColonIdx = field.indexOf(':');
+            if (firstColonIdx == -1) {
+                facts.put("name", field);
+            } else {
+                facts.put("name", field.substring(0, firstColonIdx));
+                facts.put("value", field.substring(firstColonIdx + 1).trim());
+            }
             event.add(facts);
         }
         LOG.debug("Created list of facts");

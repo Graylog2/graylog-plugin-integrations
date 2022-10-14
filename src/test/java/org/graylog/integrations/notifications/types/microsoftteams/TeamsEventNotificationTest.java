@@ -42,6 +42,7 @@ import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,6 +107,17 @@ public class TeamsEventNotificationTest {
                 .build();
     }
 
+    private TeamsEventNotificationConfig getTemplatedTimestampConfig() {
+        return TeamsEventNotificationConfig.builder()
+                .type(TeamsEventNotificationConfig.TYPE_NAME)
+                .color(expectedColor)
+                .webhookUrl("axzzzz")
+                .backlogSize(1)
+                .iconUrl(expectedImage)
+                .customMessage("Timestamp: ${event.timestamp}")
+                .build();
+    }
+
     private NotificationDto getHttpNotification() {
         return NotificationDto.builder()
                 .title("Foobar")
@@ -124,6 +136,17 @@ public class TeamsEventNotificationTest {
         String actual = message.getJsonString();
         assertThat(actual).isEqualTo(expected);
 
+    }
+
+    @Test
+    public void testValidTimestampFields() throws EventNotificationException {
+        TeamsMessage actual = teamsEventNotification.createTeamsMessage(eventNotificationContext, getTemplatedTimestampConfig());
+        JsonNode node = actual.sections().iterator().next().facts().iterator().next();
+        assertThat(node.has("value")).isTrue();
+        String timestampString = node.get("value").asText();
+        assertThat(timestampString).contains(":");
+        DateTime dt = DateTime.parse(timestampString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+        assertThat(dt).isNotNull();
     }
 
     @After
@@ -195,7 +218,7 @@ public class TeamsEventNotificationTest {
                 .fields(ImmutableMap.of("hello", "world"))
                 .build();
 
-        //uses the eventDEfinitionDto from NotificationTestData.getDummyContext in the setup method
+        //uses the eventDefinitionDto from NotificationTestData.getDummyContext in the setup method
         EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().orElseThrow(NullPointerException::new);
         return EventNotificationContext.builder()
                 .notificationId("1234")
