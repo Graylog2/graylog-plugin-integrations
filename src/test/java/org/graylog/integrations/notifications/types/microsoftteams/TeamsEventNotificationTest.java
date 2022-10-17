@@ -16,8 +16,6 @@
  */
 package org.graylog.integrations.notifications.types.microsoftteams;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -42,7 +40,6 @@ import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +48,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,18 +142,7 @@ public class TeamsEventNotificationTest {
         TeamsMessage.Sections section = actual.sections().iterator().next();
         assertThat(section.activitySubtitle()).isEqualTo(expectedSubtitle);
         assertThat(section.activityImage()).isEqualTo(expectedImage);
-        assertThat(section.facts().toString().contains("\"name\":\"a custom message\"")).isTrue();
-    }
-
-    @Test
-    public void testValidTimestampFields() throws EventNotificationException {
-        TeamsMessage actual = teamsEventNotification.createTeamsMessage(eventNotificationContext, getTemplatedTimestampConfig());
-        JsonNode node = actual.sections().iterator().next().facts().iterator().next();
-        assertThat(node.has("value")).isTrue();
-        String timestampString = node.get("value").asText();
-        assertThat(timestampString).contains(":");
-        DateTime dt = DateTime.parse(timestampString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-        assertThat(dt).isNotNull();
+        assertThat(section.text().contains("a custom message")).isTrue();
     }
 
     @After
@@ -260,7 +245,7 @@ public class TeamsEventNotificationTest {
 
     @Test
     public void buildCustomMessage() throws PermanentEventNotificationException {
-        JsonNode expectedCustomMessage = teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "test");
+        String expectedCustomMessage = teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "test");
         assertThat(expectedCustomMessage).isNotEmpty();
 
     }
@@ -278,15 +263,8 @@ public class TeamsEventNotificationTest {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(5)
                 .build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode message = teamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig, "Title:       ${event_definition_title}");
-        Map<String, String> fact = new HashMap<>();
-        fact.put("name", "Title");
-        fact.put("value", "Event Definition Test Title");
-        List<Map<String, String>> facts = new ArrayList<>();
-        facts.add(fact);
-
-        assertThat(message).isEqualTo(objectMapper.convertValue(facts, JsonNode.class));
+        String message = teamsEventNotification.buildCustomMessage(eventNotificationContext, TeamsConfig, "Title: ${event_definition_title}");
+        assertThat(message).isEqualTo("Title: Event Definition Test Title");
     }
 
 
@@ -328,7 +306,7 @@ public class TeamsEventNotificationTest {
 
         List<MessageSummary> messageSummaries = new ArrayList<>();
         for (int i = 0; i < size; i++) {
-            MessageSummary summary = new MessageSummary("graylog_" + i, new Message("Test message_" + i, "source" + i, new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)));
+            MessageSummary summary = new MessageSummary("graylog_" + i, new Message("Test message_" + i + " : with a colon and another colon : just for good measure", "source" + i, new DateTime(2020, 9, 6, 17, 0, DateTimeZone.UTC)));
             messageSummaries.add(summary);
         }
         return ImmutableList.copyOf(messageSummaries);
