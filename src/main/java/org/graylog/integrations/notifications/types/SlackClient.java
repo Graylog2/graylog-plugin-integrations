@@ -66,7 +66,7 @@ public class SlackClient {
 
         LOG.debug("Posting to webhook url <{}> the payload is <{}>",
                 webhookUrl,
-                "");
+                objectMapper.writeValueAsString(message));
 
         try (final Response r = httpClient.newCall(request).execute()) {
             if (!r.isSuccessful()) {
