@@ -42,6 +42,7 @@ import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,6 +83,9 @@ public class TeamsEventNotificationTest {
     private TeamsEventNotificationConfig teamsEventNotificationConfig;
     private EventNotificationContext eventNotificationContext;
 
+    private final String expectedColor = "#FF2052";
+    private final String expectedImage = "iconUrl";
+
     @Before
     public void setUp() {
 
@@ -99,10 +103,22 @@ public class TeamsEventNotificationTest {
     private void getDummyTeamsNotificationConfig() {
         teamsEventNotificationConfig = TeamsEventNotificationConfig.builder()
                 .type(TeamsEventNotificationConfig.TYPE_NAME)
-                .color("#FF2052")
+                .color(expectedColor)
                 .webhookUrl("axzzzz")
                 .backlogSize(1)
+                .iconUrl(expectedImage)
                 .customMessage("a custom message")
+                .build();
+    }
+
+    private TeamsEventNotificationConfig getTemplatedTimestampConfig() {
+        return TeamsEventNotificationConfig.builder()
+                .type(TeamsEventNotificationConfig.TYPE_NAME)
+                .color(expectedColor)
+                .webhookUrl("axzzzz")
+                .backlogSize(1)
+                .iconUrl(expectedImage)
+                .customMessage("Timestamp: ${event.timestamp}")
                 .build();
     }
 
@@ -119,11 +135,29 @@ public class TeamsEventNotificationTest {
 
     @Test
     public void createTeamsMessage() throws EventNotificationException {
-        String expected = "{\"themeColor\":\"#FF2052\",\"@type\":\"MessageCard\",\"text\":\"**Alert Event Definition Test Title triggered:**\\n\",\"@context\":\"http://schema.org/extensions\",\"sections\":[{\"activitySubtitle\":\"_Event Definition Test Description_\",\"facts\":[{\"name\":\"a custom message\",\"value\":\"\"}]}]}";
-        TeamsMessage message = teamsEventNotification.createTeamsMessage(eventNotificationContext, teamsEventNotificationConfig);
-        String actual = message.getJsonString();
-        assertThat(actual).isEqualTo(expected);
+        String expectedText = "**Alert Event Definition Test Title triggered:**\n";
+        String expectedSubtitle = "_Event Definition Test Description_";
+        TeamsMessage actual = teamsEventNotification.createTeamsMessage(eventNotificationContext, teamsEventNotificationConfig);
+        assertThat(actual.type()).isEqualTo(TeamsMessage.VALUE_TYPE);
+        assertThat(actual.context()).isEqualTo(TeamsMessage.VALUE_CONTEXT);
+        assertThat(actual.color()).isEqualTo(expectedColor);
+        assertThat(actual.text()).isEqualTo(expectedText);
+        assertThat(actual.sections().size()).isEqualTo(1);
+        TeamsMessage.Sections section = actual.sections().iterator().next();
+        assertThat(section.activitySubtitle()).isEqualTo(expectedSubtitle);
+        assertThat(section.activityImage()).isEqualTo(expectedImage);
+        assertThat(section.facts().toString().contains("\"name\":\"a custom message\"")).isTrue();
+    }
 
+    @Test
+    public void testValidTimestampFields() throws EventNotificationException {
+        TeamsMessage actual = teamsEventNotification.createTeamsMessage(eventNotificationContext, getTemplatedTimestampConfig());
+        JsonNode node = actual.sections().iterator().next().facts().iterator().next();
+        assertThat(node.has("value")).isTrue();
+        String timestampString = node.get("value").asText();
+        assertThat(timestampString).contains(":");
+        DateTime dt = DateTime.parse(timestampString, DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+        assertThat(dt).isNotNull();
     }
 
     @After
@@ -155,7 +189,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test(expected = EventNotificationException.class)
-    public void execute_with_invalid_webhook_url() throws EventNotificationException {
+    public void executeWithInvalidWebhookUrl() throws EventNotificationException {
         givenGoodNotificationService();
         givenGoodNodeId();
         givenTeamsClientThrowsPermException();
@@ -165,7 +199,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test(expected = EventNotificationException.class)
-    public void execute_with_null_event_timerange() throws EventNotificationException {
+    public void executeWithNullEventTimerange() throws EventNotificationException {
         EventNotificationContext yetAnotherContext = getEventNotificationContextToSimulateNullPointerException();
         assertThat(yetAnotherContext.event().timerangeStart().isPresent()).isFalse();
         assertThat(yetAnotherContext.event().timerangeEnd().isPresent()).isFalse();
@@ -195,7 +229,7 @@ public class TeamsEventNotificationTest {
                 .fields(ImmutableMap.of("hello", "world"))
                 .build();
 
-        //uses the eventDEfinitionDto from NotificationTestData.getDummyContext in the setup method
+        //uses the eventDefinitionDto from NotificationTestData.getDummyContext in the setup method
         EventDefinitionDto eventDefinitionDto = eventNotificationContext.eventDefinition().orElseThrow(NullPointerException::new);
         return EventNotificationContext.builder()
                 .notificationId("1234")
@@ -232,14 +266,14 @@ public class TeamsEventNotificationTest {
     }
 
     @Test(expected = PermanentEventNotificationException.class)
-    public void buildCustomMessage_with_invalidTemplate() throws EventNotificationException {
+    public void buildCustomMessageWithInvalidTemplate() throws EventNotificationException {
         teamsEventNotificationConfig = buildInvalidTemplate();
         teamsEventNotification.buildCustomMessage(eventNotificationContext, teamsEventNotificationConfig, "Title:       ${does't exist}");
     }
 
 
     @Test
-    public void test_customMessage() throws PermanentEventNotificationException {
+    public void testCustomMessage() throws PermanentEventNotificationException {
 
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(5)
@@ -257,7 +291,7 @@ public class TeamsEventNotificationTest {
 
 
     @Test
-    public void test_backlog_message_limit_when_backlogSize_isFive() {
+    public void testBacklogMessageLimitWhenBacklogSizeIsFive() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(5)
                 .build();
@@ -268,7 +302,7 @@ public class TeamsEventNotificationTest {
     }
 
     @Test
-    public void test_backlog_message_limit_when_backlogSize_isZero() {
+    public void testBacklogMessageLimitWhenBacklogSizeIsZero() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(0)
                 .build();
@@ -279,7 +313,7 @@ public class TeamsEventNotificationTest {
     }
 
     @Test
-    public void test_backlog_message_limit_When_eventNotificationContext_isNull() {
+    public void testBacklogMessageLimitWhenEventNotificationContextIsNull() {
         TeamsEventNotificationConfig TeamsConfig = TeamsEventNotificationConfig.builder()
                 .backlogSize(0)
                 .build();

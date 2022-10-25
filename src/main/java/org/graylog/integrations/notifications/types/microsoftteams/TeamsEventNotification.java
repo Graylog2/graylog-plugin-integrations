@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -83,7 +84,7 @@ public class TeamsEventNotification implements EventNotification {
 
         try {
             TeamsMessage teamsMessage = createTeamsMessage(ctx, config);
-            requestClient.send(teamsMessage.getJsonString(), config.webhookUrl());
+            requestClient.send(objectMapper.writeValueAsString(teamsMessage), config.webhookUrl());
         } catch (TemporaryEventNotificationException exp) {
             //scheduler needs to retry a TemporaryEventNotificationException
             throw exp;
@@ -111,7 +112,6 @@ public class TeamsEventNotification implements EventNotification {
      * @throws PermanentEventNotificationException - throws this exception when the custom message template is invalid
      */
     TeamsMessage createTeamsMessage(EventNotificationContext ctx, TeamsEventNotificationConfig config) throws PermanentEventNotificationException {
-        //Note: Link names if notify channel or else the channel tag will be plain text.
         String messageTitle = buildDefaultMessage(ctx);
         String description = buildMessageDescription(ctx);
         JsonNode customMessage = null;
@@ -120,13 +120,17 @@ public class TeamsEventNotification implements EventNotification {
             customMessage = buildCustomMessage(ctx, config, template);
         }
 
-        return new TeamsMessage(
-                config.color(),
-                config.iconUrl(),
-                messageTitle,
-                customMessage,
-                description
-        );
+        TeamsMessage.Sections section = TeamsMessage.Sections.builder()
+                .activityImage(config.iconUrl())
+                .activitySubtitle(description)
+                .facts(customMessage)
+                .build();
+
+        return TeamsMessage.builder()
+                .color(config.color())
+                .text(messageTitle)
+                .sections(Collections.singleton(section))
+                .build();
     }
 
     String buildDefaultMessage(EventNotificationContext ctx) {
@@ -162,9 +166,13 @@ public class TeamsEventNotification implements EventNotification {
         List<Map<String, String>> event = new ArrayList<>();
         for (String field : fields) {
             Map<String, String> facts = new HashMap<>();
-            String[] factFields = field.split(":");
-            facts.put("name", factFields[0]);
-            facts.put("value", factFields.length == 1 ? "" : factFields[1].trim());
+            int firstColonIdx = field.indexOf(':');
+            if (firstColonIdx == -1) {
+                facts.put("name", field);
+            } else {
+                facts.put("name", field.substring(0, firstColonIdx));
+                facts.put("value", field.substring(firstColonIdx + 1).trim());
+            }
             event.add(facts);
         }
         LOG.debug("Created list of facts");
