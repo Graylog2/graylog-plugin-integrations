@@ -1,0 +1,5 @@
+type = "fixed"
+message = "Fixed bug where old PagerDuty notifications would fail to load."
+
+issues = ["1054"]
+pulls = ["1077"]
