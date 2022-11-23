@@ -1,0 +1,14 @@
+type = "changed"
+message = "Modified how Microsoft Teams notification templates are processed."
+
+issues = ["1096", "1200"]
+pulls = ["1202"]
+
+details.user = """
+The Microsoft Teams notification template used to rely on each line being a key-value pair with a colon delimiter. This
+led to any lines containing multiple colons being displayed incorrectly. The template is now processed as either HTML
+or Markup to allow more flexible formatting and to correctly display lines with multiple colons. This will break any
+existing notifications that use the old default template and likely any customized templates that rely on the old
+processing functionality. The new default template can be found in the linked PR. Customized templates will need to be
+modified to use either HTML or Markup before notifications will display properly in Teams.
+"""
