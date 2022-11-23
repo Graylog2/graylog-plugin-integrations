@@ -1,0 +1,5 @@
+type = "fixed"
+message = "Add migration to migrate PagerDuty event notifications from v1 to v2."
+
+issues = ["1054"]
+pulls = ["1077"]
