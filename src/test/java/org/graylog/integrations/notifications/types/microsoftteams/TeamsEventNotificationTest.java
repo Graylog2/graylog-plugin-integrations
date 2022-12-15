@@ -237,9 +237,9 @@ public class TeamsEventNotificationTest {
     }
 
     private void givenGoodNodeId() {
-        when(mockNodeId.toString()).thenReturn("12345");
+        when(RefamocknodeId.getNodeId()).thenReturn("12345");
         assertThat(mockNodeId).isNotNull();
-        assertThat(mockNodeId.toString()).isEqualTo("12345");
+        assertThat(mocknodeId.getNodeId()).isEqualTo("12345");
     }
 
 

@@ -63,8 +63,7 @@ public class SlackEventNotificationTest {
     //code under test
     SlackEventNotification slackEventNotification;
 
-    @Mock
-    NodeId mockNodeId;
+    NodeId mockNodeId = () -> "12345";
 
     @Mock
     NotificationService mockNotificationService;
@@ -178,7 +177,6 @@ public class SlackEventNotificationTest {
     @Test(expected = EventNotificationException.class)
     public void executeWithInvalidWebhookUrl() throws EventNotificationException, JsonProcessingException {
         givenGoodNotificationService();
-        givenGoodNodeId();
         givenSlackClientThrowsPermException();
         //when execute is called with a invalid webhook URL, we expect a event notification exception
         slackEventNotification.execute(eventNotificationContext);
@@ -235,12 +233,6 @@ public class SlackEventNotificationTest {
                 .when(mockSlackClient)
                 .send(any(), anyString());
 
-    }
-
-    private void givenGoodNodeId() {
-        when(mockNodeId.toString()).thenReturn("12345");
-        assertThat(mockNodeId).isNotNull();
-        assertThat(mockNodeId.toString()).isEqualTo("12345");
     }
 
     @Test
