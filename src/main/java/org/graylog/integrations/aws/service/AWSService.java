@@ -39,7 +39,7 @@ import org.graylog2.plugin.configuration.ConfigurationException;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.inputs.transports.ThrottleableTransport;
-import org.graylog2.plugin.system.NodeId;
+import org.graylog2.plugin.system.NodeIdentifier;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
 import org.graylog2.shared.inputs.MessageInputFactory;
 import org.graylog2.shared.inputs.NoSuchInputTypeException;
@@ -73,11 +73,11 @@ public class AWSService {
 
     private final InputService inputService;
     private final MessageInputFactory messageInputFactory;
-    private final NodeId nodeId;
+    private final NodeIdentifier nodeId;
     private final ObjectMapper objectMapper;
 
     @Inject
-    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeId nodeId,
+    public AWSService(InputService inputService, MessageInputFactory messageInputFactory, NodeIdentifier nodeId,
                       ObjectMapper objectMapper) {
 
         this.inputService = inputService;
@@ -275,9 +275,9 @@ public class AWSService {
                                                                                 AWSInput.TYPE,
                                                                                 false,
                                                                                 configuration,
-                                                                                nodeId.toString());
+                                                                                nodeId.getNodeId());
         try {
-            final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.toString());
+            final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.getNodeId());
             messageInput.checkConfiguration();
             final Input input = this.inputService.create(messageInput.asMap());
             final String newInputId = inputService.save(input);
