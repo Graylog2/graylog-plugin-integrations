@@ -67,8 +67,6 @@ public class PagerDutyNotificationTest {
     ObjectMapper spyObjectMapper;
     @Mock
     NotificationService mockNotificationService;
-    @Mock
-    NodeId mockNodeId;
 
     // Test Objects
     EventNotificationContext ctx;

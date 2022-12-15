@@ -64,8 +64,7 @@ public class TeamsEventNotificationTest {
     //code under test
     TeamsEventNotification teamsEventNotification;
 
-    @Mock
-    NodeId mockNodeId;
+    private final NodeId nodeId = () -> "12345";
 
     @Mock
     NotificationService mockNotificationService;
@@ -93,7 +92,7 @@ public class TeamsEventNotificationTest {
         teamsEventNotification = new TeamsEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                 Engine.createEngine(),
                 mockNotificationService,
-                mockNodeId, mockrequestClient);
+                nodeId, mockrequestClient);
     }
 
     private void getDummyTeamsNotificationConfig() {
@@ -176,7 +175,6 @@ public class TeamsEventNotificationTest {
     @Test(expected = EventNotificationException.class)
     public void executeWithInvalidWebhookUrl() throws EventNotificationException {
         givenGoodNotificationService();
-        givenGoodNodeId();
         givenTeamsClientThrowsPermException();
         //when execute is called with a invalid webhook URL, we expect a event notification exception
         teamsEventNotification.execute(eventNotificationContext);
@@ -235,13 +233,6 @@ public class TeamsEventNotificationTest {
                 .send(any(), anyString());
 
     }
-
-    private void givenGoodNodeId() {
-        when(RefamocknodeId.getNodeId()).thenReturn("12345");
-        assertThat(mockNodeId).isNotNull();
-        assertThat(mocknodeId.getNodeId()).isEqualTo("12345");
-    }
-
 
     @Test
     public void buildCustomMessage() throws PermanentEventNotificationException {

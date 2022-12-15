@@ -63,7 +63,7 @@ public class SlackEventNotificationTest {
     //code under test
     SlackEventNotification slackEventNotification;
 
-    NodeId mockNodeId = () -> "12345";
+    private final NodeId nodeId = () -> "12345";
 
     @Mock
     NotificationService mockNotificationService;
@@ -94,7 +94,7 @@ public class SlackEventNotificationTest {
         slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
                 Engine.createEngine(),
                 mockNotificationService,
-                mockNodeId, mockSlackClient);
+                nodeId, mockSlackClient);
 
     }
 
