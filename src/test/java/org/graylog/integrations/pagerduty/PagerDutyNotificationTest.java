@@ -31,6 +31,7 @@ import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.system.NodeId;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -54,8 +55,6 @@ import static org.mockito.Mockito.verify;
 @RunWith(MockitoJUnitRunner.class)
 public class PagerDutyNotificationTest {
 
-    // Code Under Test
-    @InjectMocks
     private PagerDutyNotification cut;
 
     // Mock Objects
@@ -71,6 +70,13 @@ public class PagerDutyNotificationTest {
     // Test Objects
     EventNotificationContext ctx;
     Exception thrown;
+
+    private final NodeId nodeId = () -> "5ca1ab1e-0000-4000-a000-000000000000";
+
+    @Before
+    public void setUp() throws Exception {
+        cut = new PagerDutyNotification(mockPagerDutyClient, mockMessageFactory, spyObjectMapper, mockNotificationService, nodeId);
+    }
 
     // Test Cases
     @Test
