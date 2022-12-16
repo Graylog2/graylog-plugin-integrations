@@ -67,7 +67,7 @@ public class AWSServiceTest {
     @Mock
     private User user;
 
-    private final NodeId nodeId = () -> "node-id";
+    private final NodeId nodeId = () -> "5ca1ab1e-0000-4000-a000-000000000000";
 
     @Mock
     private MessageInput messageInput;
@@ -104,7 +104,7 @@ public class AWSServiceTest {
 
         // Verify that inputService received a valid input to save.
         final ArgumentCaptor<InputCreateRequest> argumentCaptor = ArgumentCaptor.forClass(InputCreateRequest.class);
-        verify(messageInputFactory, times(1)).create(argumentCaptor.capture(), eq("a-user-name"), eq("node-id"));
+        verify(messageInputFactory, times(1)).create(argumentCaptor.capture(), eq("a-user-name"), eq("5ca1ab1e-0000-4000-a000-000000000000"));
 
         // Just verify that the input create request was prepared correctly. This verifies the important argument
         // transposition logic.
