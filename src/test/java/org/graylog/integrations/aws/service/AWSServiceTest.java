@@ -30,6 +30,7 @@ import org.graylog2.inputs.InputServiceImpl;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.plugin.system.SimpleNodeId;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.inputs.MessageInputFactory;
@@ -67,7 +68,7 @@ public class AWSServiceTest {
     @Mock
     private User user;
 
-    private final NodeId nodeId = () -> "5ca1ab1e-0000-4000-a000-000000000000";
+    private final NodeId nodeId = new SimpleNodeId("5ca1ab1e-0000-4000-a000-000000000000");
 
     @Mock
     private MessageInput messageInput;

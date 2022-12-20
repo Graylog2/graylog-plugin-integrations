@@ -37,6 +37,7 @@ import org.graylog2.plugin.Message;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.plugin.system.SimpleNodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -63,7 +64,7 @@ public class SlackEventNotificationTest {
     //code under test
     SlackEventNotification slackEventNotification;
 
-    private final NodeId nodeId = () -> "12345";
+    private final NodeId nodeId = new SimpleNodeId("12345");
 
     @Mock
     NotificationService mockNotificationService;

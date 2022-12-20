@@ -31,6 +31,7 @@ import org.graylog2.notifications.NotificationImpl;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.Tools;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.plugin.system.SimpleNodeId;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,7 +72,7 @@ public class PagerDutyNotificationTest {
     EventNotificationContext ctx;
     Exception thrown;
 
-    private final NodeId nodeId = () -> "5ca1ab1e-0000-4000-a000-000000000000";
+    private final NodeId nodeId = new SimpleNodeId("5ca1ab1e-0000-4000-a000-000000000000");
 
     @Before
     public void setUp() throws Exception {
