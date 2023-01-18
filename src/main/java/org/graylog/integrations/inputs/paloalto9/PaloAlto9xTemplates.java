@@ -263,7 +263,7 @@ public class PaloAlto9xTemplates {
 
         fields.add(create(PaloAlto9xFields.PAN_LOG_PANORAMA, 35, STRING));
         fields.add(create(PaloAlto9xFields.PAN_SELECTION_TYPE, 36, STRING));
-        fields.add(create(ApplicationFields.APPLICATION_RESPONSE_TIME, 37, LONG));
+        fields.add(create(ApplicationFields.APPLICATION_RESPONSE_TIME, 37, STRING));
         fields.add(create(PaloAlto9xFields.PAN_GATEWAY_PRIORITY, 38, LONG));
         fields.add(create(PaloAlto9xFields.PAN_ATTEMPTED_GATEWAYS, 39, STRING));
 
