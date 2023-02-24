@@ -37,6 +37,10 @@ function TeamsNotificationSummary({ notification, ...restProps }: TeamsNotificat
         <td>{notification.config.custom_message}</td>
       </tr>
       <tr>
+        <td>Time Zone</td>
+        <td>{notification.config.time_zone}</td>
+      </tr>
+      <tr>
         <td>Message Backlog Limit</td>
         <td>{notification.config.backlog_size}</td>
       </tr>

@@ -17,7 +17,6 @@
 package org.graylog.integrations.notifications.types;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.floreysoft.jmte.Engine;
 import com.google.common.annotations.VisibleForTesting;
 import org.graylog.events.notifications.EventNotification;
@@ -33,6 +32,8 @@ import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,18 +53,18 @@ public class SlackEventNotification implements EventNotification {
     private final EventNotificationService notificationCallbackService;
     private final Engine templateEngine;
     private final NotificationService notificationService;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapperProvider objectMapperProvider;
     private final NodeId nodeId;
     private final SlackClient slackClient;
 
     @Inject
     public SlackEventNotification(EventNotificationService notificationCallbackService,
-                                  ObjectMapper objectMapper,
+                                  ObjectMapperProvider objectMapperProvider,
                                   Engine templateEngine,
                                   NotificationService notificationService,
                                   NodeId nodeId, SlackClient slackClient) {
         this.notificationCallbackService = notificationCallbackService;
-        this.objectMapper = requireNonNull(objectMapper);
+        this.objectMapperProvider = requireNonNull(objectMapperProvider);
         this.templateEngine = requireNonNull(templateEngine);
         this.notificationService = requireNonNull(notificationService);
         this.nodeId = requireNonNull(nodeId);
@@ -179,7 +180,7 @@ public class SlackEventNotification implements EventNotification {
 
     String buildTemplatedChannel(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
         final List<MessageSummary> backlog = getMessageBacklog(ctx, config);
-        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
+        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog, config.timeZone());
         try {
             LOG.debug("channel: template = {} model = {}", template, model);
             return templateEngine.transform(template, model);
@@ -192,7 +193,7 @@ public class SlackEventNotification implements EventNotification {
 
     String buildCustomMessage(EventNotificationContext ctx, SlackEventNotificationConfig config, String template) throws PermanentEventNotificationException {
         final List<MessageSummary> backlog = getMessageBacklog(ctx, config);
-        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog);
+        Map<String, Object> model = getCustomMessageModel(ctx, config.type(), backlog, config.timeZone());
         try {
             LOG.debug("customMessage: template = {} model = {}", template, model);
             return templateEngine.transform(template, model);
@@ -214,11 +215,11 @@ public class SlackEventNotification implements EventNotification {
 
 
     @VisibleForTesting
-    Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, String type, List<MessageSummary> backlog) {
+    Map<String, Object> getCustomMessageModel(EventNotificationContext ctx, String type, List<MessageSummary> backlog, DateTimeZone timeZone) {
         EventNotificationModelData modelData = EventNotificationModelData.of(ctx, backlog);
 
         LOG.debug("the custom message model data is {}", modelData.toString());
-        Map<String, Object> objectMap = objectMapper.convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
+        Map<String, Object> objectMap = objectMapperProvider.getForTimeZone(timeZone).convertValue(modelData, TypeReferences.MAP_STRING_OBJECT);
         objectMap.put("type", type);
         return objectMap;
     }

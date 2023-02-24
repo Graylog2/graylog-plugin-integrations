@@ -92,7 +92,7 @@ public class SlackEventNotificationTest {
         final ImmutableList<MessageSummary> messageSummaries = generateMessageSummaries(50);
         when(notificationCallbackService.getBacklogForEvent(eventNotificationContext)).thenReturn(messageSummaries);
 
-        slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider().get(),
+        slackEventNotification = new SlackEventNotification(notificationCallbackService, new ObjectMapperProvider(),
                 Engine.createEngine(),
                 mockNotificationService,
                 nodeId, mockSlackClient);
@@ -164,7 +164,7 @@ public class SlackEventNotificationTest {
     @Test
     public void getCustomMessageModel() {
         List<MessageSummary> messageSummaries = generateMessageSummaries(50);
-        Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig.type(), messageSummaries);
+        Map<String, Object> customMessageModel = slackEventNotification.getCustomMessageModel(eventNotificationContext, slackEventNotificationConfig.type(), messageSummaries, DateTimeZone.UTC);
         //there are 9 keys and two asserts needs to be implemented (backlog,event)
         assertThat(customMessageModel).isNotNull();
         assertThat(customMessageModel.get("event_definition_description")).isEqualTo("Event Definition Test Description");

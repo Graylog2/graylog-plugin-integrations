@@ -30,6 +30,7 @@ import org.graylog.scheduler.JobTriggerData;
 import org.graylog2.contentpacks.EntityDescriptorIds;
 import org.graylog2.contentpacks.model.entities.references.ValueReference;
 import org.graylog2.plugin.rest.ValidationResult;
+import org.joda.time.DateTimeZone;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotBlank;
@@ -48,6 +49,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     private static final String DEFAULT_HEX_COLOR = "#ff0500";
     private static final String DEFAULT_CUSTOM_MESSAGE = "Graylog Slack Notification";
     private static final long DEFAULT_BACKLOG_SIZE = 0;
+    private static final DateTimeZone DEFAULT_TIME_ZONE = DateTimeZone.UTC;
 
     static final String INVALID_BACKLOG_ERROR_MESSAGE = "Backlog size cannot be less than zero";
     static final String INVALID_CHANNEL_ERROR_MESSAGE = "Channel cannot be empty";
@@ -67,6 +69,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     static final String FIELD_ICON_URL = "icon_url";
     static final String FIELD_ICON_EMOJI = "icon_emoji";
     static final String FIELD_BACKLOG_SIZE = "backlog_size";
+    static final String FIELD_TIME_ZONE = "time_zone";
 
     @JsonProperty(FIELD_BACKLOG_SIZE)
     public abstract long backlogSize();
@@ -103,6 +106,9 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     @JsonProperty(FIELD_ICON_EMOJI)
     @Nullable
     public abstract String iconEmoji();
+
+    @JsonProperty(FIELD_TIME_ZONE)
+    public abstract DateTimeZone timeZone();
 
     @Override
     @JsonIgnore
@@ -159,7 +165,8 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
                     .customMessage(DEFAULT_CUSTOM_MESSAGE)
                     .notifyChannel(false)
                     .backlogSize(DEFAULT_BACKLOG_SIZE)
-                    .linkNames(false);
+                    .linkNames(false)
+                    .timeZone(DEFAULT_TIME_ZONE);
         }
 
         @JsonProperty(FIELD_COLOR)
@@ -192,6 +199,9 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
         @JsonProperty(FIELD_BACKLOG_SIZE)
         public abstract SlackEventNotificationConfig.Builder backlogSize(long backlogSize);
 
+        @JsonProperty(FIELD_TIME_ZONE)
+        public abstract SlackEventNotificationConfig.Builder timeZone(DateTimeZone timeZone);
+
         public abstract SlackEventNotificationConfig build();
     }
 
@@ -207,6 +217,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
                 .linkNames(ValueReference.of(linkNames()))
                 .iconUrl(ValueReference.of(iconUrl()))
                 .iconEmoji(ValueReference.of(iconEmoji()))
+                .timeZone(ValueReference.of(timeZone().getID()))
                 .build();
     }
 }

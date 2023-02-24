@@ -16,6 +16,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+
 import CommonNotificationSummary from 'components/event-notifications/event-notification-types/CommonNotificationSummary';
 
 function SlackNotificationSummary({ notification, ...restProps }) {
@@ -36,6 +37,10 @@ function SlackNotificationSummary({ notification, ...restProps }) {
       <tr>
         <td>Custom Message</td>
         <td>{notification.config.custom_message}</td>
+      </tr>
+      <tr>
+        <td>Time Zone</td>
+        <td>{notification.config.time_zone}</td>
       </tr>
       <tr>
         <td>Message Backlog Limit</td>
@@ -84,7 +89,7 @@ SlackNotificationSummary.propTypes = {
       channel: PropTypes.string,
       webhook_url: PropTypes.string,
       color: PropTypes.string,
-
+      time_zone: PropTypes.string,
     }).isRequired,
 
   }),

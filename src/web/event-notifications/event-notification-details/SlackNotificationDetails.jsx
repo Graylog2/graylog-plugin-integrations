@@ -17,6 +17,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
+
 import { ReadOnlyFormGroup } from 'components/common';
 import { Well } from 'components/bootstrap';
 
@@ -44,6 +45,7 @@ const SlackNotificationDetails = ({ notification }) => (
     <ReadOnlyFormGroup label="Link Names" value={notification.config.link_names} />
     <ReadOnlyFormGroup label="Icon URL" value={notification.config.icon_url} />
     <ReadOnlyFormGroup label="Icon Emoji" value={notification.config.icon_emoji} />
+    <ReadOnlyFormGroup label="Time Zone" value={notification.config.time_zone} />
   </>
 );
 
