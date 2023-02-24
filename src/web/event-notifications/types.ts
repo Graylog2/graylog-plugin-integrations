@@ -31,6 +31,7 @@ export interface ConfigType {
     custom_message: string,
     webhook_url?: string,
     color?: string,
+    time_zone?: string,
 }
 
 export type ValidationType = {
