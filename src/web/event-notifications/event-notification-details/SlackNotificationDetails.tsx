@@ -15,11 +15,11 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
 
 import { ReadOnlyFormGroup } from 'components/common';
 import { Well } from 'components/bootstrap';
+import type { SlackNotificationSummaryType } from 'event-notifications/types';
 
 const NewExampleWell = styled(Well)(({ theme }) => css`
   margin-bottom: 5px;
@@ -29,7 +29,7 @@ const NewExampleWell = styled(Well)(({ theme }) => css`
   word-wrap: break-word;
 `);
 
-const SlackNotificationDetails = ({ notification }) => (
+const SlackNotificationDetails: React.FC<SlackNotificationSummaryType> = ({ notification }) => (
   <>
     <ReadOnlyFormGroup label="Webhook URL" value={notification.config.webhook_url} />
     <ReadOnlyFormGroup label="Channel" value={notification.config.channel} />
@@ -40,7 +40,7 @@ const SlackNotificationDetails = ({ notification }) => (
                          </NewExampleWell>
                        )} />
     <ReadOnlyFormGroup label="Message Backlog Limit" value={notification.config.backlog_size} />
-    <ReadOnlyFormGroup label="User Name" value={notification.config.username} />
+    <ReadOnlyFormGroup label="User Name" value={notification.config.user_name} />
     <ReadOnlyFormGroup label="Notify Channel" value={notification.config.notify_channel} />
     <ReadOnlyFormGroup label="Link Names" value={notification.config.link_names} />
     <ReadOnlyFormGroup label="Icon URL" value={notification.config.icon_url} />
@@ -48,9 +48,5 @@ const SlackNotificationDetails = ({ notification }) => (
     <ReadOnlyFormGroup label="Time Zone" value={notification.config.time_zone} />
   </>
 );
-
-SlackNotificationDetails.propTypes = {
-  notification: PropTypes.object.isRequired,
-};
 
 export default SlackNotificationDetails;

@@ -16,7 +16,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import camelCase from 'lodash/camelCase';
@@ -26,41 +25,15 @@ import { ColorPickerPopover, TimezoneSelect } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 import DocumentationLink from 'components/support/DocumentationLink';
 import { getValueFromInput } from 'util/FormsUtils';
+import type { SlackConfigType, SlackValidationType } from 'event-notifications/types';
 
-class SlackNotificationForm extends React.Component {
-  static propTypes = {
-    config: PropTypes.shape({
-      color: PropTypes.string,
-      webhook_url: PropTypes.string,
-      channel: PropTypes.string,
-      link_names: PropTypes.string,
-      icon_url: PropTypes.string,
-      icon_emoji: PropTypes.string,
-      backlog_size: PropTypes.number,
-      user_name: PropTypes.string,
-      notify_channel: PropTypes.string,
-      custom_message: PropTypes.string,
-      time_zone: PropTypes.string,
-    }).isRequired,
-    validation: PropTypes.shape({
-      failed: PropTypes.bool.isRequired,
-      errors: PropTypes.shape({
-        webhook_url: PropTypes.arrayOf(PropTypes.string),
-        channel: PropTypes.arrayOf(PropTypes.string),
-        color: PropTypes.arrayOf(PropTypes.string),
-        link_names: PropTypes.string,
-        icon_url: PropTypes.string,
-        icon_emoji: PropTypes.string,
-        backlog_size: PropTypes.number,
-        user_name: PropTypes.string,
-        notify_channel: PropTypes.string,
-        custom_message: PropTypes.string,
-      }),
-      error_context: PropTypes.object,
-    }).isRequired,
-    onChange: PropTypes.func.isRequired,
-  };
+type Props = {
+  config: SlackConfigType,
+  validation: SlackValidationType,
+  onChange: any,
+};
 
+class SlackNotificationForm extends React.Component<Props, any> {
   static defaultConfig = {
     color: '#FF0000',
     webhook_url: '',
@@ -163,7 +136,6 @@ class SlackNotificationForm extends React.Component {
             <ColorLabel color={config.color} />
             <div style={{ display: 'inline-block', marginLeft: 15 }}>
               <ColorPickerPopover id="color"
-                                  name="color"
                                   color={config.color || '#f06292'}
                                   placement="right"
                                   triggerNode={<Button bsSize="xsmall">Change color</Button>}

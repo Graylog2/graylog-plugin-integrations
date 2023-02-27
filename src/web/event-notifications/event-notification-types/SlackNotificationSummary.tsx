@@ -15,11 +15,11 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import CommonNotificationSummary from 'components/event-notifications/event-notification-types/CommonNotificationSummary';
+import type { SlackNotificationSummaryType } from 'event-notifications/types';
 
-function SlackNotificationSummary({ notification, ...restProps }) {
+function SlackNotificationSummary({ notification, ...restProps }: SlackNotificationSummaryType) {
   return (
     <CommonNotificationSummary {...restProps} notification={notification}>
       <tr>
@@ -66,35 +66,9 @@ function SlackNotificationSummary({ notification, ...restProps }) {
         <td>Icon Emoji</td>
         <td>{notification.config.icon_emoji}</td>
       </tr>
-      <tr>
-        <td>Graylog URL</td>
-        <td>{notification.config.graylog_url}</td>
-      </tr>
     </CommonNotificationSummary>
   );
 }
-
-SlackNotificationSummary.propTypes = {
-  type: PropTypes.string.isRequired,
-  notification: PropTypes.shape({
-    config: PropTypes.shape({
-      graylog_url: PropTypes.string,
-      icon_emoji: PropTypes.string,
-      icon_url: PropTypes.string,
-      link_names: PropTypes.string,
-      notify_channel: PropTypes.string,
-      backlog_size: PropTypes.number,
-      user_name: PropTypes.string,
-      custom_message: PropTypes.string,
-      channel: PropTypes.string,
-      webhook_url: PropTypes.string,
-      color: PropTypes.string,
-      time_zone: PropTypes.string,
-    }).isRequired,
-
-  }),
-  definitionNotification: PropTypes.object.isRequired,
-};
 
 SlackNotificationSummary.defaultProps = {
   notification: {},

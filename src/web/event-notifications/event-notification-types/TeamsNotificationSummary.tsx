@@ -48,10 +48,6 @@ function TeamsNotificationSummary({ notification, ...restProps }: TeamsNotificat
         <td>Icon URL</td>
         <td>{notification.config.icon_url}</td>
       </tr>
-      <tr>
-        <td>Graylog URL</td>
-        <td>{notification.config.graylog_url}</td>
-      </tr>
     </CommonNotificationSummary>
   );
 }
