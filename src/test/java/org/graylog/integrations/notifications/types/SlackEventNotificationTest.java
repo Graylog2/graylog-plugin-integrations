@@ -100,7 +100,7 @@ public class SlackEventNotificationTest {
     }
 
     private void getDummySlackNotificationConfig() {
-        slackEventNotificationConfig = new AutoValue_SlackEventNotificationConfig.Builder()
+        slackEventNotificationConfig = SlackEventNotificationConfig.builder()
                 .notifyChannel(true)
                 .type(SlackEventNotificationConfig.TYPE_NAME)
                 .color(expectedColor)
