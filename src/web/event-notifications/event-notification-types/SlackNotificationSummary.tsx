@@ -35,6 +35,10 @@ function SlackNotificationSummary({ notification, ...restProps }: SlackNotificat
         <td>{notification.config.channel}</td>
       </tr>
       <tr>
+        <td>Include Title</td>
+        <td>{notification.config.include_title}</td>
+      </tr>
+      <tr>
         <td>Custom Message</td>
         <td>{notification.config.custom_message}</td>
       </tr>

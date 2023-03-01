@@ -68,6 +68,7 @@ export interface SlackConfigType {
     webhook_url: string,
     color: string,
     time_zone: string,
+    include_title: boolean,
 }
 
 export type SlackValidationType = {

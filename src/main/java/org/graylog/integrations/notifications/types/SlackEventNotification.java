@@ -33,6 +33,7 @@ import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.MessageSummary;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
+import org.graylog2.shared.utilities.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,13 +123,14 @@ public class SlackEventNotification implements EventNotification {
      * @throws PermanentEventNotificationException - throws this exception when the custom message template is invalid
      */
     SlackMessage createSlackMessage(EventNotificationContext ctx, SlackEventNotificationConfig config) throws PermanentEventNotificationException {
-        //Note: Link names if notify channel or else the channel tag will be plain text.
-        boolean linkNames = config.linkNames() || config.notifyChannel();
-        String message = buildDefaultMessage(ctx, config);
 
         String customMessage = null;
         String template = config.customMessage();
         if (!isNullOrEmpty(template)) {
+            // If the title is not included but the channel still needs to be notified, add a @channel tag to the custom message
+            if (!config.includeTitle() && config.notifyChannel()) {
+                template = StringUtils.f("@channel\n%s", template);
+            }
             customMessage = buildCustomMessage(ctx, config, template);
         }
 
@@ -137,16 +139,18 @@ public class SlackEventNotification implements EventNotification {
                 .text(customMessage)
                 .build();
 
+        //Note: Link names if notify channel or else the channel tag will be plain text.
+        boolean linkNames = config.linkNames() || config.notifyChannel();
         String templatedChannel = buildTemplatedChannel(ctx, config, config.channel());
         String emoji = config.iconEmoji() != null ? ensureEmojiSyntax(config.iconEmoji()) : "";
         return SlackMessage.builder()
                 .iconEmoji(emoji)
                 .iconUrl(config.iconUrl())
                 .username(config.userName())
-                .text(message)
+                .text(config.includeTitle() ? buildDefaultMessage(ctx, config) : null)
                 .channel(templatedChannel)
                 .linkNames(linkNames)
-                .attachments(Collections.singleton(attachment))
+                .attachments(isNullOrEmpty(template) ? Collections.emptySet() : Collections.singleton(attachment))
                 .build();
     }
 
@@ -187,7 +191,7 @@ public class SlackEventNotification implements EventNotification {
         } catch (Exception e) {
             String error = "Invalid channel template.";
             LOG.error(error + "[{}]", e.toString());
-            throw new PermanentEventNotificationException(error + e.toString(), e.getCause());
+            throw new PermanentEventNotificationException(error + e, e.getCause());
         }
     }
 

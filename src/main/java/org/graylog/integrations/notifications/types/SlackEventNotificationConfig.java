@@ -56,6 +56,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     static final String INVALID_WEBHOOK_ERROR_MESSAGE = "Specified Webhook URL is not a valid URL";
     static final String INVALID_SLACK_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Slack URL";
     static final String INVALID_DISCORD_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Discord URL";
+    static final String EMPTY_BODY_ERROR_MESSAGE = "If custom message is empty the title must be included";
     static final String WEB_HOOK_URL = "https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx";
     static final String CHANNEL = "#general";
 
@@ -70,6 +71,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     static final String FIELD_ICON_EMOJI = "icon_emoji";
     static final String FIELD_BACKLOG_SIZE = "backlog_size";
     static final String FIELD_TIME_ZONE = "time_zone";
+    static final String FIELD_INCLUDE_TITLE = "include_title";
 
     @JsonProperty(FIELD_BACKLOG_SIZE)
     public abstract long backlogSize();
@@ -110,6 +112,9 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     @JsonProperty(FIELD_TIME_ZONE)
     public abstract DateTimeZone timeZone();
 
+    @JsonProperty(FIELD_INCLUDE_TITLE)
+    public abstract Boolean includeTitle();
+
     @Override
     @JsonIgnore
     public JobTriggerData toJobTriggerData(EventDto dto) {
@@ -149,13 +154,18 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
             validation.addError(FIELD_CHANNEL, INVALID_CHANNEL_ERROR_MESSAGE);
         }
 
+        if (!includeTitle() && (customMessage() == null || customMessage().isBlank())) {
+            validation.addError(FIELD_CUSTOM_MESSAGE, EMPTY_BODY_ERROR_MESSAGE);
+            validation.addError(FIELD_INCLUDE_TITLE, EMPTY_BODY_ERROR_MESSAGE);
+        }
+
         return validation;
     }
 
     @AutoValue.Builder
     public static abstract class Builder implements EventNotificationConfig.Builder<SlackEventNotificationConfig.Builder> {
         @JsonCreator
-        public static SlackEventNotificationConfig.Builder create() {
+        public static Builder create() {
 
             return new AutoValue_SlackEventNotificationConfig.Builder()
                     .type(TYPE_NAME)
@@ -166,41 +176,45 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
                     .notifyChannel(false)
                     .backlogSize(DEFAULT_BACKLOG_SIZE)
                     .linkNames(false)
-                    .timeZone(DEFAULT_TIME_ZONE);
+                    .timeZone(DEFAULT_TIME_ZONE)
+                    .includeTitle(true);
         }
 
         @JsonProperty(FIELD_COLOR)
-        public abstract SlackEventNotificationConfig.Builder color(String color);
+        public abstract Builder color(String color);
 
         @JsonProperty(FIELD_WEBHOOK_URL)
-        public abstract SlackEventNotificationConfig.Builder webhookUrl(String webhookUrl);
+        public abstract Builder webhookUrl(String webhookUrl);
 
         @JsonProperty(FIELD_CHANNEL)
-        public abstract SlackEventNotificationConfig.Builder channel(String channel);
+        public abstract Builder channel(String channel);
 
         @JsonProperty(FIELD_CUSTOM_MESSAGE)
-        public abstract SlackEventNotificationConfig.Builder customMessage(String customMessage);
+        public abstract Builder customMessage(String customMessage);
 
         @JsonProperty(FIELD_USER_NAME)
-        public abstract SlackEventNotificationConfig.Builder userName(String userName);
+        public abstract Builder userName(String userName);
 
         @JsonProperty(FIELD_NOTIFY_CHANNEL)
-        public abstract SlackEventNotificationConfig.Builder notifyChannel(boolean notifyChannel);
+        public abstract Builder notifyChannel(boolean notifyChannel);
 
         @JsonProperty(FIELD_LINK_NAMES)
-        public abstract SlackEventNotificationConfig.Builder linkNames(boolean linkNames);
+        public abstract Builder linkNames(boolean linkNames);
 
         @JsonProperty(FIELD_ICON_URL)
-        public abstract SlackEventNotificationConfig.Builder iconUrl(String iconUrl);
+        public abstract Builder iconUrl(String iconUrl);
 
         @JsonProperty(FIELD_ICON_EMOJI)
-        public abstract SlackEventNotificationConfig.Builder iconEmoji(String iconEmoji);
+        public abstract Builder iconEmoji(String iconEmoji);
 
         @JsonProperty(FIELD_BACKLOG_SIZE)
-        public abstract SlackEventNotificationConfig.Builder backlogSize(long backlogSize);
+        public abstract Builder backlogSize(long backlogSize);
 
         @JsonProperty(FIELD_TIME_ZONE)
-        public abstract SlackEventNotificationConfig.Builder timeZone(DateTimeZone timeZone);
+        public abstract Builder timeZone(DateTimeZone timeZone);
+
+        @JsonProperty(FIELD_INCLUDE_TITLE)
+        public abstract Builder includeTitle(Boolean includeTitle);
 
         public abstract SlackEventNotificationConfig build();
     }

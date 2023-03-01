@@ -41,6 +41,7 @@ const SlackNotificationDetails: React.FC<SlackNotificationSummaryType> = ({ noti
                        )} />
     <ReadOnlyFormGroup label="Message Backlog Limit" value={notification.config.backlog_size} />
     <ReadOnlyFormGroup label="User Name" value={notification.config.user_name} />
+    <ReadOnlyFormGroup label="Include Title" value={notification.config.include_title} />
     <ReadOnlyFormGroup label="Notify Channel" value={notification.config.notify_channel} />
     <ReadOnlyFormGroup label="Link Names" value={notification.config.link_names} />
     <ReadOnlyFormGroup label="Icon URL" value={notification.config.icon_url} />

@@ -206,9 +206,16 @@ class SlackNotificationForm extends React.Component<Props, any> {
                help={get(validation, 'errors.user_name[0]', 'User name of the sender in Slack')}
                value={config.user_name || ''}
                onChange={this.handleChange} />
+        <Input id="include_title"
+               name="include_title"
+               label="Include Title"
+               help={get(validation, 'errors.include_title[0]', 'Include the event definition title and description in the notification')}
+               type="checkbox"
+               checked={config.include_title}
+               onChange={this.handleChange} />
         <Input id="notification-notifyChannel"
                name="notify_channel"
-               label="Notify Channel (optional)"
+               label="Notify Channel"
                type="checkbox"
                bsStyle={validation.errors.notify_channel ? 'error' : null}
                help={get(validation, 'errors.notify_channel[0]', 'Notify all users in channel by adding @channel to the message')}
@@ -216,7 +223,7 @@ class SlackNotificationForm extends React.Component<Props, any> {
                onChange={this.handleChange} />
         <Input id="notification-linkNames"
                name="link_names"
-               label="Link Names (optional)"
+               label="Link Names"
                type="checkbox"
                bsStyle={validation.errors.link_names ? 'error' : null}
                help={get(validation, 'errors.link_names[0]', 'Find and link channel names and user names')}

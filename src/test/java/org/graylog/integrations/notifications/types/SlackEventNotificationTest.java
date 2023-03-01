@@ -140,8 +140,6 @@ public class SlackEventNotificationTest {
         SlackMessage.Attachment attachment = actual.attachments().iterator().next();
         assertThat(attachment.color()).isEqualTo(expectedColor);
         assertThat(attachment.text()).isEqualTo(expectedAttachmentText);
-        assertThat(attachment.pretext()).isEqualTo(SlackMessage.VALUE_PRETEXT);
-        assertThat(attachment.fallback()).isEqualTo(SlackMessage.VALUE_FALLBACK);
     }
 
     @After
@@ -292,6 +290,38 @@ public class SlackEventNotificationTest {
         //global setting is at N and the eventNotificationContext is null then the message summaries is null
         List<MessageSummary> messageSummaries = slackEventNotification.getMessageBacklog(null, slackConfig);
         assertThat(messageSummaries).isNull();
+    }
+
+    @Test
+    public void testChannelAlertWithNoTitle() throws EventNotificationException {
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                .includeTitle(false)
+                .notifyChannel(true)
+                .customMessage("A custom message")
+                .iconEmoji("")
+                .iconUrl("")
+                .userName("")
+                .build();
+
+        SlackMessage message = slackEventNotification.createSlackMessage(eventNotificationContext, slackConfig);
+        assertThat(message.attachments().iterator().next().text()).startsWith("@channel");
+        assertThat(message.text()).isNull();
+    }
+
+    @Test
+    public void testChannelAlertWithTitle() throws EventNotificationException {
+        SlackEventNotificationConfig slackConfig = SlackEventNotificationConfig.builder()
+                .includeTitle(true)
+                .notifyChannel(true)
+                .customMessage("A custom message")
+                .iconEmoji("")
+                .iconUrl("")
+                .userName("")
+                .build();
+
+        SlackMessage message = slackEventNotification.createSlackMessage(eventNotificationContext, slackConfig);
+        assertThat(message.attachments().iterator().next().text()).doesNotStartWith("@channel");
+        assertThat(message.text()).startsWith("@channel");
     }
 
     ImmutableList<MessageSummary> generateMessageSummaries(int size) {
