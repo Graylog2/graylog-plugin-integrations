@@ -60,7 +60,8 @@ export interface SlackConfigType {
     icon_emoji?: string,
     icon_url?: string,
     link_names: string,
-    notify_channel: string,
+    notify_channel: boolean,
+    notify_here: boolean,
     backlog_size: number,
     user_name?: string,
     custom_message: string,
@@ -82,6 +83,7 @@ export interface SlackErrorType {
     icon_url?: string,
     link_names: string,
     notify_channel: string,
+    notify_here: string,
     backlog_size: number,
     user_name?: string,
     custom_message: string,
@@ -89,4 +91,5 @@ export interface SlackErrorType {
     webhook_url: string,
     color: string,
     time_zone: string,
+    include_title?: string,
 }

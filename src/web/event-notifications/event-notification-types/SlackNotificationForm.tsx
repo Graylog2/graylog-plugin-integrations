@@ -20,7 +20,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import camelCase from 'lodash/camelCase';
 
-import { Input, Button, ControlLabel, FormControl, FormGroup, HelpBlock, InputGroup } from 'components/bootstrap';
+import { Col, Input, Button, ControlLabel, FormControl, FormGroup, HelpBlock, InputGroup, Row } from 'components/bootstrap';
 import { ColorPickerPopover, TimezoneSelect } from 'components/common';
 import ColorLabel from 'components/sidecars/common/ColorLabel';
 import DocumentationLink from 'components/support/DocumentationLink';
@@ -206,21 +206,38 @@ class SlackNotificationForm extends React.Component<Props, any> {
                help={get(validation, 'errors.user_name[0]', 'User name of the sender in Slack')}
                value={config.user_name || ''}
                onChange={this.handleChange} />
-        <Input id="include_title"
-               name="include_title"
-               label="Include Title"
-               help={get(validation, 'errors.include_title[0]', 'Include the event definition title and description in the notification')}
-               type="checkbox"
-               checked={config.include_title}
-               onChange={this.handleChange} />
-        <Input id="notification-notifyChannel"
-               name="notify_channel"
-               label="Notify Channel"
-               type="checkbox"
-               bsStyle={validation.errors.notify_channel ? 'error' : null}
-               help={get(validation, 'errors.notify_channel[0]', 'Notify all users in channel by adding @channel to the message')}
-               checked={config.notify_channel || ''}
-               onChange={this.handleChange} />
+        <Row>
+          <Col md={4}>
+            <Input id="include_title"
+                   name="include_title"
+                   label="Include Title"
+                   bsStyle={validation.errors.include_title ? 'error' : null}
+                   help={get(validation, 'errors.include_title[0]', 'Include the event definition title and description in the notification')}
+                   type="checkbox"
+                   checked={config.include_title}
+                   onChange={this.handleChange} />
+          </Col>
+          <Col md={4}>
+            <Input id="notification-notifyChannel"
+                   name="notify_channel"
+                   label="Notify Channel"
+                   type="checkbox"
+                   bsStyle={validation.errors.notify_channel ? 'error' : null}
+                   help={get(validation, 'errors.notify_channel[0]', 'Notify all users in channel by adding @channel to the message')}
+                   checked={config.notify_channel || ''}
+                   onChange={this.handleChange} />
+          </Col>
+          <Col md={4}>
+            <Input id="notification-notifyHere"
+                   name="notify_here"
+                   label="Notify Here"
+                   type="checkbox"
+                   bsStyle={validation.errors.notify_here ? 'error' : null}
+                   help={get(validation, 'errors.notify_here[0]', 'Notify active users in channel by adding @here to the message')}
+                   checked={config.notify_here || ''}
+                   onChange={this.handleChange} />
+          </Col>
+        </Row>
         <Input id="notification-linkNames"
                name="link_names"
                label="Link Names"

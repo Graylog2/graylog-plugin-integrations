@@ -69,6 +69,9 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
     @JsonProperty(SlackEventNotificationConfig.FIELD_INCLUDE_TITLE)
     public abstract ValueReference includeTitle();
 
+    @JsonProperty(SlackEventNotificationConfig.FIELD_NOTIFY_HERE)
+    public abstract ValueReference notifyHere();
+
     public static Builder builder() {
         return Builder.create();
     }
@@ -83,7 +86,8 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
             return new AutoValue_SlackEventNotificationConfigEntity.Builder()
                     .type(TYPE_NAME)
                     .timeZone(ValueReference.of("UTC"))
-                    .includeTitle(ValueReference.of(true));
+                    .includeTitle(ValueReference.of(true))
+                    .notifyHere(ValueReference.of(false));
         }
 
         @JsonProperty(SlackEventNotificationConfig.FIELD_COLOR)
@@ -119,6 +123,9 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
         @JsonProperty(SlackEventNotificationConfig.FIELD_INCLUDE_TITLE)
         public abstract Builder includeTitle(ValueReference includeTitle);
 
+        @JsonProperty(SlackEventNotificationConfig.FIELD_NOTIFY_HERE)
+        public abstract Builder notifyHere(ValueReference notifyHere);
+
         public abstract SlackEventNotificationConfigEntity build();
     }
 
@@ -136,6 +143,7 @@ public abstract class SlackEventNotificationConfigEntity implements EventNotific
                 .iconEmoji(iconEmoji().asString(parameters))
                 .timeZone(DateTimeZone.forID(timeZone().asString(parameters)))
                 .includeTitle(includeTitle().asBoolean(parameters))
+                .notifyHere(notifyHere().asBoolean(parameters))
                 .build();
     }
 }

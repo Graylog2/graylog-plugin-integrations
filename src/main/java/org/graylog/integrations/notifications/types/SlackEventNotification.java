@@ -127,9 +127,10 @@ public class SlackEventNotification implements EventNotification {
         String customMessage = null;
         String template = config.customMessage();
         if (!isNullOrEmpty(template)) {
-            // If the title is not included but the channel still needs to be notified, add a @channel tag to the custom message
-            if (!config.includeTitle() && config.notifyChannel()) {
-                template = StringUtils.f("@channel\n%s", template);
+            // If the title is not included but the channel/here still needs to be notified, add a @channel tag to the custom message
+            if (!config.includeTitle() && (config.notifyChannel() || config.notifyHere())) {
+                String tag = config.notifyChannel() ? "channel" : "here";
+                template = StringUtils.f("@%s\n%s", tag, template);
             }
             customMessage = buildCustomMessage(ctx, config, template);
         }
@@ -140,7 +141,7 @@ public class SlackEventNotification implements EventNotification {
                 .build();
 
         //Note: Link names if notify channel or else the channel tag will be plain text.
-        boolean linkNames = config.linkNames() || config.notifyChannel();
+        boolean linkNames = config.linkNames() || config.notifyChannel() || config.notifyHere();
         String templatedChannel = buildTemplatedChannel(ctx, config, config.channel());
         String emoji = config.iconEmoji() != null ? ensureEmojiSyntax(config.iconEmoji()) : "";
         return SlackMessage.builder()
@@ -172,7 +173,10 @@ public class SlackEventNotification implements EventNotification {
         String title = buildMessageTitle(ctx);
 
         // Build custom message
-        String audience = config.notifyChannel() ? "@channel " : "";
+        String audience = "";
+        if (config.notifyChannel() || config.notifyHere()) {
+            audience = config.notifyChannel() ? "@channel " : "@here ";
+        }
         String description = ctx.eventDefinition().map(EventDefinitionDto::description).orElse("");
         return String.format(Locale.ROOT, "%s*Alert %s* triggered:\n> %s \n", audience, title, description);
     }
@@ -204,7 +208,7 @@ public class SlackEventNotification implements EventNotification {
         } catch (Exception e) {
             String error = "Invalid Custom Message template.";
             LOG.error(error + "[{}]", e.toString());
-            throw new PermanentEventNotificationException(error + e.toString(), e.getCause());
+            throw new PermanentEventNotificationException(error + e, e.getCause());
         }
     }
 

@@ -57,6 +57,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     static final String INVALID_SLACK_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Slack URL";
     static final String INVALID_DISCORD_URL_ERROR_MESSAGE = "Specified Webhook URL is not a valid Discord URL";
     static final String EMPTY_BODY_ERROR_MESSAGE = "If custom message is empty the title must be included";
+    static final String INVALID_NOTIFY_SETTINGS = "Can only notify either @channel or @here, not both.";
     static final String WEB_HOOK_URL = "https://hooks.slack.com/services/xxx/xxxx/xxxxxxxxxxxxxxxxxxx";
     static final String CHANNEL = "#general";
 
@@ -66,6 +67,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     static final String FIELD_CUSTOM_MESSAGE = "custom_message";
     static final String FIELD_USER_NAME = "user_name";
     static final String FIELD_NOTIFY_CHANNEL = "notify_channel";
+    static final String FIELD_NOTIFY_HERE = "notify_here";
     static final String FIELD_LINK_NAMES = "link_names";
     static final String FIELD_ICON_URL = "icon_url";
     static final String FIELD_ICON_EMOJI = "icon_emoji";
@@ -115,6 +117,9 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
     @JsonProperty(FIELD_INCLUDE_TITLE)
     public abstract Boolean includeTitle();
 
+    @JsonProperty(FIELD_NOTIFY_HERE)
+    public abstract Boolean notifyHere();
+
     @Override
     @JsonIgnore
     public JobTriggerData toJobTriggerData(EventDto dto) {
@@ -159,6 +164,11 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
             validation.addError(FIELD_INCLUDE_TITLE, EMPTY_BODY_ERROR_MESSAGE);
         }
 
+        if (notifyChannel() && notifyHere()) {
+            validation.addError(FIELD_NOTIFY_CHANNEL, INVALID_NOTIFY_SETTINGS);
+            validation.addError(FIELD_NOTIFY_HERE, INVALID_NOTIFY_SETTINGS);
+        }
+
         return validation;
     }
 
@@ -174,6 +184,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
                     .channel(CHANNEL)
                     .customMessage(DEFAULT_CUSTOM_MESSAGE)
                     .notifyChannel(false)
+                    .notifyHere(false)
                     .backlogSize(DEFAULT_BACKLOG_SIZE)
                     .linkNames(false)
                     .timeZone(DEFAULT_TIME_ZONE)
@@ -216,6 +227,9 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
         @JsonProperty(FIELD_INCLUDE_TITLE)
         public abstract Builder includeTitle(Boolean includeTitle);
 
+        @JsonProperty(FIELD_NOTIFY_HERE)
+        public abstract Builder notifyHere(Boolean notifyHere);
+
         public abstract SlackEventNotificationConfig build();
     }
 
@@ -232,6 +246,7 @@ public abstract class SlackEventNotificationConfig implements EventNotificationC
                 .iconUrl(ValueReference.of(iconUrl()))
                 .iconEmoji(ValueReference.of(iconEmoji()))
                 .timeZone(ValueReference.of(timeZone().getID()))
+                .notifyHere(ValueReference.of(notifyHere()))
                 .build();
     }
 }
