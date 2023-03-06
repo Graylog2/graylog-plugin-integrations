@@ -166,11 +166,12 @@ class TeamsNotificationForm extends React.Component<TeamsNotificationFormType, a
         <FormGroup>
           <Input id="notification-time-zone"
                  help="Time zone used for timestamps in the notification body."
-                 label="Time zone for date/time values (optional)">
+                 label="Time zone for date/time values">
             <TimezoneSelect className="timezone-select"
                             name="time_zone"
                             value={config.time_zone}
-                            onChange={this.handleTimeZoneChange} />
+                            onChange={this.handleTimeZoneChange}
+                            clearable={false} />
           </Input>
           <ControlLabel>Message Backlog Limit (optional)</ControlLabel>
           <InputGroup>
