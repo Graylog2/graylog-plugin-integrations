@@ -1,0 +1,5 @@
+type = "fixed"
+message = "Fixed issue with Palo Alto Global Protect logs parsing last 5 fields incorrectly."
+
+issues = ["1327"]
+pulls = ["1328"]
