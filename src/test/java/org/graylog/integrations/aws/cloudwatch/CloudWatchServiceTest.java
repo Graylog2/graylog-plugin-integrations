@@ -16,10 +16,13 @@
  */
 package org.graylog.integrations.aws.cloudwatch;
 
+import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,19 +53,20 @@ public class CloudWatchServiceTest {
 
     @Mock
     private CloudWatchLogsClientBuilder logsClientBuilder;
-
     @Mock
     private CloudWatchLogsClient cloudWatchLogsClient;
-
     @Mock
     private DescribeLogGroupsIterable logGroupsIterable;
+    @Mock
+    private EncryptedValueService encryptedValueService;
+    @Mock
+    private EncryptedValue encryptedValue;
 
     private CloudWatchService cloudWatchService;
 
     @Before
     public void setUp() {
-
-        cloudWatchService = new CloudWatchService(logsClientBuilder);
+        cloudWatchService = new CloudWatchService(logsClientBuilder, new AWSClientBuilderUtil(encryptedValueService));
     }
 
     @Test
@@ -77,8 +81,8 @@ public class CloudWatchServiceTest {
         DescribeLogGroupsResponse fakeLogGroupResponse = DescribeLogGroupsResponse
                 .builder()
                 .logGroups(LogGroup.builder().logGroupName("group-1").build(),
-                           LogGroup.builder().logGroupName("group-2").build(),
-                           LogGroup.builder().logGroupName("group-3").build())
+                        LogGroup.builder().logGroupName("group-2").build(),
+                        LogGroup.builder().logGroupName("group-3").build())
                 .build();
 
         // Mock out the response. When CloudWatchLogsClient.describeLogGroupsPaginator() is called,
@@ -88,15 +92,15 @@ public class CloudWatchServiceTest {
         when(cloudWatchLogsClient.describeLogGroupsPaginator(isA(DescribeLogGroupsRequest.class))).thenReturn(logGroupsIterable);
 
         final AWSRequest awsRequest = AWSRequestImpl.builder()
-                                                    .region(Region.US_EAST_1.id())
-                                                    .awsAccessKeyId("a-key")
-                                                    .awsSecretAccessKey("a-secret")
-                                                    .build();
+                .region(Region.US_EAST_1.id())
+                .awsAccessKeyId("a-key")
+                .awsSecretAccessKey(encryptedValue)
+                .build();
         final LogGroupsResponse logGroupsResponse = cloudWatchService.getLogGroupNames(awsRequest);
 
         // Inspect the log groups returned and verify the contents and size.
         assertEquals("The number of groups should be because the two responses " +
-                     "with 3 groups each were provided.", 6, logGroupsResponse.total());
+                "with 3 groups each were provided.", 6, logGroupsResponse.total());
 
         // Loop example to verify presence of a specific log group.
         boolean foundGroup = false;

@@ -17,6 +17,7 @@
 package org.graylog.integrations.aws.service;
 
 import org.assertj.core.api.AssertionsForClassTypes;
+import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.AWSLogMessage;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.AWSTestingUtils;
@@ -26,7 +27,8 @@ import org.graylog.integrations.aws.resources.requests.KinesisNewStreamRequest;
 import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckResponse;
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
-import org.graylog2.plugin.inputs.codecs.Codec;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -85,23 +87,23 @@ public class KinesisServiceTest {
 
     @Mock
     private IamClientBuilder iamClientBuilder;
-
     @Mock
     private KinesisClientBuilder kinesisClientBuilder;
-
     @Mock
     private KinesisClient kinesisClient;
+    @Mock
+    private EncryptedValueService encryptedValueService;
+    @Mock
+    private EncryptedValue encryptedValue;
 
     private KinesisService kinesisService;
 
-    private Map<String, Codec.Factory<? extends Codec>> availableCodecs;
-
     @Before
     public void setUp() {
-
         kinesisService = new KinesisService(iamClientBuilder, kinesisClientBuilder,
-                                            new ObjectMapperProvider().get(),
-                                            AWSTestingUtils.buildTestCodecs());
+                new ObjectMapperProvider().get(),
+                AWSTestingUtils.buildTestCodecs(),
+                new AWSClientBuilderUtil(encryptedValueService));
     }
 
     @Test
@@ -133,7 +135,7 @@ public class KinesisServiceTest {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
         KinesisHealthCheckResponse response = executeHealthCheckTest(AWSTestingUtils.cloudWatchFlowLogPayload(),
-                                                                     Instant.now()); // Arrival time does not matter for CloudWatch since CloudWatch timestamp is used.
+                Instant.now()); // Arrival time does not matter for CloudWatch since CloudWatch timestamp is used.
         assertEquals(AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS, response.inputType());
         Map<String, Object> fields = response.messageFields();
         assertEquals(AWSTestingUtils.CLOUD_WATCH_TIMESTAMP, fields.get("timestamp"));
@@ -149,7 +151,7 @@ public class KinesisServiceTest {
 
         // The recordArrivalTime does not matter here, since the CloudWatch timestamp is used for the message instead.
         KinesisHealthCheckResponse response = executeHealthCheckTest(AWSTestingUtils.cloudWatchRawPayload(),
-                                                                     Instant.now()); // Arrival time does not matter for CloudWatch since CloudWatch timestamp is used.
+                Instant.now()); // Arrival time does not matter for CloudWatch since CloudWatch timestamp is used.
         assertEquals(AWSMessageType.KINESIS_CLOUDWATCH_RAW, response.inputType());
         Map<String, Object> fields = response.messageFields();
         assertEquals(AWSTestingUtils.CLOUD_WATCH_TIMESTAMP, fields.get("timestamp"));
@@ -176,8 +178,8 @@ public class KinesisServiceTest {
         when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(false).build());
+                        .streamNames(TWO_TEST_STREAMS)
+                        .hasMoreStreams(false).build());
 
         Shard shard = Shard.builder().shardId("shardId-1234").build();
         when(kinesisClient.listShards(isA(ListShardsRequest.class)))
@@ -187,18 +189,18 @@ public class KinesisServiceTest {
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
         final Record record = Record.builder()
-                                    .approximateArrivalTimestamp(recordArrivalTime)
-                                    .data(SdkBytes.fromByteArray(payloadData))
-                                    .build();
+                .approximateArrivalTimestamp(recordArrivalTime)
+                .data(SdkBytes.fromByteArray(payloadData))
+                .build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build())
                 .thenReturn(GetRecordsResponse.builder().records(record).millisBehindLatest(0L).build());
 
         KinesisHealthCheckRequest request = KinesisHealthCheckRequest.builder()
-                                                                     .region(Region.EU_WEST_1.id())
-                                                                     .awsAccessKeyId("a-key")
-                                                                     .awsSecretAccessKey("a-secret")
-                                                                     .streamName(TEST_STREAM_1).build();
+                .region(Region.EU_WEST_1.id())
+                .awsAccessKeyId("a-key")
+                .awsSecretAccessKey(encryptedValue)
+                .streamName(TEST_STREAM_1).build();
         return kinesisService.healthCheck(request);
     }
 
@@ -212,14 +214,14 @@ public class KinesisServiceTest {
 
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(false).build());
+                        .streamNames(TWO_TEST_STREAMS)
+                        .hasMoreStreams(false).build());
 
 
         StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder()
-                                                                                             .region(TEST_REGION)
-                                                                                             .awsAccessKeyId("a-key")
-                                                                                             .awsSecretAccessKey("a-secret").build());
+                .region(TEST_REGION)
+                .awsAccessKeyId("a-key")
+                .awsSecretAccessKey(encryptedValue).build());
         assertEquals(2, streamsResponse.total());
         assertEquals(2, streamsResponse.streams().size());
 
@@ -232,17 +234,17 @@ public class KinesisServiceTest {
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 // First return a response with two streams indicating that there are more.
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(true).build())
+                        .streamNames(TWO_TEST_STREAMS)
+                        .hasMoreStreams(true).build())
                 // Then return a response with two streams and indicate that all have been retrieved.
                 .thenReturn(ListStreamsResponse.builder()
-                                               .streamNames(TWO_TEST_STREAMS)
-                                               .hasMoreStreams(false).build()); // Indicate no more streams.
+                        .streamNames(TWO_TEST_STREAMS)
+                        .hasMoreStreams(false).build()); // Indicate no more streams.
 
         streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder()
-                                                                             .region(TEST_REGION)
-                                                                             .awsAccessKeyId("a-key")
-                                                                             .awsSecretAccessKey("a-secret").build());
+                .region(TEST_REGION)
+                .awsAccessKeyId("a-key")
+                .awsSecretAccessKey(encryptedValue).build());
 
         // There should be 4 total streams (two from each page).
         assertEquals(4, streamsResponse.total());
@@ -255,8 +257,8 @@ public class KinesisServiceTest {
         // Test empty list
         List<Record> fakeRecordList = new ArrayList<>();
         AssertionsForClassTypes.assertThatThrownBy(() -> kinesisService.selectRandomRecord(fakeRecordList))
-                               .isExactlyInstanceOf(IllegalArgumentException.class)
-                               .hasMessageContaining("Records list can not be empty.");
+                .isExactlyInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Records list can not be empty.");
 
         // Test list with records
         fakeRecordList.add(Record.builder().build());
@@ -279,9 +281,9 @@ public class KinesisServiceTest {
                 .thenReturn(GetShardIteratorResponse.builder().shardIterator("shardIterator").build());
 
         final Record record = Record.builder()
-                                    .approximateArrivalTimestamp(Instant.now())
-                                    .data(SdkBytes.fromByteArray(AWSTestingUtils.cloudWatchRawPayload()))
-                                    .build();
+                .approximateArrivalTimestamp(Instant.now())
+                .data(SdkBytes.fromByteArray(AWSTestingUtils.cloudWatchRawPayload()))
+                .build();
         GetRecordsResponse recordsResponse = GetRecordsResponse.builder().records(record).millisBehindLatest(10000L).build();
         when(kinesisClient.getRecords(isA(GetRecordsRequest.class)))
                 .thenReturn(recordsResponse)
@@ -313,16 +315,16 @@ public class KinesisServiceTest {
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());
         when(kinesisClient.describeStream(isA(DescribeStreamRequest.class)))
                 .thenReturn(DescribeStreamResponse.builder().streamDescription(StreamDescription.builder()
-                                                                                                .streamName(TEST_STREAM_1)
-                                                                                                .streamStatus(StreamStatus.ACTIVE)
-                                                                                                .streamARN(STREAM_ARN)
-                                                                                                .build()).build());
+                        .streamName(TEST_STREAM_1)
+                        .streamStatus(StreamStatus.ACTIVE)
+                        .streamARN(STREAM_ARN)
+                        .build()).build());
 
         final KinesisNewStreamRequest kinesisNewStreamRequest = KinesisNewStreamRequest.builder()
-                                                                                       .region(Region.EU_WEST_1.id())
-                                                                                       .awsAccessKeyId("a-key")
-                                                                                       .awsSecretAccessKey("a-secret")
-                                                                                       .streamName(TEST_STREAM_1).build();
+                .region(Region.EU_WEST_1.id())
+                .awsAccessKeyId("a-key")
+                .awsSecretAccessKey(encryptedValue)
+                .streamName(TEST_STREAM_1).build();
         // TODO debug the error
         final KinesisNewStreamResponse response = kinesisService.createNewKinesisStream(kinesisNewStreamRequest);
 

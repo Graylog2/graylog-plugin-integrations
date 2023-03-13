@@ -16,7 +16,6 @@
  */
 package org.graylog.integrations.aws.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.codecs.AWSCodec;
 import org.graylog.integrations.aws.inputs.AWSInput;
@@ -32,6 +31,7 @@ import org.graylog2.plugin.inputs.MessageInput;
 import org.graylog2.plugin.system.NodeId;
 import org.graylog2.plugin.system.SimpleNodeId;
 import org.graylog2.rest.models.system.inputs.requests.InputCreateRequest;
+import org.graylog2.security.encryption.EncryptedValue;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.graylog2.shared.inputs.MessageInputFactory;
 import org.junit.Before;
@@ -60,21 +60,20 @@ public class AWSServiceTest {
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
+    private final NodeId nodeId = new SimpleNodeId("5ca1ab1e-0000-4000-a000-000000000000");
+
     private AWSService awsService;
 
     @Mock
     private InputServiceImpl inputService;
-
     @Mock
     private User user;
-
-    private final NodeId nodeId = new SimpleNodeId("5ca1ab1e-0000-4000-a000-000000000000");
-
     @Mock
     private MessageInput messageInput;
-
     @Mock
     MessageInputFactory messageInputFactory;
+    @Mock
+    EncryptedValue encryptedValue;
 
     @Before
     public void setUp() {
@@ -91,8 +90,8 @@ public class AWSServiceTest {
 
         AWSInputCreateRequest request =
                 AWSInputCreateRequest.builder().region(Region.US_EAST_1.id())
-                                     .awsAccessKeyId("a-key")
-                                     .awsSecretAccessKey("a-secret")
+                        .awsAccessKeyId("a-key")
+                        .awsSecretAccessKey(encryptedValue)
                                      .name("AWS Input")
                                      .awsMessageType(AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString())
                                      .streamName("a-stream")
@@ -117,7 +116,7 @@ public class AWSServiceTest {
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
         assertEquals("KINESIS_CLOUDWATCH_FLOW_LOGS", input.configuration().get(AWSCodec.CK_AWS_MESSAGE_TYPE));
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
-        assertEquals("a-secret", input.configuration().get(AWSInput.CK_SECRET_KEY));
+        assertEquals(encryptedValue, input.configuration().get(AWSInput.CK_SECRET_KEY));
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
         assertEquals("a-stream", input.configuration().get(KinesisTransport.CK_KINESIS_STREAM_NAME));
         assertEquals(10000, input.configuration().get(KinesisTransport.CK_KINESIS_RECORD_BATCH_SIZE));
@@ -145,7 +144,7 @@ public class AWSServiceTest {
     }
 
     @Test
-    public void testAvailableServices() throws JsonProcessingException {
+    public void testAvailableServices() {
 
         AvailableServiceResponse services = awsService.getAvailableServices();
 
@@ -166,7 +165,7 @@ public class AWSServiceTest {
     }
 
     @Test
-    public void testPermissions() throws JsonProcessingException {
+    public void testPermissions() {
 
         final KinesisPermissionsResponse permissions = awsService.getPermissions();
 

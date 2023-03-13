@@ -25,6 +25,8 @@ import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -41,6 +43,7 @@ import software.amazon.kinesis.coordinator.Scheduler;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +70,7 @@ public class KinesisConsumer implements Runnable {
     private final AWSMessageType awsMessageType;
     private final Consumer<byte[]> handleMessageCallback;
     private final AWSRequest request;
+    private final EncryptedValueService encryptedValueService;
     private Scheduler kinesisScheduler;
 
     KinesisConsumer(NodeId nodeId,
@@ -75,7 +79,8 @@ public class KinesisConsumer implements Runnable {
                     Consumer<byte[]> handleMessageCallback,
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
-                    int recordBatchSize, AWSRequest request) {
+                    int recordBatchSize, AWSRequest request,
+                    EncryptedValueService encryptedValueService) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
@@ -87,13 +92,17 @@ public class KinesisConsumer implements Runnable {
         this.awsMessageType = awsMessageType;
         this.recordBatchSize = recordBatchSize;
         this.request = request;
+        this.encryptedValueService = encryptedValueService;
     }
 
+    @Override
     public void run() {
 
         LOG.debug("Starting the Kinesis Consumer.");
-        AwsCredentialsProvider credentialsProvider = AWSAuthFactory.create(request.region(), request.awsAccessKeyId(),
-                                                                           request.awsSecretAccessKey(), request.assumeRoleArn());
+        AwsCredentialsProvider credentialsProvider = AWSAuthFactory.create(request.region(),
+                request.awsAccessKeyId(),
+                encryptedValueService.decrypt(Optional.ofNullable(request.awsSecretAccessKey()).orElse(EncryptedValue.createUnset())),
+                request.assumeRoleArn());
 
         final Region region = Region.of(request.region());
 
@@ -120,9 +129,9 @@ public class KinesisConsumer implements Runnable {
         final KinesisShardProcessorFactory kinesisShardProcessorFactory = new KinesisShardProcessorFactory(objectMapper, transport, handleMessageCallback, kinesisStreamName, awsMessageType);
 
         ConfigsBuilder configsBuilder = new ConfigsBuilder(kinesisStreamName, applicationName,
-                                                           kinesisAsyncClient, dynamoClient, cloudWatchClient,
-                                                           workerId,
-                                                           kinesisShardProcessorFactory);
+                kinesisAsyncClient, dynamoClient, cloudWatchClient,
+                workerId,
+                kinesisShardProcessorFactory);
 
         final PollingConfig pollingConfig = new PollingConfig(kinesisStreamName, kinesisAsyncClient);
 

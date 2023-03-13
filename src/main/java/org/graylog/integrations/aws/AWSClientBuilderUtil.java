@@ -19,6 +19,8 @@ package org.graylog.integrations.aws;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.awscore.client.builder.AwsClientBuilder;
 import software.amazon.awssdk.core.client.builder.SdkClientBuilder;
@@ -30,7 +32,9 @@ import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kinesis.KinesisClient;
 import software.amazon.awssdk.services.kinesis.KinesisClientBuilder;
 
+import javax.inject.Inject;
 import java.net.URI;
+import java.util.Optional;
 
 /**
  * Responsible for initializing and building AWS SDK clients. This logic is centralized in one place to ensure consistency amongst the
@@ -38,9 +42,11 @@ import java.net.URI;
  */
 public class AWSClientBuilderUtil {
 
-    // Non-instantiable Util class.
-    private AWSClientBuilderUtil() {
+    private final EncryptedValueService encryptedValueService;
 
+    @Inject
+    public AWSClientBuilderUtil(EncryptedValueService encryptedValueService) {
+        this.encryptedValueService = encryptedValueService;
     }
 
     /**
@@ -67,13 +73,15 @@ public class AWSClientBuilderUtil {
      * @param request       The full AWSRequest.
      * @return A fully built {@link CloudWatchLogsClient}
      */
-    public static CloudWatchLogsClient buildClient(CloudWatchLogsClientBuilder clientBuilder, AWSRequest request) {
+    public CloudWatchLogsClient buildClient(CloudWatchLogsClientBuilder clientBuilder, AWSRequest request) {
         Preconditions.checkNotNull(request.region(), "An AWS region is required.");
         AWSClientBuilderUtil.initializeBuilder(clientBuilder,
-                                               request.cloudwatchEndpoint(),
-                                               Region.of(request.region()),
-                                               AWSAuthFactory.create(request.region(), request.awsAccessKeyId(),
-                                                                     request.awsSecretAccessKey(), request.assumeRoleArn()));
+                request.cloudwatchEndpoint(),
+                Region.of(request.region()),
+                AWSAuthFactory.create(request.region(),
+                        request.awsAccessKeyId(),
+                        decryptSecretAccessKey(request.awsSecretAccessKey()),
+                        request.assumeRoleArn()));
 
         return clientBuilder.build();
     }
@@ -85,13 +93,15 @@ public class AWSClientBuilderUtil {
      * @param request       The full AWSRequest.
      * @return A fully built {@link KinesisClient}
      */
-    public static KinesisClient buildClient(KinesisClientBuilder clientBuilder, AWSRequest request) {
+    public KinesisClient buildClient(KinesisClientBuilder clientBuilder, AWSRequest request) {
 
         AWSClientBuilderUtil.initializeBuilder(clientBuilder,
-                                               request.kinesisEndpoint(),
-                                               Region.of(request.region()),
-                                               AWSAuthFactory.create(request.region(), request.awsAccessKeyId(),
-                                                                     request.awsSecretAccessKey(), request.assumeRoleArn()));
+                request.kinesisEndpoint(),
+                Region.of(request.region()),
+                AWSAuthFactory.create(request.region(),
+                        request.awsAccessKeyId(),
+                        decryptSecretAccessKey(request.awsSecretAccessKey()),
+                        request.assumeRoleArn()));
 
         return clientBuilder.build();
     }
@@ -103,18 +113,23 @@ public class AWSClientBuilderUtil {
      * @param request       The full AWSRequest.
      * @return A fully built {@link IamClient}
      */
-    public static IamClient buildClient(IamClientBuilder clientBuilder, AWSRequest request) {
+    public IamClient buildClient(IamClientBuilder clientBuilder, AWSRequest request) {
         Region iamRegion = Region.AWS_GLOBAL;
         if (request.region().contains("gov")) {
             iamRegion = Region.AWS_US_GOV_GLOBAL;
         }
 
         AWSClientBuilderUtil.initializeBuilder(clientBuilder,
-                                               request.iamEndpoint(),
-                                               iamRegion, // Always specify the appropriate global region for the IAM client.
-                                               AWSAuthFactory.create(request.region(), // The AWSAuthProvider must still use the user-specified region, since a role might need to be assumed in that region.
-                                                                     request.awsAccessKeyId(),
-                                                                     request.awsSecretAccessKey(), request.assumeRoleArn()));
+                request.iamEndpoint(),
+                iamRegion, // Always specify the appropriate global region for the IAM client.
+                AWSAuthFactory.create(request.region(), // The AWSAuthProvider must still use the user-specified region, since a role might need to be assumed in that region.
+                        request.awsAccessKeyId(),
+                        decryptSecretAccessKey(request.awsSecretAccessKey()),
+                        request.assumeRoleArn()));
         return clientBuilder.build();
+    }
+
+    private String decryptSecretAccessKey(EncryptedValue secretAccessKey) {
+        return encryptedValueService.decrypt(Optional.ofNullable(secretAccessKey).orElse(EncryptedValue.createUnset()));
     }
 }

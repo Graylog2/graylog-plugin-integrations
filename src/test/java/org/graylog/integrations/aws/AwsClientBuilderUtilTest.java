@@ -17,6 +17,9 @@
 package org.graylog.integrations.aws;
 
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -40,11 +43,24 @@ import static org.mockito.Mockito.verify;
 public class AwsClientBuilderUtilTest {
 
     // Mock Objects
-    @Mock private IamClientBuilder mockIamClientBuilder;
-    @Mock private AWSRequest mockAwsRequest;
+    @Mock
+    private IamClientBuilder mockIamClientBuilder;
+    @Mock
+    private AWSRequest mockAwsRequest;
+    @Mock
+    private EncryptedValueService encryptedValueService;
+    @Mock
+    private EncryptedValue encryptedValue;
 
     // Test Objects
-    IamClient iamClient;
+    private IamClient iamClient;
+
+    private AWSClientBuilderUtil awsClientBuilderUtil;
+
+    @Before
+    public void setUp() throws Exception {
+        awsClientBuilderUtil = new AWSClientBuilderUtil(encryptedValueService);
+    }
 
     // Test Cases
     @Test
@@ -113,15 +129,11 @@ public class AwsClientBuilderUtilTest {
 
     private void givenGoodCredentialsProvider() {
         given(mockAwsRequest.awsAccessKeyId()).willReturn("AKTESTTESTTEST");
-        given(mockAwsRequest.awsSecretAccessKey()).willReturn("SECRETSECRETSECRET");
+        given(mockAwsRequest.awsSecretAccessKey()).willReturn(encryptedValue);
     }
 
     private void givenNullEndpoint() {
         given(mockAwsRequest.iamEndpoint()).willReturn(null);
-    }
-
-    private void givenEmptyEndpoint() {
-        given(mockAwsRequest.iamEndpoint()).willReturn("");
     }
 
     private void givenGoodIamEndpoint() {
@@ -134,7 +146,7 @@ public class AwsClientBuilderUtilTest {
 
     // WHENs
     private void whenBuildClientIsCalledForIam() {
-        iamClient = AWSClientBuilderUtil.buildClient(mockIamClientBuilder, mockAwsRequest);
+        iamClient = awsClientBuilderUtil.buildClient(mockIamClientBuilder, mockAwsRequest);
     }
 
     // THENs
@@ -164,11 +176,5 @@ public class AwsClientBuilderUtilTest {
         ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         verify(mockIamClientBuilder, times(0)).endpointOverride(uriCaptor.capture());
     }
-
-    private void thenIamClientConstructedWithEndpoint() {
-        ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
-        verify(mockIamClientBuilder, times(1)).endpointOverride(uriCaptor.capture());
-
-        assertThat(uriCaptor.getValue(), notNullValue());
-    }
+    
 }

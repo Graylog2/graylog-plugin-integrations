@@ -102,16 +102,25 @@ public class AWSInput extends MessageInput {
         public Descriptor() {
             super(NAME, false, "");
         }
+
+        @Override
+        public boolean isCloudCompatible() {
+            return true;
+        }
     }
 
     @ConfigClass
     public static class Config extends MessageInput.Config {
 
         private static final String AWS_SDK_ENDPOINT_DESCRIPTION = "Only specify this if you want to override the endpoint, which the AWS SDK communicates with.";
+        private final boolean isCloud;
 
         @Inject
-        public Config(AWSTransport.Factory transport, AWSCodec.Factory codec) {
+        public Config(AWSTransport.Factory transport,
+                      AWSCodec.Factory codec,
+                      org.graylog2.Configuration configuration) {
             super(transport.getConfig(), codec.getConfig());
+            this.isCloud = configuration.isCloud();
         }
 
         @Override
@@ -133,14 +142,15 @@ public class AWSInput extends MessageInput {
                     "AWS access key",
                     "",
                     "Access key of an AWS user with sufficient permissions. (See documentation)",
-                    ConfigurationField.Optional.OPTIONAL));
+                    isCloud ? ConfigurationField.Optional.NOT_OPTIONAL : ConfigurationField.Optional.OPTIONAL));
 
             request.addField(new TextField(
                     CK_SECRET_KEY,
                     "AWS secret key",
                     "",
                     "Secret key of an AWS user with sufficient permissions. (See documentation)",
-                    ConfigurationField.Optional.OPTIONAL,
+                    isCloud ? ConfigurationField.Optional.NOT_OPTIONAL : ConfigurationField.Optional.OPTIONAL,
+                    true,
                     TextField.Attribute.IS_PASSWORD));
 
             request.addField(new TextField(

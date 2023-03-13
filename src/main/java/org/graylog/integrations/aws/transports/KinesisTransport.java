@@ -44,6 +44,8 @@ import org.graylog2.plugin.inputs.transports.ThrottleableTransport;
 import org.graylog2.plugin.inputs.transports.Transport;
 import org.graylog2.plugin.journal.RawMessage;
 import org.graylog2.plugin.system.NodeId;
+import org.graylog2.security.encryption.EncryptedValue;
+import org.graylog2.security.encryption.EncryptedValueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.regions.Region;
@@ -71,26 +73,29 @@ public class KinesisTransport extends ThrottleableTransport {
     private final NodeId nodeId;
     private final LocalMetricRegistry localRegistry;
     private final ObjectMapper objectMapper;
+    private final EncryptedValueService encryptedValueService;
+    private final ExecutorService executor;
 
     private KinesisConsumer kinesisConsumer;
-    private final ExecutorService executor;
 
     @Inject
     public KinesisTransport(@Assisted final Configuration configuration,
                             EventBus serverEventBus,
                             final NodeId nodeId,
                             LocalMetricRegistry localRegistry,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            EncryptedValueService encryptedValueService) {
         super(serverEventBus, configuration);
         this.configuration = configuration;
         this.nodeId = nodeId;
         this.localRegistry = localRegistry;
         this.objectMapper = objectMapper;
+        this.encryptedValueService = encryptedValueService;
         this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-                                                                  .setDaemon(true)
-                                                                  .setNameFormat("aws-kinesis-reader-%d")
-                                                                  .setUncaughtExceptionHandler((t, e) -> LOG.error("Uncaught exception in AWS Kinesis reader.", e))
-                                                                  .build());
+                .setDaemon(true)
+                .setNameFormat("aws-kinesis-reader-%d")
+                .setUncaughtExceptionHandler((t, e) -> LOG.error("Uncaught exception in AWS Kinesis reader.", e))
+                .build());
     }
 
     @Override
@@ -109,7 +114,7 @@ public class KinesisTransport extends ThrottleableTransport {
 
         final Region region = Region.of(Objects.requireNonNull(configuration.getString(CK_AWS_REGION)));
         final String key = configuration.getString(CK_ACCESS_KEY);
-        final String secret = configuration.getString(CK_SECRET_KEY);
+        final EncryptedValue secret = configuration.getEncryptedValue(CK_SECRET_KEY);
         final String assumeRoleArn = configuration.getString(AWSInput.CK_ASSUME_ROLE_ARN);
 
         final String dynamodbEndpoint = configuration.getString(AWSInput.CK_DYNAMODB_ENDPOINT);
@@ -138,7 +143,7 @@ public class KinesisTransport extends ThrottleableTransport {
         final AWSMessageType awsMessageType = AWSMessageType.valueOf(configuration.getString(AWSCodec.CK_AWS_MESSAGE_TYPE));
 
         this.kinesisConsumer = new KinesisConsumer(nodeId, this, objectMapper, kinesisCallback(input),
-                                                   streamName, awsMessageType, batchSize, awsRequest);
+                streamName, awsMessageType, batchSize, awsRequest, encryptedValueService);
 
         LOG.debug("Starting Kinesis reader thread for input {}", input.toIdentifier());
         executor.submit(this.kinesisConsumer);
