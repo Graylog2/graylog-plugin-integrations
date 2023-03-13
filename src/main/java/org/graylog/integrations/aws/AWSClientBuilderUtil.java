@@ -19,6 +19,7 @@ package org.graylog.integrations.aws;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog2.Configuration;
 import org.graylog2.security.encryption.EncryptedValue;
 import org.graylog2.security.encryption.EncryptedValueService;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -43,10 +44,21 @@ import java.util.Optional;
 public class AWSClientBuilderUtil {
 
     private final EncryptedValueService encryptedValueService;
+    private final Configuration configuration;
 
     @Inject
-    public AWSClientBuilderUtil(EncryptedValueService encryptedValueService) {
+    public AWSClientBuilderUtil(EncryptedValueService encryptedValueService, Configuration configuration) {
         this.encryptedValueService = encryptedValueService;
+        this.configuration = configuration;
+    }
+
+    public AwsCredentialsProvider createCredentialsProvider(AWSRequest request) {
+        return AWSAuthFactory.create(
+                configuration.isCloud(),
+                request.region(),
+                request.awsAccessKeyId(),
+                decryptSecretAccessKey(request.awsSecretAccessKey()),
+                request.assumeRoleArn());
     }
 
     /**
@@ -56,7 +68,7 @@ public class AWSClientBuilderUtil {
      * @param endpoint See {@link SdkClientBuilder#endpointOverride(java.net.URI)} javadoc.
      * @param region   The region to specify on the client.
      */
-    public static void initializeBuilder(AwsClientBuilder builder, String endpoint, Region region, AwsCredentialsProvider credentialsProvider) {
+    public void initializeBuilder(AwsClientBuilder builder, String endpoint, Region region, AwsCredentialsProvider credentialsProvider) {
         builder.region(region);
         builder.credentialsProvider(credentialsProvider);
 
@@ -75,13 +87,10 @@ public class AWSClientBuilderUtil {
      */
     public CloudWatchLogsClient buildClient(CloudWatchLogsClientBuilder clientBuilder, AWSRequest request) {
         Preconditions.checkNotNull(request.region(), "An AWS region is required.");
-        AWSClientBuilderUtil.initializeBuilder(clientBuilder,
+        initializeBuilder(clientBuilder,
                 request.cloudwatchEndpoint(),
                 Region.of(request.region()),
-                AWSAuthFactory.create(request.region(),
-                        request.awsAccessKeyId(),
-                        decryptSecretAccessKey(request.awsSecretAccessKey()),
-                        request.assumeRoleArn()));
+                createCredentialsProvider(request));
 
         return clientBuilder.build();
     }
@@ -94,14 +103,10 @@ public class AWSClientBuilderUtil {
      * @return A fully built {@link KinesisClient}
      */
     public KinesisClient buildClient(KinesisClientBuilder clientBuilder, AWSRequest request) {
-
-        AWSClientBuilderUtil.initializeBuilder(clientBuilder,
+        initializeBuilder(clientBuilder,
                 request.kinesisEndpoint(),
                 Region.of(request.region()),
-                AWSAuthFactory.create(request.region(),
-                        request.awsAccessKeyId(),
-                        decryptSecretAccessKey(request.awsSecretAccessKey()),
-                        request.assumeRoleArn()));
+                createCredentialsProvider(request));
 
         return clientBuilder.build();
     }
@@ -119,13 +124,10 @@ public class AWSClientBuilderUtil {
             iamRegion = Region.AWS_US_GOV_GLOBAL;
         }
 
-        AWSClientBuilderUtil.initializeBuilder(clientBuilder,
+        initializeBuilder(clientBuilder,
                 request.iamEndpoint(),
                 iamRegion, // Always specify the appropriate global region for the IAM client.
-                AWSAuthFactory.create(request.region(), // The AWSAuthProvider must still use the user-specified region, since a role might need to be assumed in that region.
-                        request.awsAccessKeyId(),
-                        decryptSecretAccessKey(request.awsSecretAccessKey()),
-                        request.assumeRoleArn()));
+                createCredentialsProvider(request));
         return clientBuilder.build();
     }
 

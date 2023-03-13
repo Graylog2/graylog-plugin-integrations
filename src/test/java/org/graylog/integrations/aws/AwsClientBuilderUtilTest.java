@@ -17,6 +17,7 @@
 package org.graylog.integrations.aws;
 
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog2.Configuration;
 import org.graylog2.security.encryption.EncryptedValue;
 import org.graylog2.security.encryption.EncryptedValueService;
 import org.junit.Before;
@@ -59,7 +60,7 @@ public class AwsClientBuilderUtilTest {
 
     @Before
     public void setUp() throws Exception {
-        awsClientBuilderUtil = new AWSClientBuilderUtil(encryptedValueService);
+        awsClientBuilderUtil = new AWSClientBuilderUtil(encryptedValueService, mock(Configuration.class));
     }
 
     // Test Cases
@@ -176,5 +177,5 @@ public class AwsClientBuilderUtilTest {
         ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         verify(mockIamClientBuilder, times(0)).endpointOverride(uriCaptor.capture());
     }
-    
+
 }

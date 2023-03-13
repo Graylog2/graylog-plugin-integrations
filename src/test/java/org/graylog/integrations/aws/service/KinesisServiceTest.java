@@ -28,7 +28,6 @@ import org.graylog.integrations.aws.resources.responses.KinesisHealthCheckRespon
 import org.graylog.integrations.aws.resources.responses.KinesisNewStreamResponse;
 import org.graylog.integrations.aws.resources.responses.StreamsResponse;
 import org.graylog2.security.encryption.EncryptedValue;
-import org.graylog2.security.encryption.EncryptedValueService;
 import org.graylog2.shared.bindings.providers.ObjectMapperProvider;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -38,7 +37,6 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
@@ -70,7 +68,9 @@ import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class KinesisServiceTest {
@@ -84,15 +84,11 @@ public class KinesisServiceTest {
 
     @Rule
     public MockitoRule mockitoRule = MockitoJUnit.rule();
-
-    @Mock
-    private IamClientBuilder iamClientBuilder;
-    @Mock
-    private KinesisClientBuilder kinesisClientBuilder;
+    
     @Mock
     private KinesisClient kinesisClient;
     @Mock
-    private EncryptedValueService encryptedValueService;
+    private AWSClientBuilderUtil awsClientBuilderUtil;
     @Mock
     private EncryptedValue encryptedValue;
 
@@ -100,10 +96,12 @@ public class KinesisServiceTest {
 
     @Before
     public void setUp() {
-        kinesisService = new KinesisService(iamClientBuilder, kinesisClientBuilder,
+        kinesisService = new KinesisService(
+                mock(IamClientBuilder.class),
+                mock(KinesisClientBuilder.class),
                 new ObjectMapperProvider().get(),
                 AWSTestingUtils.buildTestCodecs(),
-                new AWSClientBuilderUtil(encryptedValueService));
+                awsClientBuilderUtil);
     }
 
     @Test
@@ -173,9 +171,7 @@ public class KinesisServiceTest {
 
     private KinesisHealthCheckResponse executeHealthCheckTest(byte[] payloadData, Instant recordArrivalTime) throws IOException, ExecutionException {
 
-        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+        when(awsClientBuilderUtil.buildClient(any(KinesisClientBuilder.class), any())).thenReturn(kinesisClient);
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
                         .streamNames(TWO_TEST_STREAMS)
@@ -207,16 +203,13 @@ public class KinesisServiceTest {
     @Test
     public void testGetStreams() throws ExecutionException {
 
-        // Test with two streams and one page. This is the most common case for most AWS accounts.
-        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+        when(awsClientBuilderUtil.buildClient(any(KinesisClientBuilder.class), any())).thenReturn(kinesisClient);
 
+        // Test with two streams and one page. This is the most common case for most AWS accounts.
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 .thenReturn(ListStreamsResponse.builder()
                         .streamNames(TWO_TEST_STREAMS)
                         .hasMoreStreams(false).build());
-
 
         StreamsResponse streamsResponse = kinesisService.getKinesisStreamNames(AWSRequestImpl.builder()
                 .region(TEST_REGION)
@@ -227,10 +220,6 @@ public class KinesisServiceTest {
 
         // Test with stream paging functionality. This will be the case when a large number of Kinesis streams
         // are present on a particular AWS account.
-        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
-
         when(kinesisClient.listStreams(isA(ListStreamsRequest.class)))
                 // First return a response with two streams indicating that there are more.
                 .thenReturn(ListStreamsResponse.builder()
@@ -306,10 +295,7 @@ public class KinesisServiceTest {
     @Test
     public void testCreateNewKinesisStream() {
 
-        // These three lines mock the KinesisClient. Must be repeated for every test.
-        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+        when(awsClientBuilderUtil.buildClient(any(KinesisClientBuilder.class), any())).thenReturn(kinesisClient);
 
         // Mock out specific KinesisNewStreamRequest to return a response.
         when(kinesisClient.createStream(isA(CreateStreamRequest.class))).thenReturn(CreateStreamResponse.builder().build());

@@ -27,15 +27,12 @@ import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog.integrations.aws.service.KinesisService;
 import org.graylog2.plugin.database.users.User;
 import org.graylog2.security.encryption.EncryptedValue;
-import org.graylog2.security.encryption.EncryptedValueService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
@@ -60,7 +57,9 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -79,21 +78,13 @@ public class KinesisSetupResourceTest {
 
     private KinesisSetupResource setupResource;
     @Mock
-    private IamClientBuilder iamClientBuilder = Mockito.mock(IamClientBuilder.class);
+    private IamClient iamClient;
     @Mock
-    private IamClient iamClient = Mockito.mock(IamClient.class);
+    private CloudWatchLogsClient logsClient;
     @Mock
-    private CloudWatchLogsClientBuilder logsClientBuilder = Mockito.mock(CloudWatchLogsClientBuilder.class);
-    @Mock
-    private CloudWatchLogsClient logsClient = Mockito.mock(CloudWatchLogsClient.class);
-    @Mock
-    private KinesisClientBuilder kinesisClientBuilder = Mockito.mock(KinesisClientBuilder.class);
-    @Mock
-    private KinesisClient kinesisClient = Mockito.mock(KinesisClient.class);
+    private KinesisClient kinesisClient;
     @Mock
     private User currentUser;
-    @Mock
-    private EncryptedValueService encryptedValueService;
     @Mock
     private EncryptedValue encryptedValue;
 
@@ -117,25 +108,14 @@ public class KinesisSetupResourceTest {
     public void setUp() {
 
         // Set up services.
-        AWSClientBuilderUtil awsClientBuilderUtil = new AWSClientBuilderUtil(encryptedValueService);
+        AWSClientBuilderUtil awsClientBuilderUtil = mock(AWSClientBuilderUtil.class);
         setupResource = new KinesisSetupTestResource(
-                new CloudWatchService(logsClientBuilder, awsClientBuilderUtil),
-                new KinesisService(iamClientBuilder, kinesisClientBuilder, null, null, awsClientBuilderUtil));
+                new CloudWatchService(mock(CloudWatchLogsClientBuilder.class), awsClientBuilderUtil),
+                new KinesisService(mock(IamClientBuilder.class), mock(KinesisClientBuilder.class), null, null, awsClientBuilderUtil));
 
-        // Set up IAM client.
-        when(iamClientBuilder.region(isA(Region.class))).thenReturn(iamClientBuilder);
-        when(iamClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(iamClientBuilder);
-        when(iamClientBuilder.build()).thenReturn(iamClient);
-
-        // Set up CloudWatch client.
-        when(logsClientBuilder.region(isA(Region.class))).thenReturn(logsClientBuilder);
-        when(logsClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(logsClientBuilder);
-        when(logsClientBuilder.build()).thenReturn(logsClient);
-
-        // Set up Kinesis client.
-        when(kinesisClientBuilder.region(isA(Region.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(kinesisClientBuilder);
-        when(kinesisClientBuilder.build()).thenReturn(kinesisClient);
+        when(awsClientBuilderUtil.buildClient(any(IamClientBuilder.class), any())).thenReturn(iamClient);
+        when(awsClientBuilderUtil.buildClient(any(CloudWatchLogsClientBuilder.class), any())).thenReturn(logsClient);
+        when(awsClientBuilderUtil.buildClient(any(KinesisClientBuilder.class), any())).thenReturn(kinesisClient);
 
         // Stream AWS request mocks
         when(kinesisClient.createStream(isA(CreateStreamRequest.class)))

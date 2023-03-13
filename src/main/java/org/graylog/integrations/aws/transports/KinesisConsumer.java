@@ -20,13 +20,10 @@ package org.graylog.integrations.aws.transports;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
-import org.graylog.integrations.aws.AWSAuthFactory;
 import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
 import org.graylog2.plugin.system.NodeId;
-import org.graylog2.security.encryption.EncryptedValue;
-import org.graylog2.security.encryption.EncryptedValueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -43,7 +40,6 @@ import software.amazon.kinesis.coordinator.Scheduler;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +66,7 @@ public class KinesisConsumer implements Runnable {
     private final AWSMessageType awsMessageType;
     private final Consumer<byte[]> handleMessageCallback;
     private final AWSRequest request;
-    private final EncryptedValueService encryptedValueService;
+    private final AWSClientBuilderUtil awsClientBuilderUtil;
     private Scheduler kinesisScheduler;
 
     KinesisConsumer(NodeId nodeId,
@@ -80,7 +76,7 @@ public class KinesisConsumer implements Runnable {
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
                     int recordBatchSize, AWSRequest request,
-                    EncryptedValueService encryptedValueService) {
+                    AWSClientBuilderUtil awsClientBuilderUtil) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
@@ -92,30 +88,27 @@ public class KinesisConsumer implements Runnable {
         this.awsMessageType = awsMessageType;
         this.recordBatchSize = recordBatchSize;
         this.request = request;
-        this.encryptedValueService = encryptedValueService;
+        this.awsClientBuilderUtil = awsClientBuilderUtil;
     }
 
     @Override
     public void run() {
 
         LOG.debug("Starting the Kinesis Consumer.");
-        AwsCredentialsProvider credentialsProvider = AWSAuthFactory.create(request.region(),
-                request.awsAccessKeyId(),
-                encryptedValueService.decrypt(Optional.ofNullable(request.awsSecretAccessKey()).orElse(EncryptedValue.createUnset())),
-                request.assumeRoleArn());
+        AwsCredentialsProvider credentialsProvider = awsClientBuilderUtil.createCredentialsProvider(request);
 
         final Region region = Region.of(request.region());
 
         final DynamoDbAsyncClientBuilder dynamoDbClientBuilder = DynamoDbAsyncClient.builder();
-        AWSClientBuilderUtil.initializeBuilder(dynamoDbClientBuilder, request.dynamodbEndpoint(), region, credentialsProvider);
+        awsClientBuilderUtil.initializeBuilder(dynamoDbClientBuilder, request.dynamodbEndpoint(), region, credentialsProvider);
         final DynamoDbAsyncClient dynamoClient = dynamoDbClientBuilder.build();
 
         final CloudWatchAsyncClientBuilder cloudwatchClientBuilder = CloudWatchAsyncClient.builder();
-        AWSClientBuilderUtil.initializeBuilder(cloudwatchClientBuilder, request.cloudwatchEndpoint(), region, credentialsProvider);
+        awsClientBuilderUtil.initializeBuilder(cloudwatchClientBuilder, request.cloudwatchEndpoint(), region, credentialsProvider);
         final CloudWatchAsyncClient cloudWatchClient = cloudwatchClientBuilder.build();
 
         final KinesisAsyncClientBuilder kinesisAsyncClientBuilder = KinesisAsyncClient.builder();
-        AWSClientBuilderUtil.initializeBuilder(kinesisAsyncClientBuilder, request.kinesisEndpoint(), region, credentialsProvider);
+        awsClientBuilderUtil.initializeBuilder(kinesisAsyncClientBuilder, request.kinesisEndpoint(), region, credentialsProvider);
         final KinesisAsyncClient kinesisAsyncClient = KinesisClientUtil.createKinesisAsyncClient(kinesisAsyncClientBuilder);
 
         final String workerId = String.format(Locale.ENGLISH, "graylog-node-%s", nodeId.anonymize());

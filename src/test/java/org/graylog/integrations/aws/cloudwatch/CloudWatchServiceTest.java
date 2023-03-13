@@ -22,14 +22,12 @@ import org.graylog.integrations.aws.resources.requests.AWSRequestImpl;
 import org.graylog.integrations.aws.resources.responses.LogGroupsResponse;
 import org.graylog.integrations.aws.service.CloudWatchService;
 import org.graylog2.security.encryption.EncryptedValue;
-import org.graylog2.security.encryption.EncryptedValueService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClient;
 import software.amazon.awssdk.services.cloudwatchlogs.CloudWatchLogsClientBuilder;
@@ -43,7 +41,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class CloudWatchServiceTest {
@@ -52,13 +52,11 @@ public class CloudWatchServiceTest {
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
-    private CloudWatchLogsClientBuilder logsClientBuilder;
-    @Mock
     private CloudWatchLogsClient cloudWatchLogsClient;
     @Mock
     private DescribeLogGroupsIterable logGroupsIterable;
     @Mock
-    private EncryptedValueService encryptedValueService;
+    private AWSClientBuilderUtil awsClientBuilderUtil;
     @Mock
     private EncryptedValue encryptedValue;
 
@@ -66,16 +64,12 @@ public class CloudWatchServiceTest {
 
     @Before
     public void setUp() {
-        cloudWatchService = new CloudWatchService(logsClientBuilder, new AWSClientBuilderUtil(encryptedValueService));
+        cloudWatchService = new CloudWatchService(mock(CloudWatchLogsClientBuilder.class), awsClientBuilderUtil);
     }
 
     @Test
     public void testLogGroupNames() {
-
-        // Perform test setup. Return the builder and client when appropriate.
-        when(logsClientBuilder.region(isA(Region.class))).thenReturn(logsClientBuilder);
-        when(logsClientBuilder.credentialsProvider(isA(AwsCredentialsProvider.class))).thenReturn(logsClientBuilder);
-        when(logsClientBuilder.build()).thenReturn(cloudWatchLogsClient);
+        when(awsClientBuilderUtil.buildClient(any(CloudWatchLogsClientBuilder.class), any())).thenReturn(cloudWatchLogsClient);
 
         // Create a fake response that contains three log groups.
         DescribeLogGroupsResponse fakeLogGroupResponse = DescribeLogGroupsResponse
