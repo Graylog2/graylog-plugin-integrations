@@ -109,7 +109,6 @@ public class AWSService {
 
     /**
      * Build a list of region choices with both a value (persisted in configuration) and display value (shown to the user).
-     *
      * The display value is formatted nicely: "EU (London): eu-west-2"
      * The value is eventually passed to Regions.of() to get the actual region object: eu-west-2
      *
@@ -241,7 +240,6 @@ public class AWSService {
 
     /**
      * Save the AWS Input
-     *
      * This method takes the individual input params in the {@link AWSInputCreateRequest} and creates/saves
      * an input with them.
      */
@@ -272,10 +270,10 @@ public class AWSService {
 
         // Create and save the input.
         final InputCreateRequest inputCreateRequest = InputCreateRequest.create(request.name(),
-                                                                                AWSInput.TYPE,
-                                                                                false,
-                                                                                configuration,
-                                                                                nodeId.getNodeId());
+                AWSInput.TYPE,
+                true,
+                configuration,
+                nodeId.getNodeId());
         try {
             final MessageInput messageInput = messageInputFactory.create(inputCreateRequest, user.getName(), nodeId.getNodeId());
             messageInput.checkConfiguration();
