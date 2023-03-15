@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.graylog.integrations.aws.AWSClientBuilderUtil;
 import org.graylog.integrations.aws.AWSMessageType;
 import org.graylog.integrations.aws.resources.requests.AWSRequest;
+import org.graylog2.plugin.InputFailureRecorder;
 import org.graylog2.plugin.system.NodeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,14 @@ import software.amazon.awssdk.services.kinesis.KinesisAsyncClient;
 import software.amazon.awssdk.services.kinesis.KinesisAsyncClientBuilder;
 import software.amazon.kinesis.common.ConfigsBuilder;
 import software.amazon.kinesis.common.KinesisClientUtil;
+import software.amazon.kinesis.coordinator.NoOpWorkerStateChangeListener;
 import software.amazon.kinesis.coordinator.Scheduler;
+import software.amazon.kinesis.coordinator.WorkerStateChangeListener;
+import software.amazon.kinesis.lifecycle.NoOpTaskExecutionListener;
+import software.amazon.kinesis.lifecycle.TaskExecutionListener;
+import software.amazon.kinesis.lifecycle.TaskOutcome;
+import software.amazon.kinesis.lifecycle.TaskType;
+import software.amazon.kinesis.lifecycle.events.TaskExecutionListenerInput;
 import software.amazon.kinesis.retrieval.polling.PollingConfig;
 
 import java.util.Locale;
@@ -67,6 +75,7 @@ public class KinesisConsumer implements Runnable {
     private final Consumer<byte[]> handleMessageCallback;
     private final AWSRequest request;
     private final AWSClientBuilderUtil awsClientBuilderUtil;
+    private final InputFailureRecorder inputFailureRecorder;
     private Scheduler kinesisScheduler;
 
     KinesisConsumer(NodeId nodeId,
@@ -76,7 +85,8 @@ public class KinesisConsumer implements Runnable {
                     String kinesisStreamName,
                     AWSMessageType awsMessageType,
                     int recordBatchSize, AWSRequest request,
-                    AWSClientBuilderUtil awsClientBuilderUtil) {
+                    AWSClientBuilderUtil awsClientBuilderUtil,
+                    InputFailureRecorder inputFailureRecorder) {
         Preconditions.checkArgument(StringUtils.isNotBlank(kinesisStreamName), "A Kinesis stream name is required.");
         Preconditions.checkNotNull(awsMessageType, "A AWSMessageType is required.");
 
@@ -89,6 +99,7 @@ public class KinesisConsumer implements Runnable {
         this.recordBatchSize = recordBatchSize;
         this.request = request;
         this.awsClientBuilderUtil = awsClientBuilderUtil;
+        this.inputFailureRecorder = inputFailureRecorder;
     }
 
     @Override
@@ -133,11 +144,32 @@ public class KinesisConsumer implements Runnable {
             LOG.debug("Using explicit batch size [{}]", recordBatchSize);
             pollingConfig.maxRecords(recordBatchSize);
         }
+        WorkerStateChangeListener workerStateChangeListener = new NoOpWorkerStateChangeListener() {
+            @Override
+            public void onAllInitializationAttemptsFailed(Throwable e) {
+                inputFailureRecorder.setFailing(
+                        KinesisConsumer.class,
+                        "Initialization for Kinesis stream <%s> failed.".formatted(kinesisStreamName), e);
+            }
+        };
+
+        TaskExecutionListener taskExecutionListener = new NoOpTaskExecutionListener() {
+            @Override
+            public void afterTaskExecution(TaskExecutionListenerInput input) {
+                if (TaskOutcome.FAILURE.equals(input.taskOutcome())) {
+                    inputFailureRecorder.setFailing(KinesisConsumer.class,
+                            "Errors for Kinesis stream <%s>!".formatted(kinesisStreamName));
+                } else if (TaskOutcome.SUCCESSFUL.equals(input.taskOutcome()) && TaskType.PROCESS.equals(input.taskType())) {
+                    inputFailureRecorder.setRunning();
+                }
+            }
+        };
+
         this.kinesisScheduler = new Scheduler(
                 configsBuilder.checkpointConfig(),
-                configsBuilder.coordinatorConfig(),
+                configsBuilder.coordinatorConfig().workerStateChangeListener(workerStateChangeListener),
                 configsBuilder.leaseManagementConfig(),
-                configsBuilder.lifecycleConfig(),
+                configsBuilder.lifecycleConfig().taskExecutionListener(taskExecutionListener),
                 configsBuilder.metricsConfig(),
                 configsBuilder.processorConfig(),
                 configsBuilder.retrievalConfig().retrievalSpecificConfig(pollingConfig));

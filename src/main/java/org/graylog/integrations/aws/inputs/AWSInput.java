@@ -24,7 +24,6 @@ import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
 import org.graylog2.plugin.LocalMetricRegistry;
 import org.graylog2.plugin.ServerStatus;
-import org.graylog2.plugin.buffers.InputBuffer;
 import org.graylog2.plugin.configuration.Configuration;
 import org.graylog2.plugin.configuration.ConfigurationRequest;
 import org.graylog2.plugin.configuration.fields.ConfigurationField;
@@ -32,7 +31,6 @@ import org.graylog2.plugin.configuration.fields.DropdownField;
 import org.graylog2.plugin.configuration.fields.NumberField;
 import org.graylog2.plugin.configuration.fields.TextField;
 import org.graylog2.plugin.inputs.MessageInput;
-import org.graylog2.plugin.inputs.MisfireException;
 import org.graylog2.plugin.inputs.annotations.ConfigClass;
 import org.graylog2.plugin.inputs.annotations.FactoryClass;
 import software.amazon.awssdk.regions.Region;
@@ -74,16 +72,6 @@ public class AWSInput extends MessageInput {
               config,
               descriptor,
               serverStatus);
-    }
-
-    @Override
-    public void launch(InputBuffer buffer) throws MisfireException {
-        super.launch(buffer);
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
     }
 
     @FactoryClass
