@@ -49,7 +49,6 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
     awsCloudWatchAwsRegion,
     awsCloudWatchBatchSize,
     awsEndpointCloudWatch = { value: undefined },
-    awsCloudWatchGlobalInput = { value: undefined },
     awsCloudWatchKinesisInputType = { value: DEFAULT_KINESIS_LOG_TYPE },
     awsCloudWatchKinesisStream,
     awsCloudWatchName,
@@ -59,7 +58,7 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
     awsEndpointKinesis = { value: undefined },
   } = formData;
 
-  const globalInputEnabled = !!awsCloudWatchGlobalInput.value;
+  const globalInputEnabled = true;
   const throttleEnabled = !!awsCloudWatchThrottleEnabled.value;
   const addPrefix = !!awsCloudWatchAddFlowLogPrefix.value;
 
