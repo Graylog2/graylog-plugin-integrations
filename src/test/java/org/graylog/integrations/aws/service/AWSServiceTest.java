@@ -47,7 +47,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -112,7 +111,7 @@ public class AWSServiceTest {
         InputCreateRequest input = argumentCaptor.getValue();
         assertEquals("AWS Input", input.title());
         assertEquals(AWSInput.TYPE, input.type());
-        assertFalse(input.global());
+        assertTrue(input.global());
         assertEquals("us-east-1", input.configuration().get(AWSInput.CK_AWS_REGION));
         assertEquals("KINESIS_CLOUDWATCH_FLOW_LOGS", input.configuration().get(AWSCodec.CK_AWS_MESSAGE_TYPE));
         assertEquals("a-key", input.configuration().get(AWSInput.CK_ACCESS_KEY));
