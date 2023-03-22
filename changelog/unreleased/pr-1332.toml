@@ -1,0 +1,5 @@
+type = "added"
+message = "Added configurable default timezone to syslogs inputs and parse tz field from FortiGate msg's"
+
+issues = ["Graylog2/graylog2-server#3853"]
+pulls = ["1332", "Graylog2/graylog2-server#14737", "graylog-labs/syslog4j-graylog2#41", ]
