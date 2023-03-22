@@ -1,0 +1,5 @@
+type = "added"
+message = "Added option to notify @here in Slack notifications."
+
+issues = ["780"]
+pulls = ["1320"]
