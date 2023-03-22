@@ -1,0 +1,5 @@
+type = "added"
+message = "Added support for timezones in Slack and Teams notifications."
+
+issues = ["1318"]
+pulls = ["1320"]

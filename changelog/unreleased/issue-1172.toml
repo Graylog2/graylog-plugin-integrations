@@ -1,0 +1,5 @@
+type = "added"
+message = "Added option to omit title portion of Slack notifications to reduce clutter."
+
+issues = ["1172"]
+pulls = ["1320"]
