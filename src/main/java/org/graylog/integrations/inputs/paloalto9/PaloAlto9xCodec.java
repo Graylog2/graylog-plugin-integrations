@@ -167,7 +167,7 @@ public class PaloAlto9xCodec implements Codec {
                     CK_TIMEZONE,
                     "Time Zone",
                     DateTimeZone.UTC.getID(),
-                    DropdownField.ValueTemplates.timeZones(),
+                    DropdownField.ValueTemplates.timeZones(false),
                     "Time zone of the Palo Alto device",
                     ConfigurationField.Optional.OPTIONAL));
 

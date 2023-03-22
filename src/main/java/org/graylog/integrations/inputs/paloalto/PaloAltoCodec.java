@@ -141,7 +141,7 @@ public class PaloAltoCodec implements Codec {
                     CK_TIMEZONE,
                     TIMEZONE_OFFSET_LABEL,
                     DateTimeZone.UTC.getID(),
-                    DropdownField.ValueTemplates.timeZones(),
+                    DropdownField.ValueTemplates.timeZones(false),
                     TIMEZONE_OFFSET_DESCRIPTION,
                     ConfigurationField.Optional.OPTIONAL));
 
