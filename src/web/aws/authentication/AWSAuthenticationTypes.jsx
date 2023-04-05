@@ -69,47 +69,40 @@ const AWSAuthenticationTypes = ({ onChange }) => {
     }
   };
 
-  let authTypes;
-
-  if (AppConfig.isCloud()) {
-    authTypes = (
-      <KeySecret awsKey={awsCloudWatchAwsKey}
-                 awsSecret={awsCloudWatchAwsSecret}
-                 onChange={onChange} />
-    );
-  } else {
-    authTypes = (
-      <>
-        <Input type="select"
-               name="awsAuthType"
-               id="awsAuthType"
-               onChange={handleTypeChange}
-               label="AWS Authentication Type"
-               defaultValue={currentType}>
-          {Object.keys(AWS_AUTH_TYPES).map((type) => (
-            <option value={AWS_AUTH_TYPES[type]}
-                    key={`option-${type}`}>
-              {AWS_AUTH_TYPES[type]}
-            </option>
-          ))}
-        </Input>
-
-        <AuthWrapper>
-          {isType(AWS_AUTH_TYPES.automatic) && <Automatic />}
-
-          {isType(AWS_AUTH_TYPES.keysecret) && (
-            <KeySecret awsKey={awsCloudWatchAwsKey}
-                       awsSecret={awsCloudWatchAwsSecret}
-                       onChange={onChange} />
-          )}
-        </AuthWrapper>
-      </>
-    );
-  }
-
   return (
     <>
-      {authTypes}
+      {AppConfig.isCloud()
+        ? (
+          <KeySecret awsKey={awsCloudWatchAwsKey}
+                     awsSecret={awsCloudWatchAwsSecret}
+                     onChange={onChange} />
+        ) : (
+          <>
+            <Input type="select"
+                   name="awsAuthType"
+                   id="awsAuthType"
+                   onChange={handleTypeChange}
+                   label="AWS Authentication Type"
+                   defaultValue={currentType}>
+              {Object.keys(AWS_AUTH_TYPES).map((type) => (
+                <option value={AWS_AUTH_TYPES[type]}
+                        key={`option-${type}`}>
+                  {AWS_AUTH_TYPES[type]}
+                </option>
+              ))}
+            </Input>
+
+            <AuthWrapper>
+              {isType(AWS_AUTH_TYPES.automatic) && <Automatic />}
+
+              {isType(AWS_AUTH_TYPES.keysecret) && (
+              <KeySecret awsKey={awsCloudWatchAwsKey}
+                         awsSecret={awsCloudWatchAwsSecret}
+                         onChange={onChange} />
+              )}
+            </AuthWrapper>
+          </>
+        )}
       <ARN awsARN={awsCloudWatchAssumeARN} onChange={onChange} />
     </>
   );

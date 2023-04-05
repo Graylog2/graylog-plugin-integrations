@@ -58,7 +58,6 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
     awsEndpointKinesis = { value: undefined },
   } = formData;
 
-  const globalInputEnabled = true;
   const throttleEnabled = !!awsCloudWatchThrottleEnabled.value;
   const addPrefix = !!awsCloudWatchAddFlowLogPrefix.value;
 
@@ -74,7 +73,6 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
       aws_input_type: awsCloudWatchKinesisInputType.value,
       stream_name: awsCloudWatchKinesisStream.value,
       batch_size: Number(awsCloudWatchBatchSize.value || awsCloudWatchBatchSize.defaultValue),
-      global: globalInputEnabled,
       enable_throttling: throttleEnabled,
       add_flow_log_prefix: addPrefix,
     },
@@ -176,7 +174,7 @@ const StepReview = ({ onSubmit, onEditClick, externalInputSubmit }) => {
           </li>
           <li>
             <strong>Global Input</strong>
-            <span><Icon name={globalInputEnabled ? 'check' : 'times'} /></span>
+            <span><Icon name="check" /></span>
           </li>
           <li>
             <strong>Record Batch Size</strong>
