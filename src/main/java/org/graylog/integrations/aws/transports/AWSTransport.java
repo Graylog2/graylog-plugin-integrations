@@ -65,11 +65,7 @@ public class AWSTransport extends ThrottleableTransport2 {
         LOG.debug("Start AWS Transport");
         // Load the transport by message type.
         final Transport transport = resolveTransport();
-        if (transport instanceof ThrottleableTransport2 transport2) {
-            transport2.launch(input, inputFailureRecorder);
-        } else {
-            transport.launch(input);
-        }
+        transport.launch(input, inputFailureRecorder);
 
         // Keep reference to the transport, so it can be stopped later.
         resolvedTransport = transport;
