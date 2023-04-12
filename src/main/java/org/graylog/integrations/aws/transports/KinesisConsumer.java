@@ -195,6 +195,7 @@ public class KinesisConsumer implements Runnable {
                 LOG.error("Exception while executing graceful shutdown.", e);
             } catch (TimeoutException e) {
                 LOG.error("Timeout while waiting for shutdown.  Scheduler may not have exited.");
+                kinesisScheduler.shutdown();
             }
         }
     }
