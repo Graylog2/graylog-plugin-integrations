@@ -95,7 +95,6 @@ public class AWSServiceTest {
                                      .awsMessageType(AWSMessageType.KINESIS_CLOUDWATCH_FLOW_LOGS.toString())
                                      .streamName("a-stream")
                                      .batchSize(10000)
-                                     .global(false)
                                      .addFlowLogPrefix(true)
                                      .throttlingAllowed(true)
                                      .build();
