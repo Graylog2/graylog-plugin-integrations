@@ -50,6 +50,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.site.skip>true</maven.site.skip>
         <graylog.version>5.2.0-SNAPSHOT</graylog.version>
+        <aws-java-sdk-2.version>2.20.61</aws-java-sdk-2.version>
         <aws-kinesis-client.version>2.2.10</aws-kinesis-client.version>
         <integrations.protobuf.version>3.11.1</integrations.protobuf.version>
     </properties>
@@ -67,14 +68,23 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Include the bundled/shaded AWS SDK dependency. This includes all third party dependencies in a remapped
-             package location (software.amazon.awssdk.thirdparty...) to avoid conflicts with dependencies used in the Graylog Server core.
-             This was initially needed to resolve a conflict with the Apache HTTP client.
-             See https://github.com/aws/aws-sdk-java-v2/blob/master/bundle/pom.xml for the remapped locations. -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
-            <artifactId>bundle</artifactId>
-            <version>${aws-java-sdk-2.version}</version>
+            <artifactId>cloudwatchlogs</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>iam</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
         </dependency>
         <!-- AWS maintains a separate client for Kinesis. -->
         <dependency>
@@ -211,35 +221,6 @@
                             <exclude>com.google.protobuf:protobuf-java</exclude>
                         </excludes>
                     </artifactSet>
-                    <filters>
-                        <!-- The AWS SDK Bundle imports the entire SDK. Explicitly include only the packages that are
-                             needed. This prevents the entire SDK from being packaged and distributed with this plugin (~150MB).
-                             See the comment on the bundle above for more info. -->
-                        <filter>
-                            <artifact>software.amazon.awssdk:bundle</artifact>
-                            <includes>
-                                <!-- Include core AWS SDK packages. -->
-                                <include>software/amazon/awssdk/annotations/**</include>
-                                <include>software/amazon/awssdk/auth/**</include>
-                                <include>software/amazon/awssdk/awscore/**</include>
-                                <include>software/amazon/awssdk/core/**</include>
-                                <include>software/amazon/awssdk/http/**</include>
-                                <include>software/amazon/awssdk/internal/http/**</include>
-                                <include>software/amazon/awssdk/profiles/**</include>
-                                <include>software/amazon/awssdk/protocols/**</include>
-                                <include>software/amazon/awssdk/regions/**</include>
-                                <include>software/amazon/awssdk/thirdparty/**</include>
-                                <include>software/amazon/awssdk/utils/**</include>
-                                <include>software/amazon/awssdk/metrics/**</include>
-                                <!-- Include only the specific service packages that are needed. -->
-                                <include>software/amazon/awssdk/services/cloudwatchlogs/**</include>
-                                <include>software/amazon/awssdk/services/dynamodb/**</include>
-                                <include>software/amazon/awssdk/services/iam/**</include>
-                                <include>software/amazon/awssdk/services/kinesis/**</include>
-                                <include>software/amazon/awssdk/services/sts/**</include>
-                            </includes>
-                        </filter>
-                    </filters>
                 </configuration>
                 <executions>
                     <execution>
