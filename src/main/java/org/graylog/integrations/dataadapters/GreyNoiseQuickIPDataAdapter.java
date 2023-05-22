@@ -54,6 +54,7 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseQuickIPDataAdapter.class);
     public static final String NAME = "GreyNoise";
     static final String GREYNOISE_IPQC_ENDPOINT = "https://api.greynoise.io/v2/noise/quick/";
+    static final String GREYNOISE_PING_ENDPOINT = "https://api.greynoise.io/ping";
 
     private final EncryptedValueService encryptedValueService;
     private final Config config;
@@ -70,6 +71,10 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
         this.config = (Config) config;
         this.encryptedValueService = encryptedValueService;
         this.okHttpClient = okHttpClient;
+
+        if (!isEnterpriseSubscription()) {
+            throw new RuntimeException("A GreyNoise Enterprise subscription is required.");
+        }
     }
 
     @Override
@@ -152,6 +157,23 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
 
     @Override
     public void set(Object key, Object value) {
+    }
+
+    private boolean isEnterpriseSubscription() {
+        Request request = new Request.Builder()
+                .url(GREYNOISE_PING_ENDPOINT)
+                .method("GET", null)
+                .addHeader("Accept", "application/json")
+                .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
+                .addHeader("User-Agent", "Graylog")
+                .build();
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            JSONObject json = new JSONObject(response.body().string());
+            return response.code() == 200 && json.hasField("offering") && !json.getFieldAsString("offering").equals("community");
+        } catch (Exception e) {
+            LOG.error("An error occurred while retrieving subscription type.");
+            return false;
+        }
     }
 
     public interface Factory extends LookupDataAdapter.Factory<GreyNoiseQuickIPDataAdapter> {

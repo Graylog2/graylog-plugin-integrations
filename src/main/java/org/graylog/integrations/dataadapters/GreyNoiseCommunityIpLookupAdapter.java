@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
  * The API response is a subset of the IP context returned by the full IP Lookup API.
  * </p>
  */
+@Deprecated
 public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     public static final String ADAPTER_NAME = "GreyNoise Community IP Lookup";
