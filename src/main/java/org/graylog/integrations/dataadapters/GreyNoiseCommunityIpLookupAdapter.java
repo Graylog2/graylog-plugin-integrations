@@ -53,6 +53,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
+ * The GreyNoiseCommunityIpLookupAdapter class is deprecated as of https://github.com/Graylog2/graylog-plugin-integrations/pull/1340.
+ *
  * A {@link LookupDataAdapter} that uses the <a href="https://docs.greynoise.io/reference/get_v3-community-ip">GreyNoise Community API</a>
  * to perform IP lookups.
  *
@@ -93,8 +95,8 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
     }
 
     @Override
-    protected void doStart(){
-        //Not needed
+    protected void doStart() throws Exception {
+        throw new Exception("GreyNoise Community IP Lookup is no longer supported.");
     }
 
     @Override
@@ -122,25 +124,24 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
         return LookupResult.withError("GreyNoise Community IP Lookup Data Adapter is no deprecated and lookups can no longer be performed.");
     }
 
-//    @Override
-//    protected LookupResult doGet(Object ipAddress) {
-//
-//
-//        Optional<Request> request = createRequest(ipAddress);
-//        if (!request.isPresent()) {
-//            return LookupResult.withError();
-//        }
-//
-//        LookupResult result;
-//        try (Response response = okHttpClient.newCall(request.get()).execute()) {
-//            result = parseResponse(response);
-//
-//        } catch (IOException e) {
-//            LOG.error("an error occurred while retrieving GreyNoise IP data. {}", e.getMessage(), e);
-//            result = LookupResult.withError();
-//        }
-//        return result;
-//    }
+    protected LookupResult doDoGet(Object ipAddress) {
+
+
+        Optional<Request> request = createRequest(ipAddress);
+        if (!request.isPresent()) {
+            return LookupResult.withError();
+        }
+
+        LookupResult result;
+        try (Response response = okHttpClient.newCall(request.get()).execute()) {
+            result = parseResponse(response);
+
+        } catch (IOException e) {
+            LOG.error("an error occurred while retrieving GreyNoise IP data. {}", e.getMessage(), e);
+            result = LookupResult.withError();
+        }
+        return result;
+    }
 
     @VisibleForTesting
     Optional<Request> createRequest(Object ipAddress) {

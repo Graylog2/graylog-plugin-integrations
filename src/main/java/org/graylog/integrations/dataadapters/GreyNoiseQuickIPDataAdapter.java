@@ -49,16 +49,18 @@ import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(GreyNoiseQuickIPDataAdapter.class);
     public static final String NAME = "GreyNoise";
     static final String GREYNOISE_IPQC_ENDPOINT = "https://api.greynoise.io/v2/noise/quick/";
-    static final String GREYNOISE_PING_ENDPOINT = "https://api.greynoise.io/ping";
 
     private final EncryptedValueService encryptedValueService;
     private final Config config;
     private final OkHttpClient okHttpClient;
+
+    private static final AtomicBoolean VALID_GREYNOISE_LICENSE = new AtomicBoolean(false);
 
     @Inject
     public GreyNoiseQuickIPDataAdapter(@Assisted("id") String id,
@@ -75,8 +77,11 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
 
     @Override
     public void doStart() throws Exception {
-        if (!isEnterpriseSubscription()) {
-            throw new Exception("Cannot start GreyNoise Data Adapter. A GreyNoise Enterprise subscription is required.");
+        if (!isValidSubscription(encryptedValueService.decrypt(config.apiToken()))) {
+            VALID_GREYNOISE_LICENSE.set(false);
+            throw new Exception("Cannot start Data Adapter without a GreyNoise Enterprise subscription. Check API key and restart Data Adapter.");
+        } else {
+            VALID_GREYNOISE_LICENSE.set(true);
         }
     }
 
@@ -97,6 +102,9 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
 
     @Override
     protected LookupResult doGet(Object keyObject) {
+        if (!VALID_GREYNOISE_LICENSE.get()) {
+            return LookupResult.withError("Cannot perform lookup without a GreyNoise Enterprise subscription. Check API key and restart Data Adapter.");
+        }
 
         String ip = keyObject.toString();
         // if the IP address is a valid IPv4 address, check to see if it is a reserved IP.
@@ -157,21 +165,22 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     public void set(Object key, Object value) {
     }
 
-    // Check if provided API token has a valid GreyNoise Enterprise subscription.
-    private boolean isEnterpriseSubscription() {
+    // Check if provided API token has a valid non-community GreyNoise subscription.
+    private boolean isValidSubscription(String apiKey) {
         Request request = new Request.Builder()
-                .url(GREYNOISE_PING_ENDPOINT)
+                .url("https://api.greynoise.io/ping")
                 .method("GET", null)
                 .addHeader("Accept", "application/json")
-                .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
+                .addHeader("key", apiKey)
                 .addHeader("User-Agent", "Graylog")
                 .build();
 
         try (Response response = okHttpClient.newCall(request).execute()) {
             JSONObject json = new JSONObject(response.body().string());
-            return response.code() == 200 && json.hasField("offering") && !json.getFieldAsString("offering").equals("community");
+            return response.isSuccessful()
+                    && json.hasField("offering") && !json.getFieldAsString("offering").equals("community");
         } catch (Exception e) {
-            LOG.error("An error occurred while retrieving subscription type.");
+            LOG.warn("An error occurred while retrieving subscription type.", e);
             return false;
         }
     }

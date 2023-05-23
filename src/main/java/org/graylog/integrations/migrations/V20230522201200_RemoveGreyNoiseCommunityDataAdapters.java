@@ -7,7 +7,7 @@ import org.graylog2.migrations.Migration;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
 import org.graylog2.plugin.cluster.ClusterConfigService;
-import org.graylog2.plugin.system.NodeId;
+import org.graylog2.shared.utilities.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +21,18 @@ public class V20230522201200_RemoveGreyNoiseCommunityDataAdapters extends Migrat
     private final ClusterConfigService clusterConfigService;
     private final DBDataAdapterService dataAdapterService;
     private final NotificationService notificationService;
-    private final NodeId nodeId;
 
     @Inject
     public V20230522201200_RemoveGreyNoiseCommunityDataAdapters(ClusterConfigService clusterConfigService,
                                                                 DBDataAdapterService dataAdapterService,
-                                                                NotificationService notificationService,
-                                                                NodeId nodeId) {
+                                                                NotificationService notificationService) {
         this.clusterConfigService = clusterConfigService;
         this.dataAdapterService = dataAdapterService;
         this.notificationService = notificationService;
-        this.nodeId = nodeId;
     }
 
     /**
-     * This migration removes all GreyNoise Community IP Lookup Data Adapters.
+     * This migration notifies users of the deprecation and removal of functionality for GreyNoiseCommunityIpLookupAdapters.
      */
     @Override
     public void upgrade() {
@@ -45,22 +42,20 @@ public class V20230522201200_RemoveGreyNoiseCommunityDataAdapters extends Migrat
         }
 
         List<DataAdapterDto> greyNoiseCommunityAdapters = dataAdapterService.findAll().stream()
-                .filter(da -> da.config() instanceof GreyNoiseCommunityIpLookupAdapter).toList();
+                .filter(da -> da.config().type().equals(GreyNoiseCommunityIpLookupAdapter.ADAPTER_NAME)).toList();
 
         greyNoiseCommunityAdapters.forEach(adapter -> {
-            dataAdapterService.deleteAndPostEvent(adapter.id());
-
             final Notification systemNotification = notificationService.buildNow()
-                    .addNode(nodeId.getNodeId())
                     .addType(Notification.Type.GENERIC)
                     .addSeverity(Notification.Severity.URGENT)
-                    .addDetail("title", "Removed GreyNoise Community IP Lookup Data Adapter")
-                    .addDetail("description", "GreyNoise Community IP Lookup Data Adapters are no longer supported.");
+                    .addDetail("title", StringUtils.f("Disabled Data Adapter [%s]", adapter.title()))
+                    .addDetail("description", "GreyNoise Community IP Lookup Data Adapters are no longer supported as of Graylog 5.1.3."
+                            + "This Data Adapter's lookups will no longer return results and it should be deleted");
 
             notificationService.publishIfFirst(systemNotification);
         });
 
-        clusterConfigService.write(new V20230522201200_RemoveGreyNoiseCommunityDataAdapters.MigrationCompleted());
+        //clusterConfigService.write(new V20230522201200_RemoveGreyNoiseCommunityDataAdapters.MigrationCompleted());
     }
 
     @Override
