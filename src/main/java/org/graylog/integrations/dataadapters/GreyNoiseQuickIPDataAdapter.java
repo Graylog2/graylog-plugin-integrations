@@ -71,15 +71,13 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
         this.config = (Config) config;
         this.encryptedValueService = encryptedValueService;
         this.okHttpClient = okHttpClient;
-
-        if (!isEnterpriseSubscription()) {
-            throw new RuntimeException("A GreyNoise Enterprise subscription is required.");
-        }
     }
 
     @Override
     public void doStart() throws Exception {
-
+        if (!isEnterpriseSubscription()) {
+            throw new Exception("Cannot start GreyNoise Data Adapter. A GreyNoise Enterprise subscription is required.");
+        }
     }
 
     @Override
@@ -159,6 +157,7 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     public void set(Object key, Object value) {
     }
 
+    // Check if provided API token has a valid GreyNoise Enterprise subscription.
     private boolean isEnterpriseSubscription() {
         Request request = new Request.Builder()
                 .url(GREYNOISE_PING_ENDPOINT)
@@ -167,6 +166,7 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
                 .addHeader("key", encryptedValueService.decrypt(config.apiToken()))
                 .addHeader("User-Agent", "Graylog")
                 .build();
+
         try (Response response = okHttpClient.newCall(request).execute()) {
             JSONObject json = new JSONObject(response.body().string());
             return response.code() == 200 && json.hasField("offering") && !json.getFieldAsString("offering").equals("community");

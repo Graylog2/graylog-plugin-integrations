@@ -119,23 +119,28 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     @Override
     protected LookupResult doGet(Object ipAddress) {
-
-
-        Optional<Request> request = createRequest(ipAddress);
-        if (!request.isPresent()) {
-            return LookupResult.withError();
-        }
-
-        LookupResult result;
-        try (Response response = okHttpClient.newCall(request.get()).execute()) {
-            result = parseResponse(response);
-
-        } catch (IOException e) {
-            LOG.error("an error occurred while retrieving GreyNoise IP data. {}", e.getMessage(), e);
-            result = LookupResult.withError();
-        }
-        return result;
+        return LookupResult.withError("GreyNoise Community IP Lookup Data Adapter is no deprecated and lookups can no longer be performed.");
     }
+
+//    @Override
+//    protected LookupResult doGet(Object ipAddress) {
+//
+//
+//        Optional<Request> request = createRequest(ipAddress);
+//        if (!request.isPresent()) {
+//            return LookupResult.withError();
+//        }
+//
+//        LookupResult result;
+//        try (Response response = okHttpClient.newCall(request.get()).execute()) {
+//            result = parseResponse(response);
+//
+//        } catch (IOException e) {
+//            LOG.error("an error occurred while retrieving GreyNoise IP data. {}", e.getMessage(), e);
+//            result = LookupResult.withError();
+//        }
+//        return result;
+//    }
 
     @VisibleForTesting
     Optional<Request> createRequest(Object ipAddress) {
