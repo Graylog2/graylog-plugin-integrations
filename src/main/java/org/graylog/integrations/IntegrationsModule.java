@@ -26,6 +26,7 @@ import org.graylog.integrations.aws.resources.AWSResource;
 import org.graylog.integrations.aws.resources.KinesisSetupResource;
 import org.graylog.integrations.aws.transports.AWSTransport;
 import org.graylog.integrations.aws.transports.KinesisTransport;
+import org.graylog.integrations.dataadapters.GreyNoiseCommunityIpLookupAdapter;
 import org.graylog.integrations.dataadapters.GreyNoiseQuickIPDataAdapter;
 import org.graylog.integrations.inputs.paloalto.PaloAltoCodec;
 import org.graylog.integrations.inputs.paloalto.PaloAltoTCPInput;
@@ -133,6 +134,12 @@ public class IntegrationsModule extends PluginModule {
                     GreyNoiseQuickIPDataAdapter.class,
                     GreyNoiseQuickIPDataAdapter.Factory.class,
                     GreyNoiseQuickIPDataAdapter.Config.class);
+
+            //Community GreyNoise IP Lookup Adapter
+            installLookupDataAdapter(GreyNoiseCommunityIpLookupAdapter.ADAPTER_NAME,
+                    GreyNoiseCommunityIpLookupAdapter.class,
+                    GreyNoiseCommunityIpLookupAdapter.Factory.class,
+                    GreyNoiseCommunityIpLookupAdapter.Config.class);
 
             // PagerDuty notification type fix
             addMigration(V20220622071600_MigratePagerDutyV1.class);
