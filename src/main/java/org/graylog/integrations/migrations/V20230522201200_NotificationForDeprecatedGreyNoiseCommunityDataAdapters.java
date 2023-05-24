@@ -48,7 +48,7 @@ public class V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdap
             final Notification systemNotification = notificationService.buildNow()
                     .addType(Notification.Type.GENERIC)
                     .addSeverity(Notification.Severity.URGENT)
-                    .addDetail("title", StringUtils.f("Disabled Data Adapters [%s]", greyNoiseCommunityAdapters.toString()))
+                    .addDetail("title", StringUtils.f("Disabled Data Adapters %s", greyNoiseCommunityAdapters.toString()))
                     .addDetail("description", "GreyNoise Community IP Lookup Data Adapters are no longer supported as of Graylog 5.2."
                             + " GreyNoise Community Data Adapter lookups will no longer return results and any should be deleted.");
 
