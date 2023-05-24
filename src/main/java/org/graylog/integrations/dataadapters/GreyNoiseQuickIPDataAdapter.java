@@ -103,7 +103,8 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     @Override
     protected LookupResult doGet(Object keyObject) {
         if (!VALID_GREYNOISE_LICENSE.get()) {
-            return LookupResult.withError("Cannot perform lookup without a GreyNoise Enterprise subscription. Check API key and restart Data Adapter.");
+            return LookupResult.withError("Cannot perform lookup without a GreyNoise Enterprise subscription."
+                    + " Check API key and restart Data Adapter.");
         }
 
         String ip = keyObject.toString();

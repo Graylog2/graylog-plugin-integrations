@@ -65,7 +65,8 @@ import java.util.stream.Collectors;
 @Deprecated
 public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
-    public static final String ADAPTER_NAME = "GreyNoise Community IP Lookup [Deprecated]";
+    public static final String ADAPTER_NAME = "GreyNoise Community IP Lookup";
+    public static final String DEPRECATED = " [Deprecated]";
 
     protected static final String GREYNOISE_COMMUNITY_ENDPOINT = "https://api.greynoise.io/v3/community";
 
@@ -268,7 +269,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
     public static class Descriptor extends LookupDataAdapter.Descriptor<GreyNoiseCommunityIpLookupAdapter.Config> {
 
         public Descriptor() {
-            super(ADAPTER_NAME, GreyNoiseCommunityIpLookupAdapter.Config.class);
+            super(ADAPTER_NAME + DEPRECATED, GreyNoiseCommunityIpLookupAdapter.Config.class);
         }
 
         @Override
