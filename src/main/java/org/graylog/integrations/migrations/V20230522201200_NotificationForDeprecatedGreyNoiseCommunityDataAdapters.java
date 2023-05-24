@@ -2,7 +2,6 @@ package org.graylog.integrations.migrations;
 
 import org.graylog.integrations.dataadapters.GreyNoiseCommunityIpLookupAdapter;
 import org.graylog2.lookup.db.DBDataAdapterService;
-import org.graylog2.lookup.dto.DataAdapterDto;
 import org.graylog2.migrations.Migration;
 import org.graylog2.notifications.Notification;
 import org.graylog2.notifications.NotificationService;
@@ -15,17 +14,17 @@ import javax.inject.Inject;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public class V20230522201200_RemoveGreyNoiseCommunityDataAdapters extends Migration {
-    private static final Logger LOG = LoggerFactory.getLogger(V20230522201200_RemoveGreyNoiseCommunityDataAdapters.class);
+public class V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdapters extends Migration {
+    private static final Logger LOG = LoggerFactory.getLogger(V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdapters.class);
 
     private final ClusterConfigService clusterConfigService;
     private final DBDataAdapterService dataAdapterService;
     private final NotificationService notificationService;
 
     @Inject
-    public V20230522201200_RemoveGreyNoiseCommunityDataAdapters(ClusterConfigService clusterConfigService,
-                                                                DBDataAdapterService dataAdapterService,
-                                                                NotificationService notificationService) {
+    public V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdapters(ClusterConfigService clusterConfigService,
+                                                                                   DBDataAdapterService dataAdapterService,
+                                                                                   NotificationService notificationService) {
         this.clusterConfigService = clusterConfigService;
         this.dataAdapterService = dataAdapterService;
         this.notificationService = notificationService;
@@ -36,26 +35,27 @@ public class V20230522201200_RemoveGreyNoiseCommunityDataAdapters extends Migrat
      */
     @Override
     public void upgrade() {
-        if (clusterConfigService.get(V20230522201200_RemoveGreyNoiseCommunityDataAdapters.MigrationCompleted.class) != null) {
+        if (clusterConfigService.get(V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdapters.MigrationCompleted.class) != null) {
             LOG.debug("Migration already completed!");
             return;
         }
 
-        List<DataAdapterDto> greyNoiseCommunityAdapters = dataAdapterService.findAll().stream()
-                .filter(da -> da.config().type().equals(GreyNoiseCommunityIpLookupAdapter.ADAPTER_NAME)).toList();
+        List<String> greyNoiseCommunityAdapters = dataAdapterService.findAll().stream()
+                .filter(da -> da.config().type().equals(GreyNoiseCommunityIpLookupAdapter.ADAPTER_NAME))
+                .map(da -> da.name()).toList();
 
-        greyNoiseCommunityAdapters.forEach(adapter -> {
+        if (!greyNoiseCommunityAdapters.isEmpty()) {
             final Notification systemNotification = notificationService.buildNow()
                     .addType(Notification.Type.GENERIC)
                     .addSeverity(Notification.Severity.URGENT)
-                    .addDetail("title", StringUtils.f("Disabled Data Adapter [%s]", adapter.title()))
-                    .addDetail("description", "GreyNoise Community IP Lookup Data Adapters are no longer supported as of Graylog 5.1.3."
-                            + "This Data Adapter's lookups will no longer return results and it should be deleted");
+                    .addDetail("title", StringUtils.f("Disabled Data Adapters [%s]", greyNoiseCommunityAdapters.toString()))
+                    .addDetail("description", "GreyNoise Community IP Lookup Data Adapters are no longer supported as of Graylog 5.2."
+                            + " GreyNoise Community Data Adapter lookups will no longer return results and any should be deleted.");
 
             notificationService.publishIfFirst(systemNotification);
-        });
+        }
 
-        //clusterConfigService.write(new V20230522201200_RemoveGreyNoiseCommunityDataAdapters.MigrationCompleted());
+        clusterConfigService.write(new V20230522201200_NotificationForDeprecatedGreyNoiseCommunityDataAdapters.MigrationCompleted());
     }
 
     @Override

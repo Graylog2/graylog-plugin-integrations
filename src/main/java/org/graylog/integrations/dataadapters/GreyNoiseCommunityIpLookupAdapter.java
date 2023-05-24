@@ -53,7 +53,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * The GreyNoiseCommunityIpLookupAdapter class is deprecated as of https://github.com/Graylog2/graylog-plugin-integrations/pull/1340.
+ * The GreyNoiseCommunityIpLookupAdapter class is deprecated as of <a href="https://github.com/Graylog2/graylog-plugin-integrations/pull/1340</a>.
  *
  * A {@link LookupDataAdapter} that uses the <a href="https://docs.greynoise.io/reference/get_v3-community-ip">GreyNoise Community API</a>
  * to perform IP lookups.
@@ -97,7 +97,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     @Override
     protected void doStart() throws Exception {
-        throw new Exception("GreyNoise Community IP Lookup is no longer supported.");
+        throw new Exception("GreyNoise Community IP Lookup Data Adapter is no longer supported.");
     }
 
     @Override
@@ -122,9 +122,10 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     @Override
     protected LookupResult doGet(Object ipAddress) {
-        return LookupResult.withError("GreyNoise Community IP Lookup Data Adapter is no deprecated and lookups can no longer be performed.");
+        return LookupResult.withError("GreyNoise Community IP Lookup Data Adapter is deprecated and lookups can no longer be performed.");
     }
 
+    // This is the old doGet() method, left in case this functionality needs to be restored in the future.
     protected LookupResult doDoGet(Object ipAddress) {
 
 
