@@ -32,6 +32,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.graylog.plugins.threatintel.tools.AdapterDisabledException;
 import org.graylog2.plugin.lookup.LookupCachePurge;
 import org.graylog2.plugin.lookup.LookupDataAdapter;
 import org.graylog2.plugin.lookup.LookupDataAdapterConfiguration;
@@ -66,7 +67,6 @@ import java.util.stream.Collectors;
 public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     public static final String ADAPTER_NAME = "GreyNoise Community IP Lookup";
-    public static final String DEPRECATED = " [Deprecated]";
 
     protected static final String GREYNOISE_COMMUNITY_ENDPOINT = "https://api.greynoise.io/v3/community";
 
@@ -97,7 +97,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
 
     @Override
     protected void doStart() throws Exception {
-        throw new Exception("GreyNoise Community IP Lookup Data Adapter is no longer supported.");
+        throw new AdapterDisabledException("The GreyNoise Community IP Lookup Data Adapter is no longer supported. This Data Adapter should be deleted.");
     }
 
     @Override
@@ -270,7 +270,7 @@ public class GreyNoiseCommunityIpLookupAdapter extends LookupDataAdapter {
     public static class Descriptor extends LookupDataAdapter.Descriptor<GreyNoiseCommunityIpLookupAdapter.Config> {
 
         public Descriptor() {
-            super(ADAPTER_NAME + DEPRECATED, GreyNoiseCommunityIpLookupAdapter.Config.class);
+            super(ADAPTER_NAME, GreyNoiseCommunityIpLookupAdapter.Config.class);
         }
 
         @Override

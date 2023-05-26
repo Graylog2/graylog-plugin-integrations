@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import org.graylog.plugins.threatintel.tools.AdapterDisabledException;
 import org.graylog2.plugin.lookup.LookupCachePurge;
 import org.graylog2.plugin.lookup.LookupDataAdapter;
 import org.graylog2.plugin.lookup.LookupDataAdapterConfiguration;
@@ -79,7 +80,7 @@ public class GreyNoiseQuickIPDataAdapter extends LookupDataAdapter {
     public void doStart() throws Exception {
         if (!isValidSubscription(encryptedValueService.decrypt(config.apiToken()))) {
             VALID_GREYNOISE_LICENSE.set(false);
-            throw new Exception("Cannot start Data Adapter without a GreyNoise Enterprise subscription. Check API key and restart Data Adapter.");
+            throw new AdapterDisabledException("Cannot start Data Adapter without a GreyNoise Enterprise subscription. Check API key and restart Data Adapter.");
         } else {
             VALID_GREYNOISE_LICENSE.set(true);
         }
