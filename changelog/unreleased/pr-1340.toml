@@ -1,4 +1,4 @@
-type = "d" # One of: a(dded), c(hanged), d(eprecated), r(emoved), f(ixed), s(ecurity)
+type = "d"
 message = "GreyNoise Data Adapter functionality has been limited to only use with non-community GreyNoise subscriptions."
 
 issues = ["Graylog2/graylog-plugin-enterprise#5157"]
