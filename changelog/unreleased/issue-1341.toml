@@ -1,0 +1,5 @@
+type = "added"
+message = "Added event definition title as a summary to Microsoft Teams notifications."
+
+issues = ["1341"]
+pulls = ["1343"]
