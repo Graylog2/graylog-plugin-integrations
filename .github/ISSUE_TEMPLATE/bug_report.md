@@ -19,6 +19,6 @@ assignees: ''
 ## Environment
 
 - Graylog Version:
-- Elasticsearch Version:
+- OpenSearch Version:
 - MongoDB Version:
 - Browser Version:
