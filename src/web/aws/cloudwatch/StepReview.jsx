@@ -250,11 +250,9 @@ const ReviewItems = styled.ul`
     }
   }
 
-  strong {
-    ::after {
-      content: ':';
-      margin-right: 5px;
-    }
+  strong::after {
+    content: ':';
+    margin-right: 5px;
   }
 `;
 
@@ -264,11 +262,11 @@ const EditAnchor = styled.a`
   font-style: italic;
   cursor: pointer;
 
-  ::before {
+  &::before {
     content: "(";
   }
 
-  ::after {
+  &::after {
     content: ")";
   }
 `;
