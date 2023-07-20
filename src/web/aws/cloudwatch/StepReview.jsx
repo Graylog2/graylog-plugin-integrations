@@ -245,7 +245,7 @@ const ReviewItems = styled.ul`
   li {
     padding: 5px;
 
-    :nth-of-type(odd) {
+    &:nth-of-type(odd) {
       background-color: rgba(220, 225, 229, 0.4);
     }
   }
