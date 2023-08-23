@@ -16,12 +16,7 @@
  */
 package org.graylog.integrations.ipfix;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.primitives.Longs;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -35,9 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A Graylog specific IPFIX parser.
@@ -58,6 +51,7 @@ public class IpfixParser {
     private static final int SETID_RESERVED1 = 1;
     private static final int SETID_TEMPLATE = 2;
     private static final int SETID_OPTIONSTEMPLATE = 3;
+    public static final String LIST_KEY = "list";
 
     private final InformationElementDefinitions infoElemDefs;
 
@@ -326,254 +320,23 @@ public class IpfixParser {
      *
      * @param informationElements the field information from the template used by this data set
      * @param templateMap map from template id to its information elements, used for subtemplateLists
-     * @param setContent the data set bytes to parse
+     * @param dataSet the data set bytes to parse
      * @return collection of parsed flows
      */
-    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, Map<Integer, TemplateRecord> templateMap, ByteBuf setContent) {
+    public Set<Flow> parseDataSet(ImmutableList<InformationElement> informationElements, Map<Integer, TemplateRecord> templateMap, ByteBuf dataSet) {
         ImmutableSet.Builder<Flow> flowBuilder = ImmutableSet.builder();
-        while (setContent.isReadable()) {
+        while (dataSet.isReadable()) {
             final ImmutableMap.Builder<String, Object> fields = ImmutableMap.builder();
             for (InformationElement informationElement : informationElements) {
-                InformationElementDefinition desc = infoElemDefs.getDefinition(informationElement.id(), informationElement.enterpriseNumber());
-                switch (desc.dataType()) {
-                    // these are special because they can use reduced-size encoding (RFC 7011 Sec 6.2)
-                    case UNSIGNED8:
-                    case UNSIGNED16:
-                    case UNSIGNED32:
-                    case UNSIGNED64:
-                        long unsignedValue;
-                        switch (informationElement.length()) {
-                            case 1:
-                                unsignedValue = setContent.readUnsignedByte();
-                                break;
-                            case 2:
-                                unsignedValue = setContent.readUnsignedShort();
-                                break;
-                            case 3:
-                                unsignedValue = setContent.readUnsignedMedium();
-                                break;
-                            case 4:
-                                unsignedValue = setContent.readUnsignedInt();
-                                break;
-                            case 5:
-                            case 6:
-                            case 7:
-                            case 8:
-                                byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
-                                int firstIndex = 8 - informationElement.length();
-                                setContent.readBytes(bytesBigEndian, firstIndex, informationElement.length());
-                                unsignedValue = Longs.fromByteArray(bytesBigEndian);
-                                break;
-                            default:
-                                throw new IpfixException("Unexpected length for unsigned integer");
+                final Map.Entry<String, Object> entry = this.parseSingleInformationElement(templateMap, dataSet, fields, informationElement);
+                if (entry != null) {
+                    if (LIST_KEY.equals(entry.getKey())) {
+                        if (entry.getValue() instanceof List) {
+                            final List<Map.Entry<String, Object>> fieldList = (List<Map.Entry<String, Object>>) entry.getValue();
+                            fieldList.forEach(fields::put);
                         }
-                        fields.put(desc.fieldName(), unsignedValue);
-                        break;
-                    case SIGNED8:
-                    case SIGNED16:
-                    case SIGNED32:
-                    case SIGNED64:
-                        long signedValue;
-                        switch (informationElement.length()) {
-                            case 1:
-                                signedValue = setContent.readByte();
-                                break;
-                            case 2:
-                                signedValue = setContent.readShort();
-                                break;
-                            case 3:
-                                signedValue = setContent.readMedium();
-                                break;
-                            case 4:
-                                signedValue = setContent.readUnsignedInt();
-                                break;
-                            case 5:
-                            case 6:
-                            case 7:
-                            case 8:
-                                byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
-                                int firstIndex = 8 - informationElement.length() - 1;
-                                setContent.readBytes(bytesBigEndian, firstIndex, informationElement.length());
-                                signedValue = Longs.fromByteArray(bytesBigEndian);
-                                break;
-                            default:
-                                throw new IpfixException("Unexpected length for unsigned integer");
-                        }
-                        fields.put(desc.fieldName(), signedValue);
-                        break;
-                    case FLOAT32:
-                    case FLOAT64:
-                        double floatValue;
-                        switch (informationElement.length()) {
-                            case 4:
-                                floatValue = setContent.readFloat();
-                                break;
-                            case 8:
-                                floatValue = setContent.readDouble();
-                                break;
-                            default:
-                                throw new IpfixException("Unexpected length for float value: " + informationElement.length());
-                        }
-                        fields.put(desc.fieldName(), floatValue);
-                        break;
-                    // the remaining types aren't subject to reduced-size encoding
-                    case MACADDRESS:
-                        byte[] macBytes = new byte[6];
-                        setContent.readBytes(macBytes);
-                        fields.put(desc.fieldName(),
-                                   String.format(Locale.ROOT, "%02x:%02x:%02x:%02x:%02x:%02x",
-                                                 macBytes[0], macBytes[1], macBytes[2], macBytes[3], macBytes[4], macBytes[5]));
-
-                        break;
-                    case IPV4ADDRESS:
-                        byte[] ipv4Bytes = new byte[4];
-                        setContent.readBytes(ipv4Bytes);
-                        try {
-                            fields.put(desc.fieldName(), InetAddress.getByAddress(ipv4Bytes).getHostAddress());
-                        } catch (UnknownHostException e) {
-                            throw new IpfixException("Unable to parse IPV4 address", e);
-                        }
-                        break;
-                    case IPV6ADDRESS:
-                        byte[] ipv6Bytes = new byte[16];
-                        setContent.readBytes(ipv6Bytes);
-                        try {
-                            fields.put(desc.fieldName(), InetAddress.getByAddress(ipv6Bytes).getHostAddress());
-                        } catch (UnknownHostException e) {
-                            throw new IpfixException("Unable to parse IPV6 address", e);
-                        }
-                        break;
-                    case BOOLEAN:
-                        final byte booleanByte = setContent.readByte();
-                        switch (booleanByte) {
-                            case 1:
-                                fields.put(desc.fieldName(), true);
-                                break;
-                            case 2:
-                                fields.put(desc.fieldName(), false);
-                                break;
-                            default:
-                                throw new IpfixException("Invalid value for boolean: " + booleanByte);
-                        }
-                        break;
-                    case STRING:
-                        final CharSequence charSequence;
-                        if (informationElement.length() == 65535) {
-                            // variable length element, parse accordingly
-                            int length = getVarLength(setContent);
-                            charSequence = setContent.readCharSequence(length, StandardCharsets.UTF_8);
-                        } else {
-                            // fixed length element, just read the string from the buffer
-                            charSequence = setContent.readCharSequence(informationElement.length(), StandardCharsets.UTF_8);
-                        }
-
-                        fields.put(desc.fieldName(), String.valueOf(charSequence).replace("\0", ""));
-                        break;
-                    case OCTETARRAY:
-                        final byte[] octetArray;
-                        if (informationElement.length() == 65535) {
-                            int length = getVarLength(setContent);
-                            octetArray = new byte[length];
-                        } else {
-                            octetArray = new byte[informationElement.length()];
-                        }
-                        setContent.readBytes(octetArray);
-                        fields.put(desc.fieldName(), Hex.encodeHexString(octetArray));
-                        break;
-                    case DATETIMESECONDS:
-                        final long dateTimeSeconds = setContent.readUnsignedInt();
-                        fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochSecond(dateTimeSeconds), ZoneOffset.UTC));
-                        break;
-                    case DATETIMEMILLISECONDS:
-                        final long dateTimeMills = setContent.readLong();
-                        fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeMills), ZoneOffset.UTC));
-                        break;
-                    case DATETIMEMICROSECONDS:
-                    case DATETIMENANOSECONDS:
-                        final long seconds = setContent.readUnsignedInt();
-                        long fraction = setContent.readUnsignedInt();
-                        if (desc.dataType() == InformationElementDefinition.DataType.DATETIMEMICROSECONDS) {
-                            // bottom 11 bits must be cleared for micros to ensure the precision is correct (RFC 7011 Sec 6.1.9)
-                            fraction = fraction & ~0x7FF;
-                        }
-                        fields.put(desc.fieldName(), ZonedDateTime.ofInstant(Instant.ofEpochSecond(seconds, fraction), ZoneOffset.UTC));
-                        break;
-                    case BASICLIST: {
-                        // TODO add to field somehow
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
-                        ByteBuf listBuffer = setContent.readSlice(length);
-                        final short semantic = listBuffer.readUnsignedByte();
-                        final InformationElement element = parseInformationElement(listBuffer);
-                        InformationElementDefinition def = infoElemDefs.getDefinition(element.id(), element.enterpriseNumber());
-                        if (def == null) {
-                            LOG.error("Unable to find information element definition in basicList: id {} PEN {}, this is a bug, cannot parse packet.", element.id(), element.enterpriseNumber());
-                            break;
-                        } else {
-                            LOG.warn("Skipping basicList data ({} bytes)", informationElement.length());
-                            while (listBuffer.isReadable()) {
-                                // simply discard the bytes for now
-                                listBuffer.skipBytes(element.length());
-                            }
-                        }
-                        break;
-                    }
-                    case SUBTEMPLATELIST: {
-                        // there are three possibilities here (compare https://tools.ietf.org/html/rfc6313#section-4.5.2):
-                        //  1. the data set's template has an explicit length
-                        //  2. the length is < 255 encoded as 1 byte, in variable length format (not recommended)
-                        //  3. the length is encoded as 3 bytes, in variable length format (recommended per RFC 6313)
-                        /* encoding format in this case is according to Figure 5:
-                            0                   1                   2                   3
-                            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                           |   Semantic    |         Template ID           |     ...       |
-                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                           |                subTemplateList Content    ...                 |
-                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                           |                              ...                              |
-                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                          Semantic is one of:
-                            * 0xFF - undefined
-                            * 0x00 - noneOf
-                            * 0x01 - exactlyOneOf
-                            * 0x02 - oneOrMoreOf
-                            * 0x03 - allOf
-                            * 0x04 - ordered
-                         */
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
-                        // adjust length for semantic + templateId
-                        length -= 3;
-                        LOG.debug("Remaining data buffer:\n{}", ByteBufUtil.prettyHexDump(setContent));
-                        // TODO add to field somehow
-                        final short semantic = setContent.readUnsignedByte();
-                        final int templateId = setContent.readUnsignedShort();
-                        final TemplateRecord templateRecord = templateMap.get(templateId);
-                        if (templateRecord == null) {
-                            LOG.error("Unable to parse subtemplateList, because we don't have the template for it: {}, skipping data ({} bytes)", templateId, length);
-                            setContent.skipBytes(length);
-                            break;
-                        }
-                        final ByteBuf listContent = setContent.readSlice(length);
-                        // if this is not readable, it's an empty list
-                        final ImmutableList.Builder<Flow> flowsBuilder = ImmutableList.builder();
-                        if (listContent.isReadable()) {
-                            flowsBuilder.addAll(parseDataSet(templateRecord.informationElements(), templateMap, listContent));
-                        }
-                        final ImmutableList<Flow> flows = flowsBuilder.build();
-                        // flatten arrays and fields into the field name until we have support for nested objects
-                        for (int i = 0; i < flows.size(); i++) {
-                            final String fieldPrefix = desc.fieldName() + "_" + i + "_";
-                            flows.get(i).fields().forEach((field, value) -> {
-                                fields.put(fieldPrefix + field, value);
-                            });
-                        }
-                        break;
-                    }
-                    case SUBTEMPLATEMULTILIST: {
-                        int length = informationElement.length() == 65535 ? getVarLength(setContent) : setContent.readUnsignedByte();
-                        setContent.skipBytes(length);
-                        LOG.warn("subtemplateMultilist support is not implemented, skipping data ({} bytes)", length);
-                        break;
+                    } else {
+                        fields.put(entry);
                     }
                 }
             }
@@ -582,16 +345,270 @@ public class IpfixParser {
         return flowBuilder.build();
     }
 
-    private int getVarLength(ByteBuf setContent) {
-        int length;
-        final short firstLengthByte = setContent.readUnsignedByte();
-        if (firstLengthByte == 255) {
-            // > 255 bytes in length, parse two more bytes for actual length
-            length = setContent.readUnsignedShort();
-        } else {
-            length = firstLengthByte;
+    private Map.Entry<String, Object> parseSingleInformationElement(final Map<Integer, TemplateRecord> templateMap, final ByteBuf dataSet, final ImmutableMap.Builder<String, Object> fields, final InformationElement informationElement) {
+        InformationElementDefinition desc = infoElemDefs.getDefinition(informationElement.id(), informationElement.enterpriseNumber());
+        switch (desc.dataType()) {
+            // these are special because they can use reduced-size encoding (RFC 7011 Sec 6.2)
+            case UNSIGNED8:
+            case UNSIGNED16:
+            case UNSIGNED32:
+            case UNSIGNED64:
+                final long unsignedValue = this.getUnsignedValue(dataSet, informationElement);
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), unsignedValue);
+            case SIGNED8:
+            case SIGNED16:
+            case SIGNED32:
+            case SIGNED64:
+                final long signedValue = getSignedValue(dataSet, informationElement);
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), signedValue);
+            case FLOAT32:
+            case FLOAT64:
+                final double floatValue = getFloatValue(dataSet, informationElement);
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), floatValue);
+            // the remaining types aren't subject to reduced-size encoding
+            case MACADDRESS:
+                byte[] macBytes = new byte[6];
+                dataSet.readBytes(macBytes);
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(),
+                        String.format(Locale.ROOT, "%02x:%02x:%02x:%02x:%02x:%02x",
+                                         macBytes[0], macBytes[1], macBytes[2], macBytes[3], macBytes[4], macBytes[5]));
+            case IPV4ADDRESS:
+                byte[] ipv4Bytes = new byte[4];
+                dataSet.readBytes(ipv4Bytes);
+                try {
+                    return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), InetAddress.getByAddress(ipv4Bytes).getHostAddress());
+                } catch (UnknownHostException e) {
+                    throw new IpfixException("Unable to parse IPV4 address", e);
+                }
+            case IPV6ADDRESS:
+                byte[] ipv6Bytes = new byte[16];
+                dataSet.readBytes(ipv6Bytes);
+                try {
+                    return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), InetAddress.getByAddress(ipv6Bytes).getHostAddress());
+                } catch (UnknownHostException e) {
+                    throw new IpfixException("Unable to parse IPV6 address", e);
+                }
+            case BOOLEAN:
+                final byte booleanByte = dataSet.readByte();
+                switch (booleanByte) {
+                    case 1:
+                        return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), true);
+                    case 2:
+                        return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), false);
+                    default:
+                        throw new IpfixException("Invalid value for boolean: " + booleanByte);
+                }
+            case STRING:
+                final CharSequence charSequence;
+                if (informationElement.length() == 65535) {
+                    // variable length element, parse accordingly
+                    int length = getVarLength(dataSet);
+                    charSequence = dataSet.readCharSequence(length, StandardCharsets.UTF_8);
+                } else {
+                    // fixed length element, just read the string from the buffer
+                    charSequence = dataSet.readCharSequence(informationElement.length(), StandardCharsets.UTF_8);
+                }
+
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(),
+                        String.valueOf(charSequence).replace("\0", ""));
+            case OCTETARRAY:
+                final byte[] octetArray;
+                if (informationElement.length() == 65535) {
+                    octetArray = new byte[this.getVarLength(dataSet)];
+                } else {
+                    octetArray = new byte[informationElement.length()];
+                }
+                dataSet.readBytes(octetArray);
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(), Hex.encodeHexString(octetArray));
+            case DATETIMESECONDS:
+                final long dateTimeSeconds = dataSet.readUnsignedInt();
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(),
+                        ZonedDateTime.ofInstant(Instant.ofEpochSecond(dateTimeSeconds), ZoneOffset.UTC));
+            case DATETIMEMILLISECONDS:
+                final long dateTimeMills = dataSet.readLong();
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(),
+                        ZonedDateTime.ofInstant(Instant.ofEpochMilli(dateTimeMills), ZoneOffset.UTC));
+            case DATETIMEMICROSECONDS:
+            case DATETIMENANOSECONDS:
+                final long seconds = dataSet.readUnsignedInt();
+                long fraction = dataSet.readUnsignedInt();
+                if (desc.dataType() == InformationElementDefinition.DataType.DATETIMEMICROSECONDS) {
+                    // bottom 11 bits must be cleared for micros to ensure the precision is correct (RFC 7011 Sec 6.1.9)
+                    fraction = fraction & ~0x7FF;
+                }
+                return new AbstractMap.SimpleImmutableEntry<>(desc.fieldName(),
+                        ZonedDateTime.ofInstant(Instant.ofEpochSecond(seconds, fraction), ZoneOffset.UTC));
+            case BASICLIST: {
+                int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
+                ByteBuf listBuffer = dataSet.readSlice(length);
+                // semantic is actually not used
+                final StructuredDataTypesSemantics semantic = StructuredDataTypesSemantics.parse(listBuffer.readUnsignedByte());
+                final InformationElement element = parseInformationElement(listBuffer);
+                if (element.length() < 0xFFFF) {
+                    // the length of the data fields exclude the header fields
+                    // 1 byte for semantics and 2 bytes for id and length each
+                    final int dataLength = length - 5;
+                    if (dataLength % element.length() != 0) {
+                        throw new IpfixException("Wrong data length in basicList");
+                    }
+                    final int elementCount = dataLength / element.length();
+                    final List<Map.Entry<String, Object>> elementList = new ArrayList<>(elementCount);
+                    for (int i = 0; i < elementCount; i++) {
+                        final Map.Entry<String, Object> entry = this.parseSingleInformationElement(templateMap, listBuffer, fields, element);
+                        if (entry == null) {
+                            continue;
+                        }
+                        elementList.add(new AbstractMap.SimpleImmutableEntry<>(
+                                String.format("%s_%d", entry.getKey(), i), entry.getValue()));
+                    }
+                    return new AbstractMap.SimpleImmutableEntry<>(LIST_KEY, elementList);
+                }
+                break;
+            }
+            case SUBTEMPLATELIST: {
+                // there are three possibilities here (compare https://tools.ietf.org/html/rfc6313#section-4.5.2):
+                //  1. the data set's template has an explicit length
+                //  2. the length is < 255 encoded as 1 byte, in variable length format (not recommended)
+                //  3. the length is encoded as 3 bytes, in variable length format (recommended per RFC 6313)
+                /* encoding format in this case is according to Figure 5:
+                    0                   1                   2                   3
+                    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                   |   Semantic    |         Template ID           |     ...       |
+                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                   |                subTemplateList Content    ...                 |
+                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                   |                              ...                              |
+                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                  Semantic is one of:
+                    * 0xFF - undefined
+                    * 0x00 - noneOf
+                    * 0x01 - exactlyOneOf
+                    * 0x02 - oneOrMoreOf
+                    * 0x03 - allOf
+                    * 0x04 - ordered
+                 */
+                int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
+                // adjust length for semantic + templateId
+                length -= 3;
+                LOG.debug("Remaining data buffer:\n{}", ByteBufUtil.prettyHexDump(dataSet));
+                // TODO add to field somehow
+                final short semantic = dataSet.readUnsignedByte();
+                final int templateId = dataSet.readUnsignedShort();
+                final TemplateRecord templateRecord = templateMap.get(templateId);
+                if (templateRecord == null) {
+                    LOG.error("Unable to parse subtemplateList, because we don't have the template for it: {}, skipping data ({} bytes)", templateId, length);
+                    dataSet.skipBytes(length);
+                    break;
+                }
+                final ByteBuf listContent = dataSet.readSlice(length);
+                // if this is not readable, it's an empty list
+                final ImmutableList.Builder<Flow> flowsBuilder = ImmutableList.builder();
+                if (listContent.isReadable()) {
+                    flowsBuilder.addAll(parseDataSet(templateRecord.informationElements(), templateMap, listContent));
+                }
+                final ImmutableList<Flow> flows = flowsBuilder.build();
+                // flatten arrays and fields into the field name until we have support for nested objects
+                for (int i = 0; i < flows.size(); i++) {
+                    final String fieldPrefix = desc.fieldName() + "_" + i + "_";
+                    flows.get(i).fields().forEach((field, value) -> {
+                        fields.put(fieldPrefix + field, value);
+                    });
+                }
+                break;
+            }
+            case SUBTEMPLATEMULTILIST: {
+                int length = informationElement.length() == 65535 ? getVarLength(dataSet) : dataSet.readUnsignedByte();
+                dataSet.skipBytes(length);
+                LOG.warn("subtemplateMultilist support is not implemented, skipping data ({} bytes)", length);
+                break;
+            }
         }
-        return length;
+        return null;
+    }
+
+    private double getFloatValue(final ByteBuf dataSet, final InformationElement informationElement) {
+        final double floatValue;
+        switch (informationElement.length()) {
+            case 4:
+                floatValue = dataSet.readFloat();
+                break;
+            case 8:
+                floatValue = dataSet.readDouble();
+                break;
+            default:
+                throw new IpfixException("Unexpected length for float value: " + informationElement.length());
+        }
+        return floatValue;
+    }
+
+    private long getSignedValue(final ByteBuf dataSet, final InformationElement informationElement) {
+        final long signedValue;
+        switch (informationElement.length()) {
+            case 1:
+                signedValue = dataSet.readByte();
+                break;
+            case 2:
+                signedValue = dataSet.readShort();
+                break;
+            case 3:
+                signedValue = dataSet.readMedium();
+                break;
+            case 4:
+                signedValue = dataSet.readUnsignedInt();
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
+                int firstIndex = 8 - informationElement.length() - 1;
+                dataSet.readBytes(bytesBigEndian, firstIndex, informationElement.length());
+                signedValue = Longs.fromByteArray(bytesBigEndian);
+                break;
+            default:
+                throw new IpfixException("Unexpected length for unsigned integer");
+        }
+        return signedValue;
+    }
+
+    private long getUnsignedValue(final ByteBuf dataSet, final InformationElement informationElement) {
+        final long unsignedValue;
+        switch (informationElement.length()) {
+            case 1:
+                unsignedValue = dataSet.readUnsignedByte();
+                break;
+            case 2:
+                unsignedValue = dataSet.readUnsignedShort();
+                break;
+            case 3:
+                unsignedValue = dataSet.readUnsignedMedium();
+                break;
+            case 4:
+                unsignedValue = dataSet.readUnsignedInt();
+                break;
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+                byte[] bytesBigEndian = {0, 0, 0, 0, 0, 0, 0, 0};
+                int firstIndex = 8 - informationElement.length();
+                dataSet.readBytes(bytesBigEndian, firstIndex, informationElement.length());
+                unsignedValue = Longs.fromByteArray(bytesBigEndian);
+                break;
+            default:
+                throw new IpfixException("Unexpected length for unsigned integer");
+        }
+        return unsignedValue;
+    }
+
+    private int getVarLength(ByteBuf setContent) {
+        final short firstLengthByte = setContent.readUnsignedByte();
+        if (firstLengthByte < 255) {
+            return firstLengthByte;
+        }
+        // > 255 bytes in length, parse two more bytes for actual length
+        return setContent.readUnsignedShort();
     }
 
     public TemplateRecord parseTemplateRecord(ByteBuf bytes) {
